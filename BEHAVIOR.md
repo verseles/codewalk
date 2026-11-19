@@ -933,7 +933,7 @@ description of this code.
 - **Then** public release discovery sends no profile credentials, reads the newest-first listing in pages of 20 and stops at the page holding a release created before `v2.0.0-beta.1`, within 50 pages, 2 MiB/page, 8 MiB total and a 30-second deadline, and rejects incomplete, invalid, redirected or non-identity responses
 - **Then** when the saved catalog already holds the installed release, the listing stops at the page holding the installed tag, usually one request, and the saved catalog supplies the older history; this relies on releases being created in version order
 - **Then** a failed check names its cause: GitHub's rate limit, an answer CodeWalk could not read (malformed, oversized, unexpected status or an exhausted listing), or otherwise the connection, including timeouts
-- **Then** strict SemVer ordering, canonical major-2 tags, exact architecture assets and exact-tag GitHub URLs apply; Beta accepts only `v2.0.0-beta.N` with `N >= 1` and `prerelease: true`, while stable never offers prereleases or v1 cohorts
+- **Then** strict SemVer ordering, canonical major-2 tags, exact architecture assets and exact-tag GitHub URLs apply; Beta accepts `v2.0.0-beta.N` (`N >= 1`, `prerelease: true`) and stable major-2 releases above it, while stable never offers prereleases or v1 cohorts
 - **Then** Settings and About show installed version/build and a dismissible update card; update dismissal persists per tag independently of installed-release news dismissal
 - **Then** installed-release news shows the complete announcement with history/group actions when no visible update takes priority; startup/hourly update and news notices have independent per-version/process flags and foreground/modal guards
 - **Then** the complete v2 API catalog supplies beta history and full announcements; its `cw2.updates.catalog` envelope is capped at 512 KiB, with invalid or oversized refreshes preserving the prior saved copy instead of truncating it
@@ -953,7 +953,7 @@ description of this code.
 - **Then** Linux native startup preserves a usable working directory; if an older updater launches it from a removed installation directory, it recovers to the absolute home directory or `/` before Flutter starts, preserving access to the installed version and saved settings
 - **Then** packaged Linux release validation covers both usable and removed working directories, startup version metadata and preferences retained on disk; applied Beta/theme selections require separate GUI evidence
 - **Then** unsupported/older/unmanaged Linux installs retain a copyable exact-tag installer command, and changing channel clears a failed Linux retry target rather than offering a stale beta
-- **When** the platform has no supported native update target
+- **When** the platform has no supported native update target (including Windows and macOS, which update through the desktop installer scripts `install.ps1` and `install.sh`)
 - **Then** the update page offers no check/install route and the application does not construct Android APK cleanup on that platform
 
 Session-detail routes retain their navigation placeholders; the conversation

@@ -31,7 +31,7 @@ help:
 	@echo "  make test       Run full test suite (parallel)"
 	@echo "  make test-fast  Run fast tests only (exclude slow/integration tags)"
 	@echo "  make test-coverage-tools  Verify LCOV filtering and coverage gates"
-	@echo "  make test-release-tools  Verify the v2 beta release plan, guards and tooling"
+	@echo "  make test-release-tools  Verify the v2 release plan, guards and tooling"
 	@echo "  make test-shard SHARD_TOTAL=N SHARD_INDEX=I  Run one sharded test slice"
 	@echo "  make coverage   Run tests with coverage + threshold gate"
 	@echo "  make check      deps + analyze + coverage-tool fixtures + test"
@@ -46,8 +46,8 @@ help:
 	@echo "  make v2-android-preview Build the owner preview APK (profile, beside v1) on an x64 host"
 	@echo "  make v2-smoke   Exercise the explicit v2 entry point in widget tests"
 	@echo "  make v2-web     Build the explicit v2 entry point into build/v2/web"
-	@echo "  make release V=beta  Cut the next v2.0.0-beta.N on main (DRY_RUN=1 prints the plan only)"
-	@echo "    stable, patch and v1 releases are cut on the v1 branch"
+	@echo "  make release V=beta|stable  Cut the next v2 beta or graduate to v2.0.0 on main (DRY_RUN=1 prints the plan only)"
+	@echo "    v1 releases are cut on the v1 branch"
 	@echo "  make clean      Clean and restore dependencies"
 
 deps:
@@ -284,7 +284,7 @@ v2-smoke:
 v2-web:
 	flutter build web --no-pub --target lib/main_v2.dart --output build/v2/web
 
-# main cuts only v2 betas; stable, patch and v1 releases come from the v1 branch.
+# main cuts v2 betas (V=beta) or the v2.0.0 stable graduation (V=stable); v1 releases come from the v1 branch.
 # Detached and agentless: reports through hey, so no agent watches CI (see AGENTS.md).
 watch-ci:
 	@setsid nohup bash tool/ci/notify_run.sh ci.yml failures >/dev/null 2>&1 < /dev/null &
@@ -293,11 +293,14 @@ watch-release:
 	@setsid nohup bash tool/ci/notify_run.sh release.yml always >/dev/null 2>&1 < /dev/null &
 
 release:
-	@if [ "$(V)" != "beta" ]; then \
-		echo "main releases only v2 betas: make release V=beta [DRY_RUN=1]. Cut stable, patch and v1 releases on the v1 branch."; \
+	@if [ "$(V)" = "beta" ]; then \
+		python3 tool/release/cut_beta.py $(if $(filter 1,$(DRY_RUN)),--dry-run,); \
+	elif [ "$(V)" = "stable" ]; then \
+		python3 tool/release/cut_stable.py $(if $(filter 1,$(DRY_RUN)),--dry-run,); \
+	else \
+		echo "main releases only v2 betas or stable v2.0.0: make release V=beta|stable [DRY_RUN=1]."; \
 		exit 1; \
 	fi
-	python3 tool/release/cut_beta.py $(if $(filter 1,$(DRY_RUN)),--dry-run,)
 
 clean:
 	flutter clean

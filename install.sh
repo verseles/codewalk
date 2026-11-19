@@ -43,11 +43,15 @@ detect_platform() {
   case "$platform" in
     macos)
       case "$arch" in
-        x86_64|amd64) arch_tag="x64" ;;
-        aarch64|arm64) arch_tag="arm64" ;;
+        aarch64|arm64)
+          arch_tag="arm64"
+          asset="codewalk-macos-arm64.tar.gz"
+          ;;
+        x86_64|amd64)
+          fail "No macOS Intel (x86_64) release asset is published for $REPO"
+          ;;
         *) fail "Unsupported macOS architecture: $arch" ;;
       esac
-      asset="codewalk-macos-${arch_tag}.tar.gz"
       ;;
     linux)
       case "$arch" in
@@ -189,12 +193,14 @@ release_records() {
 
 # Prints the major of a tag that the given channel may install, or fails.
 # stable/v1 take vMAJOR.MINOR.PATCH (v optional) without suffixes; beta takes
-# only v2.0.0-beta.N. Native cohort tags (-native.N) belong to none of them.
+# v2.0.0-beta.N or final v2.MINOR.PATCH (so beta installs graduate to stable).
+# Native cohort tags (-native.N) belong to none of them.
 channel_tag_major() {
   awk -v tag="$1" -v channel="$2" 'BEGIN {
     num = "(0|[1-9][0-9]*)"
     if (channel == "beta") {
       if (tag ~ ("^v2\\.0\\.0-beta\\." num "$")) { print 2; exit 0 }
+      if (tag ~ ("^v?2\\." num "\\." num "$")) { print 2; exit 0 }
       exit 1
     }
     if (tag !~ ("^v?" num "\\." num "\\." num "$")) exit 1
@@ -206,10 +212,12 @@ channel_tag_major() {
 
 # Prints the highest tag of the given channel among release records on stdin.
 # Version components are compared as digit strings, so no size overflows.
+# Key layout: (major, minor, patch, is_final [0|1], beta_num) so final v2.0.0
+# strictly outranks every v2.0.0-beta.N.
 highest_channel_tag() {
   awk -F '\t' -v channel="$1" '
     function newer(a, b,  i, x, y) {
-      for (i = 1; i <= 4; i++) {
+      for (i = 1; i <= 5; i++) {
         # The prefix keeps the comparison textual, beyond awk number precision.
         x = "n" a[i]; y = "n" b[i]
         if (length(x) != length(y)) return length(x) > length(y)
@@ -220,15 +228,21 @@ highest_channel_tag() {
     {
       if ($2 != "false") next
       if (channel == "beta") {
-        if ($3 != "true" || $1 !~ /^v2\.0\.0-beta\.(0|[1-9][0-9]*)$/) next
-        k[1] = 2; k[2] = 0; k[3] = 0; k[4] = substr($1, 13)
+        if ($3 == "true" && $1 ~ /^v2\.0\.0-beta\.(0|[1-9][0-9]*)$/) {
+          k[1] = 2; k[2] = 0; k[3] = 0; k[4] = 0; k[5] = substr($1, 13)
+        } else if ($3 == "false" && $1 ~ /^v?2\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/) {
+          v = $1; sub(/^v/, "", v); split(v, parts, ".")
+          k[1] = parts[1]; k[2] = parts[2]; k[3] = parts[3]; k[4] = 1; k[5] = 0
+        } else {
+          next
+        }
       } else {
         if ($3 != "false" || $1 !~ /^v?(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$/) next
         v = $1; sub(/^v/, "", v); split(v, parts, ".")
         if (channel == "v1" && parts[1] != "1") next
-        k[1] = parts[1]; k[2] = parts[2]; k[3] = parts[3]; k[4] = ""
+        k[1] = parts[1]; k[2] = parts[2]; k[3] = parts[3]; k[4] = 1; k[5] = 0
       }
-      if (best == "" || newer(k, b)) { best = $1; for (i = 1; i <= 4; i++) b[i] = k[i] }
+      if (best == "" || newer(k, b)) { best = $1; for (i = 1; i <= 5; i++) b[i] = k[i] }
     }
     END { if (best == "") exit 1; print best }
   '
@@ -324,11 +338,16 @@ resolve_release() {
     [ "$record_tag" = "$requested_version" ] ||
       fail "Release $requested_version was not found as an exact tag"
     expected_prerelease=false
-    [ "$channel" != "beta" ] || expected_prerelease=true
+    case "$requested_version" in
+      v2.0.0-beta.*) [ "$channel" != "beta" ] || expected_prerelease=true ;;
+    esac
     [ "$record_draft" = "false" ] && [ "$record_prerelease" = "$expected_prerelease" ] &&
       target_major="$(channel_tag_major "$requested_version" "$channel")" ||
       fail "Release $requested_version is not a $channel release"
     version="$requested_version"
+    if [ "$channel" = "beta" ] && [ "$expected_prerelease" = "false" ]; then
+      channel="stable"
+    fi
     return 0
   fi
 
@@ -358,6 +377,12 @@ resolve_release() {
   fi
   target_major="$(channel_tag_major "$version" "$channel")" ||
     fail "Release $version is not a $channel release"
+  if [ "$channel" = "beta" ]; then
+    case "$version" in
+      v2.0.0-beta.*) ;;
+      *) channel="stable" ;;
+    esac
+  fi
 }
 
 # A release of another major replaces CodeWalk only with explicit consent,

@@ -88,23 +88,31 @@ Install using the `install.cat` pattern:
 
 Run the same command again any time to update/reinstall to the latest GitHub release.
 
-On Linux and macOS, `install.sh` also takes a release channel. Set the
-variables for `sh`, the command that runs the script:
+On Linux and macOS (`install.sh`), set release variables for `sh`, the command that runs the script:
 
 ```bash
 # Stay on CodeWalk 1 (remembered for later updates and reinstalls)
 curl -fsSL install.cat/verseles/codewalk | CODEWALK_CHANNEL=v1 sh
-# Opt in to CodeWalk 2 betas
+# Migrate an existing CodeWalk 1 installation to CodeWalk 2
+curl -fsSL install.cat/verseles/codewalk | CODEWALK_MIGRATION=accept-v2 sh
+# Opt in to CodeWalk 2 betas (graduates to stable once v2.0.0 is published)
 curl -fsSL install.cat/verseles/codewalk | CODEWALK_CHANNEL=beta CODEWALK_MIGRATION=accept-v2 sh
 # Install one exact release
-curl -fsSL install.cat/verseles/codewalk | CODEWALK_VERSION=v1.265.1 sh
+curl -fsSL install.cat/verseles/codewalk | CODEWALK_VERSION=v2.0.0 sh
 ```
 
-New installations use the `stable` channel; an installation keeps the channel
-it was installed with. Moving a CodeWalk 1 installation to CodeWalk 2, which
-works only with OpenCode 2 servers, requires `CODEWALK_MIGRATION=accept-v2`;
-without it the installer stops and changes nothing. The Windows installer
-always installs the latest release.
+On Windows (`install.ps1`), the same environment variables control channel selection and v1 → v2 migration:
+
+```powershell
+# Stay on CodeWalk 1
+$env:CODEWALK_CHANNEL='v1'; irm install.cat/verseles/codewalk | iex
+# Migrate an existing CodeWalk 1 installation to CodeWalk 2
+$env:CODEWALK_MIGRATION='accept-v2'; irm install.cat/verseles/codewalk | iex
+```
+
+New installations use the `stable` channel (CodeWalk 2); an installation keeps the channel it was installed with, and existing `beta` installations automatically graduate to stable `v2.0.0` on the next update. Moving a CodeWalk 1 installation to CodeWalk 2, which works only with OpenCode 2 servers, requires `CODEWALK_MIGRATION=accept-v2`; without it the installer stops and changes nothing.
+
+Published desktop targets: Linux (`x64`, `arm64`), Windows (`x64`; Windows ARM64 runs the `x64` package under emulation), and macOS Apple Silicon (`arm64`; macOS Intel `x86_64` is not published). Unsigned Windows builds and ad-hoc signed macOS builds may display a SmartScreen or Gatekeeper prompt on first launch (`install.sh` clears quarantine attributes on macOS automatically).
 
 Installers automatically pick the right release for your platform.
 
@@ -114,9 +122,10 @@ In CodeWalk 2, opt in to **Beta** under **Settings → Version and updates**.
 Automatic checks can be disabled; Settings-entry and manual checks remain
 available. Android downloads and verifies updates in-app before asking the
 system installer for confirmation. Managed Linux installs support verified
-installation and restart; older or portable builds keep an exact-version
-installer command. Update dismissal and release news are independent, and
-interrupted downloads can resume.
+installation and restart; older or portable Linux builds keep an exact-version
+installer command. Windows and macOS update via the desktop installer scripts
+above. Update dismissal and release news are independent, and interrupted
+downloads can resume.
 
 On Linux, release files are installed under
 `${XDG_DATA_HOME:-$HOME/.local/share}/codewalk-app`, separately from user data.
@@ -185,17 +194,20 @@ make check      # deps + analyze + coverage/v2-tool fixtures + full tests
 make check-fast # same setup, with the fast test selection
 make test-fast  # excludes slow/integration tests
 make test-coverage-tools # LCOV validation and threshold regression fixtures
-make test-release-tools  # v2 beta release plan, publication guards and tooling
+make test-release-tools  # v2 release plan, publication guards and tooling
 make coverage   # full tests with coverage + global and protected-file floors
-make release V=beta # main: cut the next v2.0.0-beta.N (DRY_RUN=1 prints the plan only)
+make release V=beta   # main: cut the next v2.0.0-beta.N (DRY_RUN=1 prints the plan only)
+make release V=stable # main: graduate to v2.0.0 (DRY_RUN=1 prints the plan only)
 ```
 
-On `main`, the Release workflow publishes only `v2.0.0-beta.N` tags: Android arm64
-and Linux x64/ARM64 built from `lib/main_v2.dart`, verified (v2 entry library,
-production signer, versionCode above every published APK, digests) and published
-as a prerelease that is never latest. A manual dispatch from `main` with a
-`dry_run_version` builds and verifies the same artifacts without publishing.
-Stable, patch and CodeWalk 1 releases are cut on the `v1` branch.
+On `main`, the Release workflow publishes `v2.0.0-beta.N` prereleases (never
+latest) and the stable `v2.0.0` release (non-prerelease, latest): Android arm64,
+Linux x64/ARM64, Windows x64, and macOS Apple Silicon built from
+`lib/main_v2.dart`, verified (v2 entry library, production Android signer,
+versionCode above every published APK, digests) and published through a
+create-only release script. A manual dispatch from `main` with a
+`dry_run_version` (`2.0.0-beta.N` or `2.0.0`) builds and verifies all five
+artifacts without publishing. CodeWalk 1 releases remain on the `v1` branch.
 
 Use focused tests while iterating and `make check` at stable validation gates. Test targets default to four workers; override with `TEST_JOBS=N` when appropriate for the host.
 

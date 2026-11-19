@@ -1,11 +1,13 @@
 name: Release
 
-# main publishes only v2 betas (v2.0.0-beta.N): Android arm64 and Linux
-# x64/ARM64 built from lib/main_v2.dart, as a prerelease that is never latest
-# and never overwritten. tool/release/release_plan.py refuses every other ref
-# before anything is built. A manual dispatch from main is a dry run: it
-# builds and verifies the same artifacts for an explicit beta version and
-# keeps them as workflow artifacts, publishing nothing.
+# main publishes CodeWalk 2 releases built from lib/main_v2.dart for Android
+# arm64, Linux (x64, ARM64), Windows (x64), and macOS (Apple Silicon):
+#   - v2.0.0-beta.N: prerelease, never latest, never overwritten
+#   - v2.0.0: first stable release, non-prerelease, latest, never overwritten
+# tool/release/release_plan.py refuses every other ref before anything is built.
+# A manual dispatch from main is a dry run: it builds and verifies all five
+# assets for an explicit 2.0.0-beta.N or 2.0.0 version and keeps them as
+# workflow artifacts, publishing nothing.
 on:
   push:
     tags:
@@ -13,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       dry_run_version:
-        description: "Dry run from main: the 2.0.0-beta.N version to build and verify (nothing is published)"
+        description: "Dry run from main: 2.0.0-beta.N or 2.0.0 version to build and verify (nothing is published)"
         required: false
         default: ""
 
@@ -36,6 +38,7 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       publish: ${{ steps.plan.outputs.publish }}
+      kind: ${{ steps.plan.outputs.kind }}
       version: ${{ steps.plan.outputs.version }}
       build_number: ${{ steps.plan.outputs.build_number }}
       apk_version_code: ${{ steps.plan.outputs.apk_version_code }}
@@ -171,6 +174,129 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
 
+  build-windows:
+    name: Build Windows (x64)
+    needs: plan
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Test the Windows installer script
+        shell: pwsh
+        run: pwsh -File tool/release/test_install_ps1.ps1
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          architecture: x64
+          cache: false
+
+      - name: Verify the pinned Flutter SDK
+        shell: bash
+        run: |
+          flutter --version --machine > "$RUNNER_TEMP/flutter-version.json"
+          py_cmd="python3"
+          if ! "$py_cmd" --version >/dev/null 2>&1; then py_cmd="python"; fi
+          "$py_cmd" - <<'PY'
+          import json, os, sys
+          sdk = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "flutter-version.json")))
+          found = (sdk["frameworkVersion"], sdk["frameworkRevision"])
+          if found != (os.environ["FLUTTER_VERSION"], os.environ["FLUTTER_REVISION"]):
+              sys.exit(f"Flutter {found} is not the pinned SDK")
+          PY
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      - run: flutter pub get
+
+      - name: Build the v2 Windows release
+        run: >-
+          flutter build windows --release --target lib/main_v2.dart
+          --build-name "${{ needs.plan.outputs.version }}"
+          --build-number "${{ needs.plan.outputs.build_number }}"
+
+      - name: Package Windows artifact
+        shell: pwsh
+        run: |
+          $bundleDir = "build/windows/x64/runner/Release"
+          if (-not (Test-Path "$bundleDir/codewalk.exe")) {
+            throw "Expected Windows executable not found in $bundleDir"
+          }
+          Compress-Archive -Path "$bundleDir/*" -DestinationPath "codewalk-windows-x64.zip" -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: codewalk-windows-x64
+          path: codewalk-windows-x64.zip
+          if-no-files-found: error
+          retention-days: 2
+
+  build-macos:
+    name: Build macOS (arm64)
+    needs: plan
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          architecture: arm64
+          cache: true
+
+      - name: Verify the pinned Flutter SDK
+        run: |
+          flutter --version --machine > "$RUNNER_TEMP/flutter-version.json"
+          python3 - <<'PY'
+          import json, os, sys
+          sdk = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "flutter-version.json")))
+          found = (sdk["frameworkVersion"], sdk["frameworkRevision"])
+          if found != (os.environ["FLUTTER_VERSION"], os.environ["FLUTTER_REVISION"]):
+              sys.exit(f"Flutter {found} is not the pinned SDK")
+          PY
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25"
+
+      - run: flutter pub get
+
+      # CocoaPods path: Flutter 3.47 enables SPM by default, while
+      # speech_to_text 7.3.0 declares macOS 10.14 in its SPM manifest.
+      - name: Build the v2 macOS release
+        env:
+          FLUTTER_SWIFT_PACKAGE_MANAGER: "false"
+          MACOSX_DEPLOYMENT_TARGET: "12.0"
+        run: >-
+          flutter build macos --release --target lib/main_v2.dart
+          --build-name "${{ needs.plan.outputs.version }}"
+          --build-number "${{ needs.plan.outputs.build_number }}"
+
+      - name: Package macOS artifact
+        run: |
+          app_dir="build/macos/Build/Products/Release/codewalk.app"
+          test -x "$app_dir/Contents/MacOS/codewalk"
+          file "$app_dir/Contents/MacOS/codewalk" | grep -q 'arm64'
+          plutil -p "$app_dir/Contents/Info.plist"
+          tar -czf "codewalk-macos-arm64.tar.gz" -C build/macos/Build/Products/Release codewalk.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: codewalk-macos-arm64
+          path: codewalk-macos-arm64.tar.gz
+          if-no-files-found: error
+          retention-days: 2
+
   build-android:
     needs: plan
     runs-on: ubuntu-24.04
@@ -251,7 +377,7 @@ jobs:
           retention-days: 2
 
   verify:
-    needs: [plan, build-linux, build-android]
+    needs: [plan, build-linux, build-windows, build-macos, build-android]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -265,6 +391,7 @@ jobs:
       - name: Verify the v2 artifacts and write the manifest
         run: >-
           python3 tool/release/verify_v2_artifacts.py
+          --kind "${{ needs.plan.outputs.kind }}"
           --tag "v${{ needs.plan.outputs.version }}"
           --version "${{ needs.plan.outputs.version }}"
           --apk-version-code "${{ needs.plan.outputs.apk_version_code }}"
@@ -272,13 +399,17 @@ jobs:
           --apk artifacts/codewalk-android/codewalk-android-arm64.apk
           --linux-x64 artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz
           --linux-arm64 artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz
+          --windows-x64 artifacts/codewalk-windows-x64/codewalk-windows-x64.zip
+          --macos-arm64 artifacts/codewalk-macos-arm64/codewalk-macos-arm64.tar.gz
           --out candidate/
 
       - name: Keep the verified candidate
         run: |
           cp artifacts/codewalk-android/codewalk-android-arm64.apk \
             artifacts/codewalk-linux-x64/codewalk-linux-x64.tar.gz \
-            artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz candidate/
+            artifacts/codewalk-linux-arm64/codewalk-linux-arm64.tar.gz \
+            artifacts/codewalk-windows-x64/codewalk-windows-x64.zip \
+            artifacts/codewalk-macos-arm64/codewalk-macos-arm64.tar.gz candidate/
 
       - uses: actions/upload-artifact@v4
         with:
@@ -311,13 +442,15 @@ jobs:
           bash tool/release/require_tag_at_commit.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" "$GITHUB_SHA"
           bash tool/release/require_new_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME"
 
-      - name: Create the v2 beta prerelease
+      - name: Create the v2 release
         env:
           GH_TOKEN: ${{ github.token }}
         run: >-
-          bash tool/release/create_v2_beta_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME"
+          bash tool/release/create_v2_release.sh "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" "${{ needs.plan.outputs.kind }}"
           candidate/codewalk-android-arm64.apk
           candidate/codewalk-linux-x64.tar.gz
           candidate/codewalk-linux-arm64.tar.gz
+          candidate/codewalk-windows-x64.zip
+          candidate/codewalk-macos-arm64.tar.gz
           candidate/release-manifest.json
           candidate/SHA256SUMS

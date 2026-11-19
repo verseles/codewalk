@@ -36,15 +36,20 @@ def check_release(text: str) -> None:
     assert re.fullmatch(r"  push:\n    tags:\n      - \"v\*\"\n  workflow_dispatch:\n(    .*\n)*", on), "release triggers"
     assert re.search(r"^permissions:\n  contents: read\n", text, re.M), "release default permissions"
     found = jobs(text)
-    assert set(found) == {"plan", "build-linux", "build-android", "verify", "publish"}, f"release jobs {sorted(found)}"
+    expected_jobs = {"plan", "build-linux", "build-windows", "build-macos", "build-android", "verify", "publish"}
+    assert set(found) == expected_jobs, f"release jobs {sorted(found)}"
     plan = found["plan"]
     assert "tool/release/release_plan.py" in plan, "plan runs release_plan.py"
     assert "tool/release/build_codes.py check" in plan, "plan checks the build code"
     assert "require_tag_at_commit.sh" in plan and "require_new_release.sh" in plan, "plan checks tag and release"
-    for job in ("build-linux", "build-android"):
+    assert "kind: ${{ steps.plan.outputs.kind }}" in plan, "plan exports kind"
+    for job in ("build-linux", "build-windows", "build-macos", "build-android"):
         assert re.search(r"^    needs: plan$", found[job], re.M), f"{job} needs plan"
-    assert re.search(r"^    needs: \[plan, build-linux, build-android\]$", found["verify"], re.M), "verify needs builds"
+    assert 'FLUTTER_SWIFT_PACKAGE_MANAGER: "false"' in found["build-macos"], "build-macos disables SPM for speech_to_text"
+    assert re.search(r"^    needs: \[plan, build-linux, build-windows, build-macos, build-android\]$",
+                     found["verify"], re.M), "verify needs all builds"
     assert "tool/release/verify_v2_artifacts.py" in found["verify"], "verify runs the verifier"
+    assert '--kind "${{ needs.plan.outputs.kind }}"' in found["verify"], "verify passes release kind"
     linux = found["build-linux"]
     launch = linux.find("python3 tool/release/smoke_v2_linux_release.py")
     upload = linux.find("name: codewalk-linux-${{ matrix.arch }}\n")
@@ -55,17 +60,17 @@ def check_release(text: str) -> None:
     assert re.search(r"^    needs: \[plan, verify\]$", publish, re.M), "publish needs plan and verify"
     assert re.search(r"^    if: needs\.plan\.outputs\.publish == 'true'$", publish, re.M), "publish is gated"
     steps = [publish.find(script) for script in
-             ("require_tag_at_commit.sh", "require_new_release.sh", "create_v2_beta_release.sh")]
+             ("require_tag_at_commit.sh", "require_new_release.sh", "create_v2_release.sh")]
     assert min(steps) >= 0 and steps == sorted(steps), "publish rechecks before creating"
     for name, job in found.items():
         write = "contents: write" in job
         assert write == (name == "publish"), f"only publish may write ({name})"
     builds = re.findall(r"flutter build [^\n]*(?:\n\s+--[^\n]*)*", text)
-    assert len(builds) == 2, f"two builds expected, found {len(builds)}"
+    assert len(builds) == 4, f"four builds expected, found {len(builds)}"
     for build in builds:
         assert "--target lib/main_v2.dart" in build, f"build without the v2 entry point: {build!r}"
-        assert re.match(r"flutter build (linux|apk) --release", build), f"unexpected build: {build!r}"
-    for forbidden in ("softprops/", "prerelease: false", "make_latest: true", "--clobber", "windows", "macos",
+        assert re.match(r"flutter build (linux|windows|macos|apk) --release", build), f"unexpected build: {build!r}"
+    for forbidden in ("softprops/", "prerelease: false", "make_latest: true", "--clobber",
                       "pages deploy", "wrangler", "make web", "make release", "make android", "make desktop"):
         assert forbidden not in text, f"release contains {forbidden!r}"
 
@@ -90,9 +95,11 @@ def check_makefile(text: str) -> None:
     for target in ("web", "desktop", "android"):
         assert not re.search(rf"^{target}:", text, re.M), f"{target} would publish a build without a v2 target"
     release = re.search(r"^release:\n((?:\t.*\n)+)", text, re.M).group(1)
-    assert 'if [ "$(V)" != "beta" ]' in release and "exit 1" in release, "release refuses non-beta"
-    assert "tool/release/cut_beta.py" in release, "release uses cut_beta.py"
-    assert "git push" not in release and "git tag" not in release, "release pushes only through cut_beta.py"
+    assert 'if [ "$(V)" = "beta" ]' in release and 'elif [ "$(V)" = "stable" ]' in release and "exit 1" in release, \
+        "release accepts only V=beta or V=stable"
+    assert "tool/release/cut_beta.py" in release and "tool/release/cut_stable.py" in release, \
+        "release routes through cut_beta.py and cut_stable.py"
+    assert "git push" not in release and "git tag" not in release, "release pushes only through cut scripts"
     assert "--follow-tags" not in text, "no --follow-tags"
 
 
@@ -101,7 +108,7 @@ class PublicationPathTests(unittest.TestCase):
         with self.assertRaises(AssertionError):
             check(*args)
 
-    def test_tag_and_dispatch_publish_only_through_the_v2_beta_plan(self):
+    def test_tag_and_dispatch_publish_only_through_the_v2_release_plan(self):
         text = read("release.yml")
         check_release(text)
         for mutated in (
@@ -110,12 +117,12 @@ class PublicationPathTests(unittest.TestCase):
             text.replace(" --target lib/main_v2.dart", "", 1),
             text.replace("python3 tool/release/release_plan.py", "echo publish=true #", 1),
             text.replace("python3 tool/release/build_codes.py check", "true", 1),
-            text.replace("-f make_latest=false", "") + "\n# make_latest: true\n",
+            text + "\n# make_latest: true\n",
             text.replace("    permissions:\n      contents: write\n", "").replace(
                 "permissions:\n  contents: read\n", "permissions:\n  contents: write\n", 1),
             text.replace("  workflow_dispatch:\n", "  workflow_dispatch:\n  pull_request:\n", 1),
-            text.replace("bash tool/release/create_v2_beta_release.sh", "uses: softprops/action-gh-release@v2 #"),
-            text + "\n      - run: flutter build windows --release --target lib/main_v2.dart\n",
+            text.replace("bash tool/release/create_v2_release.sh", "uses: softprops/action-gh-release@v2 #"),
+            text.replace('FLUTTER_SWIFT_PACKAGE_MANAGER: "false"', 'FLUTTER_SWIFT_PACKAGE_MANAGER: "true"'),
             text.replace("python3 tool/release/smoke_v2_linux_release.py", "true #", 1),
             text.replace("        if: always()\n", "", 1),
         ):
@@ -153,13 +160,13 @@ class PublicationPathTests(unittest.TestCase):
         self.assertIsNone(re.match(regex, "v2.0.0-beta.1"))
         self.assertIsNotNone(re.match(regex, "v2.0.0"))
 
-    def test_make_targets_guard_legacy_builds_and_cut_only_betas(self):
+    def test_make_targets_guard_legacy_builds_and_cut_only_beta_or_stable(self):
         text = (ROOT / "Makefile").read_text(encoding="utf-8")
         check_makefile(text)
         for mutated in (
             text + "\nweb:\n\tflutter build web\n",
-            text.replace('if [ "$(V)" != "beta" ]', 'if [ -z "$(V)" ]'),
-            text.replace("\tpython3 tool/release/cut_beta.py", "\tgit push --follow-tags; python3 tool/release/cut_beta.py"),
+            text.replace('if [ "$(V)" = "beta" ]', 'if [ -z "$(V)" ]'),
+            text.replace("\t\tpython3 tool/release/cut_beta.py", "\t\tgit push --follow-tags; python3 tool/release/cut_beta.py"),
         ):
             with self.subTest():
                 self.assert_rejected(check_makefile, mutated)
@@ -173,13 +180,13 @@ class PublicationPathTests(unittest.TestCase):
             with self.subTest(heading=heading):
                 self.assertRegex(heading, r"^## v\d+\.\d+\.\d+ - \d{4}-\d{2}-\d{2}$")
 
-    def test_make_release_refuses_every_non_beta_cut_before_any_change(self):
+    def test_make_release_refuses_every_unsupported_cut_before_any_change(self):
         for value in ("patch", "minor", "major", ""):
             with self.subTest(value=value):
                 result = subprocess.run(["make", "-s", "-C", str(ROOT), "release", f"V={value}"],
                                         capture_output=True, text=True)
                 self.assertNotEqual(result.returncode, 0)
-                self.assertIn("main releases only v2 betas", result.stdout + result.stderr)
+                self.assertIn("V=beta|stable", result.stdout + result.stderr)
 
 
 if __name__ == "__main__":

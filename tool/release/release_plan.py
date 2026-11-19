@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
 """Decides what the main release workflow may build and publish, failing closed.
 
-  v2.0.0-beta.N    a v2 beta: Android arm64 and Linux x64/ARM64 built from
-                   lib/main_v2.dart, published as a prerelease that is never
-                   latest and never overwritten
+  v2.0.0-beta.N    a v2 beta: Android arm64, Linux x64/ARM64, Windows x64 and
+                   macOS arm64 built from lib/main_v2.dart, published as a
+                   prerelease that is never latest and never overwritten
+  v2.0.0           the first stable CodeWalk 2 release: the same five targets
+                   built from lib/main_v2.dart, published as a non-prerelease
+                   latest release and never overwritten
 
-main publishes nothing else: a stable vX.Y.Z, a v1 native cohort, GA v2.0.0,
-another prerelease family or a malformed tag belong to other lines or later
-gates. The pubspec must carry `2.0.0-beta.N+BUILD` for the tag's N.
+main publishes nothing else: later stable versions (v2.0.1+), v1 tags, v1
+native cohorts, other prerelease families or malformed tags are refused. The
+pubspec must carry `<version>+BUILD` matching the tag.
 
 A manual dispatch from refs/heads/main is a dry run: it builds and verifies
-the artifacts for an explicit beta version without publishing anything.
+the artifacts for an explicit 2.0.0-beta.N or 2.0.0 version without publishing
+anything.
 
 Usage:
   release_plan.py <event> <ref_type> <ref_name> <pubspec.yaml> [dry_run_version]
-Prints `publish=`, `version=`, `build_number=` and `apk_version_code=` lines
-for $GITHUB_OUTPUT.
+Prints `publish=`, `kind=`, `version=`, `build_number=` and `apk_version_code=`
+lines for $GITHUB_OUTPUT.
 """
 import re
 import sys
@@ -25,6 +29,8 @@ NUM = r"(?:0|[1-9][0-9]*)"
 BETA_NUM = r"[1-9][0-9]*"
 BETA_TAG = re.compile(rf"^v(2\.0\.0-beta\.{BETA_NUM})$")
 BETA_VERSION = re.compile(rf"^2\.0\.0-beta\.{BETA_NUM}$")
+STABLE_TAG = re.compile(r"^v(2\.0\.0)$")
+STABLE_VERSION = re.compile(r"^2\.0\.0$")
 PUBSPEC_VERSION = re.compile(r"^version:\s*([^\s+]+)\+([0-9]+)\s*$", re.M)
 # Flutter's --split-per-abi adds 1000 x the ABI code to versionCode, and
 # arm64-v8a is ABI 2: the published APK carries the pubspec build + 2000.
@@ -55,22 +61,33 @@ def plan(event: str, ref_type: str, ref_name: str, pubspec: str,
             raise ValueError(f"unsupported event {event!r} for a tag")
         if dry_run_version:
             raise ValueError("a tag publishes its own version; a dry-run version is for main only")
-        tag = BETA_TAG.match(ref_name)
-        if not tag:
-            raise ValueError(f"tag {ref_name} is not a v2 beta (v2.0.0-beta.N); main publishes nothing else")
-        if tag.group(1) != name:
+        beta_tag = BETA_TAG.match(ref_name)
+        stable_tag = STABLE_TAG.match(ref_name)
+        if beta_tag:
+            kind, tag_version = "beta", beta_tag.group(1)
+        elif stable_tag:
+            kind, tag_version = "stable", stable_tag.group(1)
+        else:
+            raise ValueError(
+                f"tag {ref_name} is not a v2 beta (v2.0.0-beta.N) or v2.0.0; main publishes nothing else"
+            )
+        if tag_version != name:
             raise ValueError(f"tag {ref_name} does not match the pubspec version {name}")
-        return {"publish": "true", "version": name, "build_number": str(build),
+        return {"publish": "true", "kind": kind, "version": name, "build_number": str(build),
                 "apk_version_code": str(apk_version_code(build))}
     if event == "workflow_dispatch" and ref_type == "branch" and ref_name == "main":
-        if not BETA_VERSION.match(dry_run_version):
-            raise ValueError("a dry run needs an explicit 2.0.0-beta.N version")
+        if BETA_VERSION.match(dry_run_version):
+            kind = "beta"
+        elif STABLE_VERSION.match(dry_run_version):
+            kind = "stable"
+        else:
+            raise ValueError("a dry run needs an explicit 2.0.0-beta.N or 2.0.0 version")
         # A dry run never ships, so its build number only has to be valid and
         # above the pubspec's; the epoch keeps it in the published range.
         build = max(build + 1, int(time.time() if now is None else now))
-        return {"publish": "false", "version": dry_run_version, "build_number": str(build),
+        return {"publish": "false", "kind": kind, "version": dry_run_version, "build_number": str(build),
                 "apk_version_code": str(apk_version_code(build))}
-    raise ValueError(f"releases come from v2 beta tags or a main dry run, not the {ref_type} {ref_name!r}")
+    raise ValueError(f"releases come from v2 tags or a main dry run, not the {ref_type} {ref_name!r}")
 
 
 def main(argv: list[str]) -> int:

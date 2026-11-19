@@ -1,0 +1,1 @@
+Vamos sair do beta e levar para o primeiro release real, como está. Após tornar stable, os scripts desktop devem funcionar normalmente, apenas confirme.

@@ -778,19 +778,79 @@ void main() {
     });
 
     test(
-      'beta takes the highest v2 beta and never the native cohort',
+      'beta takes the highest v2 beta when no final v2 exists and never the native cohort',
       () async {
         serveList(1, <Map<String, Object?>>[
           release('v2.0.0-beta.9', prerelease: true),
           release('v2.0.0-beta.10', prerelease: true),
           release('v2.0.0-beta.11', draft: true, prerelease: true),
           release('v1.266.0-native.4', prerelease: true),
-          release('v2.0.0'),
+          release('v1.265.1'),
         ]);
 
         final result = await runInstaller(channel: 'beta');
 
         expectInstalled(result, 'v2.0.0-beta.10', 'beta');
+      },
+    );
+
+    test(
+      'beta graduates to stable v2.0.0 once published and saves stable',
+      () async {
+        serveList(1, <Map<String, Object?>>[
+          release('v2.0.0-beta.31', prerelease: true),
+          release('v2.0.0'),
+          release('v1.265.1'),
+        ]);
+        installExisting('v2.0.0-beta.31', channel: 'beta');
+
+        final result = await runInstaller();
+
+        expectInstalled(result, 'v2.0.0', 'stable');
+      },
+    );
+
+    test('beta channel can still pin an exact beta tag', () async {
+      serve(
+        'releases/tags/v2.0.0-beta.31',
+        release('v2.0.0-beta.31', prerelease: true),
+      );
+      installExisting('v2.0.0-beta.30', channel: 'beta');
+
+      final result = await runInstaller(
+        channel: 'beta',
+        version: 'v2.0.0-beta.31',
+      );
+
+      expectInstalled(result, 'v2.0.0-beta.31', 'beta');
+    });
+
+    test('fresh install picks stable v2.0.0 when latest is v2.0.0', () async {
+      serve('releases/latest', release('v2.0.0'));
+
+      final result = await runInstaller();
+
+      expectInstalled(result, 'v2.0.0', 'stable');
+    });
+
+    test(
+      'Darwin x86_64 fails before any download with explicit message',
+      () async {
+        final result = await sourceScript(
+          installScript,
+          'uname() { if [ "\$1" = "-s" ]; then echo Darwin; else echo x86_64; fi; }; '
+          'detect_platform',
+          home: home,
+          dataHome: dataHome,
+          sourceOnlyVariable: 'CODEWALK_INSTALLER_SOURCE_ONLY',
+        );
+
+        expect(result.exitCode, isNot(0));
+        expect(
+          result.stderr,
+          contains('No macOS Intel (x86_64) release asset'),
+        );
+        expect(downloads(), isEmpty);
       },
     );
 

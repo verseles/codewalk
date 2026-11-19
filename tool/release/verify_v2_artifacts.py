@@ -1,23 +1,27 @@
 #!/usr/bin/env python3
-"""Verifies the v2 beta release artifacts and writes their manifest.
+"""Verifies CodeWalk 2 release artifacts and writes their manifest.
 
-Exactly three assets ship: the Android arm64 APK and the Linux x64 and ARM64
-bundles. Each must carry the v2 app compiled from lib/main_v2.dart: its AOT
-library (libapp.so) names the v2 entry library and not the legacy one. The
-APK must be the production package, signed with the production key (never
-the debug key), arm64-only, with the planned versionName and versionCode. The
-Linux executables must match their architectures. The manifest and
-SHA256SUMS record what was verified, bound to each digest.
+Exactly five binary assets ship: the Android arm64 APK, Linux x64 and ARM64
+bundles, Windows x64 zip, and macOS Apple Silicon (arm64) bundle. Each must
+carry the v2 app compiled from lib/main_v2.dart: its AOT library names the v2
+entry library and not the legacy one. The APK must be the production package,
+signed with the production key (never the debug key), arm64-only, with the
+planned versionName and versionCode. Desktop executables must match their
+architectures. The manifest and SHA256SUMS record what was verified, bound to
+each digest.
 
 Usage:
-  verify_v2_artifacts.py --tag T --version V --apk-version-code C --commit SHA
-      --apk PATH --linux-x64 PATH --linux-arm64 PATH --out DIR
+  verify_v2_artifacts.py --kind beta|stable --tag T --version V
+      --apk-version-code C --commit SHA --apk PATH --linux-x64 PATH
+      --linux-arm64 PATH --windows-x64 PATH --macos-arm64 PATH --out DIR
 """
 import argparse
 import hashlib
 import io
 import json
+import os
 from pathlib import Path
+import plistlib
 import re
 import subprocess
 import sys
@@ -27,6 +31,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from build_codes import LEDGER, aapt2  # noqa: E402
+from release_plan import BETA_VERSION, STABLE_VERSION  # noqa: E402
 
 ENTRY_POINT = "lib/main_v2.dart"
 # Android installs an update only over an APK signed by the same key.
@@ -41,8 +46,13 @@ ASSETS = {
     "apk": "codewalk-android-arm64.apk",
     "linux-x64": "codewalk-linux-x64.tar.gz",
     "linux-arm64": "codewalk-linux-arm64.tar.gz",
+    "windows-x64": "codewalk-windows-x64.zip",
+    "macos-arm64": "codewalk-macos-arm64.tar.gz",
 }
 ELF_MACHINE = {"linux-x64": 62, "linux-arm64": 183}
+PE_MACHINE_AMD64 = 0x8664
+MACHO_CPU_TYPE_ARM64 = 0x0100000C
+MACHO_CPU_TYPE_X86_64 = 0x01000007
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -51,11 +61,59 @@ def sha256_bytes(data: bytes) -> str:
 
 def require_v2_aot(name: str, libapp: bytes) -> None:
     if not libapp:
-        raise ValueError(f"{name}: missing libapp.so (not an AOT release build)")
+        raise ValueError(f"{name}: missing AOT library (not an AOT release build)")
     if V2_MARKER not in libapp:
-        raise ValueError(f"{name}: libapp.so lacks the v2 bootstrap; it was not built from {ENTRY_POINT}")
+        raise ValueError(f"{name}: AOT library lacks the v2 bootstrap; it was not built from {ENTRY_POINT}")
     if LEGACY_MARKER in libapp:
-        raise ValueError(f"{name}: libapp.so contains the legacy bootstrap")
+        raise ValueError(f"{name}: AOT library contains the legacy bootstrap")
+
+
+def _check_safe_relative(archive_name: str, raw_name: str) -> str:
+    normalized = raw_name.replace("\\", "/")
+    if normalized.startswith("./"):
+        normalized = normalized[2:]
+    if (
+        normalized.startswith("/")
+        or re.match(r"^[A-Za-z]:", normalized)
+        or ".." in Path(normalized).parts
+    ):
+        raise ValueError(f"{archive_name}: unsafe path {raw_name!r}")
+    return normalized
+
+
+def _check_safe_tar_link(archive_name: str, member_name: str, linkname: str) -> None:
+    if linkname.startswith("/") or re.match(r"^[A-Za-z]:", linkname):
+        raise ValueError(f"{archive_name}: unsafe link {member_name!r} -> {linkname!r}")
+    parent = os.path.dirname(member_name)
+    resolved = os.path.normpath(os.path.join(parent, linkname))
+    if resolved == ".." or resolved.startswith("../") or resolved.startswith("/"):
+        raise ValueError(f"{archive_name}: unsafe link {member_name!r} -> {linkname!r}")
+
+
+def _macho_architectures(data: bytes) -> set[str]:
+    if len(data) < 8:
+        return set()
+    magic = data[:4]
+    cpu_names = {MACHO_CPU_TYPE_ARM64: "arm64", MACHO_CPU_TYPE_X86_64: "x64"}
+    if magic == b"\xcf\xfa\xed\xfe":
+        cpu = int.from_bytes(data[4:8], "little")
+        return {cpu_names[cpu]} if cpu in cpu_names else set()
+    if magic == b"\xfe\xed\xfa\xcf":
+        cpu = int.from_bytes(data[4:8], "big")
+        return {cpu_names[cpu]} if cpu in cpu_names else set()
+    if magic in (b"\xca\xfe\xba\xbe", b"\xca\xfe\xba\xbf"):
+        stride = 20 if magic == b"\xca\xfe\xba\xbe" else 32
+        nfat = int.from_bytes(data[4:8], "big")
+        if nfat == 0 or len(data) < 8 + nfat * stride:
+            return set()
+        found = set()
+        for i in range(nfat):
+            off = 8 + i * stride
+            cpu = int.from_bytes(data[off:off + 4], "big")
+            if cpu in cpu_names:
+                found.add(cpu_names[cpu])
+        return found
+    return set()
 
 
 def inspect_apk(path: Path, version: str, version_code: int, runner=subprocess.run) -> dict:
@@ -92,10 +150,9 @@ def inspect_linux(path: Path, target: str) -> dict:
     with tarfile.open(path, "r:gz") as archive:
         members = {}
         for member in archive.getmembers():
-            name = member.name[2:] if member.name.startswith("./") else member.name
-            if name.startswith("/") or ".." in Path(name).parts:
-                raise ValueError(f"{path.name}: unsafe path {member.name!r}")
+            name = _check_safe_relative(path.name, member.name)
             if member.issym() or member.islnk():
+                _check_safe_tar_link(path.name, name, member.linkname)
                 continue
             members[name] = member
 
@@ -118,23 +175,137 @@ def inspect_linux(path: Path, target: str) -> dict:
     return {"architecture": target.removeprefix("linux-"), "signature": "none (Linux bundles are not signed)"}
 
 
+def inspect_windows(path: Path) -> dict:
+    with zipfile.ZipFile(path) as archive:
+        entries = {}
+        for info in archive.infolist():
+            name = _check_safe_relative(path.name, info.filename)
+            if (info.external_attr >> 16) & 0o170000 == 0o120000:
+                raise ValueError(f"{path.name}: unsafe symlink entry {info.filename!r}")
+            if not info.is_dir():
+                entries[name] = info
+
+        def read(name: str) -> bytes:
+            info = entries.get(name)
+            return archive.read(info) if info is not None else b""
+
+        exe = read("codewalk.exe")
+        if len(exe) < 64 or exe[:2] != b"MZ":
+            raise ValueError(f"{path.name}: codewalk.exe is not a Windows x64 PE executable")
+        pe_offset = int.from_bytes(exe[60:64], "little")
+        if (
+            len(exe) < pe_offset + 6
+            or exe[pe_offset:pe_offset + 4] != b"PE\x00\x00"
+            or int.from_bytes(exe[pe_offset + 4:pe_offset + 6], "little") != PE_MACHINE_AMD64
+        ):
+            raise ValueError(f"{path.name}: codewalk.exe is not a Windows x64 PE executable")
+        if (
+            "flutter_windows.dll" not in entries
+            or "data/icudtl.dat" not in entries
+            or not any(name.startswith("data/flutter_assets/") for name in entries)
+        ):
+            raise ValueError(f"{path.name}: incomplete Windows bundle (engine, ICU data, or Flutter assets missing)")
+        require_v2_aot(path.name, read("data/app.so"))
+    return {"architecture": "x64", "signature": "none (Windows bundles are not signed)"}
+
+
+def inspect_macos(path: Path, version: str) -> dict:
+    with tarfile.open(path, "r:gz") as archive:
+        members = {}
+        for member in archive.getmembers():
+            name = _check_safe_relative(path.name, member.name)
+            if member.issym() or member.islnk():
+                _check_safe_tar_link(path.name, name, member.linkname)
+                continue
+            members[name] = member
+
+        def read(name: str) -> bytes:
+            member = members.get(name)
+            if member is None or not member.isfile():
+                return b""
+            return archive.extractfile(member).read()
+
+        executable = read("codewalk.app/Contents/MacOS/codewalk")
+        archs = _macho_architectures(executable)
+        if "arm64" not in archs:
+            raise ValueError(f"{path.name}: executable is not a macOS arm64 Mach-O")
+        aot = (
+            read("codewalk.app/Contents/Frameworks/App.framework/Versions/A/App")
+            or read("codewalk.app/Contents/Frameworks/App.framework/App")
+        )
+        require_v2_aot(path.name, aot)
+        has_engine = any(
+            name.startswith("codewalk.app/Contents/Frameworks/FlutterMacOS.framework/")
+            for name in members
+        )
+        has_assets = any(
+            name.startswith("codewalk.app/Contents/Frameworks/App.framework/Versions/A/Resources/flutter_assets/")
+            or name.startswith("codewalk.app/Contents/Frameworks/App.framework/Resources/flutter_assets/")
+            for name in members
+        )
+        if not has_engine or not has_assets:
+            raise ValueError(f"{path.name}: incomplete macOS bundle (engine or Flutter assets missing)")
+        raw_plist = read("codewalk.app/Contents/Info.plist")
+        if not raw_plist:
+            raise ValueError(f"{path.name}: missing codewalk.app/Contents/Info.plist")
+        try:
+            plist = plistlib.loads(raw_plist)
+        except Exception as error:
+            raise ValueError(f"{path.name}: unreadable Info.plist: {error}") from error
+        if plist.get("CFBundleIdentifier") != APPLICATION_ID:
+            raise ValueError(
+                f"{path.name}: bundle id is {plist.get('CFBundleIdentifier')!r}, not {APPLICATION_ID!r}"
+            )
+        if plist.get("CFBundleShortVersionString") != version:
+            raise ValueError(
+                f"{path.name}: CFBundleShortVersionString is {plist.get('CFBundleShortVersionString')!r}, planned {version!r}"
+            )
+    return {
+        "architecture": "arm64",
+        "architectures": sorted(archs),
+        "bundle_id": APPLICATION_ID,
+        "version_name": version,
+        "signature": "ad-hoc (not notarized)",
+    }
+
+
 def verify(tag: str, version: str, version_code: int, commit: str, paths: dict, out: Path,
-           runner=subprocess.run) -> dict:
+           kind: str = "beta", runner=subprocess.run) -> dict:
     if tag != f"v{version}":
         raise ValueError(f"tag {tag} does not name version {version}")
+    if kind == "beta":
+        if not BETA_VERSION.fullmatch(version):
+            raise ValueError(f"beta kind requires a 2.0.0-beta.N version, not {version}")
+        prerelease, make_latest = True, False
+    elif kind == "stable":
+        if not STABLE_VERSION.fullmatch(version):
+            raise ValueError(f"stable kind requires 2.0.0, not {version}")
+        prerelease, make_latest = False, True
+    else:
+        raise ValueError(f"unsupported release kind: {kind}")
     assets = {}
     for key, name in ASSETS.items():
+        if key not in paths:
+            raise ValueError(f"missing required asset input: {key}")
         path = paths[key]
         if path.name != name:
             raise ValueError(f"asset {path} must be named {name}")
-        details = (inspect_apk(path, version, version_code, runner) if key == "apk"
-                   else inspect_linux(path, key))
+        if key == "apk":
+            details = inspect_apk(path, version, version_code, runner)
+        elif key in ELF_MACHINE:
+            details = inspect_linux(path, key)
+        elif key == "windows-x64":
+            details = inspect_windows(path)
+        elif key == "macos-arm64":
+            details = inspect_macos(path, version)
+        else:
+            raise ValueError(f"unexpected asset key: {key}")
         data = path.read_bytes()
         assets[name] = {"sha256": sha256_bytes(data), "size": len(data), **details}
     manifest = {
         "schema": 1, "tag": tag, "version": version, "commit": commit, "entry_point": ENTRY_POINT,
         "entry_point_sha256": sha256_bytes((ROOT / ENTRY_POINT).read_bytes()),
-        "prerelease": True, "make_latest": False, "assets": assets,
+        "prerelease": prerelease, "make_latest": make_latest, "assets": assets,
     }
     out.mkdir(parents=True, exist_ok=True)
     (out / "release-manifest.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
@@ -147,13 +318,22 @@ def verify(tag: str, version: str, version_code: int, commit: str, paths: dict, 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    for flag in ("--tag", "--version", "--commit", "--apk", "--linux-x64", "--linux-arm64", "--out"):
+    parser.add_argument("--kind", required=True, choices=("beta", "stable"))
+    for flag in ("--tag", "--version", "--commit", "--apk", "--linux-x64", "--linux-arm64",
+                 "--windows-x64", "--macos-arm64", "--out"):
         parser.add_argument(flag, required=True)
     parser.add_argument("--apk-version-code", required=True, type=int)
     args = parser.parse_args(argv[1:])
-    paths = {"apk": Path(args.apk), "linux-x64": Path(args.linux_x64), "linux-arm64": Path(args.linux_arm64)}
+    paths = {
+        "apk": Path(args.apk),
+        "linux-x64": Path(args.linux_x64),
+        "linux-arm64": Path(args.linux_arm64),
+        "windows-x64": Path(args.windows_x64),
+        "macos-arm64": Path(args.macos_arm64),
+    }
     try:
-        manifest = verify(args.tag, args.version, args.apk_version_code, args.commit, paths, Path(args.out))
+        manifest = verify(args.tag, args.version, args.apk_version_code, args.commit, paths, Path(args.out),
+                          kind=args.kind)
     except (ValueError, OSError, KeyError, zipfile.BadZipFile, tarfile.TarError,
             subprocess.CalledProcessError) as error:
         print(f"Refusing to release: {error}", file=sys.stderr)
