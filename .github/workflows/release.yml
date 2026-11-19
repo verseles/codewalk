@@ -198,6 +198,8 @@ jobs:
       - name: Verify the pinned Flutter SDK
         shell: bash
         run: |
+          # Warm up the Flutter tool before --machine so bootstrap chatter does not pollute JSON.
+          flutter --version
           flutter --version --machine > "$RUNNER_TEMP/flutter-version.json"
           py_cmd="python3"
           if ! "$py_cmd" --version >/dev/null 2>&1; then py_cmd="python"; fi
