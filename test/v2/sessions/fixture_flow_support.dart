@@ -535,6 +535,7 @@ List<FixtureRoute> sessionRoutes({
     if (directory != null) ...[
       located('/api/permission/request'),
       located('/api/form'),
+      located('/api/shell'),
       // The captured model row, its variant settings included; the captured
       // agent list was empty.
       located('/api/model', [_doc(OpenCodeFixtures(), 'model.json')]),

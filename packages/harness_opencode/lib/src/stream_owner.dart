@@ -120,6 +120,7 @@ final class _Watch {
   bool shellsRefreshing = false;
   bool shellsRefreshInvalidated = false;
   RequestCancellation? shellsCancellation;
+  Timer? shellsRetryTimer;
 }
 
 const _maxHeldShellTerminals = 64;
@@ -165,6 +166,7 @@ final class OpenCodeStreamOwner {
     this.maxChildren = 64,
   }) : _now = now ?? DateTime.now,
        _delay = delay ?? Future<void>.delayed,
+       _customDelay = delay,
        streamId = 'opencode:/api/event:${harness.storageKey}' {
     if (maxHydrationAttempts <= 0 ||
         maxRepairs < 0 ||
@@ -198,6 +200,7 @@ final class OpenCodeStreamOwner {
   final String streamId;
   final DateTime Function() _now;
   final Future<void> Function(Duration) _delay;
+  final Future<void> Function(Duration)? _customDelay;
 
   final _updates = StreamController<OpenCodeStreamUpdate>.broadcast();
   final _catalogChanges = StreamController<OpenCodeCatalogChange>.broadcast();
@@ -592,6 +595,7 @@ final class OpenCodeStreamOwner {
     watch.cancellation?.cancel();
     watch.olderCancellation?.cancel();
     watch.shellsCancellation?.cancel();
+    watch.shellsRetryTimer?.cancel();
     store.close(ref);
   }
 
@@ -602,6 +606,7 @@ final class OpenCodeStreamOwner {
       watch.cancellation?.cancel();
       watch.olderCancellation?.cancel();
       watch.shellsCancellation?.cancel();
+      watch.shellsRetryTimer?.cancel();
     }
     await _subscription?.cancel();
     await _updates.close();
@@ -710,6 +715,7 @@ final class OpenCodeStreamOwner {
       watch.cancellation?.cancel();
       watch.olderCancellation?.cancel();
       watch.shellsCancellation?.cancel();
+      watch.shellsRetryTimer?.cancel();
       watch.heldShellTerminals.clear();
       watch.shellsRetried = false;
     }
@@ -932,15 +938,25 @@ final class OpenCodeStreamOwner {
     _Watch watch,
     int generation,
   ) async {
-    await _delay(const Duration(seconds: 1));
-    if (!_current(ref, watch, generation) || watch.stalled) return;
-    await refreshShells(ref);
+    if (_customDelay != null) {
+      await _customDelay(const Duration(seconds: 1));
+      if (!_current(ref, watch, generation) || watch.stalled) return;
+      await refreshShells(ref);
+      return;
+    }
+    watch.shellsRetryTimer?.cancel();
+    watch.shellsRetryTimer = Timer(const Duration(seconds: 1), () {
+      watch.shellsRetryTimer = null;
+      if (!_current(ref, watch, generation) || watch.stalled) return;
+      unawaited(refreshShells(ref));
+    });
   }
 
   void _setAside(SessionRef ref, _Watch watch) {
     watch.cancellation?.cancel();
     watch.olderCancellation?.cancel();
     watch.shellsCancellation?.cancel();
+    watch.shellsRetryTimer?.cancel();
     watch
       ..ready = false
       ..stalled = true
@@ -963,6 +979,7 @@ final class OpenCodeStreamOwner {
     watch?.cancellation?.cancel();
     watch?.olderCancellation?.cancel();
     watch?.shellsCancellation?.cancel();
+    watch?.shellsRetryTimer?.cancel();
     watch?.heldShellTerminals.clear();
     store.close(ref);
     _emit(OpenCodeSessionEvicted(ref));
@@ -1346,6 +1363,7 @@ final class OpenCodeStreamOwner {
         ..cancellation?.cancel()
         ..olderCancellation?.cancel()
         ..shellsCancellation?.cancel()
+        ..shellsRetryTimer?.cancel()
         ..shellsRefreshInvalidated = true
         ..ready = false
         ..held.clear()
