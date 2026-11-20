@@ -71,11 +71,19 @@ class CutStableTests(unittest.TestCase):
         self.assertEqual(step["apk_version_code"], NOW + 4001)
         self.assertEqual(step["push"], ["git", "push", "--atomic", "origin", "HEAD:refs/heads/main", "refs/tags/v2.0.0"])
 
-    def test_plan_refuses_non_beta_pubspec_or_second_cut(self):
-        for content in (STABLE_PUBSPEC, "name: codewalk\nversion: 1.265.1+1790000000\n"):
+    def test_plan_bumps_stable_minor_and_patch_and_refuses_non_v2(self):
+        (self.root / "pubspec.yaml").write_text(STABLE_PUBSPEC, encoding="utf-8")
+        (self.root / "release-notes/v2.1.0.md").write_text(NOTES, encoding="utf-8")
+        (self.root / "release-notes/v2.0.1.md").write_text(NOTES, encoding="utf-8")
+        minor_step = cut_stable.plan(FakeGit(), now=NOW, today=TODAY, root=self.root, bump="minor")
+        self.assertEqual((minor_step["version"], minor_step["tag"]), ("2.1.0", "v2.1.0"))
+        patch_step = cut_stable.plan(FakeGit(), now=NOW, today=TODAY, root=self.root, bump="patch")
+        self.assertEqual((patch_step["version"], patch_step["tag"]), ("2.0.1", "v2.0.1"))
+
+        for content in ("name: codewalk\nversion: 1.265.1+1790000000\n", "name: codewalk\nversion: 3.0.0+1790000000\n"):
             with self.subTest(content=content):
                 (self.root / "pubspec.yaml").write_text(content, encoding="utf-8")
-                with self.assertRaisesRegex(ValueError, "cannot graduate"):
+                with self.assertRaisesRegex(ValueError, "cannot cut a stable v2 release"):
                     cut_stable.plan(FakeGit(), now=NOW, today=TODAY, root=self.root)
 
     def test_plan_refuses_branch_dirty_unsynced_or_existing_tag(self):

@@ -29,8 +29,8 @@ NUM = r"(?:0|[1-9][0-9]*)"
 BETA_NUM = r"[1-9][0-9]*"
 BETA_TAG = re.compile(rf"^v(2\.0\.0-beta\.{BETA_NUM})$")
 BETA_VERSION = re.compile(rf"^2\.0\.0-beta\.{BETA_NUM}$")
-STABLE_TAG = re.compile(r"^v(2\.0\.0)$")
-STABLE_VERSION = re.compile(r"^2\.0\.0$")
+STABLE_TAG = re.compile(rf"^v(2\.{NUM}\.{NUM})$")
+STABLE_VERSION = re.compile(rf"^2\.{NUM}\.{NUM}$")
 PUBSPEC_VERSION = re.compile(r"^version:\s*([^\s+]+)\+([0-9]+)\s*$", re.M)
 # Flutter's --split-per-abi adds 1000 x the ABI code to versionCode, and
 # arm64-v8a is ABI 2: the published APK carries the pubspec build + 2000.

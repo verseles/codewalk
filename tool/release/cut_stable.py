@@ -20,7 +20,7 @@ import time
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from cut_beta import ROOT, SNAPSHOT, changed_paths, git, next_build  # noqa: E402
-from release_plan import BETA_VERSION, apk_version_code, pubspec_version  # noqa: E402
+from release_plan import BETA_VERSION, STABLE_VERSION, apk_version_code, pubspec_version  # noqa: E402
 
 TARGET_VERSION = "2.0.0"
 TARGET_TAG = "v2.0.0"
@@ -28,6 +28,24 @@ NOTES_REL = Path("release-notes/v2.0.0.md")
 CHANGELOG_REL = Path("CHANGELOG.md")
 MAX_NOTES_BYTES = 65536
 MAX_ANNOUNCEMENT_CHARS = 300
+
+
+def next_stable_version(current: str, bump: str = "minor") -> str:
+    if BETA_VERSION.match(current):
+        return "2.0.0"
+    if STABLE_VERSION.match(current):
+        _, minor_s, patch_s = current.split(".")
+        minor, patch = int(minor_s), int(patch_s)
+        if bump == "patch":
+            return f"2.{minor}.{patch + 1}"
+        if bump == "minor":
+            return f"2.{minor + 1}.0"
+        raise ValueError(f"unsupported stable bump: {bump}")
+    raise ValueError(f"cannot cut a stable v2 release from {current}")
+
+
+def notes_rel_for(version: str) -> Path:
+    return Path(f"release-notes/v{version}.md")
 
 
 def validate_notes(text: str) -> str:
@@ -60,10 +78,11 @@ def prepend_changelog(changelog_text: str, version: str, date_iso: str, notes: s
     return content.rstrip() + "\n\n" + section
 
 
-def plan(runner=subprocess.run, now: int | None = None, today: str | None = None, root: Path = ROOT) -> dict:
+def plan(runner=subprocess.run, now: int | None = None, today: str | None = None,
+         root: Path = ROOT, bump: str = "minor") -> dict:
     branch = git(runner, "rev-parse", "--abbrev-ref", "HEAD")
     if branch != "main":
-        raise ValueError(f"v2.0.0 is cut on main, not {branch}")
+        raise ValueError(f"stable v2 releases are cut on main, not {branch}")
     dirty = [path for path in changed_paths(runner) if path.split("/", 1)[0] != SNAPSHOT]
     if dirty:
         raise ValueError(f"commit or resolve pending changes first: {dirty[:5]}")
@@ -72,31 +91,32 @@ def plan(runner=subprocess.run, now: int | None = None, today: str | None = None
     if remote != head:
         raise ValueError(f"main is not at origin/main ({head[:8]} vs {remote[:8] or 'none'}); sync first")
     name, build = pubspec_version((root / "pubspec.yaml").read_text(encoding="utf-8"))
-    if not BETA_VERSION.match(name):
-        raise ValueError(f"cannot graduate {name} to {TARGET_VERSION}; expected 2.0.0-beta.N")
-    notes_path = root / NOTES_REL
+    target_version = next_stable_version(name, bump=bump)
+    target_tag = f"v{target_version}"
+    notes_rel = notes_rel_for(target_version)
+    notes_path = root / notes_rel
     if not notes_path.is_file():
-        raise ValueError(f"missing curated release notes: {NOTES_REL}")
+        raise ValueError(f"missing curated release notes: {notes_rel}")
     notes = validate_notes(notes_path.read_text(encoding="utf-8"))
     changelog_path = root / CHANGELOG_REL
     if not changelog_path.is_file():
         raise ValueError(f"missing {CHANGELOG_REL}")
     date_iso = today or datetime.now(timezone.utc).date().isoformat()
     # Validate changelog insertion before mutating anything.
-    prepend_changelog(changelog_path.read_text(encoding="utf-8"), TARGET_VERSION, date_iso, notes)
-    if git(runner, "tag", "--list", TARGET_TAG) or git(runner, "ls-remote", "--tags", "origin", f"refs/tags/{TARGET_TAG}"):
-        raise ValueError(f"tag {TARGET_TAG} already exists")
+    prepend_changelog(changelog_path.read_text(encoding="utf-8"), target_version, date_iso, notes)
+    if git(runner, "tag", "--list", target_tag) or git(runner, "ls-remote", "--tags", "origin", f"refs/tags/{target_tag}"):
+        raise ValueError(f"tag {target_tag} already exists")
     new_build = next_build(build, int(time.time() if now is None else now))
     return {
         "from": f"{name}+{build}",
-        "version": TARGET_VERSION,
+        "version": target_version,
         "build": new_build,
-        "tag": TARGET_TAG,
+        "tag": target_tag,
         "date": date_iso,
         "notes": notes,
         "apk_version_code": apk_version_code(new_build),
         "commit": head,
-        "push": ["git", "push", "--atomic", "origin", "HEAD:refs/heads/main", f"refs/tags/{TARGET_TAG}"],
+        "push": ["git", "push", "--atomic", "origin", "HEAD:refs/heads/main", f"refs/tags/{target_tag}"],
     }
 
 
@@ -135,11 +155,12 @@ def cut(step: dict, runner=subprocess.run, root: Path = ROOT) -> None:
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--bump", choices=("minor", "patch"), default="minor")
     args = parser.parse_args(argv[1:])
     try:
-        step = plan()
+        step = plan(bump=args.bump)
     except (ValueError, subprocess.CalledProcessError) as error:
-        print(f"Refusing to cut {TARGET_TAG}: {error}", file=sys.stderr)
+        print(f"Refusing to cut stable release: {error}", file=sys.stderr)
         return 1
     print(f"{step['from']} -> {step['version']}+{step['build']} (APK versionCode {step['apk_version_code']})")
     print(f"CHANGELOG heading: ## {step['tag']} - {step['date']}")

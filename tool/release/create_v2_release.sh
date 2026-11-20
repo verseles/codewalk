@@ -23,7 +23,7 @@ case "$kind" in
     make_latest="false"
     ;;
   stable)
-    if [[ "$tag" != "v2.0.0" ]]; then
+    if [[ ! "$tag" =~ ^v2\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
       echo "Refusing stable publication for unsupported tag: $tag" >&2
       exit 1
     fi

@@ -149,7 +149,7 @@ class CreateV2ReleaseTests(unittest.TestCase):
         self.assertTrue(upload.startswith(f"release upload {BETA_TAG} "))
 
     def test_mismatched_kind_and_tag_is_refused_before_any_call(self):
-        for tag, kind in ((STABLE_TAG, "beta"), (BETA_TAG, "stable"), ("v2.0.1", "stable"), (BETA_TAG, "nightly")):
+        for tag, kind in ((STABLE_TAG, "beta"), ("v2.1.0", "beta"), (BETA_TAG, "stable"), ("v1.266.0", "stable"), (BETA_TAG, "nightly")):
             with self.subTest(tag=tag, kind=kind):
                 code, calls = self.run_create('case "$1" in api) echo 1;; esac\n', tag=tag, kind=kind)
                 self.assertEqual(code, 1)

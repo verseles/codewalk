@@ -16,19 +16,21 @@ class ReleasePlanTests(unittest.TestCase):
                     "build_number": "1792800000", "apk_version_code": "1792802000",
                 })
 
-    def test_a_matching_v2_0_0_tag_publishes_as_stable(self):
-        for event in ("push", "workflow_dispatch"):
-            with self.subTest(event=event):
-                self.assertEqual(plan(event, "tag", "v2.0.0", STABLE), {
-                    "publish": "true", "kind": "stable", "version": "2.0.0",
-                    "build_number": "1795200000", "apk_version_code": "1795202000",
-                })
+    def test_a_matching_v2_stable_tag_publishes_as_stable(self):
+        for tag, version in (("v2.0.0", "2.0.0"), ("v2.0.1", "2.0.1"), ("v2.1.0", "2.1.0")):
+            pubspec = f"version: {version}+1795200000\n"
+            for event in ("push", "workflow_dispatch"):
+                with self.subTest(tag=tag, event=event):
+                    self.assertEqual(plan(event, "tag", tag, pubspec), {
+                        "publish": "true", "kind": "stable", "version": version,
+                        "build_number": "1795200000", "apk_version_code": "1795202000",
+                    })
 
     def test_every_other_tag_is_refused(self):
-        for tag in ("v1.266.0", "v2.0.1", "v2.1.0", "v1.266.0-native.1", "v2.0.0-native.1",
-                    "v2.0.0-rc.1", "v2.0.1-beta.1", "v3.0.0-beta.1", "v2.0.0-beta.0",
+        for tag in ("v1.266.0", "v1.266.0-native.1", "v2.0.0-native.1",
+                    "v2.0.0-rc.1", "v2.0.1-beta.1", "v3.0.0-beta.1", "v3.0.0", "v2.0.0-beta.0",
                     "v2.0.0-beta.03", "v2.0.0-beta.3 ", "2.0.0-beta.3", "v2.0.0-beta.3+1",
-                    "v2.0.0-beta", "2.0.0", "v2.0.0+1"):
+                    "v2.0.0-beta", "2.0.0", "v2.0.0+1", "v2.01.0"):
             with self.subTest(tag=tag), self.assertRaises(ValueError):
                 plan("push", "tag", tag, BETA)
 
@@ -58,7 +60,7 @@ class ReleasePlanTests(unittest.TestCase):
                          "1792800001")
 
     def test_a_dry_run_needs_a_supported_v2_version(self):
-        for version in ("", "2.0.1", "2.1.0", "1.266.0", "2.0.0-beta.0", "v2.0.0-beta.1", "v2.0.0"):
+        for version in ("", "1.266.0", "3.0.0", "2.0.0-beta.0", "v2.0.0-beta.1", "v2.0.0", "v2.1.0"):
             with self.subTest(version=version), self.assertRaises(ValueError):
                 plan("workflow_dispatch", "branch", "main", LEGACY, version)
 
