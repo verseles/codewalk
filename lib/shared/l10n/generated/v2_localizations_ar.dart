@@ -2704,4 +2704,115 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get liveShellLoadMore => 'تحميل المزيد من المخرجات';
+
+  @override
+  String get composerAttach => 'إرفاق';
+
+  @override
+  String get composerAttachImage => 'صورة';
+
+  @override
+  String get composerAttachFile => 'ملف';
+
+  @override
+  String get composerAttachAudio => 'صوت';
+
+  @override
+  String get composerAttachLocation => 'موقع';
+
+  @override
+  String get composerAttachRemove => 'إزالة المرفق';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return 'حتى $max مرفقات لكل رسالة';
+  }
+
+  @override
+  String get composerAttachTooLarge => 'يتجاوز الملف حد 100 ميغابايت';
+
+  @override
+  String get composerAttachEmpty => 'لا يمكن إرفاق ملف فارغ';
+
+  @override
+  String get composerAttachReadFailed => 'تعذر قراءة الملف المحدد';
+
+  @override
+  String get composerAttachUploadFailed => 'تعذر رفع المرفق';
+
+  @override
+  String get composerAttachUploadUnavailable =>
+      'لا يقبل هذا الخادم رفع الملفات';
+
+  @override
+  String get composerAttachUploadedAsFile => 'تم الرفع كملف';
+
+  @override
+  String get composerLocationTitle => 'إرفاق موقع';
+
+  @override
+  String get composerLocationUseCurrent => 'استخدام الموقع الحالي';
+
+  @override
+  String get composerLocationLatitude => 'خط العرض';
+
+  @override
+  String get composerLocationLongitude => 'خط الطول';
+
+  @override
+  String get composerLocationLabel => 'تسمية (اختياري)';
+
+  @override
+  String get composerLocationInvalid =>
+      'أدخل خط عرض (-90 إلى 90) وخط طول (-180 إلى 180) صالحين';
+
+  @override
+  String get composerLocationDenied =>
+      'اسمح بالوصول إلى الموقع أو أدخل الإحداثيات يدويًا';
+
+  @override
+  String get composerLocationUnavailable =>
+      'الموقع الحالي غير متاح على هذا الجهاز';
+
+  @override
+  String get composerLocationAdd => 'إرفاق';
+
+  @override
+  String get attachmentImagePreview => 'عرض الصورة';
+
+  @override
+  String get attachmentOpenFile => 'فتح الملف';
+
+  @override
+  String get attachmentOpenMap => 'فتح في الخرائط';
+
+  @override
+  String get attachmentPlayAudio => 'تشغيل الصوت';
+
+  @override
+  String get attachmentPauseAudio => 'إيقاف مؤقت';
+
+  @override
+  String get attachmentAudioUnavailable => 'تشغيل الصوت غير متاح';
+
+  @override
+  String get attachmentPreviewUnavailable =>
+      'المعاينة غير متاحة على هذا الجهاز';
+
+  @override
+  String get attachmentLoadFailed => 'تعذر تحميل المرفق';
+
+  @override
+  String get attachmentRetry => 'إعادة المحاولة';
+
+  @override
+  String get attachmentOpenFailed => 'تعذر فتح المرفق';
+
+  @override
+  String get attachmentMapFailed => 'تعذر فتح تطبيق الخرائط؛ تم نسخ الإحداثيات';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return 'المرفقات: $count';
+  }
 }

@@ -4783,6 +4783,210 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Load more output'**
   String get liveShellLoadMore;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get composerAttach;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get composerAttachImage;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'File'**
+  String get composerAttachFile;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Audio'**
+  String get composerAttachAudio;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get composerAttachLocation;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Remove attachment'**
+  String get composerAttachRemove;
+
+  /// Notice when the composer attachment cap is reached
+  ///
+  /// In en, this message translates to:
+  /// **'Up to {max} attachments per message'**
+  String composerAttachTooMany(int max);
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'File exceeds the 100 MB limit'**
+  String get composerAttachTooLarge;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Empty files can’t be attached'**
+  String get composerAttachEmpty;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t read the selected file'**
+  String get composerAttachReadFailed;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t upload attachment'**
+  String get composerAttachUploadFailed;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'This server doesn’t accept uploaded files'**
+  String get composerAttachUploadUnavailable;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded as file'**
+  String get composerAttachUploadedAsFile;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Attach location'**
+  String get composerLocationTitle;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Use current location'**
+  String get composerLocationUseCurrent;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get composerLocationLatitude;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get composerLocationLongitude;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Label (optional)'**
+  String get composerLocationLabel;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid latitude (-90 to 90) and longitude (-180 to 180)'**
+  String get composerLocationInvalid;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Allow location access or enter coordinates manually'**
+  String get composerLocationDenied;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Current location isn’t available on this device'**
+  String get composerLocationUnavailable;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get composerLocationAdd;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'View image'**
+  String get attachmentImagePreview;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Open file'**
+  String get attachmentOpenFile;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Open in maps'**
+  String get attachmentOpenMap;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Play audio'**
+  String get attachmentPlayAudio;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Pause audio'**
+  String get attachmentPauseAudio;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Audio playback unavailable'**
+  String get attachmentAudioUnavailable;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Preview unavailable on this device'**
+  String get attachmentPreviewUnavailable;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t load attachment'**
+  String get attachmentLoadFailed;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get attachmentRetry;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t open attachment'**
+  String get attachmentOpenFailed;
+
+  /// V2 attachments (#473)
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t open maps app; coordinates copied'**
+  String get attachmentMapFailed;
+
+  /// Compact attachment summary for pending or outbox rows
+  ///
+  /// In en, this message translates to:
+  /// **'Attachments: {count}'**
+  String attachmentCountLabel(int count);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

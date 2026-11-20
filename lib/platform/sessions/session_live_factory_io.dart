@@ -4,6 +4,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/permission_mode.dart';
+import '../../shared/sessions/session_attachments.dart';
 import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_unrestricted.dart';
@@ -14,12 +15,14 @@ import 'opencode_profile_slot.dart';
 SessionLiveDirectory? createSessionLiveDirectory({
   DateTime Function()? now,
   PayloadStore? payloads,
+  AttachmentBlobRepository? blobs,
   PermissionModePolicy? permissionModes,
   UnrestrictedOwnershipLedger? unrestrictedOwnership,
   CommandId Function()? commandIds,
 }) => _NativeLiveDirectory(
   now ?? DateTime.now,
   payloads,
+  blobs,
   permissionModes,
   unrestrictedOwnership,
   commandIds ?? mintCommandId,
@@ -33,6 +36,7 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
   _NativeLiveDirectory(
     this._now,
     this._payloads,
+    this._blobs,
     this._permissionModes,
     this._unrestrictedOwnership,
     this._commandIds,
@@ -41,6 +45,7 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
   }
   final DateTime Function() _now;
   final PayloadStore? _payloads;
+  final AttachmentBlobRepository? _blobs;
   final PermissionModePolicy? _permissionModes;
   final UnrestrictedOwnershipLedger? _unrestrictedOwnership;
   final CommandId Function() _commandIds;
@@ -221,6 +226,7 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
         if (identical(_slots[key], slot)) _slots.remove(key);
       },
       payloads: _payloads,
+      blobs: _blobs,
       queue: _queue,
       ids: _ids.putIfAbsent(key, OpenCodeMessageIds.new),
       answered: _answered.putIfAbsent(key, () => <String>{}),

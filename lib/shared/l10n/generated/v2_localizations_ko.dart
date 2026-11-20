@@ -2600,4 +2600,110 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get liveShellLoadMore => '출력 더 불러오기';
+
+  @override
+  String get composerAttach => '첨부';
+
+  @override
+  String get composerAttachImage => '이미지';
+
+  @override
+  String get composerAttachFile => '파일';
+
+  @override
+  String get composerAttachAudio => '오디오';
+
+  @override
+  String get composerAttachLocation => '위치';
+
+  @override
+  String get composerAttachRemove => '첨부 파일 제거';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return '메시지당 최대 $max개까지 첨부할 수 있습니다';
+  }
+
+  @override
+  String get composerAttachTooLarge => '파일이 100MB 제한을 초과합니다';
+
+  @override
+  String get composerAttachEmpty => '빈 파일은 첨부할 수 없습니다';
+
+  @override
+  String get composerAttachReadFailed => '선택한 파일을 읽을 수 없습니다';
+
+  @override
+  String get composerAttachUploadFailed => '첨부 파일을 업로드하지 못했습니다';
+
+  @override
+  String get composerAttachUploadUnavailable => '이 서버는 파일 업로드를 지원하지 않습니다';
+
+  @override
+  String get composerAttachUploadedAsFile => '파일로 업로드됨';
+
+  @override
+  String get composerLocationTitle => '위치 첨부';
+
+  @override
+  String get composerLocationUseCurrent => '현재 위치 사용';
+
+  @override
+  String get composerLocationLatitude => '위도';
+
+  @override
+  String get composerLocationLongitude => '경도';
+
+  @override
+  String get composerLocationLabel => '레이블(선택)';
+
+  @override
+  String get composerLocationInvalid => '올바른 위도(-90~90)와 경도(-180~180)를 입력하세요';
+
+  @override
+  String get composerLocationDenied => '위치 권한을 허용하거나 좌표를 직접 입력하세요';
+
+  @override
+  String get composerLocationUnavailable => '이 기기에서는 현재 위치를 사용할 수 없습니다';
+
+  @override
+  String get composerLocationAdd => '첨부';
+
+  @override
+  String get attachmentImagePreview => '이미지 보기';
+
+  @override
+  String get attachmentOpenFile => '파일 열기';
+
+  @override
+  String get attachmentOpenMap => '지도에서 열기';
+
+  @override
+  String get attachmentPlayAudio => '오디오 재생';
+
+  @override
+  String get attachmentPauseAudio => '오디오 일시정지';
+
+  @override
+  String get attachmentAudioUnavailable => '오디오를 재생할 수 없습니다';
+
+  @override
+  String get attachmentPreviewUnavailable => '이 기기에서는 미리보기를 사용할 수 없습니다';
+
+  @override
+  String get attachmentLoadFailed => '첨부 파일을 불러올 수 없습니다';
+
+  @override
+  String get attachmentRetry => '다시 시도';
+
+  @override
+  String get attachmentOpenFailed => '첨부 파일을 열 수 없습니다';
+
+  @override
+  String get attachmentMapFailed => '지도 앱을 열 수 없어 좌표를 복사했습니다';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return '첨부: $count';
+  }
 }

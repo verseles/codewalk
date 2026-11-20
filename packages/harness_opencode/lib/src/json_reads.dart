@@ -38,6 +38,7 @@ final class OpenCodeJsonReads {
     T Function(Object?) project,
     RequestCancellation? parent, {
     int? maxBytes,
+    Map<String, String> headers = const {},
   }) async {
     if (parent?.isCancelled ?? false) {
       throw const OpenCodeSessionReadException(
@@ -52,7 +53,7 @@ final class OpenCodeJsonReads {
     T result;
     try {
       result = await Future.any([
-        _collect(path, project, operation, maxBytes ?? maxBodyBytes),
+        _collect(path, project, operation, maxBytes ?? maxBodyBytes, headers),
         operation.stopped.future.then<T>((_) => throw operation.failure!),
       ]);
     } on OpenCodeSessionReadException {
@@ -96,12 +97,13 @@ final class OpenCodeJsonReads {
     T Function(Object?) project,
     _ReadOperation operation,
     int maxBytes,
+    Map<String, String> extraHeaders,
   ) async {
     final response = await transport.send(
       TransportRequest(
         method: 'GET',
         path: path,
-        headers: const {'Accept': 'application/json'},
+        headers: {'Accept': 'application/json', ...extraHeaders},
       ),
       cancellation: operation.cancellation,
     );

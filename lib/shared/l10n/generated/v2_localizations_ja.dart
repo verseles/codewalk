@@ -2602,4 +2602,110 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveShellLoadMore => '出力をさらに読み込む';
+
+  @override
+  String get composerAttach => '添付';
+
+  @override
+  String get composerAttachImage => '画像';
+
+  @override
+  String get composerAttachFile => 'ファイル';
+
+  @override
+  String get composerAttachAudio => '音声';
+
+  @override
+  String get composerAttachLocation => '位置情報';
+
+  @override
+  String get composerAttachRemove => '添付を削除';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return '1メッセージあたり最大 $max 件まで添付できます';
+  }
+
+  @override
+  String get composerAttachTooLarge => 'ファイルが100 MBの上限を超えています';
+
+  @override
+  String get composerAttachEmpty => '空のファイルは添付できません';
+
+  @override
+  String get composerAttachReadFailed => '選択したファイルを読み込めませんでした';
+
+  @override
+  String get composerAttachUploadFailed => '添付ファイルをアップロードできませんでした';
+
+  @override
+  String get composerAttachUploadUnavailable => 'このサーバーはファイルアップロードに対応していません';
+
+  @override
+  String get composerAttachUploadedAsFile => 'ファイルとしてアップロード';
+
+  @override
+  String get composerLocationTitle => '位置情報を添付';
+
+  @override
+  String get composerLocationUseCurrent => '現在地を使用';
+
+  @override
+  String get composerLocationLatitude => '緯度';
+
+  @override
+  String get composerLocationLongitude => '経度';
+
+  @override
+  String get composerLocationLabel => 'ラベル（任意）';
+
+  @override
+  String get composerLocationInvalid => '有効な緯度（-90〜90）と経度（-180〜180）を入力してください';
+
+  @override
+  String get composerLocationDenied => '位置情報へのアクセスを許可するか、座標を手入力してください';
+
+  @override
+  String get composerLocationUnavailable => 'このデバイスでは現在地を取得できません';
+
+  @override
+  String get composerLocationAdd => '添付';
+
+  @override
+  String get attachmentImagePreview => '画像を表示';
+
+  @override
+  String get attachmentOpenFile => 'ファイルを開く';
+
+  @override
+  String get attachmentOpenMap => 'マップで開く';
+
+  @override
+  String get attachmentPlayAudio => '音声を再生';
+
+  @override
+  String get attachmentPauseAudio => '音声を一時停止';
+
+  @override
+  String get attachmentAudioUnavailable => '音声を再生できません';
+
+  @override
+  String get attachmentPreviewUnavailable => 'このデバイスではプレビューできません';
+
+  @override
+  String get attachmentLoadFailed => '添付ファイルを読み込めませんでした';
+
+  @override
+  String get attachmentRetry => '再試行';
+
+  @override
+  String get attachmentOpenFailed => '添付ファイルを開けませんでした';
+
+  @override
+  String get attachmentMapFailed => 'マップを開けませんでした。座標をコピーしました';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return '添付: $count';
+  }
 }

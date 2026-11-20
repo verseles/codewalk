@@ -665,8 +665,8 @@ description of this code.
 - **Given** a live session's composer or a new chat's draft
 - **When** it renders
 - **Then** one rounded bubble without an outline holds the field and every control (#484): on a phone without focus it is a single line with **+**, the field ("Message"), the mic and the action; while anything inside it has focus on a phone, and always on a desktop, the field ("Type / for commands") sits on top and one row below holds **+**, the model chip, the mic and the action, which keep to the end; nothing sits above the field
-- **Then** the action is a round Send (filled while there is text to send) or, while the session responds and the field is empty, a round dark Stop
-- **Then** **+** (attachments and canned answers) and the mic (voice) are shown disabled, and their tooltips and semantics say the feature is coming
+- **Then** the action is a round Send (filled while there is text or staged attachments to send) or, while the session responds and both the field and attachments are empty, a round dark Stop
+- **Then** **+** opens the attachment menu (Image, File, Audio, Location) in live sessions and new chat drafts, disabled only while a send is in flight or the server is offline; the mic (voice) stays disabled on platforms without native dictation, with a tooltip saying why
 - **Then** a closed field shows one line and keeps every line of the draft; it opens on the frame after it takes focus, including a field that already had focus when the composer was built
 - **Then** the field uses the platform's native spell check, suggestions and autocorrection unless Settings > Behavior > Composer spell check is off; the choice persists under `cw2.settings.composerSpellCheck` (on by default, only `false` is written) and nothing is sent to another service
 - **When** the on-screen keyboard opens
@@ -682,10 +682,27 @@ description of this code.
 - **When** a message is sent
 - **Then** the field lets go of the focus, so the keyboard closes and the composer folds (beta.21); a send that fails, or text typed while it was pending, keeps it; a double-tap Continue that is accepted lets go too, unless text was typed meanwhile
 
-- **Given** a live session the server reports idle, with an empty field
+- **Given** a live session the server reports idle, with an empty field and no staged attachments
 - **When** the user double-taps or double-clicks the empty Send
-- **Then** the literal `continue` is sent once through the same outbox send; a single tap does nothing; it is not offered while the session runs, is stopping, or reports no execution state
+- **Then** the literal `continue` is sent once through the same outbox send; a single tap does nothing; it is not offered while the session runs, is stopping, has staged attachments, or reports no execution state
 - **Then** the field stays editable while the continue is sent, and text typed meanwhile stays, also when the session's tab closes before the send ends
+
+### V2 attachments (#473)
+
+- **Given** a live session composer or a new chat draft
+- **When** the user taps **+** (`composer-attach`)
+- **Then** a compact menu offers **Image**, **File**, **Audio**, and **Location**
+- **Then** picking files streams up to 100 MB per file (up to 8 attachments per message) into local content-addressed blob storage (`AttachmentBlobRepository`, 256 MB LRU with pin protection for active drafts and unsettled outbox records), sniffing MIME types from magic bytes instead of trusting filenames alone, and showing pending chips above the input field with thumbnails/icons, size, honest "Uploaded as file" notes when the active model lacks native image/PDF input and the harness supports staging uploads, and a remove button per chip
+- **Then** picking **Location** opens a dialog with an optional "Use current location" action (when platform location services are available; denied or unavailable GPS stays non-blocking) alongside manual latitude (`-90..90`), longitude (`-180..180`), and optional label (`<=200` chars) inputs
+- **Then** sending a message with attachments (with or without text) inlines eligible `image/png`, `image/jpeg`, `image/gif`, `image/webp`, `application/pdf` (when the active model supports that modality), and valid UTF-8 text (`<=256` KB) up to 20 MB per item and 20 MB total inline, and streams audio, larger files, or unsupported-modality files to `<tmp>/uploads/<uuid>/<sanitized>` via `POST /api/experimental/fs/write` (workspace code writes remain disabled) before sealing the outbox payload
+- **Then** sealed outbox payloads over 32 KB spill out-of-band to `PromptPayloadStore` (verified by SHA-256 and exact byte length) so same-ID reconciliation replays the exact sealed payload without re-uploading, and taking back a cancelled pending prompt restores both its display text and its staged attachments
+- **Given** a user message with attachments in either the live timeline or the read-only history view
+- **When** the bubble renders
+- **Then** attachments appear above the message text inside the user bubble:
+  - **Images**: bounded thumbnails loaded on demand through the session's `AttachmentFacet` (negotiating `X-OpenCode-Capabilities: experimental-media-uri` and falling back cleanly to inline/local cache), opening a fullscreen zoomable `InteractiveViewer` lightbox on tap, with retry on load failure and a safe fallback tile for images exceeding 25 megapixels or omitted bytes
+  - **Files & PDFs**: card with MIME icon, sanitized basename, MIME type, and size; tapping fetches app-owned cached bytes and opens them with the OS viewer (never passing untrusted server paths), or reports preview unavailable when bytes cannot be retrieved on this device
+  - **Audio**: inline player card with Play/Pause, progress scrubber (`Slider`), and `m:ss` clock (single active player across timelines), degrading honestly to a disabled card when playback is unsupported or bytes are unavailable on this device
+  - **Location**: card with optional label, formatted coordinates, and optional accuracy; tapping launches a strictly numeric allowlisted map URI (`geo:` on Android, `https://www.openstreetmap.org/` elsewhere — never trusting URLs from labels or metadata), copying coordinates with a snackbar if no maps app handles it
 
 ### V2 voice input
 

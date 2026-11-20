@@ -2726,4 +2726,115 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get liveShellLoadMore => 'আরও আউটপুট লোড করুন';
+
+  @override
+  String get composerAttach => 'সংযুক্ত করুন';
+
+  @override
+  String get composerAttachImage => 'ছবি';
+
+  @override
+  String get composerAttachFile => 'ফাইল';
+
+  @override
+  String get composerAttachAudio => 'অডিও';
+
+  @override
+  String get composerAttachLocation => 'অবস্থান';
+
+  @override
+  String get composerAttachRemove => 'সংযুক্তি সরান';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return 'প্রতি বার্তায় সর্বোচ্চ $maxটি সংযুক্তি';
+  }
+
+  @override
+  String get composerAttachTooLarge => 'ফাইলটি 100 MB সীমা ছাড়িয়ে গেছে';
+
+  @override
+  String get composerAttachEmpty => 'খালি ফাইল সংযুক্ত করা যাবে না';
+
+  @override
+  String get composerAttachReadFailed => 'নির্বাচিত ফাইল পড়া যায়নি';
+
+  @override
+  String get composerAttachUploadFailed => 'সংযুক্তি আপলোড করা যায়নি';
+
+  @override
+  String get composerAttachUploadUnavailable =>
+      'এই সার্ভার ফাইল আপলোড সমর্থন করে না';
+
+  @override
+  String get composerAttachUploadedAsFile => 'ফাইল হিসেবে আপলোড';
+
+  @override
+  String get composerLocationTitle => 'অবস্থান সংযুক্ত করুন';
+
+  @override
+  String get composerLocationUseCurrent => 'বর্তমান অবস্থান ব্যবহার করুন';
+
+  @override
+  String get composerLocationLatitude => 'অক্ষাংশ';
+
+  @override
+  String get composerLocationLongitude => 'দ্রাঘিমাংশ';
+
+  @override
+  String get composerLocationLabel => 'লেবেল (ঐচ্ছিক)';
+
+  @override
+  String get composerLocationInvalid =>
+      'সঠিক অক্ষাংশ (-90 থেকে 90) ও দ্রাঘিমাংশ (-180 থেকে 180) লিখুন';
+
+  @override
+  String get composerLocationDenied =>
+      'অবস্থানের অনুমতি দিন বা স্থানাঙ্ক নিজে লিখুন';
+
+  @override
+  String get composerLocationUnavailable =>
+      'এই ডিভাইসে বর্তমান অবস্থান উপলব্ধ নয়';
+
+  @override
+  String get composerLocationAdd => 'সংযুক্ত করুন';
+
+  @override
+  String get attachmentImagePreview => 'ছবি দেখুন';
+
+  @override
+  String get attachmentOpenFile => 'ফাইল খুলুন';
+
+  @override
+  String get attachmentOpenMap => 'ম্যাপে খুলুন';
+
+  @override
+  String get attachmentPlayAudio => 'অডিও চালান';
+
+  @override
+  String get attachmentPauseAudio => 'অডিও থামান';
+
+  @override
+  String get attachmentAudioUnavailable => 'অডিও প্লেব্যাক উপলব্ধ নয়';
+
+  @override
+  String get attachmentPreviewUnavailable => 'এই ডিভাইসে প্রিভিউ উপলব্ধ নয়';
+
+  @override
+  String get attachmentLoadFailed => 'সংযুক্তি লোড করা যায়নি';
+
+  @override
+  String get attachmentRetry => 'আবার চেষ্টা করুন';
+
+  @override
+  String get attachmentOpenFailed => 'সংযুক্তি খোলা যায়নি';
+
+  @override
+  String get attachmentMapFailed =>
+      'ম্যাপ অ্যাপ খোলা যায়নি; স্থানাঙ্ক কপি করা হয়েছে';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return 'সংযুক্তি: $count';
+  }
 }

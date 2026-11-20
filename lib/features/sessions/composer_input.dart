@@ -111,6 +111,8 @@ class ComposerFrame extends StatefulWidget {
     required this.action,
     required this.attachTooltip,
     required this.voiceTooltip,
+    this.attach,
+    this.attachmentsStrip,
     this.voice,
     this.chip,
   });
@@ -120,6 +122,8 @@ class ComposerFrame extends StatefulWidget {
   final Widget action;
   final String attachTooltip;
   final String voiceTooltip;
+  final Widget? attach;
+  final Widget? attachmentsStrip;
   final Widget? voice;
   final Widget? chip;
 
@@ -128,6 +132,8 @@ class ComposerFrame extends StatefulWidget {
 }
 
 class _ComposerFrameState extends State<ComposerFrame> {
+  final _attach = GlobalKey(debugLabel: 'composer attach');
+
   /// Moves the mic between the closed and the open row without losing it:
   /// a dictation in flight, or the keyboard focus that opened the composer,
   /// stays with it (#307).
@@ -177,7 +183,12 @@ class _ComposerFrameState extends State<ComposerFrame> {
   @override
   Widget build(BuildContext context) {
     final open = composerAlwaysOpen || _frame.hasFocus;
-    final attach = _soon('composer-attach', Symbols.add, widget.attachTooltip);
+    final attach = KeyedSubtree(
+      key: _attach,
+      child:
+          widget.attach ??
+          _soon('composer-attach', Symbols.add, widget.attachTooltip),
+    );
     final voice = KeyedSubtree(
       key: _voice,
       child:
@@ -205,6 +216,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              ?widget.attachmentsStrip,
               Row(
                 children: [
                   if (!open) attach,

@@ -2732,4 +2732,116 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get liveShellLoadMore => 'Load more output';
+
+  @override
+  String get composerAttach => 'Attach';
+
+  @override
+  String get composerAttachImage => 'Image';
+
+  @override
+  String get composerAttachFile => 'File';
+
+  @override
+  String get composerAttachAudio => 'Audio';
+
+  @override
+  String get composerAttachLocation => 'Location';
+
+  @override
+  String get composerAttachRemove => 'Remove attachment';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return 'Up to $max attachments per message';
+  }
+
+  @override
+  String get composerAttachTooLarge => 'File exceeds the 100 MB limit';
+
+  @override
+  String get composerAttachEmpty => 'Empty files can’t be attached';
+
+  @override
+  String get composerAttachReadFailed => 'Couldn’t read the selected file';
+
+  @override
+  String get composerAttachUploadFailed => 'Couldn’t upload attachment';
+
+  @override
+  String get composerAttachUploadUnavailable =>
+      'This server doesn’t accept uploaded files';
+
+  @override
+  String get composerAttachUploadedAsFile => 'Uploaded as file';
+
+  @override
+  String get composerLocationTitle => 'Attach location';
+
+  @override
+  String get composerLocationUseCurrent => 'Use current location';
+
+  @override
+  String get composerLocationLatitude => 'Latitude';
+
+  @override
+  String get composerLocationLongitude => 'Longitude';
+
+  @override
+  String get composerLocationLabel => 'Label (optional)';
+
+  @override
+  String get composerLocationInvalid =>
+      'Enter valid latitude (-90 to 90) and longitude (-180 to 180)';
+
+  @override
+  String get composerLocationDenied =>
+      'Allow location access or enter coordinates manually';
+
+  @override
+  String get composerLocationUnavailable =>
+      'Current location isn’t available on this device';
+
+  @override
+  String get composerLocationAdd => 'Attach';
+
+  @override
+  String get attachmentImagePreview => 'View image';
+
+  @override
+  String get attachmentOpenFile => 'Open file';
+
+  @override
+  String get attachmentOpenMap => 'Open in maps';
+
+  @override
+  String get attachmentPlayAudio => 'Play audio';
+
+  @override
+  String get attachmentPauseAudio => 'Pause audio';
+
+  @override
+  String get attachmentAudioUnavailable => 'Audio playback unavailable';
+
+  @override
+  String get attachmentPreviewUnavailable =>
+      'Preview unavailable on this device';
+
+  @override
+  String get attachmentLoadFailed => 'Couldn’t load attachment';
+
+  @override
+  String get attachmentRetry => 'Retry';
+
+  @override
+  String get attachmentOpenFailed => 'Couldn’t open attachment';
+
+  @override
+  String get attachmentMapFailed =>
+      'Couldn’t open maps app; coordinates copied';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return 'Attachments: $count';
+  }
 }

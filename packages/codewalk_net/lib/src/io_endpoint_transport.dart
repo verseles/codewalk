@@ -117,6 +117,7 @@ final class _Operation {
         return;
       }
       _request = request;
+      request.done.ignore();
       request.followRedirects = false;
       // Bodies are raw entity bytes, so ask for an uncompressed one:
       // HttpClient otherwise advertises gzip, which servers honour above a
@@ -131,6 +132,33 @@ final class _Operation {
       if (input.body != null) {
         request.contentLength = input.body!.length;
         request.add(input.body!);
+      } else if (input.bodyStream != null) {
+        final expected = input.contentLength;
+        request.contentLength = expected ?? -1;
+        var written = 0;
+        await for (final chunk in input.bodyStream!) {
+          if (_finished) {
+            request.abort();
+            return;
+          }
+          if (chunk.isEmpty) continue;
+          if (expected != null && written + chunk.length > expected) {
+            finish(const TransportException(TransportFailure.invalidRequest));
+            return;
+          }
+          request.add(chunk);
+          written += chunk.length;
+          // Active upload progress resets the inactivity header timer.
+          _timer?.cancel();
+          _timer = Timer(
+            owner._headerTimeout,
+            () => finish(const TransportException(TransportFailure.timeout)),
+          );
+        }
+        if (expected != null && written != expected) {
+          finish(const TransportException(TransportFailure.invalidRequest));
+          return;
+        }
       }
       final response = await request.close();
       if (_finished) {

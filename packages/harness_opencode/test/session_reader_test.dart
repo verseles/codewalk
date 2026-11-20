@@ -45,7 +45,13 @@ final class TestTransport implements EndpointHttpTransport {
     requests.add(request);
     expect(request.method, 'GET');
     expect(request.body, isNull);
-    expect(request.headers, {'Accept': 'application/json'});
+    expect(request.headers['Accept'], 'application/json');
+    expect(
+      request.headers.keys.every(
+        (key) => key == 'Accept' || key == openCodeCapabilitiesHeader,
+      ),
+      isTrue,
+    );
     return handle(request, cancellation);
   }
 

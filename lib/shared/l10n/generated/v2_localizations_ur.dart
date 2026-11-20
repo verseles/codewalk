@@ -2725,4 +2725,116 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get liveShellLoadMore => 'مزید آؤٹ پٹ لوڈ کریں';
+
+  @override
+  String get composerAttach => 'منسلک کریں';
+
+  @override
+  String get composerAttachImage => 'تصویر';
+
+  @override
+  String get composerAttachFile => 'فائل';
+
+  @override
+  String get composerAttachAudio => 'آڈیو';
+
+  @override
+  String get composerAttachLocation => 'مقام';
+
+  @override
+  String get composerAttachRemove => 'منسلک فائل ہٹائیں';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return 'فی پیغام زیادہ سے زیادہ $max منسلکات';
+  }
+
+  @override
+  String get composerAttachTooLarge => 'فائل 100 MB کی حد سے زیادہ ہے';
+
+  @override
+  String get composerAttachEmpty => 'خالی فائل منسلک نہیں کی جا سکتی';
+
+  @override
+  String get composerAttachReadFailed => 'منتخب فائل نہیں پڑھی جا سکی';
+
+  @override
+  String get composerAttachUploadFailed => 'منسلک فائل اپ لوڈ نہیں ہو سکی';
+
+  @override
+  String get composerAttachUploadUnavailable =>
+      'یہ سرور فائل اپ لوڈ قبول نہیں کرتا';
+
+  @override
+  String get composerAttachUploadedAsFile => 'فائل کے طور پر اپ لوڈ';
+
+  @override
+  String get composerLocationTitle => 'مقام منسلک کریں';
+
+  @override
+  String get composerLocationUseCurrent => 'موجودہ مقام استعمال کریں';
+
+  @override
+  String get composerLocationLatitude => 'عرض بلد';
+
+  @override
+  String get composerLocationLongitude => 'طول بلد';
+
+  @override
+  String get composerLocationLabel => 'لیبل (اختیاری)';
+
+  @override
+  String get composerLocationInvalid =>
+      'درست عرض بلد (-90 سے 90) اور طول بلد (-180 سے 180) درج کریں';
+
+  @override
+  String get composerLocationDenied =>
+      'مقام کی اجازت دیں یا نقاط دستی طور پر درج کریں';
+
+  @override
+  String get composerLocationUnavailable =>
+      'اس ڈیوائس پر موجودہ مقام دستیاب نہیں';
+
+  @override
+  String get composerLocationAdd => 'منسلک کریں';
+
+  @override
+  String get attachmentImagePreview => 'تصویر دیکھیں';
+
+  @override
+  String get attachmentOpenFile => 'فائل کھولیں';
+
+  @override
+  String get attachmentOpenMap => 'نقشے میں کھولیں';
+
+  @override
+  String get attachmentPlayAudio => 'آڈیو چلائیں';
+
+  @override
+  String get attachmentPauseAudio => 'آڈیو روکیں';
+
+  @override
+  String get attachmentAudioUnavailable => 'آڈیو پلے بیک دستیاب نہیں';
+
+  @override
+  String get attachmentPreviewUnavailable =>
+      'اس ڈیوائس پر پیش منظر دستیاب نہیں';
+
+  @override
+  String get attachmentLoadFailed => 'منسلک فائل لوڈ نہیں ہو سکی';
+
+  @override
+  String get attachmentRetry => 'دوبارہ کوشش کریں';
+
+  @override
+  String get attachmentOpenFailed => 'منسلک فائل نہیں کھل سکی';
+
+  @override
+  String get attachmentMapFailed =>
+      'نقشہ ایپ نہیں کھل سکی؛ نقاط کاپی کر لیے گئے';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return 'منسلکات: $count';
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'attachment_projection.dart';
 import 'compaction_projection.dart';
 import 'execution_projection.dart';
 import 'inbox_projection.dart';
@@ -226,6 +227,7 @@ List<SessionEvent> projectOpenCodeEvent(
   required String sourceVersion,
   required StreamPosition position,
   required DateTime receivedAt,
+  OpenCodeInlineMediaSink? onInlineMedia,
 }) {
   if (value is! Map<String, Object?>) {
     _fail(OpenCodeEventProjectionFailure.malformed);
@@ -233,6 +235,19 @@ List<SessionEvent> projectOpenCodeEvent(
   final type = value['type'];
   if (type is! String || type.isEmpty) {
     _fail(OpenCodeEventProjectionFailure.malformed);
+  }
+  if (type == 'session.inbox.enqueued' ||
+      type == 'session.inbox.delivered' ||
+      type == 'session.inbox.cancelled' ||
+      type == 'session.inbox.delivery.changed') {
+    return projectOpenCodeInboxEvent(
+      value,
+      current,
+      sourceVersion: sourceVersion,
+      position: position,
+      receivedAt: receivedAt,
+      onInlineMedia: onInlineMedia,
+    );
   }
   final route = _routes[type];
   if (route != null) {

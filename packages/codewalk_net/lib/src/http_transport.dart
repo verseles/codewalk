@@ -59,10 +59,23 @@ final class TransportRequest {
     required this.path,
     Map<String, String> headers = const {},
     List<int>? body,
+    this.bodyStream,
+    this.contentLength,
   }) : headers = Map.unmodifiable(headers),
        body = body == null
            ? null
-           : Uint8List.fromList(body).asUnmodifiableView();
+           : Uint8List.fromList(body).asUnmodifiableView() {
+    if (body != null && bodyStream != null) {
+      throw ArgumentError('Specify either body or bodyStream, not both.');
+    }
+    if (contentLength != null && contentLength! < 0) {
+      throw ArgumentError.value(
+        contentLength,
+        'contentLength',
+        'Must be nonnegative.',
+      );
+    }
+  }
 
   final String method;
 
@@ -71,6 +84,12 @@ final class TransportRequest {
   final String path;
   final Map<String, String> headers;
   final Uint8List? body;
+
+  /// Optional streamed request body for large uploads without full buffering.
+  final Stream<List<int>>? bodyStream;
+
+  /// Exact byte length of [bodyStream] when known.
+  final int? contentLength;
 }
 
 final class TransportResponse {

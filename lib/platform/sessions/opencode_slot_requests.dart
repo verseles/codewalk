@@ -3,9 +3,30 @@ import 'dart:async';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net_io.dart';
 
+import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
+
+SessionLivePhase openCodeConnectionPhase(ConnectionKind kind) => switch (kind) {
+  ConnectionKind.hydrating => SessionLivePhase.hydrating,
+  ConnectionKind.live => SessionLivePhase.live,
+  ConnectionKind.reconnecting => SessionLivePhase.reconnecting,
+  ConnectionKind.degraded => SessionLivePhase.degraded,
+  ConnectionKind.authRequired => SessionLivePhase.authRequired,
+  ConnectionKind.incompatible => SessionLivePhase.incompatible,
+  _ => SessionLivePhase.connecting,
+};
+
+SessionLiveFailure? openCodePhaseFailure(SessionLivePhase phase) =>
+    switch (phase) {
+      SessionLivePhase.degraded => SessionLiveFailure.unavailable,
+      SessionLivePhase.authRequired =>
+        SessionLiveFailure.authenticationRequired,
+      SessionLivePhase.incompatible =>
+        SessionLiveFailure.incompatibleResponse,
+      _ => null,
+    };
 
 /// Internal per-session in-flight request records owned by
 /// [OpenCodeProfileSlot].

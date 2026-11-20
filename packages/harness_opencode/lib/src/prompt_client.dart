@@ -5,6 +5,8 @@ import 'dart:typed_data';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net.dart';
 
+import 'attachment_prompt.dart';
+import 'attachment_projection.dart';
 import 'inbox_projection.dart';
 import 'session_projection.dart';
 import 'version_policy.dart';
@@ -55,9 +57,14 @@ final class OpenCodePromptClient {
     required this.connectedVersion,
     this.deadline = const Duration(seconds: 20),
     this.maxBodyBytes = 1024 * 1024,
+    // 20 MiB inline attachment base64-encodes to ~26.7 MiB plus JSON overhead.
+    this.maxAdmissionBytes = 32 * 1024 * 1024,
+    this.onInlineMedia,
   }) {
     // Rejected here, not after the POST where it would lose the receipt.
-    if (deadline <= Duration.zero || maxBodyBytes <= 0) {
+    if (deadline <= Duration.zero ||
+        maxBodyBytes <= 0 ||
+        maxAdmissionBytes <= 0) {
       throw ArgumentError('Prompt deadline and body limit must be positive.');
     }
   }
@@ -67,6 +74,8 @@ final class OpenCodePromptClient {
   final String connectedVersion;
   final Duration deadline;
   final int maxBodyBytes;
+  final int maxAdmissionBytes;
+  final OpenCodeInlineMediaSink? onInlineMedia;
 
   /// Prepares and posts in one call; see [prepare] and [post].
   Future<OpenCodePromptAttempt> send({
@@ -75,6 +84,7 @@ final class OpenCodePromptClient {
     required String messageId,
     required PromptDraft draft,
     required Delivery delivery,
+    List<OpenCodePreparedAttachment> attachments = const [],
     bool resume = true,
     RequestCancellation? cancellation,
   }) async => switch (prepare(
@@ -83,6 +93,7 @@ final class OpenCodePromptClient {
     messageId: messageId,
     draft: draft,
     delivery: delivery,
+    attachments: attachments,
     resume: resume,
   )) {
     OpenCodePromptRefused(:final attempt) => attempt,
@@ -100,6 +111,7 @@ final class OpenCodePromptClient {
     required String messageId,
     required PromptDraft draft,
     required Delivery delivery,
+    List<OpenCodePreparedAttachment> attachments = const [],
     bool resume = true,
   }) {
     if (session.harnessRef != harness) {
@@ -121,6 +133,7 @@ final class OpenCodePromptClient {
         'text': draft.text,
         'delivery': delivery.name,
         'resume': resume,
+        if (attachments.isNotEmpty) 'attachmentCount': attachments.length,
       }),
     );
     OpenCodePromptRefused unavailable(String reason) =>
@@ -139,31 +152,115 @@ final class OpenCodePromptClient {
         messageId.contains(RegExp(r'\s'))) {
       return unavailable('invalidMessageId');
     }
-    // Attachments, mentions, selection and metadata are later children;
-    // never send a draft with fields silently dropped.
-    if (draft.attachments.isNotEmpty ||
+    // Mentions, selection and raw draft metadata are separate children;
+    // unencoded draft.attachments without prepared payloads are still refused
+    // so fields are never silently dropped.
+    if ((draft.attachments.isNotEmpty && attachments.isEmpty) ||
         draft.mentions.isNotEmpty ||
         draft.selection != null ||
         draft.metadata != null) {
       return unavailable('unsupportedDraft');
     }
-    if (draft.text.trim().isEmpty) return unavailable('emptyText');
     if (delivery != Delivery.steer && delivery != Delivery.queue) {
       return unavailable('unsupportedDelivery');
+    }
+    final built = buildOpenCodePromptEnvelope(
+      displayText: draft.text,
+      attachments: attachments,
+    );
+    if (built.refusal case final reason?) return unavailable(reason);
+    final envelope = built.envelope!;
+    final body = <String, Object?>{
+      'id': messageId,
+      'text': envelope.wireText,
+      'delivery': delivery.name,
+      'resume': resume,
+      if (envelope.files.isNotEmpty) 'files': envelope.files,
+      if (envelope.metadata != null) 'metadata': envelope.metadata,
+    };
+    return OpenCodePromptReady._(
+      session: session,
+      command: command,
+      messageId: messageId,
+      text: envelope.wireText,
+      displayText: envelope.displayText,
+      hasAttachments: attachments.isNotEmpty,
+      delivery: delivery,
+      resume: resume,
+      payload: jsonEncode(body),
+    );
+  }
+
+  /// Re-validates a previously sealed wire [payload] for same-ID replay
+  /// (for example, an attachment prompt persisted in the outbox). Rejects any
+  /// payload whose JSON `id`, `text`, or `delivery` diverges from the record.
+  OpenCodePromptPreparation prepareSealed({
+    required SessionRef session,
+    required CommandId commandId,
+    required String messageId,
+    required String wireText,
+    required String displayText,
+    required Delivery delivery,
+    required bool resume,
+    required String payload,
+    required bool hasAttachments,
+  }) {
+    final owner = SessionOwner(session);
+    final command = OriginalCommand(
+      id: commandId,
+      harness: harness,
+      owner: owner,
+      operation: const OpenValue.known(MutationOperation.prompt),
+      connectedVersion: connectedVersion,
+      intent: CanonicalValue({
+        'messageId': messageId,
+        'text': displayText,
+        'delivery': delivery.name,
+        'resume': resume,
+        if (hasAttachments) 'hasAttachments': true,
+      }),
+    );
+    OpenCodePromptRefused unavailable(String reason) =>
+        OpenCodePromptRefused._(_unavailable(command, messageId, reason));
+
+    if (session.harnessRef != harness) return unavailable('wrongHarness');
+    if (!OpenCodeCompatibility.supportsV2(connectedVersion)) {
+      return unavailable('unverifiedVersion');
+    }
+    try {
+      openCodeSessionId(session.nativeId);
+    } on FormatException {
+      return unavailable('invalidSession');
+    }
+    if (!messageId.startsWith('msg_') ||
+        messageId.length > 4096 ||
+        messageId.contains(RegExp(r'\s'))) {
+      return unavailable('invalidMessageId');
+    }
+    if (delivery != Delivery.steer && delivery != Delivery.queue) {
+      return unavailable('unsupportedDelivery');
+    }
+    try {
+      final decoded = jsonDecode(payload);
+      if (decoded is! Map<String, Object?> ||
+          decoded['id'] != messageId ||
+          decoded['text'] != wireText ||
+          decoded['delivery'] != delivery.name) {
+        return unavailable('payloadMismatch');
+      }
+    } on FormatException {
+      return unavailable('payloadMismatch');
     }
     return OpenCodePromptReady._(
       session: session,
       command: command,
       messageId: messageId,
-      text: draft.text,
+      text: wireText,
+      displayText: displayText,
+      hasAttachments: hasAttachments,
       delivery: delivery,
       resume: resume,
-      payload: jsonEncode({
-        'id': messageId,
-        'text': draft.text,
-        'delivery': delivery.name,
-        'resume': resume,
-      }),
+      payload: payload,
     );
   }
 
@@ -285,15 +382,19 @@ final class OpenCodePromptClient {
         };
       }
       final bytes = await Future.any<Uint8List>([
-        current.readBytes(maxBytes: maxBodyBytes, inactivityTimeout: deadline),
+        current.readBytes(
+          maxBytes: ready.hasAttachments ? maxAdmissionBytes : maxBodyBytes,
+          inactivityTimeout: deadline,
+        ),
         expired.future,
       ]);
-      final Object? body;
+      final Object? rawBody;
       try {
-        body = jsonDecode(utf8.decode(bytes));
+        rawBody = jsonDecode(utf8.decode(bytes));
       } on FormatException {
         return uncertain('malformedAdmission');
       }
+      final body = extractOpenCodeInlineMedia(rawBody, onMedia: onInlineMedia);
       final data = body is Map<String, Object?> ? body['data'] : null;
       if (data is! Map<String, Object?> ||
           data['id'] != messageId ||
@@ -305,12 +406,14 @@ final class OpenCodePromptClient {
         session,
         sourceVersion: connectedVersion,
         generation: 'prompt',
+        onInlineMedia: onInlineMedia,
       );
       final pending = row.pending;
       if (pending == null) return uncertain('malformedAdmission');
       // A pending same-id replay returns the original admission, even for
       // changed text or delivery: this intent was not admitted.
-      if (pending.text != ready.text || pending.delivery.known != delivery) {
+      if ((row.wireText ?? pending.text) != ready.text ||
+          pending.delivery.known != delivery) {
         return rejected(
           _error(
             ErrorKind.protocol,
@@ -546,14 +649,46 @@ final class OpenCodePromptReady extends OpenCodePromptPreparation {
     required this.command,
     required this.messageId,
     required this.text,
+    required this.displayText,
+    required this.hasAttachments,
     required this.delivery,
     required this.resume,
     required this.payload,
   });
+
+  /// Reconstructs a prepared send from an already-sealed replay payload.
+  factory OpenCodePromptReady.replay({
+    required SessionRef session,
+    required OriginalCommand command,
+    required String messageId,
+    required String text,
+    required String displayText,
+    required bool hasAttachments,
+    required Delivery delivery,
+    required bool resume,
+    required String payload,
+  }) => OpenCodePromptReady._(
+    session: session,
+    command: command,
+    messageId: messageId,
+    text: text,
+    displayText: displayText,
+    hasAttachments: hasAttachments,
+    delivery: delivery,
+    resume: resume,
+    payload: payload,
+  );
+
   final SessionRef session;
   final OriginalCommand command;
   final String messageId;
+
+  /// Wire text sent in `POST /api/session/{id}/prompt` and matched on admission.
   final String text;
+
+  /// Clean user-typed text without synthetic attachment/location lines.
+  final String displayText;
+  final bool hasAttachments;
   final Delivery delivery;
   final bool resume;
   final String payload;

@@ -2764,4 +2764,118 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get liveShellLoadMore => 'Cargar más salida';
+
+  @override
+  String get composerAttach => 'Adjuntar';
+
+  @override
+  String get composerAttachImage => 'Imagen';
+
+  @override
+  String get composerAttachFile => 'Archivo';
+
+  @override
+  String get composerAttachAudio => 'Audio';
+
+  @override
+  String get composerAttachLocation => 'Ubicación';
+
+  @override
+  String get composerAttachRemove => 'Quitar adjunto';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return 'Hasta $max adjuntos por mensaje';
+  }
+
+  @override
+  String get composerAttachTooLarge => 'El archivo supera el límite de 100 MB';
+
+  @override
+  String get composerAttachEmpty => 'No se pueden adjuntar archivos vacíos';
+
+  @override
+  String get composerAttachReadFailed =>
+      'No se pudo leer el archivo seleccionado';
+
+  @override
+  String get composerAttachUploadFailed => 'No se pudo subir el adjunto';
+
+  @override
+  String get composerAttachUploadUnavailable =>
+      'Este servidor no admite la carga de archivos';
+
+  @override
+  String get composerAttachUploadedAsFile => 'Subido como archivo';
+
+  @override
+  String get composerLocationTitle => 'Adjuntar ubicación';
+
+  @override
+  String get composerLocationUseCurrent => 'Usar ubicación actual';
+
+  @override
+  String get composerLocationLatitude => 'Latitud';
+
+  @override
+  String get composerLocationLongitude => 'Longitud';
+
+  @override
+  String get composerLocationLabel => 'Etiqueta (opcional)';
+
+  @override
+  String get composerLocationInvalid =>
+      'Ingresa una latitud (-90 a 90) y longitud (-180 a 180) válidas';
+
+  @override
+  String get composerLocationDenied =>
+      'Permite el acceso a la ubicación o ingresa coordenadas manualmente';
+
+  @override
+  String get composerLocationUnavailable =>
+      'La ubicación actual no está disponible en este dispositivo';
+
+  @override
+  String get composerLocationAdd => 'Adjuntar';
+
+  @override
+  String get attachmentImagePreview => 'Ver imagen';
+
+  @override
+  String get attachmentOpenFile => 'Abrir archivo';
+
+  @override
+  String get attachmentOpenMap => 'Abrir en mapas';
+
+  @override
+  String get attachmentPlayAudio => 'Reproducir audio';
+
+  @override
+  String get attachmentPauseAudio => 'Pausar audio';
+
+  @override
+  String get attachmentAudioUnavailable =>
+      'Reproducción de audio no disponible';
+
+  @override
+  String get attachmentPreviewUnavailable =>
+      'Vista previa no disponible en este dispositivo';
+
+  @override
+  String get attachmentLoadFailed => 'No se pudo cargar el adjunto';
+
+  @override
+  String get attachmentRetry => 'Reintentar';
+
+  @override
+  String get attachmentOpenFailed => 'No se pudo abrir el adjunto';
+
+  @override
+  String get attachmentMapFailed =>
+      'No se pudo abrir la app de mapas; coordenadas copiadas';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return 'Adjuntos: $count';
+  }
 }

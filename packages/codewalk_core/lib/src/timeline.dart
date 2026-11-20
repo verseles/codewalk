@@ -1,3 +1,4 @@
+import 'attachments.dart';
 import 'errors.dart';
 import 'identity.dart';
 import 'session.dart';
@@ -73,6 +74,17 @@ final class OutputRef {
   final String? mimeType;
   final int? sizeBytes;
   final bool truncated;
+
+  @override
+  bool operator ==(Object other) =>
+      other is OutputRef &&
+      other.id == id &&
+      other.mimeType == mimeType &&
+      other.sizeBytes == sizeBytes &&
+      other.truncated == truncated;
+
+  @override
+  int get hashCode => Object.hash(id, mimeType, sizeBytes, truncated);
 }
 
 final class AttachmentRef {
@@ -81,13 +93,57 @@ final class AttachmentRef {
     required String mimeType,
     required this.content,
     this.name,
+    this.kind = const OpenValue.known(AttachmentKind.unknown),
+    this.width,
+    this.height,
+    this.location,
+    this.availability = const OpenValue.known(AttachmentAvailability.ready),
   }) : id = requireText(id, 'id'),
-       mimeType = requireText(mimeType, 'mimeType');
+       mimeType = requireText(mimeType, 'mimeType') {
+    requireAttachmentContentId(content.id);
+    if (width != null && width! < 0) {
+      throw ArgumentError.value(width, 'width', 'Must be nonnegative');
+    }
+    if (height != null && height! < 0) {
+      throw ArgumentError.value(height, 'height', 'Must be nonnegative');
+    }
+  }
 
   final String id;
   final String mimeType;
   final OutputRef content;
   final String? name;
+  final OpenValue<AttachmentKind> kind;
+  final int? width;
+  final int? height;
+  final GeoPoint? location;
+  final OpenValue<AttachmentAvailability> availability;
+
+  @override
+  bool operator ==(Object other) =>
+      other is AttachmentRef &&
+      other.id == id &&
+      other.mimeType == mimeType &&
+      other.content == content &&
+      other.name == name &&
+      other.kind == kind &&
+      other.width == width &&
+      other.height == height &&
+      other.location == location &&
+      other.availability == availability;
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    mimeType,
+    content,
+    name,
+    kind,
+    width,
+    height,
+    location,
+    availability,
+  );
 }
 
 /// The adapter resolves an opaque target; core does not rewrite it as a path.

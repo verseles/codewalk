@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'attachment_projection.dart';
 import 'compaction_projection.dart';
 import 'display_label.dart';
 import 'error_projection.dart';
@@ -27,6 +28,7 @@ List<TimelineItem> projectOpenCodeHistory(
   SessionRef ref, {
   required String sourceVersion,
   int maxItems = 2000,
+  OpenCodeInlineMediaSink? onInlineMedia,
 }) {
   if (maxItems <= 0) throw ArgumentError('maxItems must be positive.');
   if (sourceVersion.isEmpty) {
@@ -286,56 +288,31 @@ List<TimelineItem> projectOpenCodeHistory(
     switch (type) {
       case 'user':
         failure = null;
+        final rawUserText = text(message['text']);
+        final projected = projectOpenCodeUserAttachments(
+          messageId: id,
+          rawText: rawUserText,
+          rawFiles: message.containsKey('files') ? message['files'] : null,
+          rawMetadata: message['metadata'],
+          rawAgents: message.containsKey('agents') ? message['agents'] : null,
+          rawSkills: message.containsKey('skills') ? message['skills'] : null,
+          onInlineMedia: onInlineMedia,
+        );
         add(
           UserInput(
             meta: meta('user', 0, status: completed),
-            text: text(message['text']),
+            text: projected.displayText,
+            attachments: projected.attachments,
             delivery: OpenValue.unknown('nativeHistoryDeliveryUnverified'),
             confirmed: true,
           ),
         );
-        final counts = <String, Object?>{};
-        final files = <Object?>[];
-        for (final key in ['files', 'agents', 'skills']) {
-          if (!message.containsKey(key)) continue;
-          final entries = list(message[key]);
-          counts[key] = entries.length;
-          for (final entry in entries) {
-            final context = map(entry);
-            if (key == 'files') {
-              final source = map(context['source']);
-              files.add({
-                'mime': text(context['mime'], cap: 4096, charge: false),
-                'sourceKind': text(
-                  source['type'],
-                  cap: 4096,
-                  nonempty: true,
-                  charge: false,
-                ),
-              });
-            }
-            if (context.containsKey('mention')) {
-              final mention = map(context['mention']);
-              for (final key in ['start', 'end']) {
-                node();
-                final v = mention[key];
-                if (v is! num || !v.isFinite) malformed();
-              }
-            }
-          }
-        }
-        if (counts.values.any((v) => (v as int) > 0)) {
+        if (projected.unprojectedManifest case final unprojected?) {
           unknown(
             'context',
             'user-context-manifest',
             0,
-            {
-              'type': 'user-context-manifest',
-              'reason': 'contentResolutionUnavailable',
-              'counts': counts,
-              'files': files,
-              'contextNotProjected': true,
-            },
+            unprojected,
             extra: {'contextNotProjected': true},
           );
         }

@@ -25,6 +25,10 @@ final class OpenCodeEndpointProbe {
   final DateTime Function() now;
   final Duration deadline;
   final int maxBodyBytes;
+  OpenCodeServerInfo? _lastServerInfo;
+
+  /// The parsed `/api/info` payload from the most recent successful v2 probe.
+  OpenCodeServerInfo? get lastServerInfo => _lastServerInfo;
 
   Future<EndpointAssessment> detect({RequestCancellation? cancellation}) async {
     final token = cancellation ?? RequestCancellation();
@@ -71,6 +75,7 @@ final class OpenCodeEndpointProbe {
         );
       }
       if (info.status == 200 && server != null) {
+        _lastServerInfo = server;
         return OpenCodeCompatibility.assess(server.version);
       }
       // Auth, readiness and valid-but-unknown JSON are not permission to downgrade.

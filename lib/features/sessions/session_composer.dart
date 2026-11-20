@@ -9,6 +9,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_preferences_controller.dart';
+import '../../platform/sessions/attachment_staging_store.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/prompt_outbox.dart';
@@ -16,6 +17,8 @@ import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/endpoint_health_view.dart';
+import 'composer_attach_button.dart';
+import 'composer_attachment_strip.dart';
 import 'composer_input.dart';
 import 'composer_voice_button.dart';
 import 'session_builtin_commands.dart';
@@ -190,11 +193,25 @@ class _SessionComposerState extends State<SessionComposer> {
   void initState() {
     super.initState();
     _text.addListener(_textChanged);
+    widget.controller.live.attachments.addListener(_textChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant SessionComposer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(
+      oldWidget.controller.live.attachments,
+      widget.controller.live.attachments,
+    )) {
+      oldWidget.controller.live.attachments.removeListener(_textChanged);
+      widget.controller.live.attachments.addListener(_textChanged);
+    }
   }
 
   @override
   void dispose() {
     _text.removeListener(_textChanged);
+    widget.controller.live.attachments.removeListener(_textChanged);
     _commands.dispose();
     _ownFocus?.dispose();
     super.dispose();
@@ -216,11 +233,13 @@ class _SessionComposerState extends State<SessionComposer> {
 
   void _textChanged() => setState(() {});
 
-  /// A local command runs whenever no send is pending; text needs a
-  /// session that can take it.
+  /// A local command runs whenever no send is pending; text or staged
+  /// attachments need a session that can take them.
   bool get _canSend => parseSessionBuiltinCommand(_text.text) != null
       ? !widget.controller.sending
-      : widget.controller.canSend && _text.text.trim().isNotEmpty;
+      : widget.controller.canSend &&
+            (_text.text.trim().isNotEmpty ||
+                widget.controller.live.attachments.isNotEmpty);
 
   void _pick(SessionBuiltinCommand command) => unawaited(_run(command));
 
@@ -241,6 +260,7 @@ class _SessionComposerState extends State<SessionComposer> {
   bool get _canContinue =>
       widget.controller.canSend &&
       _text.text.trim().isEmpty &&
+      widget.controller.live.attachments.isEmpty &&
       widget.controller.live.state?.execution?.kind.known == ExecutionKind.idle;
 
   /// Whether a continue is being sent: the field stays editable meanwhile,
@@ -267,18 +287,29 @@ class _SessionComposerState extends State<SessionComposer> {
     _voice.currentState?.cancel();
     final draft = _text;
     final sent = draft.text;
+    final attachments = widget.controller.live.attachments;
     final command = parseSessionBuiltinCommand(sent);
-    if (command != null) return _run(command);
+    if (command != null && attachments.isEmpty) return _run(command);
+    final sentItems = List.of(attachments.items);
+    final sentRefs = attachments.toAttachmentRefs();
     final queue = context.read<AppPreferencesController?>()?.composerQueue;
+    final staging = context.read<AttachmentStagingStore?>();
     final clear = await widget.controller.send(
       sent,
+      attachments: sentRefs,
       delivery: queue == true ? Delivery.queue : Delivery.steer,
     );
-    // Text typed while the send was pending is the user's, never cleared,
-    // and keeps the keyboard.
-    if (clear && draft.text == sent) {
-      draft.clear();
-      _letGo();
+    // Text or attachments added while the send was pending stay untouched.
+    if (clear) {
+      if (draft.text == sent) {
+        draft.clear();
+      }
+      if (sentItems.isNotEmpty) {
+        await attachments.clearSent(sentItems, storeOverride: staging);
+      }
+      if (draft.text.isEmpty && attachments.isEmpty) {
+        _letGo();
+      }
     }
   }
 
@@ -368,6 +399,10 @@ class _SessionComposerState extends State<SessionComposer> {
         ComposerNotice.versionChanged => l10n.composerNoticeVersionChanged,
         ComposerNotice.sourceChanged => l10n.composerSourceChanged,
         ComposerNotice.sourceUnknown => l10n.composerSourceUnknown,
+        ComposerNotice.attachmentTooLarge => l10n.composerAttachTooLarge,
+        ComposerNotice.attachmentMissing => l10n.composerAttachReadFailed,
+        ComposerNotice.uploadFailed => l10n.composerAttachUploadFailed,
+        ComposerNotice.uploadUnavailable => l10n.composerAttachUploadUnavailable,
       };
 
   static String _preview(String text) {
@@ -454,7 +489,18 @@ class _SessionComposerState extends State<SessionComposer> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      _preview(chip.pending.text).replaceAll('\n', ' '),
+                      () {
+                        final raw = _preview(
+                          entry?.shownText ?? chip.pending.text,
+                        ).replaceAll('\n', ' ');
+                        if (entry != null && entry.attachments.isNotEmpty) {
+                          final badge = l10n.attachmentCountLabel(
+                            entry.attachments.length,
+                          );
+                          return raw.isEmpty ? badge : '$raw · $badge';
+                        }
+                        return raw;
+                      }(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -516,7 +562,15 @@ class _SessionComposerState extends State<SessionComposer> {
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 360),
             child: Text(
-              '${_preview(entry.text)} · $status',
+              () {
+                final text = _preview(entry.shownText);
+                final summary = entry.attachments.isEmpty
+                    ? text
+                    : text.isEmpty
+                    ? l10n.attachmentCountLabel(entry.attachments.length)
+                    : '$text · ${l10n.attachmentCountLabel(entry.attachments.length)}';
+                return '$summary · $status';
+              }(),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
@@ -547,7 +601,7 @@ class _SessionComposerState extends State<SessionComposer> {
                 builder: (context) => AlertDialog(
                   title: Text(l10n.composerHint),
                   content: SingleChildScrollView(
-                    child: SelectableText(entry.text),
+                    child: SelectableText(entry.shownText),
                   ),
                   actions: [
                     TextButton(
@@ -594,7 +648,9 @@ class _SessionComposerState extends State<SessionComposer> {
       // beta.21). The button keeps its look otherwise.
       // Spaces alone are no text, as for Continue.
       final done =
-          status?.kind == ComposerStatusKind.idle && _text.text.trim().isEmpty;
+          status?.kind == ComposerStatusKind.idle &&
+          _text.text.trim().isEmpty &&
+          c.live.attachments.isEmpty;
       final choose = preferences == null
           ? null
           : () => _chooseSend(preferences);
@@ -689,7 +745,20 @@ class _SessionComposerState extends State<SessionComposer> {
                     },
                   },
                   child: ComposerFrame(
-                    attachTooltip: l10n.composerAttachSoon,
+                    attachTooltip: l10n.composerAttach,
+                    attach: ComposerAttachButton(
+                      attachments: c.live.attachments,
+                      enabled:
+                          !(c.sending && !_continuing) &&
+                          !c.live.endpointOffline,
+                      supportsAudio: c.live.supportsStageUpload,
+                    ),
+                    attachmentsStrip: ComposerAttachmentStrip(
+                      attachments: c.live.attachments,
+                      enabled: !(c.sending && !_continuing),
+                      modelInputModalities: c.live.activeModelInputModalities,
+                      supportsStageUpload: c.live.supportsStageUpload,
+                    ),
                     voiceTooltip: l10n.composerVoiceUnavailable,
                     voice: ComposerVoiceButton(
                       key: _voice,
@@ -741,7 +810,9 @@ class _SessionComposerState extends State<SessionComposer> {
                             ),
                           )
                         : c.live.stopping ||
-                              (c.live.canStop && _text.text.trim().isEmpty)
+                              (c.live.canStop &&
+                                  _text.text.trim().isEmpty &&
+                                  c.live.attachments.isEmpty)
                         ? SessionStopButton(live: c.live)
                         // Holding Send, or a right click there, chooses how a
                         // prompt sent while the assistant works goes; the keys

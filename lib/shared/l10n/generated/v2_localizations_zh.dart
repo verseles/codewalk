@@ -2554,4 +2554,110 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveShellLoadMore => '加载更多输出';
+
+  @override
+  String get composerAttach => '添加附件';
+
+  @override
+  String get composerAttachImage => '图片';
+
+  @override
+  String get composerAttachFile => '文件';
+
+  @override
+  String get composerAttachAudio => '音频';
+
+  @override
+  String get composerAttachLocation => '位置';
+
+  @override
+  String get composerAttachRemove => '移除附件';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return '每条消息最多添加 $max 个附件';
+  }
+
+  @override
+  String get composerAttachTooLarge => '文件超过 100 MB 限制';
+
+  @override
+  String get composerAttachEmpty => '无法附加空文件';
+
+  @override
+  String get composerAttachReadFailed => '无法读取所选文件';
+
+  @override
+  String get composerAttachUploadFailed => '附件上传失败';
+
+  @override
+  String get composerAttachUploadUnavailable => '此服务器不支持文件上传';
+
+  @override
+  String get composerAttachUploadedAsFile => '作为文件上传';
+
+  @override
+  String get composerLocationTitle => '附加位置';
+
+  @override
+  String get composerLocationUseCurrent => '使用当前位置';
+
+  @override
+  String get composerLocationLatitude => '纬度';
+
+  @override
+  String get composerLocationLongitude => '经度';
+
+  @override
+  String get composerLocationLabel => '标签（可选）';
+
+  @override
+  String get composerLocationInvalid => '请输入有效的纬度（-90 至 90）和经度（-180 至 180）';
+
+  @override
+  String get composerLocationDenied => '请允许位置权限或手动输入坐标';
+
+  @override
+  String get composerLocationUnavailable => '此设备无法获取当前位置';
+
+  @override
+  String get composerLocationAdd => '附加';
+
+  @override
+  String get attachmentImagePreview => '查看图片';
+
+  @override
+  String get attachmentOpenFile => '打开文件';
+
+  @override
+  String get attachmentOpenMap => '在地图中打开';
+
+  @override
+  String get attachmentPlayAudio => '播放音频';
+
+  @override
+  String get attachmentPauseAudio => '暂停音频';
+
+  @override
+  String get attachmentAudioUnavailable => '无法播放音频';
+
+  @override
+  String get attachmentPreviewUnavailable => '此设备无法预览';
+
+  @override
+  String get attachmentLoadFailed => '无法加载附件';
+
+  @override
+  String get attachmentRetry => '重试';
+
+  @override
+  String get attachmentOpenFailed => '无法打开附件';
+
+  @override
+  String get attachmentMapFailed => '无法打开地图应用；已复制坐标';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return '附件：$count';
+  }
 }

@@ -20,6 +20,8 @@ final class OutboxEntry {
     this.fence = CancellationFence.none,
     this.source = OutboxSource.unknown,
     this.takenBack = false,
+    this.displayText,
+    this.attachments = const [],
   });
   final SessionRef session;
   final CommandId commandId;
@@ -29,6 +31,17 @@ final class OutboxEntry {
   final SubmissionKind state;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  /// User-authored prompt text without synthetic wire attachment lines.
+  /// Defaults to [text] when omitted (text-only prompts).
+  final String? displayText;
+
+  /// Canonical attachments included with this prompt, kept so take-back
+  /// restores both text and staged attachments cleanly.
+  final List<AttachmentRef> attachments;
+
+  /// Clean text for display in outbox strips and take-back editing.
+  String get shownText => displayText ?? text;
 
   /// A finite category such as `ConflictError` or `timeout`; never server
   /// text.

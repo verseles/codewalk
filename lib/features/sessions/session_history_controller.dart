@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
+import '../../shared/sessions/session_attachments.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../hosts/hosts_controller.dart';
 
@@ -38,6 +39,13 @@ class SessionHistoryController extends ChangeNotifier {
   bool stale = false;
   bool limited = false;
   bool get hasMore => _cursor != null && !limited && !stale;
+
+  AttachmentFacet? get attachmentFacet {
+    final source = _source;
+    return source is SessionAttachmentSource
+        ? (source as SessionAttachmentSource).attachments
+        : null;
+  }
 
   EndpointCredential? _currentCredential() {
     if (_disposed || hosts.loading || hosts.storageError) return null;

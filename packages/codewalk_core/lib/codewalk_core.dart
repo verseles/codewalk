@@ -12,6 +12,7 @@ export 'src/capabilities.dart';
 export 'src/commands.dart';
 export 'src/lifecycle.dart';
 export 'src/credential_text.dart';
+export 'src/attachments.dart';
 export 'src/timeline.dart';
 export 'src/events.dart';
 export 'src/forms.dart';

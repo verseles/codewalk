@@ -32,5 +32,7 @@
 	<string>Voice input uses speech recognition to convert your spoken words to text.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Microphone access is needed for voice input in the message composer.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Location access is used only when you choose to attach your current location to a message.</string>
 </dict>
 </plist>

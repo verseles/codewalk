@@ -6,13 +6,16 @@ import 'package:codewalk_net/codewalk_net_io.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/prompt_outbox.dart';
+import '../../shared/sessions/session_attachments.dart';
 import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_unrestricted.dart';
+import '../storage/attachment_blob_store.dart';
 import '../storage/payload_store.dart';
 import '../storage/storage_support.dart';
+import 'opencode_attachment_lane.dart';
 import 'opencode_catalog_lease.dart';
 import 'opencode_live_handle.dart';
 import 'opencode_selection_lane.dart';
@@ -20,12 +23,11 @@ import 'opencode_shell_lane.dart';
 import 'opencode_slot_requests.dart';
 import 'opencode_turn_action_lane.dart';
 import 'prompt_outbox_store.dart';
+import 'prompt_payload_store.dart';
 import 'turn_action_journal.dart';
 import 'unrestricted_ownership_store.dart';
 
-/// The per-profile runtime of one OpenCode v2 endpoint: the
-/// authenticated transport, the session reader, the single global event
-/// stream and everything a live session or the session catalog needs from it.
+/// Per-profile runtime of one OpenCode v2 endpoint.
 final class OpenCodeProfileSlot {
   OpenCodeProfileSlot(
     this.profile,
@@ -34,6 +36,7 @@ final class OpenCodeProfileSlot {
     this._now,
     this._release, {
     required this.payloads,
+    this.blobs,
     required this.queue,
     required this.ids,
     required this.answered,
@@ -53,6 +56,8 @@ final class OpenCodeProfileSlot {
       _transport,
       harness: harness,
       maxHistoryItems: 500,
+      onInlineMedia: (id, bytes, mime) =>
+          _attachments?.cacheInlineMedia(id, bytes, mime),
     );
   }
 
@@ -64,11 +69,10 @@ final class OpenCodeProfileSlot {
   final DateTime Function() _now;
   final void Function() _release;
   final PayloadStore? payloads;
+  final AttachmentBlobRepository? blobs;
   final KeySerialExecutor queue;
   final OpenCodeMessageIds ids;
   final PermissionModePolicy? permissionModes;
-
-  /// CodeWalk's own Unrestricted insertions; without it the action is absent.
   final UnrestrictedOwnershipLedger? unrestrictedOwnership;
   late final _unrestrictedBinding = unrestrictedBindingFor(profile);
   int _unrestrictedEpoch = 0;
@@ -81,6 +85,8 @@ final class OpenCodeProfileSlot {
   OpenCodeSelectionLane? _selection;
   OpenCodeTurnActionLane? _turns;
   OpenCodeShellLane? _shells;
+  OpenCodeAttachmentLane? _attachments;
+  OpenCodeAttachmentLane? get attachments => _attachments;
   final _stops = <SessionRef, OpenCodeStopRequest>{};
   final _older = <SessionRef, SessionOlderHistoryState>{};
   final _unrestricted = <SessionRef, OpenCodeUnrestrictedEntry>{};
@@ -114,7 +120,8 @@ final class OpenCodeProfileSlot {
   Future<void> ready() => _ready ??= _probe();
 
   Future<void> _probe() async {
-    final assessment = await OpenCodeEndpointProbe(_transport).detect();
+    final probe = OpenCodeEndpointProbe(_transport);
+    final assessment = await probe.detect();
     if (_closing != null || !isCurrentBinding()) {
       throw const SessionLiveException(SessionLiveFailure.cancelled);
     }
@@ -170,6 +177,18 @@ final class OpenCodeProfileSlot {
       view: view,
       publish: (ref) => _publish(ref, view(ref)),
     );
+    final blobRepo = blobs ?? MemoryAttachmentBlobStore();
+    _attachments = OpenCodeAttachmentLane(
+      transport: _transport,
+      harness: harness,
+      connectedVersion: observed,
+      blobs: blobRepo,
+      temporaryPath: probe.lastServerInfo?.temporaryPath,
+      view: view,
+      modelInputModalities: (ref) =>
+          _selection?.modelInputModalities(ref) ?? const {},
+      currentBinding: () => _activeBinding,
+    );
     if (payloads case final store?) {
       _turns = OpenCodeTurnActionLane(
         queue: queue,
@@ -196,6 +215,7 @@ final class OpenCodeProfileSlot {
           _transport,
           harness: harness,
           connectedVersion: observed,
+          onInlineMedia: _attachments!.cacheInlineMedia,
         ),
         reader: _reader,
         ids: ids,
@@ -206,6 +226,9 @@ final class OpenCodeProfileSlot {
         cancellation: lifetimeCancellation,
         beforeSubmit: _turns!.beforeSubmit,
         beforeReplay: _turns!.beforeReplay,
+        prepareAttachments: _attachments!.prepareForSubmit,
+        payloadBlobs: PromptPayloadStore(blobRepo),
+        attachmentBlobs: blobRepo,
       );
     }
     final connection = IoSseRecovery(
@@ -1326,23 +1349,8 @@ final class OpenCodeProfileSlot {
         _markUnrestrictedBusy(ref, entry);
         unawaited(_settleUnrestricted(ref, entry, rules));
       case OpenCodeConnectionUpdated(:final kind, :final session):
-        final phase = switch (kind) {
-          ConnectionKind.hydrating => SessionLivePhase.hydrating,
-          ConnectionKind.live => SessionLivePhase.live,
-          ConnectionKind.reconnecting => SessionLivePhase.reconnecting,
-          ConnectionKind.degraded => SessionLivePhase.degraded,
-          ConnectionKind.authRequired => SessionLivePhase.authRequired,
-          ConnectionKind.incompatible => SessionLivePhase.incompatible,
-          _ => SessionLivePhase.connecting,
-        };
-        final failure = switch (phase) {
-          SessionLivePhase.degraded => SessionLiveFailure.unavailable,
-          SessionLivePhase.authRequired =>
-            SessionLiveFailure.authenticationRequired,
-          SessionLivePhase.incompatible =>
-            SessionLiveFailure.incompatibleResponse,
-          _ => null,
-        };
+        final phase = openCodeConnectionPhase(kind);
+        final failure = openCodePhaseFailure(phase);
         if (session == null) {
           _phase = phase;
           // A terminal stream never recovers; new leases get a fresh slot
@@ -1464,6 +1472,7 @@ final class OpenCodeProfileSlot {
     _selection?.close();
     _turns?.close();
     _shells?.close();
+    _attachments?.dispose();
     for (final reply in _replyStates.values) {
       reply.dispose();
     }

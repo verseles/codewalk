@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../platform/sessions/attachment_staging_store.dart';
 import '../../platform/sessions/model_preference_store.dart';
 import '../../platform/sessions/session_draft_store.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -377,6 +378,7 @@ class _SessionRoutePageState extends State<SessionRoutePage> {
         health: context.read<EndpointHealthController?>(),
         permissionModes: _permissionPolicy(context),
         drafts: context.read<SessionDraftStore?>(),
+        attachmentStaging: context.read<AttachmentStagingStore?>(),
         modelPreferences: context.read<ModelPreferenceStore?>(),
       );
       final live = _live ??= tabs == null ? create() : tabs.live(ref, create);

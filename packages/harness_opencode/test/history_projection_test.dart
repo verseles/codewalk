@@ -397,17 +397,23 @@ void main() {
         isTrue,
       );
       final attached = project(lastHistory('e/attachment-png.json'));
-      expect(attached.whereType<UserInput>().single.attachments, isEmpty);
-      final manifest = attached.whereType<UnknownItem>().firstWhere(
-        (i) => i.rawType == 'user-context-manifest',
+      final userWithPng = attached.whereType<UserInput>().single;
+      expect(userWithPng.attachments, hasLength(1));
+      expect(userWithPng.attachments.single.mimeType, 'image/png');
+      expect(userWithPng.attachments.single.kind.known, AttachmentKind.image);
+      expect(userWithPng.attachments.single.name, 'capture.png');
+      expect(
+        userWithPng.attachments.single.content.id,
+        startsWith('inline:'),
       );
-      expect(((manifest.raw.value as Map)['files'] as List).single, {
-        'mime': 'image/png',
-        'sourceKind': 'inline',
-      });
+      expect(
+        attached.whereType<UnknownItem>().where(
+          (i) => i.rawType == 'user-context-manifest',
+        ),
+        isEmpty,
+      );
       final encoded = jsonEncode(attached.map(semanticItem).toList());
       expect(encoded, isNot(contains('iVBORw0')));
-      expect(encoded, isNot(contains('capture.png')));
     },
   );
 

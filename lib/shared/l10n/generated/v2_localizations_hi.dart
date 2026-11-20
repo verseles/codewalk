@@ -2730,4 +2730,116 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get liveShellLoadMore => 'और आउटपुट लोड करें';
+
+  @override
+  String get composerAttach => 'संलग्न करें';
+
+  @override
+  String get composerAttachImage => 'चित्र';
+
+  @override
+  String get composerAttachFile => 'फ़ाइल';
+
+  @override
+  String get composerAttachAudio => 'ऑडियो';
+
+  @override
+  String get composerAttachLocation => 'स्थान';
+
+  @override
+  String get composerAttachRemove => 'अटैचमेंट हटाएँ';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return 'प्रति संदेश अधिकतम $max अटैचमेंट';
+  }
+
+  @override
+  String get composerAttachTooLarge => 'फ़ाइल 100 MB की सीमा से अधिक है';
+
+  @override
+  String get composerAttachEmpty => 'खाली फ़ाइल संलग्न नहीं की जा सकती';
+
+  @override
+  String get composerAttachReadFailed => 'चयनित फ़ाइल नहीं पढ़ी जा सकी';
+
+  @override
+  String get composerAttachUploadFailed => 'अटैचमेंट अपलोड नहीं हो सका';
+
+  @override
+  String get composerAttachUploadUnavailable =>
+      'यह सर्वर फ़ाइल अपलोड स्वीकार नहीं करता';
+
+  @override
+  String get composerAttachUploadedAsFile => 'फ़ाइल के रूप में अपलोड';
+
+  @override
+  String get composerLocationTitle => 'स्थान संलग्न करें';
+
+  @override
+  String get composerLocationUseCurrent => 'वर्तमान स्थान उपयोग करें';
+
+  @override
+  String get composerLocationLatitude => 'अक्षांश';
+
+  @override
+  String get composerLocationLongitude => 'देशांतर';
+
+  @override
+  String get composerLocationLabel => 'लेबल (वैकल्पिक)';
+
+  @override
+  String get composerLocationInvalid =>
+      'मान्य अक्षांश (-90 से 90) और देशांतर (-180 से 180) दर्ज करें';
+
+  @override
+  String get composerLocationDenied =>
+      'स्थान अनुमति दें या निर्देशांक स्वयं दर्ज करें';
+
+  @override
+  String get composerLocationUnavailable =>
+      'इस डिवाइस पर वर्तमान स्थान उपलब्ध नहीं है';
+
+  @override
+  String get composerLocationAdd => 'संलग्न करें';
+
+  @override
+  String get attachmentImagePreview => 'चित्र देखें';
+
+  @override
+  String get attachmentOpenFile => 'फ़ाइल खोलें';
+
+  @override
+  String get attachmentOpenMap => 'मैप्स में खोलें';
+
+  @override
+  String get attachmentPlayAudio => 'ऑडियो चलाएँ';
+
+  @override
+  String get attachmentPauseAudio => 'ऑडियो रोकें';
+
+  @override
+  String get attachmentAudioUnavailable => 'ऑडियो प्लेबैक उपलब्ध नहीं है';
+
+  @override
+  String get attachmentPreviewUnavailable =>
+      'इस डिवाइस पर पूर्वावलोकन उपलब्ध नहीं है';
+
+  @override
+  String get attachmentLoadFailed => 'अटैचमेंट लोड नहीं हो सका';
+
+  @override
+  String get attachmentRetry => 'पुनः प्रयास करें';
+
+  @override
+  String get attachmentOpenFailed => 'अटैचमेंट नहीं खोला जा सका';
+
+  @override
+  String get attachmentMapFailed =>
+      'मैप्स ऐप नहीं खुल सका; निर्देशांक कॉपी किए गए';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return 'अटैचमेंट: $count';
+  }
 }

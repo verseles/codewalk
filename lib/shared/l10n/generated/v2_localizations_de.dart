@@ -2778,4 +2778,120 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get liveShellLoadMore => 'Mehr Ausgabe laden';
+
+  @override
+  String get composerAttach => 'Anhängen';
+
+  @override
+  String get composerAttachImage => 'Bild';
+
+  @override
+  String get composerAttachFile => 'Datei';
+
+  @override
+  String get composerAttachAudio => 'Audio';
+
+  @override
+  String get composerAttachLocation => 'Standort';
+
+  @override
+  String get composerAttachRemove => 'Anhang entfernen';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return 'Maximal $max Anhänge pro Nachricht';
+  }
+
+  @override
+  String get composerAttachTooLarge =>
+      'Datei überschreitet das Limit von 100 MB';
+
+  @override
+  String get composerAttachEmpty =>
+      'Leere Dateien können nicht angehängt werden';
+
+  @override
+  String get composerAttachReadFailed =>
+      'Ausgewählte Datei konnte nicht gelesen werden';
+
+  @override
+  String get composerAttachUploadFailed =>
+      'Anhang konnte nicht hochgeladen werden';
+
+  @override
+  String get composerAttachUploadUnavailable =>
+      'Dieser Server akzeptiert keine hochgeladenen Dateien';
+
+  @override
+  String get composerAttachUploadedAsFile => 'Als Datei hochgeladen';
+
+  @override
+  String get composerLocationTitle => 'Standort anhängen';
+
+  @override
+  String get composerLocationUseCurrent => 'Aktuellen Standort verwenden';
+
+  @override
+  String get composerLocationLatitude => 'Breitengrad';
+
+  @override
+  String get composerLocationLongitude => 'Längengrad';
+
+  @override
+  String get composerLocationLabel => 'Bezeichnung (optional)';
+
+  @override
+  String get composerLocationInvalid =>
+      'Gültigen Breitengrad (-90 bis 90) und Längengrad (-180 bis 180) eingeben';
+
+  @override
+  String get composerLocationDenied =>
+      'Standortzugriff erlauben oder Koordinaten manuell eingeben';
+
+  @override
+  String get composerLocationUnavailable =>
+      'Aktueller Standort ist auf diesem Gerät nicht verfügbar';
+
+  @override
+  String get composerLocationAdd => 'Anhängen';
+
+  @override
+  String get attachmentImagePreview => 'Bild ansehen';
+
+  @override
+  String get attachmentOpenFile => 'Datei öffnen';
+
+  @override
+  String get attachmentOpenMap => 'In Karten öffnen';
+
+  @override
+  String get attachmentPlayAudio => 'Audio abspielen';
+
+  @override
+  String get attachmentPauseAudio => 'Audio pausieren';
+
+  @override
+  String get attachmentAudioUnavailable => 'Audiowiedergabe nicht verfügbar';
+
+  @override
+  String get attachmentPreviewUnavailable =>
+      'Vorschau auf diesem Gerät nicht verfügbar';
+
+  @override
+  String get attachmentLoadFailed => 'Anhang konnte nicht geladen werden';
+
+  @override
+  String get attachmentRetry => 'Erneut versuchen';
+
+  @override
+  String get attachmentOpenFailed => 'Anhang konnte nicht geöffnet werden';
+
+  @override
+  String get attachmentMapFailed =>
+      'Karten-App konnte nicht geöffnet werden; Koordinaten kopiert';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return 'Anhänge: $count';
+  }
 }

@@ -5,12 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart'
     show TextEditingController, TextEditingValue, TextSelection;
 
+import '../../platform/sessions/attachment_staging_store.dart';
 import '../../platform/sessions/model_preference_store.dart';
 import '../../platform/sessions/workspace_draft_store.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/session_actions.dart';
 import '../../shared/sessions/session_catalog_source.dart';
 import '../hosts/endpoint_health_controller.dart';
+import 'composer_attachments_controller.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_selection.dart';
 
@@ -31,12 +33,14 @@ final class WorkspaceFirstPrompt {
     required this.text,
     required this.commandId,
     required this.profile,
+    this.attachments = const [],
   });
   final WorkspaceDraftKey key;
   final SessionSummary summary;
   final String text;
   final CommandId commandId;
   final EndpointProfile profile;
+  final List<AttachmentRef> attachments;
   SessionRef get session => summary.info.ref;
   String get location =>
       Uri(pathSegments: ['', 's', session.host.value, session.nativeId]).path;
@@ -49,9 +53,11 @@ class WorkspaceDraftController extends ChangeNotifier {
     this.health,
     CommandId Function()? commandIds,
     ModelPreferenceStore? modelPreferences,
+    AttachmentStagingStore? attachmentStaging,
   }) : _catalog = catalog,
        _store = store,
-       _commandIds = commandIds ?? mintCommandId {
+       _commandIds = commandIds ?? mintCommandId,
+       attachments = ComposerAttachmentsController(store: attachmentStaging) {
     selection = WorkspaceDraftSelection(
       canChange: () => !_sending && isDraftActive,
       refresh: _refreshDefaults,
@@ -62,6 +68,7 @@ class WorkspaceDraftController extends ChangeNotifier {
     _catalog.addListener(_catalogChanged);
     health?.addListener(_notify);
     draft.addListener(_draftChanged);
+    attachments.addListener(_notify);
     _catalogChanged();
   }
   final SessionsController _catalog;
@@ -78,6 +85,7 @@ class WorkspaceDraftController extends ChangeNotifier {
   final WorkspaceDraftStore _store;
   final CommandId Function() _commandIds;
   final draft = TextEditingController();
+  final ComposerAttachmentsController attachments;
   final _activeDraftContexts = <WorkspaceDraftKey>{};
   final _unscopedProfiles = <String>{};
   final _unscopedText = <String, String>{};
@@ -149,7 +157,7 @@ class WorkspaceDraftController extends ChangeNotifier {
       _catalog.hosts.pendingBindingChange != _profile &&
       status == WorkspaceDraftStatus.ready &&
       !_store.isUnreadable(_currentKey!) &&
-      draft.text.trim().isNotEmpty &&
+      (draft.text.trim().isNotEmpty || attachments.isNotEmpty) &&
       (_location.isEmpty || _location == '/' || _location == '/sessions') &&
       !_catalog.loading &&
       _catalog.createReason == SessionActionReason.none;
@@ -248,6 +256,9 @@ class WorkspaceDraftController extends ChangeNotifier {
         handoff.commandId.value,
         handoff.text,
       );
+      if (handoff.attachments.isNotEmpty) {
+        await attachments.clearScope('ws:${handoff.key.storageKey}');
+      }
     }
     if (!_disposed && _currentKey == handoff.key) {
       final generation = _restoreGeneration;
@@ -341,6 +352,7 @@ class WorkspaceDraftController extends ChangeNotifier {
     if (previous != null) _store.detach(previous, _draftForgotten);
     _currentKey = key;
     if (key != null) _store.attach(key, _draftForgotten);
+    unawaited(attachments.bindScope(key == null ? null : 'ws:${key.storageKey}'));
     unawaited(_loadDefaults(key));
   }
 
@@ -575,6 +587,7 @@ class WorkspaceDraftController extends ChangeNotifier {
         text: text,
         commandId: id,
         profile: profile,
+        attachments: attachments.toAttachmentRefs(),
       );
       _activeDraftContexts.remove(key);
       onBound(ref, text, id);
@@ -612,7 +625,9 @@ class WorkspaceDraftController extends ChangeNotifier {
     _catalog.removeListener(_catalogChanged);
     health?.removeListener(_notify);
     draft.removeListener(_draftChanged);
+    attachments.removeListener(_notify);
     draft.dispose();
+    attachments.dispose();
     selection.dispose();
     super.dispose();
   }

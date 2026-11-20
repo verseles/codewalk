@@ -338,7 +338,13 @@ void main() {
       expect(model.label, 'Fledge Alpha Free');
       expect(model.variants, ['low', 'high', 'max']);
       expect(model.metadata, isNull);
-      expect(model.inputModalities, isEmpty);
+      expect(model.inputModalities, {
+        'text': true,
+        'image': true,
+        'pdf': false,
+        'audio': false,
+        'video': false,
+      });
     });
 
     test('an observed list of every provider model is read whole', () async {

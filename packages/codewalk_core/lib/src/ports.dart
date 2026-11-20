@@ -1,3 +1,4 @@
+import 'attachments.dart';
 import 'capabilities.dart';
 import 'catalog.dart';
 import 'commands.dart';
@@ -75,6 +76,7 @@ abstract interface class SessionHandle {
   UndoFacet? get undo;
   WorkFacet? get work;
   ShellFacet? get shells;
+  AttachmentFacet? get attachments;
   LifecycleFacet? get lifecycle;
   Future<void> detach();
 }

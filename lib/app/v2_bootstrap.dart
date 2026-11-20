@@ -15,12 +15,17 @@ import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../features/settings/update_scheduler.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
+import '../platform/sessions/attachment_staging_store.dart';
 import '../platform/sessions/model_preference_store.dart';
 import '../platform/sessions/session_draft_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
 import '../shared/l10n/l10n_bridge.dart';
+import '../shared/media/attachment_picker.dart';
+import '../shared/media/audio_playback.dart';
+import '../shared/media/location_fix_source.dart';
 import '../shared/sessions/permission_mode.dart';
+import '../shared/sessions/session_attachments.dart';
 import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
 import '../shared/theme/app_theme.dart';
@@ -129,6 +134,23 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
         ),
         Provider<SessionDraftStore?>.value(value: dependencies.sessionDrafts),
         Provider<SpeechDictation?>.value(value: dependencies.speechDictation),
+        Provider<AttachmentBlobRepository?>.value(
+          value: dependencies.attachmentBlobs,
+        ),
+        Provider<AttachmentStagingStore?>.value(
+          value: dependencies.attachmentStaging,
+        ),
+        Provider<AttachmentPickerPort?>.value(
+          value: dependencies.attachmentPicker,
+        ),
+        Provider<AttachmentFileOpener?>.value(
+          value: dependencies.attachmentFileOpener,
+        ),
+        Provider<MapUriLauncher?>.value(value: dependencies.mapUriLauncher),
+        Provider<AudioPlaybackPort?>.value(value: dependencies.audioPlayback),
+        Provider<LocationFixSource?>.value(
+          value: dependencies.locationFixSource,
+        ),
         ListenableProvider<ModelPreferenceStore?>.value(
           value: dependencies.modelPreferences,
         ),

@@ -16,6 +16,7 @@ import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../features/settings/update_scheduler.dart';
 import '../platform/pairing/native_pairing_links.dart';
+import '../platform/sessions/attachment_staging_store.dart';
 import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/model_preference_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
@@ -23,6 +24,10 @@ import '../platform/sessions/session_draft_store.dart';
 import '../platform/sessions/unrestricted_ownership_store.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
+import '../shared/media/attachment_picker.dart';
+import '../shared/media/audio_playback.dart';
+import '../shared/media/location_fix_source.dart';
+import '../shared/sessions/session_attachments.dart';
 import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
 import '../shared/voice/speech_dictation.dart';
@@ -65,6 +70,13 @@ class AppDependencies {
     this.sessionDrafts,
     this.modelPreferences,
     this.speechDictation,
+    this.attachmentBlobs,
+    this.attachmentStaging,
+    this.attachmentPicker,
+    this.attachmentFileOpener,
+    this.mapUriLauncher,
+    this.audioPlayback,
+    this.locationFixSource,
     this.workspaceDrafts,
     this.projectContexts,
     this.desktopWindow,
@@ -136,6 +148,13 @@ class AppDependencies {
 
   /// Dictation through the platform's own speech recognizer (#307).
   final SpeechDictation? speechDictation;
+  final AttachmentBlobRepository? attachmentBlobs;
+  final AttachmentStagingStore? attachmentStaging;
+  final AttachmentPickerPort? attachmentPicker;
+  final AttachmentFileOpener? attachmentFileOpener;
+  final MapUriLauncher? mapUriLauncher;
+  final AudioPlaybackPort? audioPlayback;
+  final LocationFixSource? locationFixSource;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
@@ -175,6 +194,7 @@ class AppDependencies {
     sessionTabs?.dispose();
     // What was typed and not yet written is written now.
     unawaited(sessionDrafts?.flush());
+    unawaited(audioPlayback?.dispose());
     sessions?.dispose();
     unawaited(liveDirectory?.close());
     endpointHealth?.dispose();

@@ -23,12 +23,16 @@ import '../features/settings/update_scheduler.dart';
 import '../platform/connectivity/network_changes.dart';
 import '../platform/endpoints/pairing_factory.dart';
 import '../platform/endpoints/probe_factory.dart';
+import '../platform/media/attachment_picker_factory.dart';
+import '../platform/media/audio_playback_factory.dart';
+import '../platform/media/location_fix_factory.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
 import '../platform/releases/apk_platform_factory.dart';
 import '../platform/releases/linux_installer_factory.dart';
 import '../platform/releases/release_source_factory.dart';
+import '../platform/sessions/attachment_staging_store.dart';
 import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/model_preference_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
@@ -43,6 +47,7 @@ import '../platform/sessions/session_tabs_store.dart';
 import '../platform/sessions/unrestricted_ownership_store.dart';
 import '../platform/sessions/workspace_draft_store.dart';
 import '../platform/sessions/workspace_store.dart';
+import '../platform/storage/attachment_blob_store_factory.dart';
 import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
 import '../platform/storage/payload_factory.dart';
@@ -50,9 +55,13 @@ import '../platform/storage/preferences_backend.dart';
 import '../platform/window/desktop_window_port.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
+import '../shared/media/attachment_picker.dart';
+import '../shared/media/audio_playback.dart';
+import '../shared/media/location_fix_source.dart';
 import '../shared/releases/release_source.dart';
 import '../shared/releases/update_selector.dart';
 import '../shared/sessions/session_actions.dart';
+import '../shared/sessions/session_attachments.dart';
 import '../shared/sessions/session_catalog_source.dart';
 import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
@@ -96,6 +105,13 @@ AppDependencies createAppDependencies({
   Stream<Object?>? networkChanges,
   DesktopWindowPort? desktopWindow,
   SpeechDictation? speechDictation,
+  AttachmentBlobRepository? attachmentBlobs,
+  AttachmentStagingStore? attachmentStaging,
+  AttachmentPickerPort? attachmentPicker,
+  AttachmentFileOpener? attachmentFileOpener,
+  MapUriLauncher? mapUriLauncher,
+  AudioPlaybackPort? audioPlayback,
+  LocationFixSource? locationFixSource,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
@@ -167,6 +183,10 @@ AppDependencies createAppDependencies({
   // One payload store for the outbox and the drafts, which use their own
   // keys.
   final payloads = createV2PayloadStore(metadata);
+  final blobs = attachmentBlobs ?? createAttachmentBlobStore();
+  final staging =
+      attachmentStaging ??
+      AttachmentStagingStore(payloads: payloads, blobs: blobs);
   // The live directory owns the endpoint's single event stream; the session
   // catalog listens to the same one, so the directory is created first and
   // the catalog borrows its feed.
@@ -174,6 +194,7 @@ AppDependencies createAppDependencies({
       (sessionLiveDirectory ??
       () => createSessionLiveDirectory(
         payloads: payloads,
+        blobs: blobs,
         permissionModes: permissionModes,
         unrestrictedOwnership: unrestrictedOwnership,
       ))();
@@ -250,6 +271,7 @@ AppDependencies createAppDependencies({
   final workspaceDrafts = WorkspaceDraftController(
     catalog: locator<SessionsController>(),
     modelPreferences: modelPreferences,
+    attachmentStaging: staging,
     health: endpointHealth,
     store:
         workspaceDraftStore ??
@@ -323,7 +345,14 @@ AppDependencies createAppDependencies({
       tabs: sessionTabs,
     ),
     sessions: locator<SessionsController>(),
-    historyFactory: sessionHistoryFactory ?? createSessionHistorySource,
+    historyFactory:
+        sessionHistoryFactory ??
+        (profile, credential, session) => createSessionHistorySource(
+          profile,
+          credential,
+          session,
+          blobs: blobs,
+        ),
     liveDirectory: liveDirectory,
     disposeProfileBindings: disposeProfileBindings,
     liveWake: liveWake,
@@ -344,6 +373,13 @@ AppDependencies createAppDependencies({
     sessionDrafts: sessionDrafts,
     modelPreferences: modelPreferences,
     speechDictation: speechDictation ?? NativeSpeechDictation(),
+    attachmentBlobs: blobs,
+    attachmentStaging: staging,
+    attachmentPicker: attachmentPicker ?? createAttachmentPickerPort(),
+    attachmentFileOpener: attachmentFileOpener ?? createAttachmentFileOpener(),
+    mapUriLauncher: mapUriLauncher ?? createMapUriLauncher(),
+    audioPlayback: audioPlayback ?? createAudioPlaybackPort(),
+    locationFixSource: locationFixSource ?? createLocationFixSource(),
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),

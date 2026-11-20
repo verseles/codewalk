@@ -2777,4 +2777,118 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get liveShellLoadMore => 'Charger plus de sortie';
+
+  @override
+  String get composerAttach => 'Joindre';
+
+  @override
+  String get composerAttachImage => 'Image';
+
+  @override
+  String get composerAttachFile => 'Fichier';
+
+  @override
+  String get composerAttachAudio => 'Audio';
+
+  @override
+  String get composerAttachLocation => 'Position';
+
+  @override
+  String get composerAttachRemove => 'Retirer la pièce jointe';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return 'Jusqu’à $max pièces jointes par message';
+  }
+
+  @override
+  String get composerAttachTooLarge => 'Le fichier dépasse la limite de 100 Mo';
+
+  @override
+  String get composerAttachEmpty => 'Impossible de joindre un fichier vide';
+
+  @override
+  String get composerAttachReadFailed =>
+      'Impossible de lire le fichier sélectionné';
+
+  @override
+  String get composerAttachUploadFailed =>
+      'Échec de l’envoi de la pièce jointe';
+
+  @override
+  String get composerAttachUploadUnavailable =>
+      'Ce serveur n’accepte pas l’envoi de fichiers';
+
+  @override
+  String get composerAttachUploadedAsFile => 'Envoyé comme fichier';
+
+  @override
+  String get composerLocationTitle => 'Joindre une position';
+
+  @override
+  String get composerLocationUseCurrent => 'Utiliser la position actuelle';
+
+  @override
+  String get composerLocationLatitude => 'Latitude';
+
+  @override
+  String get composerLocationLongitude => 'Longitude';
+
+  @override
+  String get composerLocationLabel => 'Libellé (facultatif)';
+
+  @override
+  String get composerLocationInvalid =>
+      'Saisissez une latitude (-90 à 90) et une longitude (-180 à 180) valides';
+
+  @override
+  String get composerLocationDenied =>
+      'Autorisez l’accès à la position ou saisissez les coordonnées manuellement';
+
+  @override
+  String get composerLocationUnavailable =>
+      'La position actuelle n’est pas disponible sur cet appareil';
+
+  @override
+  String get composerLocationAdd => 'Joindre';
+
+  @override
+  String get attachmentImagePreview => 'Voir l’image';
+
+  @override
+  String get attachmentOpenFile => 'Ouvrir le fichier';
+
+  @override
+  String get attachmentOpenMap => 'Ouvrir dans Cartes';
+
+  @override
+  String get attachmentPlayAudio => 'Lire l’audio';
+
+  @override
+  String get attachmentPauseAudio => 'Mettre en pause';
+
+  @override
+  String get attachmentAudioUnavailable => 'Lecture audio indisponible';
+
+  @override
+  String get attachmentPreviewUnavailable =>
+      'Aperçu indisponible sur cet appareil';
+
+  @override
+  String get attachmentLoadFailed => 'Impossible de charger la pièce jointe';
+
+  @override
+  String get attachmentRetry => 'Réessayer';
+
+  @override
+  String get attachmentOpenFailed => 'Impossible d’ouvrir la pièce jointe';
+
+  @override
+  String get attachmentMapFailed =>
+      'Impossible d’ouvrir l’app de cartes ; coordonnées copiées';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return 'Pièces jointes : $count';
+  }
 }

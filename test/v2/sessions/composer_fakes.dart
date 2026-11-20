@@ -49,14 +49,18 @@ final class FakeOutbox implements PromptOutbox {
     if (submitRefusal case final refusal?) {
       return OutboxSubmission.refused(refusal);
     }
-    final entry = entryOf(
-      session,
-      commandId.value,
-      'msg_${(++_ids).toString().padLeft(4, '0')}',
-      draft.text,
-      delivery,
-      submitState,
+    final entry = OutboxEntry(
+      session: session,
+      commandId: commandId,
+      messageId: 'msg_${(++_ids).toString().padLeft(4, '0')}',
+      text: draft.text,
+      attachments: draft.attachments,
+      delivery: delivery,
+      state: submitState,
+      createdAt: DateTime.utc(2026, 10, 15),
+      updatedAt: DateTime.utc(2026, 10, 15),
       reason: submitReason,
+      source: OutboxSource.current,
     );
     _put(entry);
     await holdAfterRecord?.future;
@@ -148,6 +152,8 @@ OutboxEntry withTakenBack(OutboxEntry entry) => OutboxEntry(
   commandId: entry.commandId,
   messageId: entry.messageId,
   text: entry.text,
+  displayText: entry.displayText,
+  attachments: entry.attachments,
   delivery: entry.delivery,
   state: entry.state,
   createdAt: entry.createdAt,

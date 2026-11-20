@@ -3,9 +3,11 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  audioplayers_windows
   connectivity_plus
   dynamic_color
   flutter_secure_storage_windows
+  geolocator_windows
   screen_retriever_windows
   speech_to_text_windows
   url_launcher_windows

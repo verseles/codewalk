@@ -67,6 +67,10 @@ final class OpenCodeSelectionLane {
     );
   }
 
+  /// Active model's declared input modalities (e.g. `image`, `pdf`, `text`).
+  Map<String, bool?> modelInputModalities(SessionRef ref) =>
+      state(ref).activeModelInputModalities;
+
   /// A pick is offered on a live, current session without a switch in flight;
   /// an unconfirmed switch is replaced by a new pick. A switch the server took
   /// waits for its report first, so the next pick never hides it.

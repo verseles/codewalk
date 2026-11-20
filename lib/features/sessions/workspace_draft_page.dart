@@ -11,6 +11,8 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../hosts/endpoint_health_view.dart';
+import 'composer_attach_button.dart';
+import 'composer_attachment_strip.dart';
 import 'composer_input.dart';
 import 'composer_voice_button.dart';
 import 'session_builtin_commands.dart';
@@ -341,7 +343,15 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                               SessionFieldHeightReporter(
                                 onHeight: _fieldMeasured,
                                 child: ComposerFrame(
-                                  attachTooltip: l10n.composerAttachSoon,
+                                  attachTooltip: l10n.composerAttach,
+                                  attach: ComposerAttachButton(
+                                    attachments: c.attachments,
+                                    enabled: !c.sending && !c.endpointOffline,
+                                  ),
+                                  attachmentsStrip: ComposerAttachmentStrip(
+                                    attachments: c.attachments,
+                                    enabled: !c.sending,
+                                  ),
                                   voiceTooltip: l10n.composerVoiceUnavailable,
                                   voice: ComposerVoiceButton(
                                     key: _voice,

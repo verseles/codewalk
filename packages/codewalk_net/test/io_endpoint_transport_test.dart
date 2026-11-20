@@ -688,4 +688,69 @@ void main() {
       );
     },
   );
+
+  test(
+    'streams request body chunks with contentLength and rejects mismatches',
+    () async {
+      final server = await serve((request) async {
+        final chunks = await request.fold<List<int>>(
+          [],
+          (all, chunk) => all..addAll(chunk),
+        );
+        request.response.headers.contentType = ContentType.json;
+        request.response.write(
+          jsonEncode({
+            'length': request.contentLength,
+            'body': utf8.decode(chunks),
+          }),
+        );
+        await request.response.close();
+      });
+      final transport = client(endpoint(server));
+      final chunks = [utf8.encode('hello '), utf8.encode('streamed world')];
+      final total = chunks.fold<int>(0, (sum, c) => sum + c.length);
+      final response = await transport.send(
+        TransportRequest(
+          method: 'POST',
+          path: 'upload',
+          headers: const {'Content-Type': 'application/octet-stream'},
+          bodyStream: Stream<List<int>>.fromIterable(chunks),
+          contentLength: total,
+        ),
+      );
+      final decoded = jsonDecode(utf8.decode(await response.readBytes()));
+      expect(decoded['length'], total);
+      expect(decoded['body'], 'hello streamed world');
+
+      expect(
+        () => TransportRequest(
+          method: 'POST',
+          path: 'upload',
+          body: const [1],
+          bodyStream: const Stream.empty(),
+        ),
+        throwsArgumentError,
+      );
+      expect(
+        () => TransportRequest(
+          method: 'POST',
+          path: 'upload',
+          bodyStream: const Stream.empty(),
+          contentLength: -1,
+        ),
+        throwsArgumentError,
+      );
+      await expectLater(
+        transport.send(
+          TransportRequest(
+            method: 'POST',
+            path: 'upload',
+            bodyStream: Stream<List<int>>.fromIterable([utf8.encode('short')]),
+            contentLength: 100,
+          ),
+        ),
+        throwsA(failure(TransportFailure.invalidRequest)),
+      );
+    },
+  );
 }

@@ -6,16 +6,28 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net.dart';
 
 import 'agent_color.dart';
+import 'attachment_projection.dart';
 import 'execution_projection.dart';
 import 'history_projection.dart';
 import 'inbox_projection.dart';
 import 'json_reads.dart';
 import 'interaction_projection.dart';
+import 'media_client.dart';
+import 'model_catalog.dart';
 import 'revert_projection.dart';
 import 'session_projection.dart';
 import 'session_rules.dart';
 import 'shell_client.dart';
 import 'version_policy.dart';
+
+export 'model_catalog.dart'
+    show
+        OpenCodePromptAbsent,
+        OpenCodePromptIncomplete,
+        OpenCodePromptLocation,
+        OpenCodePromptOccupied,
+        OpenCodePromptPending,
+        OpenCodePromptPromoted;
 
 enum OpenCodeSessionReadFailure {
   closed,
@@ -45,40 +57,6 @@ final class OpenCodeSessionReadException implements Exception {
   String toString() =>
       'OpenCodeSessionReadException(${failure.name}'
       '${statusCode == null ? '' : ', status: $statusCode'})';
-}
-
-/// Where [OpenCodeSessionReader.locatePrompt] found one native prompt id.
-sealed class OpenCodePromptLocation {
-  const OpenCodePromptLocation();
-}
-
-/// Still in the inbox: admitted, not yet delivered.
-final class OpenCodePromptPending extends OpenCodePromptLocation {
-  const OpenCodePromptPending({required this.text, required this.delivery});
-  final String text;
-
-  /// The native delivery (`steer` or `queue`).
-  final String delivery;
-}
-
-/// Promoted to history: delivered.
-final class OpenCodePromptPromoted extends OpenCodePromptLocation {
-  const OpenCodePromptPromoted();
-}
-
-/// The id belongs to another kind of record.
-final class OpenCodePromptOccupied extends OpenCodePromptLocation {
-  const OpenCodePromptOccupied();
-}
-
-/// Neither in the inbox nor anywhere in the complete history.
-final class OpenCodePromptAbsent extends OpenCodePromptLocation {
-  const OpenCodePromptAbsent();
-}
-
-/// Not in the inbox nor in the history pages read, but history goes on.
-final class OpenCodePromptIncomplete extends OpenCodePromptLocation {
-  const OpenCodePromptIncomplete();
 }
 
 /// Read-only metadata and flat history; borrows an authenticated transport.
@@ -137,22 +115,34 @@ Set<String> _pendingOwners(
   return owners;
 }
 
+const _defaultMaxBodyBytes = 1024 * 1024;
+// 20 MiB inline attachment base64-encodes to ~26.7 MiB plus JSON overhead.
+const _defaultMaxMediaBodyBytes = 32 * 1024 * 1024;
+
 final class OpenCodeSessionReader {
   OpenCodeSessionReader(
     this.transport, {
     required this.harness,
     this.deadline = const Duration(seconds: 20),
-    this.maxBodyBytes = 1024 * 1024,
+    this.maxBodyBytes = _defaultMaxBodyBytes,
+    int? maxMediaBodyBytes,
     this.maxPageItems = 200,
     this.maxHistoryItems = 2000,
     this.maxCatalogBytes = 8 * 1024 * 1024,
-  }) : _endpoint = transport.endpoint,
+    this.onInlineMedia,
+  }) : maxMediaBodyBytes =
+           maxMediaBodyBytes ??
+           (maxBodyBytes == _defaultMaxBodyBytes
+               ? _defaultMaxMediaBodyBytes
+               : maxBodyBytes),
+       _endpoint = transport.endpoint,
        _cursorScope = List.generate(
          4,
          (_) => Random.secure().nextInt(1 << 32),
        ).join('-') {
     if (deadline <= Duration.zero ||
         maxBodyBytes <= 0 ||
+        this.maxMediaBodyBytes <= 0 ||
         maxPageItems <= 0 ||
         maxHistoryItems <= 0 ||
         maxCatalogBytes <= 0 ||
@@ -166,8 +156,11 @@ final class OpenCodeSessionReader {
   final HarnessRef harness;
   final Duration deadline;
   final int maxBodyBytes;
+  final int maxMediaBodyBytes;
   final int maxPageItems;
   final int maxHistoryItems;
+  final OpenCodeInlineMediaSink? onInlineMedia;
+  bool _mediaUriRefused = false;
 
   /// A location's model list carries every model of every configured
   /// provider: an observed 2.0.22 list of 185 models took 178 KB, so the
@@ -343,38 +336,15 @@ final class OpenCodeSessionReader {
   }
 
   /// The models one location offers: enabled ones only, each with its
-  /// variant ids. Nothing else of a variant is copied, because its settings
-  /// may carry provider credentials.
+  /// variant ids and input modalities. Nothing else of a variant is copied,
+  /// because its settings may carry provider credentials.
   Future<List<ModelEntry>> readModels(
     String directory, {
     RequestCancellation? cancellation,
   }) => _readCatalog(
     directory,
     'model',
-    (row) {
-      final model = _catalogObject(row);
-      if (model['enabled'] is! bool) {
-        throw const FormatException('Malformed model.');
-      }
-      if (model['enabled'] != true) return null;
-      final limit = _catalogObject(model['limit']);
-      final variants = model['variants'];
-      if (variants is! List) throw const FormatException('Malformed model.');
-      return ModelEntry(
-        id: _catalogText(model['id']),
-        providerId: _catalogText(model['providerID']),
-        label: _catalogText(model['name'], empty: true),
-        contextLimit: _catalogCount(limit['context']),
-        outputLimit: _catalogCount(limit['output']),
-        // An empty id cannot be named (`provider/model#variant`), so that
-        // variant is not offered; the rest of the catalog still is.
-        variants: [
-          for (final variant in variants)
-            _catalogText(_catalogObject(variant)['id'], empty: true),
-        ].where((id) => id.isNotEmpty),
-        cost: _catalogCost(model['cost']),
-      );
-    },
+    projectOpenCodeModelRow,
     (model) => '${model.providerId}/${model.id}',
     cancellation,
   );
@@ -404,7 +374,7 @@ final class OpenCodeSessionReader {
       directory,
       'agent',
       (row) {
-        final agent = _catalogObject(row);
+        final agent = openCodeCatalogObject(row);
         final mode = agent['mode'];
         final hidden = agent['hidden'];
         final description = agent['description'];
@@ -419,12 +389,12 @@ final class OpenCodeSessionReader {
         final variant = model is Map ? model['variant'] : null;
         return (
           CatalogEntry(
-            id: _catalogText(agent['id']),
+            id: openCodeCatalogText(agent['id']),
             kind: const OpenValue.known(CatalogKind.agent),
-            label: _catalogText(agent['name'], empty: true),
+            label: openCodeCatalogText(agent['name'], empty: true),
             description: description == null
                 ? null
-                : _catalogText(description, empty: true),
+                : openCodeCatalogText(description, empty: true),
             color: openCodeAgentColor(agent['color']),
           ),
           id is String &&
@@ -675,17 +645,13 @@ final class OpenCodeSessionReader {
     final continuation = cursor == null
         ? null
         : _decodeHistoryCursor(cursor, ref, limit, sourceVersion);
-    return _read(
-      _historyPath(ref, limit, 'asc', continuation?.native),
-      (value) => _historyPage(
-        value,
-        ref,
-        limit,
-        sourceVersion,
-        continuation?.order ?? 'asc',
-        continuation?.native,
-      ),
-      cancellation,
+    return _readHistoryAdaptive(
+      ref,
+      limit: limit,
+      order: continuation?.order ?? 'asc',
+      native: continuation?.native,
+      sourceVersion: sourceVersion,
+      cancellation: cancellation,
     );
   }
 
@@ -743,7 +709,7 @@ final class OpenCodeSessionReader {
     }
 
     // Identity only: a row of another type under this id is not ours.
-    final inbox = await _read(
+    final inbox = await _readMediaAware(
       Uri(pathSegments: ['api', 'session', ref.nativeId, 'inbox']).toString(),
       (value) => rows(value, _hydrationListLimit),
       cancellation,
@@ -767,7 +733,9 @@ final class OpenCodeSessionReader {
         found,
         next,
         length,
-      ) = await _read(_historyPath(ref, limit, 'desc', native), (value) {
+      ) = await _readMediaAware(_historyPath(ref, limit, 'desc', native), (
+        value,
+      ) {
         final data = rows(value, limit);
         final cursors = value is Map<String, Object?> ? value['cursor'] : null;
         if (cursors is! Map<String, Object?>) {
@@ -878,10 +846,13 @@ final class OpenCodeSessionReader {
     );
     Future<(T, DateTime, DateTime)> timed<T>(
       String path,
-      T Function(Object?) project,
-    ) async {
+      T Function(Object?) project, {
+      bool mediaAware = false,
+    }) async {
       final started = clock();
-      final value = await _read(path, project, cancellation);
+      final value = mediaAware
+          ? await _readMediaAware(path, project, cancellation)
+          : await _read(path, project, cancellation);
       final completed = clock();
       if (completed.isBefore(started)) {
         throw const OpenCodeSessionReadException(
@@ -988,17 +959,29 @@ final class OpenCodeSessionReader {
                 ref,
                 sourceVersion: sourceVersion,
                 generation: generation,
+                onInlineMedia: onInlineMedia,
               )
             else
               throw const FormatException('Duplicate inbox row.'),
         ];
       }),
+      mediaAware: true,
     );
-    final (page, historyStart, historyEnd) = await timed(
-      _historyPath(ref, historyLimit, 'desc', null),
-      (value) =>
-          _historyPage(value, ref, historyLimit, sourceVersion, 'desc', null),
+    final historyStart = clock();
+    final page = await _readHistoryAdaptive(
+      ref,
+      limit: historyLimit,
+      order: 'desc',
+      native: null,
+      sourceVersion: sourceVersion,
+      cancellation: cancellation,
     );
+    final historyEnd = clock();
+    if (historyEnd.isBefore(historyStart)) {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.incompatibleResponse,
+      );
+    }
     final (permissions, permissionStart, permissionEnd) = await timed(
       sessionPath('permission'),
       (value) => _projected(
@@ -1266,6 +1249,40 @@ final class OpenCodeSessionReader {
     },
   ).toString();
 
+  Future<Page<TimelineItem>> _readHistoryAdaptive(
+    SessionRef ref, {
+    required int limit,
+    required String order,
+    required String? native,
+    required String sourceVersion,
+    required RequestCancellation? cancellation,
+  }) async {
+    var effective = limit;
+    while (true) {
+      try {
+        return await _readMediaAware(
+          _historyPath(ref, effective, order, native),
+          (v) => _historyPage(
+            v,
+            ref,
+            effective,
+            sourceVersion,
+            order,
+            native,
+            cursorLimit: limit,
+          ),
+          cancellation,
+        );
+      } on OpenCodeSessionReadException catch (error) {
+        if (error.failure != OpenCodeSessionReadFailure.bodyTooLarge ||
+            effective <= 1) {
+          rethrow;
+        }
+        effective = effective ~/ 2;
+      }
+    }
+  }
+
   /// One page in chronological order. A descending page is reversed by native
   /// message, before projection, so one message's items stay contiguous.
   Page<TimelineItem> _historyPage(
@@ -1274,8 +1291,9 @@ final class OpenCodeSessionReader {
     int limit,
     String sourceVersion,
     String order,
-    String? native,
-  ) {
+    String? native, {
+    int? cursorLimit,
+  }) {
     if (value is! Map<String, Object?> ||
         value['data'] is! List ||
         value['cursor'] is! Map<String, Object?>) {
@@ -1296,12 +1314,19 @@ final class OpenCodeSessionReader {
       ref,
       sourceVersion: sourceVersion,
       maxItems: maxHistoryItems,
+      onInlineMedia: onInlineMedia,
     );
     return Page<TimelineItem>(
       items: items,
       nextCursor: next == null
           ? null
-          : _encodeHistoryCursor(next, ref, limit, sourceVersion, order),
+          : _encodeHistoryCursor(
+              next,
+              ref,
+              cursorLimit ?? limit,
+              sourceVersion,
+              order,
+            ),
     );
   }
 
@@ -1391,7 +1416,41 @@ final class OpenCodeSessionReader {
     T Function(Object?) project,
     RequestCancellation? parent, {
     int? maxBytes,
-  }) => _reads.read(path, project, parent, maxBytes: maxBytes);
+    Map<String, String> headers = const {},
+  }) => _reads.read(path, project, parent, maxBytes: maxBytes, headers: headers);
+
+  /// History and inbox read that negotiates `experimental-media-uri` (retrying
+  /// once without the header on HTTP 400) and extracts any inline base64 media
+  /// into [onInlineMedia] before the bounded string projector runs.
+  Future<T> _readMediaAware<T>(
+    String path,
+    T Function(Object?) project,
+    RequestCancellation? parent,
+  ) async {
+    T run(Object? value) =>
+        project(extractOpenCodeInlineMedia(value, onMedia: onInlineMedia));
+    if (_mediaUriRefused) {
+      return _read(path, run, parent, maxBytes: maxMediaBodyBytes);
+    }
+    try {
+      return await _read(
+        path,
+        run,
+        parent,
+        maxBytes: maxMediaBodyBytes,
+        headers: const {
+          openCodeCapabilitiesHeader: openCodeMediaUriCapability,
+        },
+      );
+    } on OpenCodeSessionReadException catch (error) {
+      if (error.failure != OpenCodeSessionReadFailure.invalidRequest) rethrow;
+      final result = await _read(path, run, parent, maxBytes: maxMediaBodyBytes);
+      // Latch refusal only when the headerless retry actually succeeded so an
+      // unrelated HTTP 400 (e.g. stale cursor) cannot downgrade negotiation.
+      _mediaUriRefused = true;
+      return result;
+    }
+  }
 
   /// A list cursor names its reader and the directory it pages, so it never
   /// continues another reader's list or another directory's.
@@ -1433,66 +1492,4 @@ final class OpenCodeSessionReader {
     }
     return value;
   }
-}
-
-Map<String, Object?> _catalogObject(Object? value) {
-  if (value is! Map<String, Object?>) {
-    throw const FormatException('Malformed catalog row.');
-  }
-  return value;
-}
-
-String _catalogText(Object? value, {bool empty = false}) {
-  if (value is! String ||
-      (value.isEmpty && !empty) ||
-      utf8.encode(value).length > 4096 ||
-      utf8.decode(utf8.encode(value)) != value) {
-    throw const FormatException('Malformed catalog text.');
-  }
-  return value;
-}
-
-/// A model's prices, or null when they cannot be read: a price is shown
-/// only as stated, and an unreadable one never fails the catalog.
-List<ModelCost>? _catalogCost(Object? value) {
-  if (value is! List || value.length > 16) return null;
-  double? money(Object? value) =>
-      value is num && value.isFinite && value >= 0 ? value.toDouble() : null;
-  final prices = <ModelCost>[];
-  for (final row in value) {
-    if (row is! Map<String, Object?>) return null;
-    final cache = row['cache'];
-    final tier = row['tier'];
-    if (cache is! Map<String, Object?>) return null;
-    final size = switch (tier) {
-      null => null,
-      {'type': 'context', 'size': final int size} when size >= 0 => size,
-      _ => -1,
-    };
-    if (size == -1) return null;
-    final input = money(row['input']);
-    final output = money(row['output']);
-    final read = money(cache['read']);
-    final write = money(cache['write']);
-    if (input == null || output == null || read == null || write == null) {
-      return null;
-    }
-    prices.add(
-      ModelCost(
-        input: input,
-        output: output,
-        cacheRead: read,
-        cacheWrite: write,
-        contextTier: size,
-      ),
-    );
-  }
-  return prices;
-}
-
-int _catalogCount(Object? value) {
-  if (value is! int || value < 0) {
-    throw const FormatException('Malformed catalog limit.');
-  }
-  return value;
 }

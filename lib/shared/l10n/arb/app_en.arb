@@ -3333,5 +3333,151 @@
   "liveShellLoadMore": "Load more output",
   "@liveShellLoadMore": {
     "description": "Button to load the next page of captured shell output"
+  },
+  "composerAttach": "Attach",
+  "@composerAttach": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachImage": "Image",
+  "@composerAttachImage": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachFile": "File",
+  "@composerAttachFile": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachAudio": "Audio",
+  "@composerAttachAudio": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachLocation": "Location",
+  "@composerAttachLocation": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachRemove": "Remove attachment",
+  "@composerAttachRemove": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachTooMany": "Up to {max} attachments per message",
+  "@composerAttachTooMany": {
+    "description": "Notice when the composer attachment cap is reached",
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "composerAttachTooLarge": "File exceeds the 100 MB limit",
+  "@composerAttachTooLarge": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachEmpty": "Empty files can’t be attached",
+  "@composerAttachEmpty": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachReadFailed": "Couldn’t read the selected file",
+  "@composerAttachReadFailed": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachUploadFailed": "Couldn’t upload attachment",
+  "@composerAttachUploadFailed": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachUploadUnavailable": "This server doesn’t accept uploaded files",
+  "@composerAttachUploadUnavailable": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerAttachUploadedAsFile": "Uploaded as file",
+  "@composerAttachUploadedAsFile": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerLocationTitle": "Attach location",
+  "@composerLocationTitle": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerLocationUseCurrent": "Use current location",
+  "@composerLocationUseCurrent": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerLocationLatitude": "Latitude",
+  "@composerLocationLatitude": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerLocationLongitude": "Longitude",
+  "@composerLocationLongitude": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerLocationLabel": "Label (optional)",
+  "@composerLocationLabel": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerLocationInvalid": "Enter valid latitude (-90 to 90) and longitude (-180 to 180)",
+  "@composerLocationInvalid": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerLocationDenied": "Allow location access or enter coordinates manually",
+  "@composerLocationDenied": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerLocationUnavailable": "Current location isn’t available on this device",
+  "@composerLocationUnavailable": {
+    "description": "V2 attachments (#473)"
+  },
+  "composerLocationAdd": "Attach",
+  "@composerLocationAdd": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentImagePreview": "View image",
+  "@attachmentImagePreview": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentOpenFile": "Open file",
+  "@attachmentOpenFile": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentOpenMap": "Open in maps",
+  "@attachmentOpenMap": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentPlayAudio": "Play audio",
+  "@attachmentPlayAudio": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentPauseAudio": "Pause audio",
+  "@attachmentPauseAudio": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentAudioUnavailable": "Audio playback unavailable",
+  "@attachmentAudioUnavailable": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentPreviewUnavailable": "Preview unavailable on this device",
+  "@attachmentPreviewUnavailable": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentLoadFailed": "Couldn’t load attachment",
+  "@attachmentLoadFailed": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentRetry": "Retry",
+  "@attachmentRetry": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentOpenFailed": "Couldn’t open attachment",
+  "@attachmentOpenFailed": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentMapFailed": "Couldn’t open maps app; coordinates copied",
+  "@attachmentMapFailed": {
+    "description": "V2 attachments (#473)"
+  },
+  "attachmentCountLabel": "Attachments: {count}",
+  "@attachmentCountLabel": {
+    "description": "Compact attachment summary for pending or outbox rows",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

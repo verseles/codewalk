@@ -742,6 +742,8 @@ final class _ScriptedHandle implements SessionHandle {
   @override
   ShellFacet? get shells => null;
   @override
+  AttachmentFacet? get attachments => null;
+  @override
   LifecycleFacet? get lifecycle => null;
   @override
   Future<SessionSnapshot> snapshot({

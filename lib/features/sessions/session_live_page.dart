@@ -17,6 +17,7 @@ import '../../shared/sessions/session_stop.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
+import 'session_attachment_scope.dart';
 import 'session_composer.dart';
 import 'session_composer_status.dart';
 import 'session_error_card.dart';
@@ -503,10 +504,12 @@ class _SessionLivePageState extends State<SessionLivePage>
                           onClose: _focusComposer,
                         ),
                       Expanded(
-                        child: SessionSwitchLabels(
-                          models: c.selectionState.models,
-                          agents: c.selectionState.agents,
-                          child: SessionLiveTimeline(
+                        child: SessionAttachmentScope(
+                          facet: c.attachmentFacet,
+                          child: SessionSwitchLabels(
+                            models: c.selectionState.models,
+                            agents: c.selectionState.agents,
+                            child: SessionLiveTimeline(
                             bottomEndOverlay: hasCapsule
                                 ? SessionSubagentCapsule(
                                     live: c,
@@ -563,6 +566,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                               canAct: canAct,
                             ),
                           ),
+                        ),
                         ),
                       ),
                       SafeArea(

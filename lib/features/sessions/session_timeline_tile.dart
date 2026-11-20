@@ -11,6 +11,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/canonical_message_body.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_snack_bar.dart';
+import 'session_attachment_strip.dart';
 import 'session_error_card.dart';
 import 'session_message_info.dart';
 import 'session_reasoning_body.dart';
@@ -382,17 +383,44 @@ class SessionTimelineTile extends StatelessWidget {
     switch (item) {
       // A message selects its text only on request (#492): an always-on
       // selection would take the long press its menu needs.
-      case UserInput(:final text):
-        return CanonicalMessageBody(
-          key: ValueKey('timeline-content-${item.id.value}'),
-          source: text,
-          complete: true,
-          allowBasicHtml: false,
-          bodyStyle: conversationBodyStyle(context),
-          onTapLink: onTapLink,
-          onTapFilePath: onTapFilePath,
-          onCopyCode: onCopyCode,
-          onCopyInlineCode: (code) => copyConversationText(context, code),
+      case UserInput(:final text, :final attachments):
+        final messageBody = text.isEmpty
+            ? null
+            : CanonicalMessageBody(
+                key: ValueKey('timeline-content-${item.id.value}'),
+                source: text,
+                complete: true,
+                allowBasicHtml: false,
+                bodyStyle: conversationBodyStyle(context),
+                onTapLink: onTapLink,
+                onTapFilePath: onTapFilePath,
+                onCopyCode: onCopyCode,
+                onCopyInlineCode: (code) => copyConversationText(context, code),
+              );
+        if (attachments.isEmpty) {
+          return messageBody ??
+              CanonicalMessageBody(
+                key: ValueKey('timeline-content-${item.id.value}'),
+                source: text,
+                complete: true,
+                allowBasicHtml: false,
+                bodyStyle: conversationBodyStyle(context),
+                onTapLink: onTapLink,
+                onTapFilePath: onTapFilePath,
+                onCopyCode: onCopyCode,
+                onCopyInlineCode: (code) => copyConversationText(context, code),
+              );
+        }
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SessionAttachmentStrip(attachments: attachments),
+            if (messageBody != null) ...[
+              const SizedBox(height: 8),
+              messageBody,
+            ],
+          ],
         );
       case AssistantText(:final text, :final complete, :final prefixMissing):
         return CanonicalMessageBody(

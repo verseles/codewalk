@@ -1316,6 +1316,7 @@ final class OpenCodeStreamOwner {
         sourceVersion: sourceVersion,
         position: _position(seq),
         receivedAt: _now(),
+        onInlineMedia: reader.onInlineMedia,
       );
     } on Exception {
       // A rejected frame is not guessed around: the session is re-read.

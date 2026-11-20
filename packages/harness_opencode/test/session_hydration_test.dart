@@ -94,6 +94,9 @@ final class Server {
                'user',
                payload: {
                  'text': 'with context',
+                 'agents': [
+                   {'name': 'explore'},
+                 ],
                  'files': [
                    {
                      'data': 'fake-private-data',

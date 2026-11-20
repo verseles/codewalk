@@ -6,8 +6,18 @@ import 'package:crypto/crypto.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 
 import '../../shared/sessions/prompt_outbox.dart';
+import '../../shared/sessions/session_attachments.dart';
 import '../storage/payload_store.dart';
 import '../storage/storage_support.dart';
+import 'opencode_attachment_lane.dart';
+import 'prompt_payload_store.dart';
+
+typedef OpenCodeAttachmentPreparer =
+    Future<List<OpenCodePreparedAttachment>> Function({
+      required SessionRef session,
+      required PromptDraft draft,
+      RequestCancellation? cancellation,
+    });
 
 /// One bounded JSON ledger per session, written atomically through the
 /// payload store before each POST. A whole submit (read, record, POST,
@@ -28,6 +38,9 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     RequestCancellation? cancellation,
     this.beforeSubmit,
     this.beforeReplay,
+    this.prepareAttachments,
+    this.payloadBlobs,
+    this.attachmentBlobs,
   }) : _now = now ?? DateTime.now,
        _wait = wait ?? Future<void>.delayed,
        _queue = queue ?? KeySerialExecutor(),
@@ -75,6 +88,47 @@ final class OpenCodePromptOutbox implements PromptOutbox {
   /// replay must only check the fence and can never commit one.
   final Future<String?> Function(SessionRef, bool Function())? beforeSubmit;
   final Future<String?> Function(SessionRef)? beforeReplay;
+  final OpenCodeAttachmentPreparer? prepareAttachments;
+  final PromptPayloadStore? payloadBlobs;
+  final AttachmentBlobRepository? attachmentBlobs;
+
+  static final _sha256Pattern = RegExp(r'^[0-9a-f]{64}$');
+  static String _attachmentPinOwner(CommandId id) => 'outbox:${id.value}';
+
+  static List<String> _localAttachmentDigests(List<AttachmentRef> attachments) {
+    final digests = <String>[];
+    for (final ref in attachments) {
+      final id = ref.content.id;
+      if (!id.startsWith('local:')) continue;
+      final digest = id.substring('local:'.length);
+      if (_sha256Pattern.hasMatch(digest)) digests.add(digest);
+    }
+    return digests;
+  }
+
+  Future<bool> _pinAttachments(
+    CommandId commandId,
+    List<AttachmentRef> attachments,
+  ) async {
+    final repo = attachmentBlobs;
+    if (repo == null) return true;
+    final digests = _localAttachmentDigests(attachments);
+    if (digests.isEmpty) return true;
+    try {
+      await repo.pin(_attachmentPinOwner(commandId), digests);
+      return true;
+    } on Object {
+      return false;
+    }
+  }
+
+  Future<void> _unpinAttachments(CommandId commandId) async {
+    try {
+      await attachmentBlobs?.unpin(_attachmentPinOwner(commandId));
+    } on Object {
+      // Best-effort pin release; never break send, eviction, or dismiss.
+    }
+  }
 
   bool get _current =>
       profile != null &&
@@ -150,6 +204,27 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       for (final record in ledger.records) {
         ids.observe(record.messageId);
       }
+      var preparedAttachments = const <OpenCodePreparedAttachment>[];
+      if (draft.attachments.isNotEmpty) {
+        final preparer = prepareAttachments;
+        if (preparer == null) {
+          return const OutboxSubmission.refused('unsupportedDraft');
+        }
+        try {
+          preparedAttachments = await preparer(
+            session: session,
+            draft: draft,
+            cancellation: _cancellation,
+          );
+        } on OpenCodeAttachmentPrepareException catch (error) {
+          return OutboxSubmission.refused(error.reason);
+        }
+        if (!_current || isCurrent?.call() == false) {
+          return OutboxSubmission.refused(
+            _current ? 'cancelledBeforeSend' : 'sourceChanged',
+          );
+        }
+      }
       final OpenCodePromptReady ready;
       switch (client.prepare(
         session: session,
@@ -157,6 +232,7 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         messageId: ids.mint(),
         draft: draft,
         delivery: delivery,
+        attachments: preparedAttachments,
       )) {
         case OpenCodePromptRefused(:final attempt):
           return OutboxSubmission.refused(
@@ -165,11 +241,25 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         case final OpenCodePromptReady prepared:
           ready = prepared;
       }
+      var storedPayload = ready.payload;
+      PromptPayloadRef? payloadBlob;
+      if (ready.payload.length > PromptPayloadStore.inlineThresholdBytes) {
+        final blobStore = payloadBlobs;
+        if (blobStore == null) {
+          return const OutboxSubmission.refused('notPersisted');
+        }
+        payloadBlob = await blobStore.write(commandId, ready.payload);
+        if (payloadBlob == null) {
+          return const OutboxSubmission.refused('notPersisted');
+        }
+        storedPayload = '';
+      }
       // Only an admitted, delivered or cancelled entry makes room: the server
       // already holds its text or no longer needs it. Rejected entries keep the user's text and uncertain
       // ones may need a replay, so without such an entry a full ledger
       // refuses.
       var base = ledger;
+      _Record? evictedRecord;
       if (base.records.length >= maxEntries) {
         final evicted = base.records.where(
           (r) =>
@@ -182,8 +272,12 @@ final class OpenCodePromptOutbox implements PromptOutbox {
               !_open(r.fence) &&
               !(r.takenBack && r.state == SubmissionKind.cancelled),
         );
-        if (evicted.isEmpty) return const OutboxSubmission.refused('full');
-        base = base.without(evicted.first);
+        if (evicted.isEmpty) {
+          if (payloadBlob != null) await payloadBlobs?.release(commandId);
+          return const OutboxSubmission.refused('full');
+        }
+        evictedRecord = evicted.first;
+        base = base.without(evictedRecord);
       }
       final now = _now().toUtc();
       final record = _Record(
@@ -191,10 +285,13 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         commandId: commandId,
         messageId: ready.messageId,
         text: ready.text,
+        displayText: ready.displayText != ready.text ? ready.displayText : null,
+        attachments: draft.attachments,
         delivery: ready.delivery,
         connectedVersion: ready.command.connectedVersion,
         resume: ready.resume,
-        payload: ready.payload,
+        payload: storedPayload,
+        payloadBlob: payloadBlob,
         // Until the turn guard accepts, this is definitely unsent. A crash
         // or failed refusal write must never turn it into a replayable send.
         state: SubmissionKind.rejected,
@@ -204,8 +301,20 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         endpoint: client.transport.endpoint,
         bindingRevision: profile!.bindingRevision,
       );
-      if (!await _persist(key, session, base.adding(record))) {
+      if (!await _pinAttachments(commandId, record.attachments)) {
+        if (payloadBlob != null) await payloadBlobs?.release(commandId);
         return const OutboxSubmission.refused('notPersisted');
+      }
+      if (!await _persist(key, session, base.adding(record))) {
+        await _unpinAttachments(commandId);
+        if (payloadBlob != null) await payloadBlobs?.release(commandId);
+        return const OutboxSubmission.refused('notPersisted');
+      }
+      if (evictedRecord != null) {
+        await _unpinAttachments(evictedRecord.commandId);
+        if (evictedRecord.payloadBlob != null) {
+          await payloadBlobs?.release(evictedRecord.commandId);
+        }
       }
       if (!_current || isCurrent?.call() == false) {
         final cancelled = record.copyWith(
@@ -302,7 +411,15 @@ final class OpenCodePromptOutbox implements PromptOutbox {
         (r) => r.commandId == commandId && r.state != SubmissionKind.sending,
       );
       if (matches.isEmpty) return false;
-      return _persist(key, session, ledger.without(matches.first));
+      final target = matches.first;
+      final persisted = await _persist(key, session, ledger.without(target));
+      if (persisted) {
+        await _unpinAttachments(target.commandId);
+        if (target.payloadBlob != null) {
+          await payloadBlobs?.release(target.commandId);
+        }
+      }
+      return persisted;
     });
   }
 
@@ -729,15 +846,39 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     if (notBefore != null && now.isBefore(notBefore)) {
       return _Step(record, retryAt: notBefore);
     }
+    final String sealedPayload;
+    if (record.payloadBlob case final blob?) {
+      final loaded = await payloadBlobs?.read(blob);
+      if (loaded == null) {
+        return settle(SubmissionKind.uncertain, 'payloadMissing');
+      }
+      sealedPayload = loaded;
+    } else {
+      sealedPayload = record.payload;
+    }
     final OpenCodePromptReady ready;
-    switch (client.prepare(
-      session: session,
-      commandId: record.commandId,
-      messageId: record.messageId,
-      draft: PromptDraft(text: record.text),
-      delivery: record.delivery,
-      resume: record.resume,
-    )) {
+    final preparation =
+        record.attachments.isNotEmpty || record.payloadBlob != null
+        ? client.prepareSealed(
+            session: session,
+            commandId: record.commandId,
+            messageId: record.messageId,
+            wireText: record.text,
+            displayText: record.displayText ?? record.text,
+            delivery: record.delivery,
+            resume: record.resume,
+            payload: sealedPayload,
+            hasAttachments: record.attachments.isNotEmpty,
+          )
+        : client.prepare(
+            session: session,
+            commandId: record.commandId,
+            messageId: record.messageId,
+            draft: PromptDraft(text: record.text),
+            delivery: record.delivery,
+            resume: record.resume,
+          );
+    switch (preparation) {
       case OpenCodePromptRefused(:final attempt):
         return settle(
           SubmissionKind.uncertain,
@@ -749,7 +890,7 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     final decision = _replayContract.evaluate(
       original: ready.command,
       candidate: ready.command,
-      persistedOriginalPayload: record.payload,
+      persistedOriginalPayload: sealedPayload,
       candidatePayload: ready.payload,
       admission: AdmissionKnowledge.unresolved,
       currentPhase: const OpenValue.known(OperationPhase.initial),
@@ -869,6 +1010,13 @@ final class OpenCodePromptOutbox implements PromptOutbox {
     SessionRef session,
     _Ledger ledger,
   ) async {
+    // Re-assert local attachment blob pins for surviving records so LRU
+    // eviction never discards bytes still needed for take-back (#486).
+    for (final record in ledger.records) {
+      if (record.attachments.isNotEmpty) {
+        await _pinAttachments(record.commandId, record.attachments);
+      }
+    }
     if (!ledger.records.any((r) => r.state == SubmissionKind.sending)) {
       return ledger;
     }
@@ -895,7 +1043,7 @@ final class OpenCodePromptOutbox implements PromptOutbox {
       }
       final json = jsonDecode(raw);
       if (json is! Map<String, Object?> ||
-          json['schema'] != 1 ||
+          (json['schema'] != 1 && json['schema'] != 2) ||
           SessionRef.fromJson(json['session']) != session) {
         return null;
       }
@@ -917,8 +1065,14 @@ final class OpenCodePromptOutbox implements PromptOutbox {
   /// True only when the ledger now durably holds [ledger]; a failed write is
   /// re-read, since it may have committed before failing.
   Future<bool> _persist(String key, SessionRef session, _Ledger ledger) async {
+    final usesV2 = ledger.records.any(
+      (r) =>
+          r.payloadBlob != null ||
+          r.displayText != null ||
+          r.attachments.isNotEmpty,
+    );
     final value = jsonEncode({
-      'schema': 1,
+      'schema': usesV2 ? 2 : 1,
       'session': session.toJson(),
       'entries': [for (final record in ledger.records) record.toJson()],
       'forgotten': ledger.forgotten,
@@ -990,10 +1144,13 @@ final class _Record {
     required this.commandId,
     required this.messageId,
     required this.text,
+    this.displayText,
+    this.attachments = const [],
     required this.delivery,
     required this.connectedVersion,
     required this.resume,
     required this.payload,
+    this.payloadBlob,
     required this.state,
     required this.createdAt,
     required this.updatedAt,
@@ -1037,15 +1194,37 @@ final class _Record {
       throw const FormatException('Replay count out of range.');
     }
     final notBefore = json['notBefore'] as String?;
+    final rawBlob = json['payloadBlob'];
+    final payloadBlob = rawBlob == null
+        ? null
+        : PromptPayloadRef.fromJson(rawBlob) ??
+              (throw const FormatException('Malformed payloadBlob reference.'));
+    final rawPayload = json['payload'];
+    if (payloadBlob == null && rawPayload is! String) {
+      throw const FormatException('Missing outbox payload.');
+    }
+    final attachments = <AttachmentRef>[];
+    if (json['attachments'] case final List<Object?> list) {
+      for (final item in list) {
+        final staged = StagedAttachment.fromJson(item);
+        if (staged == null) {
+          throw const FormatException('Malformed outbox attachment.');
+        }
+        attachments.add(staged.toAttachmentRef());
+      }
+    }
     return _Record(
       session: session,
       commandId: CommandId.fromJson(json['commandId']),
       messageId: json['messageId']! as String,
       text: json['text']! as String,
+      displayText: json['displayText'] as String?,
+      attachments: List<AttachmentRef>.unmodifiable(attachments),
       delivery: Delivery.values.byName(json['delivery']! as String),
       connectedVersion: json['connectedVersion']! as String,
       resume: json['resume']! as bool,
-      payload: json['payload']! as String,
+      payload: rawPayload is String ? rawPayload : '',
+      payloadBlob: payloadBlob,
       state: state,
       createdAt: DateTime.parse(json['createdAt']! as String),
       updatedAt: DateTime.parse(json['updatedAt']! as String),
@@ -1066,6 +1245,8 @@ final class _Record {
   final CommandId commandId;
   final String messageId;
   final String text;
+  final String? displayText;
+  final List<AttachmentRef> attachments;
   final Delivery delivery;
   final String connectedVersion;
   final bool resume;
@@ -1074,6 +1255,7 @@ final class _Record {
 
   /// The exact body posted; a later same-id replay must repeat it unchanged.
   final String payload;
+  final PromptPayloadRef? payloadBlob;
   final SubmissionKind state;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -1092,6 +1274,8 @@ final class _Record {
     commandId: commandId,
     messageId: messageId,
     text: text,
+    displayText: displayText,
+    attachments: attachments,
     delivery: delivery,
     state: state,
     createdAt: createdAt,
@@ -1119,10 +1303,13 @@ final class _Record {
     commandId: commandId,
     messageId: messageId,
     text: text,
+    displayText: displayText,
+    attachments: attachments,
     delivery: delivery ?? this.delivery,
     connectedVersion: connectedVersion,
     resume: resume,
     payload: payload,
+    payloadBlob: payloadBlob,
     state: state,
     createdAt: createdAt,
     updatedAt: updatedAt,
@@ -1139,10 +1326,18 @@ final class _Record {
     'commandId': commandId.toJson(),
     'messageId': messageId,
     'text': text,
+    if (displayText != null) 'displayText': displayText,
+    if (attachments.isNotEmpty)
+      'attachments': [
+        for (final a in attachments)
+          if (StagedAttachment.fromAttachmentRef(a) case final staged?)
+            staged.toJson(),
+      ],
     'delivery': delivery.name,
     'connectedVersion': connectedVersion,
     'resume': resume,
-    'payload': payload,
+    if (payloadBlob == null) 'payload': payload,
+    if (payloadBlob != null) 'payloadBlob': payloadBlob!.toJson(),
     'state': state.name,
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),

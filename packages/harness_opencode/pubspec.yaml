@@ -10,6 +10,7 @@ environment:
 dependencies:
   codewalk_core: ^0.0.0
   codewalk_net: ^0.0.0
+  crypto: ^3.0.6
   pub_semver: ^2.2.1
   http_parser: ^4.1.2
 

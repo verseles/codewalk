@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
+import 'session_attachment_scope.dart';
 import 'session_history_controller.dart';
 import 'session_report_group.dart';
 import 'session_timeline_projection.dart';
@@ -70,9 +71,11 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                 if (c.loading)
                   AppIndeterminateBar(semanticsLabel: l10n.sessionsLoading),
                 Expanded(
-                  child: PageStorage(
-                    bucket: _rowState,
-                    child: ListView.builder(
+                  child: SessionAttachmentScope(
+                    facet: c.attachmentFacet,
+                    child: PageStorage(
+                      bucket: _rowState,
+                      child: ListView.builder(
                       padding: EdgeInsets.symmetric(
                         horizontal: timelineSideInset(context),
                         vertical: 16,
@@ -161,6 +164,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                         );
                       },
                     ),
+                  ),
                   ),
                 ),
                 SafeArea(

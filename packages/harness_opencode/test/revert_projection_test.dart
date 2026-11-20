@@ -271,12 +271,8 @@ void main() {
         item: userItem(
           'with context',
           fields: {
-            'files': [
-              {
-                'data': '',
-                'mime': 'text/plain',
-                'source': {'type': 'inline'},
-              },
+            'agents': [
+              {'name': 'explore'},
             ],
           },
         ),

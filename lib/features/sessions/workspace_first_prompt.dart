@@ -66,10 +66,13 @@ class _DeliveryState extends State<WorkspaceFirstPromptDelivery> {
     if (!await _rule(live)) return;
     if (!mounted || identical(_attempted, intent) || !w.owns(intent)) return;
     _attempted = intent;
-    if (live.draft.text.isEmpty) live.draft.text = intent.text;
+    if (live.draft.text.isEmpty && intent.text.isNotEmpty) {
+      live.draft.text = intent.text;
+    }
     if (!w.owns(intent)) return;
     final recorded = await live.composer.send(
       intent.text,
+      attachments: intent.attachments,
       commandId: intent.commandId,
       isCurrent: () => w.owns(intent),
     );

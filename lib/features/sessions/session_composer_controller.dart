@@ -32,6 +32,10 @@ enum ComposerNotice {
   versionChanged,
   sourceChanged,
   sourceUnknown,
+  attachmentTooLarge,
+  attachmentMissing,
+  uploadFailed,
+  uploadUnavailable,
 }
 
 /// One pending inbox row; [entry] is set when this device sent it.
@@ -198,7 +202,10 @@ class SessionComposerController extends ChangeNotifier {
         continue;
       }
       if (_restoring.add(entry.commandId)) {
-        live.takeBackDraft(entry.text);
+        live.takeBackDraft(
+          entry.shownText,
+          restoredAttachments: entry.attachments,
+        );
         _takenBack.add(entry.messageId);
         if (notice == ComposerNotice.cancelPending) {
           notice = ComposerNotice.none;
@@ -226,7 +233,7 @@ class SessionComposerController extends ChangeNotifier {
   ) async {
     final id = entry.commandId;
     try {
-      await live.saveDraft();
+      if (!await live.saveDraft()) return;
       if (!await outbox.dismiss(session, id)) return;
       if (_disposed || !identical(outbox, _outbox)) return;
       entries = [
@@ -289,19 +296,25 @@ class SessionComposerController extends ChangeNotifier {
   /// meanwhile keeps its saved draft even when it reads the same.
   Future<bool> send(
     String text, {
+    List<AttachmentRef> attachments = const [],
     Delivery delivery = Delivery.steer,
     CommandId? commandId,
     bool Function()? isCurrent,
     bool fromDraft = true,
   }) async {
     final outbox = _outbox;
-    if (!canSend || outbox == null || text.trim().isEmpty) return false;
+    if (!canSend ||
+        outbox == null ||
+        (text.trim().isEmpty && attachments.isEmpty)) {
+      return false;
+    }
     // Only steer and queue are the user's to choose.
     final as = delivery == Delivery.queue ? Delivery.queue : Delivery.steer;
     return _submit(
       outbox,
       text,
       as,
+      attachments: attachments,
       fromDraft: fromDraft,
       commandId: commandId,
       isCurrent: isCurrent,
@@ -314,6 +327,7 @@ class SessionComposerController extends ChangeNotifier {
     PromptOutbox outbox,
     String text,
     Delivery as, {
+    List<AttachmentRef> attachments = const [],
     bool fromDraft = true,
     CommandId? commandId,
     bool Function()? isCurrent,
@@ -325,7 +339,7 @@ class SessionComposerController extends ChangeNotifier {
       final result = await outbox.submit(
         session: session,
         commandId: commandId ?? _commandIds(),
-        draft: PromptDraft(text: text),
+        draft: PromptDraft(text: text, attachments: attachments),
         delivery: as,
         isCurrent: () => !live.endpointOffline && (isCurrent?.call() ?? true),
       );
@@ -527,9 +541,17 @@ class SessionComposerController extends ChangeNotifier {
         return null;
       }
       // Forgotten from a lease that was reopened meanwhile: never sent.
-      if (!identical(outbox, _outbox)) return old.text;
-      final sent = await _submit(outbox, old.text, old.delivery);
-      return sent || _disposed ? null : old.text;
+      if (!identical(outbox, _outbox)) return old.shownText;
+      final sent = await _submit(
+        outbox,
+        old.shownText,
+        old.delivery,
+        attachments: old.attachments,
+      );
+      if (!sent && !_disposed && old.attachments.isNotEmpty) {
+        unawaited(live.attachments.restoreFromRefs(old.attachments));
+      }
+      return sent || _disposed ? null : old.shownText;
     } finally {
       busy.remove(id);
       sending = false;
@@ -559,6 +581,12 @@ ComposerNotice submitRefusal(String? reason) => switch (reason) {
   'notPersisted' => ComposerNotice.notSaved,
   'full' => ComposerNotice.full,
   'versionChanged' || 'unverifiedVersion' => ComposerNotice.versionChanged,
+  'attachmentTooLarge' || 'tooLarge' => ComposerNotice.attachmentTooLarge,
+  'attachmentMissing' => ComposerNotice.attachmentMissing,
+  'uploadFailed' => ComposerNotice.uploadFailed,
+  'uploadUnavailable' => ComposerNotice.uploadUnavailable,
+  'authenticationRequired' || 'UnauthorizedError' => ComposerNotice.authRequired,
+  'rateLimited' || 'RateLimited' => ComposerNotice.rateLimited,
   _ => ComposerNotice.unavailable,
 };
 

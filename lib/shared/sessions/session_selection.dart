@@ -81,4 +81,27 @@ final class SessionSelectionState {
 
   /// A change of this session is in flight or unconfirmed.
   bool get holdsSend => phase != SessionSelectionPhase.idle;
+
+  /// Active model's declared input modalities (e.g. `image`, `pdf`, `text`).
+  Map<String, bool?> get activeModelInputModalities {
+    var modelId = selection?.modelId;
+    var providerId = selection?.modelProviderId;
+    if (modelId == null && defaultModel != null) {
+      final raw = defaultModel!;
+      final slash = raw.indexOf('/');
+      if (slash > 0 && slash + 1 < raw.length) {
+        providerId = raw.substring(0, slash);
+        modelId = raw.substring(slash + 1);
+      } else {
+        modelId = raw;
+      }
+    }
+    if (modelId == null) return const {};
+    for (final m in models) {
+      if (m.id == modelId && (providerId == null || m.providerId == providerId)) {
+        return m.inputModalities;
+      }
+    }
+    return const {};
+  }
 }

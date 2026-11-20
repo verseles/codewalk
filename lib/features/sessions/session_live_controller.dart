@@ -3,11 +3,13 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart'
     show TextEditingController, TextEditingValue, TextSelection;
+import '../../platform/sessions/attachment_staging_store.dart';
 import '../../platform/sessions/model_preference_store.dart';
 import '../../platform/sessions/session_draft_store.dart';
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/permission_mode.dart';
 import '../../shared/sessions/prompt_outbox.dart';
+import '../../shared/sessions/session_attachments.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
 import '../../shared/sessions/session_selection.dart';
@@ -17,6 +19,7 @@ import '../../shared/sessions/session_turn_actions.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import '../hosts/endpoint_health_controller.dart';
 import '../hosts/hosts_controller.dart';
+import 'composer_attachments_controller.dart';
 import 'session_composer_controller.dart';
 import 'session_input_history.dart';
 import 'session_live_scroll.dart';
@@ -40,12 +43,14 @@ class SessionLiveController extends ChangeNotifier
     this.health,
     this.permissionModes,
     this.drafts,
+    this.attachmentStaging,
     this.modelPreferences,
     DateTime Function()? now,
     CommandId Function()? commandIds,
   }) : _summary = summary,
        _now = now ?? DateTime.now,
-       _commandIds = commandIds ?? mintCommandId {
+       _commandIds = commandIds ?? mintCommandId,
+       attachments = ComposerAttachmentsController(store: attachmentStaging) {
     hosts.addListener(_hostsChanged);
     health?.addListener(_notify);
     permissionModes?.addListener(_policyChanged);
@@ -53,6 +58,7 @@ class SessionLiveController extends ChangeNotifier
     draft.addListener(_draftChanged);
     drafts?.attach(session, _draftForgotten);
     unawaited(_restoreDraft());
+    unawaited(attachments.bindScope(session.storageKey));
   }
   final HostsController hosts;
   final EndpointHealthController? health;
@@ -95,6 +101,24 @@ class SessionLiveController extends ChangeNotifier
 
   /// Where the session's draft is saved, when the app graph provides it.
   final SessionDraftStore? drafts;
+  final AttachmentStagingStore? attachmentStaging;
+  final ComposerAttachmentsController attachments;
+
+  AttachmentFacet? get attachmentFacet {
+    final handle = _handle;
+    return handle is SessionAttachmentSource
+        ? (handle as SessionAttachmentSource).attachments
+        : null;
+  }
+
+  bool get supportsStageUpload {
+    final handle = _handle;
+    return handle is SessionAttachmentSource &&
+        (handle as SessionAttachmentSource).supportsStageUpload;
+  }
+
+  Map<String, bool?> get activeModelInputModalities =>
+      selectionState.activeModelInputModalities;
   String _draftText = '';
   bool _draftEdited = false;
   bool _draftRead = false;
@@ -155,19 +179,44 @@ class SessionLiveController extends ChangeNotifier
   /// come back as its draft.
   void forgetDraft(String text) => drafts?.forget(session, text);
 
-  /// Writes the draft to this device now (#486), as safely as anything
-  /// typed: a draft the store cannot keep stays on screen only.
-  Future<void> saveDraft() async => drafts?.flush();
+  Future<bool>? _pendingAttachmentRestore;
 
-  /// Puts the text of a waiting message the user took back to edit (#486)
-  /// into the draft, after anything already there.
-  void takeBackDraft(String text) {
-    final current = draft.text;
-    final next = current.isEmpty ? text : '$current\n$text';
-    draft.value = TextEditingValue(
-      text: next,
-      selection: TextSelection.collapsed(offset: next.length),
-    );
+  /// Writes the draft (and any in-flight taken-back attachment restore) to
+  /// this device now (#486), returning `false` only if attachment pinning
+  /// failed so the caller can keep the outbox record and its blob pin.
+  Future<bool> saveDraft() async {
+    await drafts?.flush();
+    final pending = _pendingAttachmentRestore;
+    if (pending == null) return true;
+    final ok = await pending;
+    if (identical(_pendingAttachmentRestore, pending)) {
+      _pendingAttachmentRestore = null;
+    }
+    return ok;
+  }
+
+  /// Puts the text (and any staged attachments) of a waiting message the user
+  /// took back to edit (#486) into the draft, after anything already there.
+  void takeBackDraft(
+    String text, {
+    List<AttachmentRef> restoredAttachments = const [],
+  }) {
+    if (text.isNotEmpty) {
+      final current = draft.text;
+      final next = current.isEmpty ? text : '$current\n$text';
+      draft.value = TextEditingValue(
+        text: next,
+        selection: TextSelection.collapsed(offset: next.length),
+      );
+    }
+    if (restoredAttachments.isNotEmpty) {
+      final prior = _pendingAttachmentRestore;
+      _pendingAttachmentRestore = () async {
+        final priorOk = prior == null ? true : await prior;
+        final nextOk = await attachments.restoreFromRefs(restoredAttachments);
+        return priorOk && nextOk;
+      }();
+    }
   }
 
   /// Up and Down through the session's sent prompts, kept with the session
@@ -1154,6 +1203,7 @@ class SessionLiveController extends ChangeNotifier
     drafts?.detach(session, _draftForgotten);
     unawaited(drafts?.flush());
     draft.dispose();
+    attachments.dispose();
     super.dispose();
   }
 }

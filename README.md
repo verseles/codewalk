@@ -20,6 +20,7 @@ A fast, native cross-platform client for [OpenCode](https://github.com/anomalyco
 - 🗂 **Project sidebar & session tabs** — conversations grouped by project with automatic project icons and browser-style tabs on desktop *(per-project tab colors: v2 soon)*.
 - 🧠 **Models, agents & permissions** — switch providers, models, variants, and agents, save favorites, answer permission and question prompts, or toggle auto-approval per session.
 - ✨ **Rich replies** — Markdown, syntax-highlighted code blocks, inline Mermaid diagrams, LaTeX math, and [basic HTML formatting](#basic-html-in-assistant-replies).
+- 📎 **Attachments** — attach images, files/PDFs, audio, and geographic location from the composer `+` button, with timeline image lightbox previews, file cards, inline audio player, and clickable map cards *(drag-and-drop & clipboard paste: v2 soon)*.
 - ↩️ **Undo, redo & compact** — step back to earlier turns and compact long sessions *(visual diff & fork views: v2 soon)*.
 
 ### Platforms & Experience
@@ -32,7 +33,7 @@ A fast, native cross-platform client for [OpenCode](https://github.com/anomalyco
 ### Coming from v1 *(v2 soon)*
 - 📁 **File manager & code editor** *(v2 soon)* — browse, open, and edit project files inside the app.
 - 🖥 **Embedded terminal** *(v2 soon)* — run commands directly on your OpenCode host.
-- 📎 **Image attachments, skills & `@` mentions** *(v2 soon)* — drag, drop, or paste images and reference project files or skills.
+- 🏷 **Skills & `@` mentions** *(v2 soon)* — reference project files, directories, agents, and skills directly in the composer.
 - 📤 **Share, export & forward** *(v2 soon)* — share messages as themed images, export sessions to Markdown/JSON, or forward messages to other sessions.
 - 💬 **Canned answers** *(v2 soon)* — reusable global or per-project quick replies.
 - 📊 **Context usage & provider quotas** *(v2 soon)* — monitor context window usage and host quotas.

@@ -1,20 +1,27 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:codewalk_net/codewalk_net_io.dart';
 import 'package:harness_opencode/harness_opencode.dart';
+import '../../shared/sessions/session_attachments.dart';
 import '../../shared/sessions/session_history_source.dart';
+import '../../shared/sessions/session_live_source.dart';
+import '../storage/attachment_blob_store.dart';
+import 'opencode_attachment_lane.dart';
 
 SessionHistorySource createSessionHistorySource(
   EndpointProfile profile,
   EndpointCredential credential,
-  SessionRef session,
-) => _NativeHistory(profile, credential, session);
+  SessionRef session, {
+  AttachmentBlobRepository? blobs,
+}) => _NativeHistory(profile, credential, session, blobs: blobs);
 
-final class _NativeHistory implements SessionHistorySource {
+final class _NativeHistory
+    implements SessionHistorySource, SessionAttachmentSource {
   _NativeHistory(
     EndpointProfile profile,
     EndpointCredential credential,
-    this.session,
-  ) {
+    this.session, {
+    AttachmentBlobRepository? blobs,
+  }) {
     if (session.harnessRef !=
         HarnessRef(HostId(profile.id), HarnessInstanceId(profile.id))) {
       throw const SessionHistoryException(
@@ -29,19 +36,41 @@ final class _NativeHistory implements SessionHistorySource {
         secret: () => credential.secret,
       ),
     );
+    _attachments = OpenCodeAttachmentLane(
+      transport: _transport,
+      harness: session.harnessRef,
+      connectedVersion: '2.0.22',
+      blobs: blobs ?? MemoryAttachmentBlobStore(),
+      temporaryPath: null,
+      view: (ref) =>
+          SessionLiveView(session: ref, phase: SessionLivePhase.closed),
+      modelInputModalities: (_) => const {},
+      currentBinding: () => !_closed,
+    );
     _reader = OpenCodeSessionReader(
       _transport,
       harness: session.harnessRef,
       maxHistoryItems: 500,
+      onInlineMedia: _attachments.cacheInlineMedia,
     );
   }
   @override
   final SessionRef session;
   late final IoEndpointHttpTransport _transport;
+  late final OpenCodeAttachmentLane _attachments;
   late final OpenCodeSessionReader _reader;
   final _tasks = <_HistoryTask>{};
   String? _version;
   bool _closed = false;
+
+  @override
+  AttachmentFacet? get attachments => _closed ? null : _attachments;
+
+  @override
+  bool get supportsStageUpload => false;
+
+  @override
+  bool get supportsMediaRead => !_closed;
 
   @override
   SessionHistoryTask read({String? cursor}) {
@@ -130,6 +159,7 @@ final class _NativeHistory implements SessionHistorySource {
     for (final task in _tasks.toList()) {
       task.cancel();
     }
+    _attachments.dispose();
     _reader.dispose();
     _transport.close();
   }

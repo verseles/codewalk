@@ -55,8 +55,7 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 
 ## 6. Funcionalidades que mexem no modelo
 
-- [ ] #292 Comandos, skills, menções e anexos
-- [ ] #473 Mostrar anexos na timeline
+- [ ] #292 Comandos, skills e menções (anexos entregues em #473)
 - [ ] #288 Arquivos (#289 leitura, #290 edição)
 - [ ] #291 Terminal
 - [ ] #286 Subagentes e bandeja de trabalho em segundo plano
@@ -123,7 +122,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - Paridade visual por pixel com a v1 (2026-11-05).
 - Editor dos padrões do OpenCode, rótulos de origem e card de permissões: o OpenCode 2 não grava config (#450).
 - Busca de símbolos no `@`: o OpenCode 2 removeu `GET /find/symbol`.
-- Anexo de PDF para o OpenCode: desligado no escopo aprovado; converta a página em imagem.
 - Task list e progresso de tarefas: o OpenCode 2 não tem todo.
 - Share/copy link e "view tasks": sem rota no 2.0.22.
 - Três linhas do painel lateral: Atualizar + Configurações e "Conectar a um servidor em execução" (as três funções seguem na toolbar) e o rótulo "Projetos abertos".

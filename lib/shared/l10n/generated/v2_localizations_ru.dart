@@ -2750,4 +2750,117 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get liveShellLoadMore => 'Загрузить ещё';
+
+  @override
+  String get composerAttach => 'Прикрепить';
+
+  @override
+  String get composerAttachImage => 'Изображение';
+
+  @override
+  String get composerAttachFile => 'Файл';
+
+  @override
+  String get composerAttachAudio => 'Аудио';
+
+  @override
+  String get composerAttachLocation => 'Геопозиция';
+
+  @override
+  String get composerAttachRemove => 'Удалить вложение';
+
+  @override
+  String composerAttachTooMany(int max) {
+    return 'До $max вложений в одном сообщении';
+  }
+
+  @override
+  String get composerAttachTooLarge => 'Файл превышает лимит 100 МБ';
+
+  @override
+  String get composerAttachEmpty => 'Пустые файлы нельзя прикрепить';
+
+  @override
+  String get composerAttachReadFailed => 'Не удалось прочитать выбранный файл';
+
+  @override
+  String get composerAttachUploadFailed => 'Не удалось загрузить вложение';
+
+  @override
+  String get composerAttachUploadUnavailable =>
+      'Этот сервер не принимает загрузку файлов';
+
+  @override
+  String get composerAttachUploadedAsFile => 'Загружено как файл';
+
+  @override
+  String get composerLocationTitle => 'Прикрепить геопозицию';
+
+  @override
+  String get composerLocationUseCurrent =>
+      'Использовать текущее местоположение';
+
+  @override
+  String get composerLocationLatitude => 'Широта';
+
+  @override
+  String get composerLocationLongitude => 'Долгота';
+
+  @override
+  String get composerLocationLabel => 'Подпись (необязательно)';
+
+  @override
+  String get composerLocationInvalid =>
+      'Введите корректные широту (-90..90) и долготу (-180..180)';
+
+  @override
+  String get composerLocationDenied =>
+      'Разрешите доступ к геолокации или введите координаты вручную';
+
+  @override
+  String get composerLocationUnavailable =>
+      'Текущее местоположение недоступно на этом устройстве';
+
+  @override
+  String get composerLocationAdd => 'Прикрепить';
+
+  @override
+  String get attachmentImagePreview => 'Просмотреть изображение';
+
+  @override
+  String get attachmentOpenFile => 'Открыть файл';
+
+  @override
+  String get attachmentOpenMap => 'Открыть на карте';
+
+  @override
+  String get attachmentPlayAudio => 'Воспроизвести аудио';
+
+  @override
+  String get attachmentPauseAudio => 'Пауза';
+
+  @override
+  String get attachmentAudioUnavailable => 'Воспроизведение аудио недоступно';
+
+  @override
+  String get attachmentPreviewUnavailable =>
+      'Предпросмотр недоступен на этом устройстве';
+
+  @override
+  String get attachmentLoadFailed => 'Не удалось загрузить вложение';
+
+  @override
+  String get attachmentRetry => 'Повторить';
+
+  @override
+  String get attachmentOpenFailed => 'Не удалось открыть вложение';
+
+  @override
+  String get attachmentMapFailed =>
+      'Не удалось открыть карты; координаты скопированы';
+
+  @override
+  String attachmentCountLabel(int count) {
+    return 'Вложения: $count';
+  }
 }

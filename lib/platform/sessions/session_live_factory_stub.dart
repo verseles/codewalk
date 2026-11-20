@@ -1,6 +1,7 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
 import '../../shared/sessions/permission_mode.dart';
+import '../../shared/sessions/session_attachments.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import '../storage/payload_store.dart';
@@ -9,6 +10,7 @@ import '../storage/payload_store.dart';
 SessionLiveDirectory? createSessionLiveDirectory({
   DateTime Function()? now,
   PayloadStore? payloads,
+  AttachmentBlobRepository? blobs,
   PermissionModePolicy? permissionModes,
   UnrestrictedOwnershipLedger? unrestrictedOwnership,
   CommandId Function()? commandIds,

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'attachment_projection.dart';
 import 'item_ids.dart';
 import 'notice_text.dart';
 import 'version_policy.dart';
@@ -27,8 +28,6 @@ final class OpenCodeInboxProjectionException implements Exception {
 const _idLimit = 4096;
 const _textLimit = 256 * 1024;
 const _contextLimit = 1024;
-// Matches the history producer's per-field selected-content budget.
-const _manifestLimit = 64 * 1024;
 const _safeInteger = 9007199254740991;
 const _enqueued = 'session.inbox.enqueued';
 const _delivered = 'session.inbox.delivered';
@@ -62,8 +61,10 @@ List<SessionEvent> projectOpenCodeInboxEvent(
   required String sourceVersion,
   required StreamPosition position,
   required DateTime receivedAt,
+  OpenCodeInlineMediaSink? onInlineMedia,
 }) {
-  final frame = _object(value);
+  final stripped = extractOpenCodeInlineMedia(value, onMedia: onInlineMedia);
+  final frame = _object(stripped);
   final type = frame['type'];
   if (type is! String) _fail(OpenCodeInboxProjectionFailure.malformed);
   if (!_types.contains(type)) return const [];
@@ -101,12 +102,18 @@ List<SessionEvent> projectOpenCodeInboxEvent(
   String? itemType;
   String? delivery;
   var text = '';
+  var attachments = const <AttachmentRef>[];
   Map<String, Object?>? context;
   if (type == _enqueued) {
-    final item = _inboxItem(_object(data['item']));
+    final item = _inboxItem(
+      _object(data['item']),
+      inboxId: inboxId,
+      onInlineMedia: onInlineMedia,
+    );
     itemType = item.type;
     delivery = item.delivery;
     text = item.text;
+    attachments = item.attachments;
     context = item.context;
   } else if (type == _deliveryChanged) {
     delivery = _delivery(data['delivery']);
@@ -176,19 +183,24 @@ List<SessionEvent> projectOpenCodeInboxEvent(
     status: OpenValue.known(status),
     source: source,
   );
-  UserInput userInput(String text, DeliveryState state, {String? generation}) =>
-      UserInput(
-        meta: meta(
-          userId,
-          generation ?? liveGeneration(),
-          state == DeliveryState.accepted || state == DeliveryState.queued
-              ? ItemStatus.pending
-              : ItemStatus.completed,
-        ),
-        text: text,
-        delivery: OpenValue.known(state),
-        confirmed: state == DeliveryState.delivered,
-      );
+  UserInput userInput(
+    String text,
+    DeliveryState state, {
+    String? generation,
+    List<AttachmentRef> attachments = const [],
+  }) => UserInput(
+    meta: meta(
+      userId,
+      generation ?? liveGeneration(),
+      state == DeliveryState.accepted || state == DeliveryState.queued
+          ? ItemStatus.pending
+          : ItemStatus.completed,
+    ),
+    text: text,
+    attachments: attachments,
+    delivery: OpenValue.known(state),
+    confirmed: state == DeliveryState.delivered,
+  );
   // Only live admissions are open. History rows (delivery unknown) and
   // delivered input are settled and never regress; a cancelled row is
   // replaced by a same-ID re-admission.
@@ -247,7 +259,9 @@ List<SessionEvent> projectOpenCodeInboxEvent(
         removePending();
       } else {
         if (delivery == 'steer' || residentOpen || residentCancelled) {
-          items.add(userInput(text, admitted(delivery!)));
+          items.add(
+            userInput(text, admitted(delivery!), attachments: attachments),
+          );
           if (context != null) {
             items.add(
               UnknownItem(
@@ -277,6 +291,7 @@ List<SessionEvent> projectOpenCodeInboxEvent(
                 residentUser.text,
                 admitted(delivery),
                 generation: residentUser.generation,
+                attachments: residentUser.attachments,
               ),
             );
           }
@@ -297,6 +312,7 @@ List<SessionEvent> projectOpenCodeInboxEvent(
             residentUser.text,
             DeliveryState.delivered,
             generation: residentUser.generation,
+            attachments: residentUser.attachments,
           ),
         );
       } else if (residentUser == null && notice == null) {
@@ -317,6 +333,7 @@ List<SessionEvent> projectOpenCodeInboxEvent(
             residentUser.text,
             DeliveryState.cancelled,
             generation: residentUser.generation,
+            attachments: residentUser.attachments,
           ),
         );
       }
@@ -332,8 +349,19 @@ List<SessionEvent> projectOpenCodeInboxEvent(
 }
 
 /// One validated inbox item; shared by the live enqueue and the inbox read.
-({String type, String delivery, String text, Map<String, Object?>? context})
-_inboxItem(Map<String, Object?> item) {
+({
+  String type,
+  String delivery,
+  String text,
+  String wireText,
+  List<AttachmentRef> attachments,
+  Map<String, Object?>? context,
+})
+_inboxItem(
+  Map<String, Object?> item, {
+  required String inboxId,
+  OpenCodeInlineMediaSink? onInlineMedia,
+}) {
   final type = _text(item['type'], cap: _idLimit);
   if (!_itemTypes.contains(type)) {
     _fail(OpenCodeInboxProjectionFailure.unsupportedValue);
@@ -341,13 +369,44 @@ _inboxItem(Map<String, Object?> item) {
   final delivery = _delivery(item['delivery']);
   final payload = _object(item['payload']);
   var text = '';
+  var wireText = '';
+  var attachments = const <AttachmentRef>[];
   Map<String, Object?>? context;
   switch (type) {
     case 'user':
-      text = _text(payload['text'], cap: _textLimit);
-      context = _contextManifest(payload);
+      wireText = _text(payload['text'], cap: _textLimit);
+      // Enforce existing per-list limits before projection.
+      for (final key in const ['files', 'agents', 'skills']) {
+        if (!payload.containsKey(key)) continue;
+        final entries = payload[key];
+        if (entries is! List<Object?>) {
+          _fail(OpenCodeInboxProjectionFailure.malformed);
+        }
+        if (entries.length > _contextLimit) {
+          _fail(OpenCodeInboxProjectionFailure.limitExceeded);
+        }
+      }
+      try {
+        final projected = projectOpenCodeUserAttachments(
+          messageId: inboxId,
+          rawText: wireText,
+          rawFiles: payload.containsKey('files') ? payload['files'] : null,
+          rawMetadata: payload['metadata'],
+          rawAgents: payload.containsKey('agents') ? payload['agents'] : null,
+          rawSkills: payload.containsKey('skills') ? payload['skills'] : null,
+          onInlineMedia: onInlineMedia,
+        );
+        text = projected.displayText;
+        attachments = projected.attachments;
+        context = projected.unprojectedManifest;
+      } on OpenCodeAttachmentLimitException {
+        _fail(OpenCodeInboxProjectionFailure.limitExceeded);
+      } on FormatException {
+        _fail(OpenCodeInboxProjectionFailure.malformed);
+      }
     case 'synthetic':
-      text = _text(payload['text'], cap: _textLimit);
+      wireText = _text(payload['text'], cap: _textLimit);
+      text = wireText;
     case 'move':
       // Validated as declared, then discarded: the target is not projected.
       _object(payload['location']);
@@ -356,21 +415,29 @@ _inboxItem(Map<String, Object?> item) {
         _text(payload['subpath'], cap: _idLimit);
       }
   }
-  return (type: type, delivery: delivery, text: text, context: context);
+  return (
+    type: type,
+    delivery: delivery,
+    text: text,
+    wireText: wireText,
+    attachments: attachments,
+    context: context,
+  );
 }
 
 /// One row of `GET /api/session/{id}/inbox` for hydration, with the live
 /// producer's identities and admission rules: a steer user prompt is an
-/// admitted [UserInput] (plus its context marker) and pending; queued prompts
-/// are pending only; a synthetic continuation is a pending [Notice], never
-/// pending input (#491); compaction and move rows are validated and yield
-/// nothing. Whether a row was already promoted into
-/// history is the caller's decision.
-({PendingInput? pending, List<TimelineItem> items}) openCodeInboxRow(
+/// admitted [UserInput] (plus its attachments and any unprojected context
+/// marker) and pending; queued prompts are pending only; a synthetic
+/// continuation is a pending [Notice], never pending input (#491); compaction
+/// and move rows are validated and yield nothing.
+({PendingInput? pending, List<TimelineItem> items, String? wireText})
+openCodeInboxRow(
   Object? value,
   SessionRef ref, {
   required String sourceVersion,
   required String generation,
+  OpenCodeInlineMediaSink? onInlineMedia,
 }) {
   final row = _object(value);
   final inboxId = _id(row['id'], 'msg_');
@@ -381,9 +448,13 @@ _inboxItem(Map<String, Object?> item) {
   if (created is! num || !created.isFinite) {
     _fail(OpenCodeInboxProjectionFailure.malformed);
   }
-  final item = _inboxItem(row);
+  final item = _inboxItem(
+    row,
+    inboxId: inboxId,
+    onInlineMedia: onInlineMedia,
+  );
   if (item.type == 'compaction' || item.type == 'move') {
-    return (pending: null, items: const []);
+    return (pending: null, items: const [], wireText: null);
   }
   ItemId itemId(String kind, Object discriminator) =>
       ItemId(jsonEncode([ref.storageKey, inboxId, kind, discriminator]));
@@ -403,6 +474,7 @@ _inboxItem(Map<String, Object?> item) {
   if (item.type == 'synthetic') {
     return (
       pending: null,
+      wireText: item.wireText,
       items: [
         openCodeSyntheticNotice(
           ItemMeta(
@@ -425,9 +497,12 @@ _inboxItem(Map<String, Object?> item) {
     text: item.text,
     delivery: OpenValue.known(steer ? Delivery.steer : Delivery.queue),
   );
-  if (item.type != 'user' || !steer) return (pending: pending, items: const []);
+  if (item.type != 'user' || !steer) {
+    return (pending: pending, items: const [], wireText: item.wireText);
+  }
   return (
     pending: pending,
+    wireText: item.wireText,
     items: [
       UserInput(
         meta: ItemMeta(
@@ -438,6 +513,7 @@ _inboxItem(Map<String, Object?> item) {
           source: source,
         ),
         text: item.text,
+        attachments: item.attachments,
         delivery: const OpenValue.known(DeliveryState.accepted),
       ),
       if (item.context != null)
@@ -477,55 +553,6 @@ String _delivery(Object? value) {
     _fail(OpenCodeInboxProjectionFailure.unsupportedValue);
   }
   return result;
-}
-
-/// Mirrors the history `user-context-manifest`: counts and file MIME/source
-/// kinds only; content stays unresolved. Null when no context is attached.
-Map<String, Object?>? _contextManifest(Map<String, Object?> payload) {
-  final counts = <String, Object?>{};
-  final files = <Object?>[];
-  var bytes = 0;
-  for (final key in ['files', 'agents', 'skills']) {
-    if (!payload.containsKey(key)) continue;
-    final entries = payload[key];
-    if (entries is! List<Object?>) {
-      _fail(OpenCodeInboxProjectionFailure.malformed);
-    }
-    if (entries.length > _contextLimit) {
-      _fail(OpenCodeInboxProjectionFailure.limitExceeded);
-    }
-    counts[key] = entries.length;
-    for (final entry in entries) {
-      final attachment = _object(entry);
-      if (key == 'files') {
-        final source = _object(attachment['source']);
-        final mime = _text(attachment['mime'], cap: _idLimit);
-        final kind = _text(source['type'], cap: _idLimit, nonempty: true);
-        bytes += utf8.encode(mime).length + utf8.encode(kind).length;
-        if (bytes > _manifestLimit) {
-          _fail(OpenCodeInboxProjectionFailure.limitExceeded);
-        }
-        files.add({'mime': mime, 'sourceKind': kind});
-      }
-      if (attachment.containsKey('mention')) {
-        final mention = _object(attachment['mention']);
-        for (final bound in ['start', 'end']) {
-          final v = mention[bound];
-          if (v is! num || !v.isFinite) {
-            _fail(OpenCodeInboxProjectionFailure.malformed);
-          }
-        }
-      }
-    }
-  }
-  if (!counts.values.any((v) => (v! as int) > 0)) return null;
-  return {
-    'type': 'user-context-manifest',
-    'reason': 'contentResolutionUnavailable',
-    'counts': counts,
-    'files': files,
-    'contextNotProjected': true,
-  };
 }
 
 Map<String, Object?> _object(Object? value) {
