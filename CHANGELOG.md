@@ -2,6 +2,24 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.1.0 - 2026-11-20
+
+> 📣 CodeWalk 2.1.0 adds composer and timeline attachments — attach images, files, PDFs, audio, and GPS or manual coordinates from the `+` button, and view image lightboxes, documents, an inline audio player with scrubber, and clickable map cards right in the conversation.
+
+### Composer attachments (`+` button)
+
+- Tap the dedicated `+` button in the live session composer or new-chat workspace draft to attach **Image**, **File** (including PDF and UTF-8 text), **Audio**, or **Location** (current GPS coordinates or manual latitude/longitude with an optional label), with a staged attachment strip showing thumbnails, file sizes, model modality hints, and removal controls before sending.
+- Follows the official OpenCode 2 attachment contract: PNG, JPEG, GIF, WebP (when the active model advertises image input), PDF (when the active model advertises PDF input), and UTF-8 text files (`<= 256 KiB`) send inline via `files[]` (`<= 20 MiB`), while larger or non-native files and audio stream via `POST /api/experimental/fs/write` to a strictly confined server temporary upload directory (`<= 100 MiB`).
+- Pending and uncertain sends spill large sealed attachment payloads out-of-band into a content-addressed store verified by SHA-256 and byte length, replay without re-uploading, and preserve both clean prompt text and staged attachment chips on Take Back.
+
+### Timeline attachments
+
+- User messages render a unified attachment strip in both live sessions and older history, negotiating `X-OpenCode-Capabilities: experimental-media-uri` (`GET /api/experimental/media/:hash`) with automatic headerless fallback and a 256 MiB local content-addressed LRU cache.
+- **Images:** Bounded thumbnail previews with a `> 25 MP` pixel-area guard on fetched bytes and a tap-to-zoom `InteractiveViewer` fullscreen lightbox.
+- **Files & PDFs:** Metadata cards opening app-owned cached bytes in the platform viewer.
+- **Audio:** Inline audio player cards with play/pause, interactive `Slider` scrubber, and `m:ss` duration clock.
+- **Locations:** Clickable geographic cards opening the user's maps app via allowlisted numeric `geo:` or OpenStreetMap HTTPS links, with coordinate copy fallback.
+
 ## v2.0.0 - 2026-11-19
 
 > 📣 CodeWalk 2.0.0 is now stable for Android, Linux (x64 & ARM64), Windows (x64), and macOS (Apple Silicon) — built fresh for OpenCode 2 with compact timelines, subagent + shell capsule, workspace tabs, QR pairing, and verified in-app updates.
