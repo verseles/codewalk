@@ -2,6 +2,16 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.1.1 - 2026-11-20
+
+> 📣 CodeWalk 2.1.1 fixes image attachments on sessions using the default or agent model: images now go inline to the model, and images sent as files preview from your device instead of showing "Preview unavailable".
+
+### Fixes
+
+- Sessions without a model of their own now read the input capabilities of the model the server actually runs (the agent's model or the location default), instead of failing to match its display name.
+- Images are sent inline unless the active model declares it cannot read images, matching OpenCode's default text and image input. PDFs still require declared PDF support, and the composer now marks undeclared PDFs as uploaded files.
+- Attachments sent as server files record their size and SHA-256, so the device that sent them previews its own local copy in the timeline. Messages sent by earlier versions keep showing the unavailable card.
+
 ## v2.1.0 - 2026-11-20
 
 > 📣 CodeWalk 2.1.0 adds composer and timeline attachments — attach images, files, PDFs, audio, and GPS or manual coordinates from the `+` button, and view image lightboxes, documents, an inline audio player with scrubber, and clickable map cards right in the conversation.
