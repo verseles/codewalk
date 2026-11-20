@@ -67,7 +67,7 @@ Open [install.cat/verseles/codewalk](https://install.cat/verseles/codewalk) in y
 <details>
 <summary>Channels, v1 → v2 migration & uninstall</summary>
 
-New installations default to `stable` (CodeWalk 2). Existing CodeWalk 1 installations are protected from accidental upgrades and require explicit consent (`CODEWALK_MIGRATION=accept-v2`). Existing CodeWalk 2 beta installs automatically graduate to stable `v2.0.0` on the next update.
+New installations default to `stable` (CodeWalk 2). Existing CodeWalk 1 installations are protected from accidental upgrades and require explicit consent (`CODEWALK_MIGRATION=accept-v2`).
 
 **Linux & macOS:**
 
@@ -77,9 +77,6 @@ curl -fsSL install.cat/verseles/codewalk | CODEWALK_CHANNEL=v1 sh
 
 # Migrate an existing CodeWalk 1 installation to CodeWalk 2
 curl -fsSL install.cat/verseles/codewalk | CODEWALK_MIGRATION=accept-v2 sh
-
-# Opt in to CodeWalk 2 betas
-curl -fsSL install.cat/verseles/codewalk | CODEWALK_CHANNEL=beta CODEWALK_MIGRATION=accept-v2 sh
 
 # Install one exact release
 curl -fsSL install.cat/verseles/codewalk | CODEWALK_VERSION=v2.0.0 sh
@@ -165,11 +162,10 @@ make check-fast          # fast subset of checks
 make test-release-tools  # release plan, artifact verifier & publication guards
 make v2-native-check     # workspace packages, architecture guard & contract tests
 make coverage            # full tests with 85% coverage floor
-make release V=beta      # cut the next v2.0.0-beta.N (DRY_RUN=1 prints plan only)
-make release V=stable    # graduate main to v2.0.0 (DRY_RUN=1 prints plan only)
+make release V=stable    # cut a stable v2 release on main (DRY_RUN=1 prints plan only)
 ```
 
-On `main`, the Release workflow builds and verifies five targets from `lib/main_v2.dart` (Android arm64, Linux x64/ARM64, Windows x64, macOS arm64) and publishes via a create-only release script (`v2.0.0-beta.N` as prerelease, `v2.0.0` as latest stable). Manual dispatch from `main` with `dry_run_version` (`2.0.0-beta.N` or `2.0.0`) builds and verifies all five targets without publishing. CodeWalk 1 releases stay on the `v1` branch.
+On `main`, the Release workflow builds and verifies five targets from `lib/main_v2.dart` (Android arm64, Linux x64/ARM64, Windows x64, macOS arm64) and publishes the release via a create-only release script. Manual dispatch from `main` with `dry_run_version` builds and verifies all five targets without publishing. CodeWalk 1 releases stay on the `v1` branch.
 
 ### Architecture & Tech Stack
 

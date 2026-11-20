@@ -8,9 +8,9 @@ The owner is short on time. These orders are enough; do not ask for routine tech
 
 | Order | What the agent does |
 |---|---|
-| `avançar` / `continuar` | Resumes unfinished work, otherwise runs the first open line of `ROADMAP.md`, from issue to push. No beta. |
-| `avançar N` | Runs the next N lines, one review boundary each. No beta. |
-| `beta` | Publishes the next `v2.0.0-beta.N`. Never happens without this order. |
+| `avançar` / `continuar` | Resumes unfinished work, otherwise runs the first open line of `ROADMAP.md`, from issue to push. No release. |
+| `avançar N` | Runs the next N lines, one review boundary each. No release. |
+| `flow` | Runs the requested work or current unit end-to-end: plan when triggered, implement, commit boundary, run local gate + reviewers in parallel, fix, update docs/Issue, squash, push and `make watch-ci`. No release. |
 | `apk` | Builds the Android APK here and sends it to `@VerselesBot`. No version, no tag. |
 | `status` | Reports the next lines of the queue, local state and the latest runs, with at most one `gh` call. |
 | `prioriza #N` | Moves that line to the top of `ROADMAP.md`. |
@@ -37,7 +37,7 @@ Ask only for a product decision or a required human action, with lettered option
 - Read v1's implementation for lessons (platform quirks, pinned versions, pitfalls, what failed), then write v2 code fresh: modern APIs, v2's architecture and tests. Never copy v1 code, even adapted; improve on it whenever possible.
 - Pixel-level visual parity with v1 is not a goal (owner, 2026-11-05).
 
-## `avançar`, unit by unit
+## `flow` / `avançar`, unit by unit
 
 1. Read the Issue and apply the v1 filter. Load `planner` only under its triggers: architectural impact, broad cross-module scope, consequential tradeoffs or an explicit request.
 2. Implement. While iterating, use the narrowest validation: focused tests and targeted `flutter analyze <paths>`.
@@ -48,16 +48,6 @@ Ask only for a product decision or a required human action, with lettered option
 7. `git push origin main`, then `make watch-ci`, then finish with a `hey` stating the outcome and next line.
 
 A blocked line stays in place with its blocker noted; take the next line that does not depend on it, or report the pending owner action.
-
-## `beta`
-
-1. Rewrite `release-notes/v2-beta.md` for this beta: what changed since the previous beta tag, led by one `> 📣` line in English of at most 300 characters. Ask for approval as soon as the beta is ordered, before the gate or any remaining work, so the owner can answer while it runs. When the beta waits on work still in progress, draft the notes from its planned scope, and ask again only if the delivered scope changes them. Never cut a beta with stale or unapproved notes. Commit them before the release, which reads them from the tag; a notes-only commit needs no new gate.
-2. Require a clean tree, `main == origin/main`, and a green local gate on that exact SHA. Never run the release in parallel with the gate.
-3. `make release V=beta`: bumps the version, commits, creates the tag and pushes atomically. A dry run is `DRY_RUN=1`.
-4. `make watch-release`, then finish with a `hey`. The Release workflow builds, verifies and publishes on its own in about 12 minutes.
-5. Red run: fix it and cut `beta.N+1`; a published tag never moves. Stable and GA releases need their own explicit order.
-
-The normal delivery of a beta is the in-app Beta channel. Send an APK link only for a first install, a recovery, or a device without the updater.
 
 ## CI: never watch it
 
@@ -79,7 +69,7 @@ flutter build apk --release --target lib/main_v2.dart --target-platform android-
 ```
 
 - Do not pass `--no-pub`: the build then keeps dev plugins in the registrant and fails. Without `--split-per-abi` the APK grows from about 90 MB to about 148 MB.
-- `--build-number` keeps the versionCode above the installed one, so Android accepts the update, and below the next beta, whose number also comes from the clock.
+- `--build-number` keeps the versionCode above the installed one, so Android accepts the update, and below the next release, whose number also comes from the clock.
 - Output: `build/app/outputs/flutter-apk/app-arm64-v8a-release.apk`. `android/key.properties` (ignored by git) signs it with the production key; `apksigner verify --print-certs` must show `7361852522a3c5ba…b846c9`, the only signer the updater accepts.
 
 Send it to `@VerselesBot`, the bot `hey` uses:
@@ -111,7 +101,7 @@ rm -rf "$dir"
 
 - `main` is CodeWalk 2 and holds only v2. The entry point is `lib/main_v2.dart` until the cutover (#319).
 - `v1` is frozen, except the final stable `v1.266.0` with Windows and macOS. Check the branch before editing, and never merge whole trees between lines.
-- v2 betas ship Android arm64 and Linux x64/arm64. Web, iOS, Windows and macOS come later in the queue. v2 does not import v1 data.
+- v2 releases ship Android arm64, Linux x64/arm64, Windows x64 and macOS arm64. Web and iOS come later in the queue. v2 does not import v1 data.
 - #476 removed the v1-only dependencies. Each returns only with the v2 feature that uses it: voice #307, notifications and tray #309 (`tray_manager`), terminal #291 (`xterm`), Tailscale #317, and `window_manager` with the desktop window #474.
 
 ## Web origins
@@ -156,8 +146,9 @@ CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Cla
 
 ## Releases on `main`
 
-- `make release` accepts only `V=beta`. Betas never write `CHANGELOG.md`, because installed v1 apps parse it with stable headings only.
-- `make release` commits only the version bump, so commit all code first. A plain `push` is not a release.
+- CodeWalk 2 has graduated to stable releases (`v2.0.0+`). Never cut a release without an explicit owner order.
+- A release requires curated release notes (led by one `> 📣` line in English of at most 300 characters), a clean tree, `main == origin/main`, and a green local gate on that exact SHA. Never run a release in parallel with the gate; a published tag never moves.
+- `make release` commits only the version bump and `CHANGELOG.md` update, creates the tag and pushes atomically, followed by `make watch-release`. Commit all code first; a plain `push` is not a release.
 - Keep `CHANGELOG.md` machine-readable: unique `## vX.Y.Z - YYYY-MM-DD` headings, newest first, `###` for subsections. Each release may have one leading `> 📣` line in English, up to 300 characters. Preserve prior sections.
 - Release rules for v1 live in the `AGENTS.md` of the `v1` branch.
 
