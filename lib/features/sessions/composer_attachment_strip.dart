@@ -36,7 +36,7 @@ class ComposerAttachmentStrip extends StatelessWidget {
     if (mime.startsWith('image/') && modelInputModalities['image'] == false) {
       return true;
     }
-    if (mime == 'application/pdf' && modelInputModalities['pdf'] == false) {
+    if (mime == 'application/pdf' && modelInputModalities['pdf'] != true) {
       return true;
     }
     return false;

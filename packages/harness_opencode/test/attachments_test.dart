@@ -128,9 +128,27 @@ void main() {
       const imgOnly = {'image': true, 'pdf': false};
       const imgAndPdf = {'image': true, 'pdf': true};
 
+      // Undeclared image support inlines, as OpenCode's default input is
+      // text and images; an explicit refusal and undeclared PDFs upload.
       expect(
         canInlineOpenCodeAttachment(
           mimeType: 'image/png',
+          byteSize: 1024,
+          inputModalities: noCaps,
+        ),
+        isTrue,
+      );
+      expect(
+        canInlineOpenCodeAttachment(
+          mimeType: 'image/png',
+          byteSize: 1024,
+          inputModalities: const {'image': false},
+        ),
+        isFalse,
+      );
+      expect(
+        canInlineOpenCodeAttachment(
+          mimeType: 'application/pdf',
           byteSize: 1024,
           inputModalities: noCaps,
         ),
@@ -647,6 +665,65 @@ void main() {
       expect(headerSeenCount, 2);
       final user = page.items.whereType<UserInput>().single;
       expect(user.attachments.single.content.id, 'inline:$bigHash');
+    });
+
+    test('path-uploaded image keeps its local digest and previews from it', () {
+      final imageSha = sha256.convert(utf8.encode('fake-image')).toString();
+      const path = '/tmp/oc/uploads/upl_12345678/photo.heic';
+      final env = buildOpenCodePromptEnvelope(
+        displayText: 'look',
+        attachments: [
+          OpenCodePathAttachment(
+            name: 'photo.heic',
+            mimeType: 'image/heic',
+            serverPath: path,
+            byteSize: 2048,
+            kind: AttachmentKind.image,
+            sha256: imageSha,
+          ),
+        ],
+      );
+      expect(env.refusal, isNull);
+      final metadata = env.envelope!.metadata!;
+      final metaAttachment =
+          (metadata['attachments']! as List<Object?>).single!
+              as Map<String, Object?>;
+      expect(metaAttachment['sha256'], imageSha);
+      expect(metaAttachment['bytes'], 2048);
+      expect(metadata['codewalk'], isNot(contains('audio')));
+
+      final projected = projectOpenCodeUserAttachments(
+        messageId: 'msg_img',
+        rawText: env.envelope!.wireText,
+        rawFiles: const [],
+        rawMetadata: jsonDecode(jsonEncode(metadata)),
+        rawAgents: null,
+        rawSkills: null,
+      );
+      final ref = projected.attachments.single;
+      expect(projected.displayText, 'look');
+      expect(ref.kind.known, AttachmentKind.image);
+      expect(ref.content.id, 'local:$imageSha');
+      expect(ref.content.sizeBytes, 2048);
+      expect(ref.availability.known, AttachmentAvailability.remote);
+
+      // Metadata written before the digest was recorded stays omitted.
+      final legacy = projectOpenCodeUserAttachments(
+        messageId: 'msg_old',
+        rawText: 'look',
+        rawFiles: const [],
+        rawMetadata: {
+          'attachments': [
+            {'name': 'photo.heic', 'mime': 'image/heic', 'path': path},
+          ],
+        },
+        rawAgents: null,
+        rawSkills: null,
+      );
+      expect(
+        legacy.attachments.single.availability.known,
+        AttachmentAvailability.omitted,
+      );
     });
 
     test('envelope accepts all openCodeIsInlineTextMime types and readHistory adaptively halves limit on bodyTooLarge', () async {

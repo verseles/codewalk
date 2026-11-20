@@ -152,10 +152,13 @@ buildOpenCodePromptEnvelope({
             ? openCodeBasename(serverPath)
             : sanitizeOpenCodeUploadFilename(name);
         syntheticLines.add(formatOpenCodeAttachmentReference(serverPath));
+        // The local digest lets the sending device preview its own copy.
         metaAttachments.add({
           'name': cleanName,
           'mime': mime,
           'path': serverPath,
+          'bytes': byteSize,
+          if (sha256 != null && sha256.isNotEmpty) 'sha256': sha256,
         });
         if (kind == AttachmentKind.audio || mime.startsWith('audio/')) {
           metaAudio.add({

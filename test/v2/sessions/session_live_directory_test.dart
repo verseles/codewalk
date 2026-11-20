@@ -87,6 +87,9 @@ final class _Server {
       'providerID': 'prov',
       'name': 'Alpha',
       'enabled': true,
+      'capabilities': {
+        'input': ['text', 'image', 'pdf'],
+      },
       'limit': {'context': 1000, 'output': 100},
       'variants': [
         {'id': 'high', 'apiKey': '[REDACTED]'},
@@ -97,6 +100,9 @@ final class _Server {
       'providerID': 'prov',
       'name': 'Beta',
       'enabled': true,
+      'capabilities': {
+        'input': ['text'],
+      },
       'limit': {'context': 1000, 'output': 100},
       'variants': <Object?>[],
     },
@@ -3547,6 +3553,8 @@ void main() {
       expect(state.selection?.modelId, isNull);
       // Build names no model of its own: the location's default runs.
       expect(state.defaultModel, 'Beta');
+      // What it reads is that model's, found by reference, not by name.
+      expect(state.activeModelInputModalities['image'], isFalse);
       expect(state.providers, {'prov': 'Provider One'});
       // An agent's own model runs instead, when the location offers it.
       server.agentCatalog = [
@@ -3568,6 +3576,10 @@ void main() {
       await handle.refreshSelection();
       // With its variant, since that model lists it.
       expect(handle.selectionState.defaultModel, 'Alpha#high');
+      expect(
+        handle.selectionState.activeModelInputModalities,
+        containsPair('image', true),
+      );
       // Without an agent the configured one decides; a model the location
       // does not offer falls back to the default.
       server.configuredAgent = 'plan';
@@ -3575,6 +3587,7 @@ void main() {
       final second = await when(other, read);
       expect(second.selection?.agentId, isNull);
       expect(second.defaultModel, 'Beta');
+      expect(second.activeModelInputModalities['image'], isFalse);
     });
 
     test('a failed read of what decides the default keeps Default', () async {
@@ -3584,6 +3597,8 @@ void main() {
       final state = await when(handle, read);
       // The configured agent is unknown, so no model is named.
       expect(state.defaultModel, isNull);
+      // Unknown, not refused: images are not barred.
+      expect(state.activeModelInputModalities, isEmpty);
       expect(state.providers, {'prov': 'Provider One'});
       expect(state.modelUnavailable, isNull);
       expect(state.agentUnavailable, isNull);

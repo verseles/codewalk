@@ -42,6 +42,7 @@ final class SessionSelectionState {
     this.models = const [],
     this.agents = const [],
     this.defaultModel,
+    this.defaultModelInputModalities = const {},
     this.providers = const {},
     this.loading = false,
     this.modelUnavailable,
@@ -63,6 +64,10 @@ final class SessionSelectionState {
   /// while it is not known.
   final String? defaultModel;
 
+  /// The declared input modalities of the model named by [defaultModel];
+  /// empty while they are not known.
+  final Map<String, bool?> defaultModelInputModalities;
+
   /// Provider display names by provider id; a provider not named here shows
   /// its id.
   final Map<String, String> providers;
@@ -82,23 +87,15 @@ final class SessionSelectionState {
   /// A change of this session is in flight or unconfirmed.
   bool get holdsSend => phase != SessionSelectionPhase.idle;
 
-  /// Active model's declared input modalities (e.g. `image`, `pdf`, `text`).
+  /// Active model's declared input modalities (e.g. `image`, `pdf`, `text`);
+  /// empty while they are not known.
   Map<String, bool?> get activeModelInputModalities {
-    var modelId = selection?.modelId;
-    var providerId = selection?.modelProviderId;
-    if (modelId == null && defaultModel != null) {
-      final raw = defaultModel!;
-      final slash = raw.indexOf('/');
-      if (slash > 0 && slash + 1 < raw.length) {
-        providerId = raw.substring(0, slash);
-        modelId = raw.substring(slash + 1);
-      } else {
-        modelId = raw;
-      }
-    }
-    if (modelId == null) return const {};
+    final modelId = selection?.modelId;
+    if (modelId == null) return defaultModelInputModalities;
+    final providerId = selection?.modelProviderId;
     for (final m in models) {
-      if (m.id == modelId && (providerId == null || m.providerId == providerId)) {
+      if (m.id == modelId &&
+          (providerId == null || m.providerId == providerId)) {
         return m.inputModalities;
       }
     }

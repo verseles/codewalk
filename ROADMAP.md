@@ -20,6 +20,7 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #448 Data saver no celular
 - [ ] #449 Diagnósticos com tags e performance
 - [ ] #444 Aviso quando o navegador não abre o link de atualização
+- [ ] #497 Nota "enviado como arquivo" do composer diverge da decisão de envio do OpenCode
 
 ## 4. Robustez da sessão
 

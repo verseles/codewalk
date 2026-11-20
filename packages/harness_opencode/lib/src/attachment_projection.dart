@@ -413,8 +413,10 @@ OpenCodeProjectedUserAttachments projectOpenCodeUserAttachments({
             (entry['name'] is String ? entry['name']! as String : null) ??
             openCodeBasename(path);
         final name = _optionalShortName(rawName);
-        final bytes = _optionalNonNegativeInt(audioMeta?['bytes']);
-        final sha = audioMeta?['sha256'];
+        final bytes =
+            _optionalNonNegativeInt(audioMeta?['bytes']) ??
+            _optionalNonNegativeInt(entry['bytes']);
+        final sha = audioMeta?['sha256'] ?? entry['sha256'];
         final hasLocalHash =
             sha is String && RegExp(r'^[0-9a-f]{64}$').hasMatch(sha);
         final kind = audioMeta != null

@@ -204,8 +204,10 @@ bool canInlineOpenCodeAttachment({
 }) {
   if (byteSize < 0 || byteSize > openCodeMaxInlineAttachmentBytes) return false;
   final normalized = mimeType.split(';').first.trim().toLowerCase();
+  // OpenCode assumes a model reads text and images unless it declares
+  // otherwise; PDFs need an explicit declaration.
   if (openCodeInlineImageMimes.contains(normalized)) {
-    return inputModalities['image'] == true;
+    return inputModalities['image'] != false;
   }
   if (normalized == 'application/pdf') {
     return inputModalities['pdf'] == true;

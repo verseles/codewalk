@@ -56,6 +56,9 @@ final class OpenCodeSelectionLane {
       defaultModel:
           entry.agentModels[selection?.agentId ?? entry.defaultAgent] ??
           entry.defaultModel,
+      defaultModelInputModalities:
+          entry.agentModelInputs[selection?.agentId ?? entry.defaultAgent] ??
+          entry.defaultModelInputs,
       providers: entry.providers,
       loading: entry.reading && !entry.read,
       modelUnavailable: entry.modelUnavailable,
@@ -326,8 +329,10 @@ final class OpenCodeSelectionLane {
         ..models = const []
         ..agents = const []
         ..agentModels = const {}
+        ..agentModelInputs = const {}
         ..defaultAgent = null
         ..defaultModel = null
+        ..defaultModelInputs = const {}
         ..providers = const {}
         ..modelUnavailable = SessionSelectionUnavailable.locationUnknown
         ..agentUnavailable = SessionSelectionUnavailable.locationUnknown;
@@ -397,6 +402,12 @@ final class OpenCodeSelectionLane {
                   variant,
               ].join('#'),
       }
+      ..agentModelInputs = {
+        if (known)
+          for (final MapEntry(key: agent, value: own) in catalog.models.entries)
+            if (offered(own.providerId, own.id) case final model?)
+              agent: model.inputModalities,
+      }
       // The server's own choice of agent: the configured one, else build,
       // else the first it offers.
       ..defaultAgent = !known
@@ -412,6 +423,10 @@ final class OpenCodeSelectionLane {
               final model? => name(model),
               null => fallback.name,
             }
+      ..defaultModelInputs = !known || fallback == null
+          ? const {}
+          : offered(fallback.providerId, fallback.id)?.inputModalities ??
+                const {}
       ..providers = providers ?? const {}
       ..modelUnavailable =
           modelFailure ??
@@ -505,8 +520,15 @@ final class _SelectionEntry {
   /// The model each agent runs a session without a model on, by agent id,
   /// when it names one the location offers.
   Map<String, String> agentModels = const {};
+
+  /// The declared input modalities of each agent's own model, by agent id.
+  Map<String, Map<String, bool?>> agentModelInputs = const {};
   String? defaultAgent;
   String? defaultModel;
+
+  /// The declared input modalities of [defaultModel] when the location offers
+  /// it; empty while unknown.
+  Map<String, bool?> defaultModelInputs = const {};
   Map<String, String> providers = const {};
   SessionSelectionUnavailable? modelUnavailable;
   SessionSelectionUnavailable? agentUnavailable;

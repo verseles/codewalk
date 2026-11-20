@@ -7,7 +7,9 @@ import 'package:codewalk_core/codewalk_core.dart';
 ///
 /// Populates [ModelEntry.inputModalities] strictly from `capabilities.input`
 /// when advertised as a JSON list; absent or malformed capability arrays stay
-/// empty so unknown modalities are never treated as consent.
+/// empty, meaning unspecified rather than refused. Consumers apply OpenCode's
+/// default input (text and images): `canInlineOpenCodeAttachment` inlines an
+/// image unless `image` is false, and a PDF only when `pdf` is true.
 ModelEntry? projectOpenCodeModelRow(Object? row) {
   final model = openCodeCatalogObject(row);
   if (model['enabled'] is! bool) {
