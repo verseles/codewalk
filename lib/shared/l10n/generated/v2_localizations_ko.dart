@@ -2706,4 +2706,59 @@ class V2LocalizationsKo extends V2Localizations {
   String attachmentCountLabel(int count) {
     return '첨부: $count';
   }
+
+  @override
+  String get contextUsageTitle => '컨텍스트 사용량';
+
+  @override
+  String get contextUsageUnavailable => '컨텍스트 사용량을 사용할 수 없음';
+
+  @override
+  String get contextUsageUsage => '사용률';
+
+  @override
+  String get contextUsageTokens => '토큰';
+
+  @override
+  String get contextUsageCost => '비용';
+
+  @override
+  String get contextUsageLimit => '한도';
+
+  @override
+  String get contextUsageInput => '입력';
+
+  @override
+  String get contextUsageOutput => '출력';
+
+  @override
+  String get contextUsageReasoning => '추론';
+
+  @override
+  String get contextUsageCacheRead => '캐시 읽기';
+
+  @override
+  String get contextUsageCacheWrite => '캐시 쓰기';
+
+  @override
+  String get contextUsageEstimated => '추정';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      '압축은 대화를 삭제하지 않고 모델 한도 내에 맞추기 위해 이전 컨텍스트를 요약합니다.';
+
+  @override
+  String get contextUsageCompactNow => '지금 압축';
+
+  @override
+  String get contextUsageCompacting => '압축 중...';
+
+  @override
+  String get contextUsageQuotaNotExposed => '이 하네스는 할당량을 제공하지 않습니다.';
+
+  @override
+  String get contextUsageQuotaNone => '보고된 할당량 기간이 없습니다.';
+
+  @override
+  String get contextUsageUnknownCurrency => '알 수 없는 통화';
 }

@@ -62,7 +62,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - [ ] #286 Subagentes e bandeja de trabalho em segundo plano
 - [ ] #287 Revert, fork e diff
 - [ ] #483 Repensar a triagem de sessões: arquivar, lido/não lido, ocultar e inbox (OpenCode 2.2.7)
-- [ ] #294 Uso, contexto e erros
 - [ ] #307 Voz: STT e leitura em voz alta
 - [ ] #308 Exportar sessão e mensagem, encaminhar
 - [ ] #309 Notificações e atenção, com sons

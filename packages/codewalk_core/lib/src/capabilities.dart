@@ -12,6 +12,23 @@ abstract final class ShellCapabilities {
   static const stop = 'shell.stop';
 }
 
+/// Canonical capability keys for harness-reported usage, context, cost and quota.
+abstract final class UsageCapabilities {
+  /// Reporting token counts and breakdowns.
+  static const tokens = 'usage.tokens';
+
+  /// Reporting monetary cost observations.
+  static const cost = 'usage.cost';
+
+  /// Reporting active context-window occupancy against a model limit.
+  static const context = 'usage.context';
+
+  /// Reporting native account/provider quota windows.
+  static const quota = 'usage.quota';
+
+  static const keys = <String>[tokens, cost, context, quota];
+}
+
 enum Support { native, host, extension, experimental, unavailable, unknown }
 
 final class Capability {

@@ -50,6 +50,7 @@ from session_turn_catalog import (
     PORT_KEYS as TURN_PORT_KEYS,
     NEW_KEYS as TURN_NEW_KEYS,
 )
+from context_usage_catalog import NEW_KEYS as CONTEXT_USAGE_NEW_KEYS
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -187,6 +188,7 @@ KEYS |= UPDATES_KEYS | set(UPDATES_NEW_KEYS)
 KEYS |= RENDERING_KEYS | set(RENDERING_NEW_KEYS)
 KEYS |= WORKSPACE_KEYS | set(WORKSPACE_NEW_KEYS)
 KEYS |= TURN_PORT_KEYS | set(TURN_NEW_KEYS)
+KEYS |= set(CONTEXT_USAGE_NEW_KEYS)
 
 
 OUTPUT_NAMES = {"v2_localizations.dart"} | {

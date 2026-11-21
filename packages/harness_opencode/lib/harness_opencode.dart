@@ -39,5 +39,7 @@ export 'src/compaction_projection.dart' hide openCodeCompactionNotice;
 export 'src/revert_projection.dart' hide openCodeStagedRevert;
 export 'src/session_lifecycle_projection.dart';
 export 'src/step_usage_projection.dart';
+export 'src/usage_capabilities.dart';
+export 'src/usage_series.dart';
 export 'src/text_reasoning_projection.dart';
 export 'src/tool_projection.dart';

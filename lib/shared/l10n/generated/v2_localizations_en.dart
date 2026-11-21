@@ -2844,4 +2844,60 @@ class V2LocalizationsEn extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'Attachments: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'Context usage';
+
+  @override
+  String get contextUsageUnavailable => 'Context usage unavailable';
+
+  @override
+  String get contextUsageUsage => 'Usage';
+
+  @override
+  String get contextUsageTokens => 'Tokens';
+
+  @override
+  String get contextUsageCost => 'Cost';
+
+  @override
+  String get contextUsageLimit => 'Limit';
+
+  @override
+  String get contextUsageInput => 'Input';
+
+  @override
+  String get contextUsageOutput => 'Output';
+
+  @override
+  String get contextUsageReasoning => 'Reasoning';
+
+  @override
+  String get contextUsageCacheRead => 'Cache read';
+
+  @override
+  String get contextUsageCacheWrite => 'Cache write';
+
+  @override
+  String get contextUsageEstimated => 'Estimated';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'Compaction summarizes older context to stay within the model limit without deleting your conversation.';
+
+  @override
+  String get contextUsageCompactNow => 'Compact now';
+
+  @override
+  String get contextUsageCompacting => 'Compacting...';
+
+  @override
+  String get contextUsageQuotaNotExposed =>
+      'Quota is not exposed by this harness.';
+
+  @override
+  String get contextUsageQuotaNone => 'No quota windows reported.';
+
+  @override
+  String get contextUsageUnknownCurrency => 'Unknown currency';
 }

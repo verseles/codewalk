@@ -2891,4 +2891,60 @@ class V2LocalizationsFr extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'Pièces jointes : $count';
   }
+
+  @override
+  String get contextUsageTitle => 'Utilisation du contexte';
+
+  @override
+  String get contextUsageUnavailable => 'Utilisation du contexte indisponible';
+
+  @override
+  String get contextUsageUsage => 'Utilisation';
+
+  @override
+  String get contextUsageTokens => 'Jetons';
+
+  @override
+  String get contextUsageCost => 'Coût';
+
+  @override
+  String get contextUsageLimit => 'Limite';
+
+  @override
+  String get contextUsageInput => 'Entrée';
+
+  @override
+  String get contextUsageOutput => 'Sortie';
+
+  @override
+  String get contextUsageReasoning => 'Raisonnement';
+
+  @override
+  String get contextUsageCacheRead => 'Lecture du cache';
+
+  @override
+  String get contextUsageCacheWrite => 'Écriture du cache';
+
+  @override
+  String get contextUsageEstimated => 'Estimé';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'Le compactage résume le contexte ancien pour rester dans la limite du modèle sans supprimer votre conversation.';
+
+  @override
+  String get contextUsageCompactNow => 'Compacter maintenant';
+
+  @override
+  String get contextUsageCompacting => 'Compactage...';
+
+  @override
+  String get contextUsageQuotaNotExposed =>
+      'Le quota n’est pas exposé par ce harness.';
+
+  @override
+  String get contextUsageQuotaNone => 'Aucune fenêtre de quota signalée.';
+
+  @override
+  String get contextUsageUnknownCurrency => 'Devise inconnue';
 }

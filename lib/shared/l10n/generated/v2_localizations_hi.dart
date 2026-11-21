@@ -2842,4 +2842,59 @@ class V2LocalizationsHi extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'अटैचमेंट: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'संदर्भ उपयोग';
+
+  @override
+  String get contextUsageUnavailable => 'संदर्भ उपयोग उपलब्ध नहीं है';
+
+  @override
+  String get contextUsageUsage => 'उपयोग';
+
+  @override
+  String get contextUsageTokens => 'टोकन';
+
+  @override
+  String get contextUsageCost => 'लागत';
+
+  @override
+  String get contextUsageLimit => 'सीमा';
+
+  @override
+  String get contextUsageInput => 'इनपुट';
+
+  @override
+  String get contextUsageOutput => 'आउटपुट';
+
+  @override
+  String get contextUsageReasoning => 'तर्क';
+
+  @override
+  String get contextUsageCacheRead => 'कैश पठन';
+
+  @override
+  String get contextUsageCacheWrite => 'कैश लेखन';
+
+  @override
+  String get contextUsageEstimated => 'अनुमानित';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'संकुचन आपकी बातचीत को हटाए बिना मॉडल की सीमा में रहने के लिए पुराने संदर्भ का सारांश बनाता है।';
+
+  @override
+  String get contextUsageCompactNow => 'अभी संकुचित करें';
+
+  @override
+  String get contextUsageCompacting => 'संकुचित हो रहा है...';
+
+  @override
+  String get contextUsageQuotaNotExposed => 'यह हार्नेस कोटा प्रदान नहीं करता।';
+
+  @override
+  String get contextUsageQuotaNone => 'कोई कोटा विंडो रिपोर्ट नहीं की गई।';
+
+  @override
+  String get contextUsageUnknownCurrency => 'अज्ञात मुद्रा';
 }

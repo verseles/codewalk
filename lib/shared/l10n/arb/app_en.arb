@@ -3479,5 +3479,23 @@
         "type": "int"
       }
     }
-  }
+  },
+  "contextUsageTitle": "Context usage",
+  "contextUsageUnavailable": "Context usage unavailable",
+  "contextUsageUsage": "Usage",
+  "contextUsageTokens": "Tokens",
+  "contextUsageCost": "Cost",
+  "contextUsageLimit": "Limit",
+  "contextUsageInput": "Input",
+  "contextUsageOutput": "Output",
+  "contextUsageReasoning": "Reasoning",
+  "contextUsageCacheRead": "Cache read",
+  "contextUsageCacheWrite": "Cache write",
+  "contextUsageEstimated": "Estimated",
+  "contextUsageAutoCompactionNote": "Compaction summarizes older context to stay within the model limit without deleting your conversation.",
+  "contextUsageCompactNow": "Compact now",
+  "contextUsageCompacting": "Compacting...",
+  "contextUsageQuotaNotExposed": "Quota is not exposed by this harness.",
+  "contextUsageQuotaNone": "No quota windows reported.",
+  "contextUsageUnknownCurrency": "Unknown currency"
 }

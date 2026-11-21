@@ -2837,4 +2837,59 @@ class V2LocalizationsUr extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'منسلکات: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'سیاق و سباق کا استعمال';
+
+  @override
+  String get contextUsageUnavailable => 'سیاق و سباق کا استعمال دستیاب نہیں';
+
+  @override
+  String get contextUsageUsage => 'استعمال';
+
+  @override
+  String get contextUsageTokens => 'ٹوکنز';
+
+  @override
+  String get contextUsageCost => 'لاگت';
+
+  @override
+  String get contextUsageLimit => 'حد';
+
+  @override
+  String get contextUsageInput => 'ان پٹ';
+
+  @override
+  String get contextUsageOutput => 'آؤٹ پٹ';
+
+  @override
+  String get contextUsageReasoning => 'استدلال';
+
+  @override
+  String get contextUsageCacheRead => 'کیش ریڈ';
+
+  @override
+  String get contextUsageCacheWrite => 'کیش رائٹ';
+
+  @override
+  String get contextUsageEstimated => 'اندازاً';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'کمپیکشن آپ کی گفتگو کو حذف کیے بغیر ماڈل کی حد کے اندر رہنے کے لیے پرانے سیاق کا خلاصہ کرتا ہے۔';
+
+  @override
+  String get contextUsageCompactNow => 'ابھی کمپیکٹ کریں';
+
+  @override
+  String get contextUsageCompacting => 'کمپیکٹ ہو رہا ہے...';
+
+  @override
+  String get contextUsageQuotaNotExposed => 'یہ ہارنس کوٹہ فراہم نہیں کرتا۔';
+
+  @override
+  String get contextUsageQuotaNone => 'کوئی کوٹہ ونڈو رپورٹ نہیں ہوئی۔';
+
+  @override
+  String get contextUsageUnknownCurrency => 'نامعلوم کرنسی';
 }

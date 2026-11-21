@@ -2894,4 +2894,60 @@ class V2LocalizationsDe extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'Anhänge: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'Kontextnutzung';
+
+  @override
+  String get contextUsageUnavailable => 'Kontextnutzung nicht verfügbar';
+
+  @override
+  String get contextUsageUsage => 'Nutzung';
+
+  @override
+  String get contextUsageTokens => 'Token';
+
+  @override
+  String get contextUsageCost => 'Kosten';
+
+  @override
+  String get contextUsageLimit => 'Limit';
+
+  @override
+  String get contextUsageInput => 'Eingabe';
+
+  @override
+  String get contextUsageOutput => 'Ausgabe';
+
+  @override
+  String get contextUsageReasoning => 'Reasoning';
+
+  @override
+  String get contextUsageCacheRead => 'Cache-Lesezugriff';
+
+  @override
+  String get contextUsageCacheWrite => 'Cache-Schreibzugriff';
+
+  @override
+  String get contextUsageEstimated => 'Geschätzt';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'Die Komprimierung fasst älteren Kontext zusammen, um im Modelllimit zu bleiben, ohne die Unterhaltung zu löschen.';
+
+  @override
+  String get contextUsageCompactNow => 'Jetzt komprimieren';
+
+  @override
+  String get contextUsageCompacting => 'Komprimierung läuft...';
+
+  @override
+  String get contextUsageQuotaNotExposed =>
+      'Kontingent wird von diesem Harness nicht bereitgestellt.';
+
+  @override
+  String get contextUsageQuotaNone => 'Keine Kontingentfenster gemeldet.';
+
+  @override
+  String get contextUsageUnknownCurrency => 'Unbekannte Währung';
 }

@@ -2837,4 +2837,59 @@ class V2LocalizationsBn extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'সংযুক্তি: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'প্রসঙ্গ ব্যবহার';
+
+  @override
+  String get contextUsageUnavailable => 'প্রসঙ্গ ব্যবহার উপলব্ধ নয়';
+
+  @override
+  String get contextUsageUsage => 'ব্যবহার';
+
+  @override
+  String get contextUsageTokens => 'টোকেন';
+
+  @override
+  String get contextUsageCost => 'খরচ';
+
+  @override
+  String get contextUsageLimit => 'সীমা';
+
+  @override
+  String get contextUsageInput => 'ইনপুট';
+
+  @override
+  String get contextUsageOutput => 'আউটপুট';
+
+  @override
+  String get contextUsageReasoning => 'যুক্তি';
+
+  @override
+  String get contextUsageCacheRead => 'ক্যাশ পঠন';
+
+  @override
+  String get contextUsageCacheWrite => 'ক্যাশ লিখন';
+
+  @override
+  String get contextUsageEstimated => 'আনুমানিক';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'কম্প্যাকশন আপনার কথোপকথন না মুছেই মডেলের সীমার মধ্যে থাকতে পুরনো প্রসঙ্গ সংক্ষিপ্ত করে।';
+
+  @override
+  String get contextUsageCompactNow => 'এখনই কম্প্যাক্ট করুন';
+
+  @override
+  String get contextUsageCompacting => 'কম্প্যাক্ট হচ্ছে...';
+
+  @override
+  String get contextUsageQuotaNotExposed => 'এই হারনেস কোটা প্রদান করে না।';
+
+  @override
+  String get contextUsageQuotaNone => 'কোনো কোটা উইন্ডো রিপোর্ট করা হয়নি।';
+
+  @override
+  String get contextUsageUnknownCurrency => 'অজানা মুদ্রা';
 }

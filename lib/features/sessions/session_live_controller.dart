@@ -17,6 +17,7 @@ import '../../shared/sessions/session_shells.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_turn_actions.dart';
 import '../../shared/sessions/session_unrestricted.dart';
+import '../../shared/sessions/session_usage.dart';
 import '../hosts/endpoint_health_controller.dart';
 import '../hosts/hosts_controller.dart';
 import 'composer_attachments_controller.dart';
@@ -119,6 +120,39 @@ class SessionLiveController extends ChangeNotifier
 
   Map<String, bool?> get activeModelInputModalities =>
       selectionState.activeModelInputModalities;
+
+  /// Canonical usage capabilities declared by the active live handle; empty
+  /// when unavailable or before a handle is bound.
+  Map<String, Capability> get usageCapabilities =>
+      _handle?.usageCapabilities ?? const {};
+
+  SessionState? _cachedUsageState;
+  SessionSelectionState? _cachedUsageSelection;
+  Map<String, Capability>? _cachedUsageCapabilities;
+  SessionUsageView? _cachedUsageView;
+
+  /// Canonical, harness-neutral view of context occupancy, tokens, cost and quota.
+  SessionUsageView get usageView {
+    final currentState = state;
+    final currentSelection = selectionState;
+    final currentCapabilities = usageCapabilities;
+    final cached = _cachedUsageView;
+    if (cached != null &&
+        identical(_cachedUsageState, currentState) &&
+        identical(_cachedUsageSelection, currentSelection) &&
+        identical(_cachedUsageCapabilities, currentCapabilities)) {
+      return cached;
+    }
+    _cachedUsageState = currentState;
+    _cachedUsageSelection = currentSelection;
+    _cachedUsageCapabilities = currentCapabilities;
+    return _cachedUsageView = resolveLiveSessionUsage(
+      state: currentState,
+      selection: currentSelection,
+      capabilities: currentCapabilities,
+    );
+  }
+
   String _draftText = '';
   bool _draftEdited = false;
   bool _draftRead = false;

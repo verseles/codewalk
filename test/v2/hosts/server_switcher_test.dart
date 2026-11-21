@@ -220,39 +220,44 @@ void main() {
     },
   );
 
-  testWidgets(
-    'pin controls pin every real action without executing them',
-    (tester) async {
-      final rig = _Rig(tester);
-      try {
-        await rig.start(tester);
-        await tester.tap(find.byKey(const ValueKey('workspace-actions')));
-        await tester.pumpAndSettle();
-        // Refresh left the toolbar: the list and the streams recover by
-        // themselves (#467).
-        expect(find.byKey(const ValueKey('workspace-pin-refresh')), findsNothing);
-        for (final action in ['servers', 'settings']) {
-          await tester.tap(find.byKey(ValueKey('workspace-pin-$action')));
-          await tester.pump();
-        }
-        expect(rig.preferences.appBarPins, [
-          WorkspacePinnedAction.newChat,
-          WorkspacePinnedAction.servers,
-          WorkspacePinnedAction.settings,
-        ]);
-        expect(rig.catalog.sources, hasLength(1));
-        await tester.tapAt(const Offset(0, 0));
-        await tester.pumpAndSettle();
-        for (final action in ['newChat', 'servers', 'settings']) {
-          expect(
-            find.byKey(ValueKey('workspace-pinned-$action')),
-            findsOneWidget,
-          );
-        }
-        expect(tester.takeException(), isNull);
-      } finally {
-        rig.dispose();
+  testWidgets('pin controls pin every real action without executing them', (
+    tester,
+  ) async {
+    final rig = _Rig(tester);
+    try {
+      await rig.start(tester);
+      await tester.tap(find.byKey(const ValueKey('workspace-actions')));
+      await tester.pumpAndSettle();
+      // Refresh left the toolbar: the list and the streams recover by
+      // themselves (#467).
+      expect(find.byKey(const ValueKey('workspace-pin-refresh')), findsNothing);
+      for (final action in ['servers', 'settings']) {
+        await tester.tap(find.byKey(ValueKey('workspace-pin-$action')));
+        await tester.pump();
       }
-    },
-  );
+      expect(rig.preferences.appBarPins, [
+        WorkspacePinnedAction.contextUsage,
+        WorkspacePinnedAction.newChat,
+        WorkspacePinnedAction.servers,
+        WorkspacePinnedAction.settings,
+      ]);
+      expect(rig.catalog.sources, hasLength(1));
+      await tester.tapAt(const Offset(0, 0));
+      await tester.pumpAndSettle();
+      // No live session is active, so contextUsage stays omitted from the bar.
+      expect(
+        find.byKey(const ValueKey('workspace-pinned-contextUsage')),
+        findsNothing,
+      );
+      for (final action in ['newChat', 'servers', 'settings']) {
+        expect(
+          find.byKey(ValueKey('workspace-pinned-$action')),
+          findsOneWidget,
+        );
+      }
+      expect(tester.takeException(), isNull);
+    } finally {
+      rig.dispose();
+    }
+  });
 }

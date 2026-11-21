@@ -8,14 +8,25 @@ import 'package:codewalk/shared/sessions/session_shells.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk/shared/sessions/session_turn_actions.dart';
 import 'package:codewalk/shared/sessions/session_unrestricted.dart';
+import 'package:codewalk/shared/sessions/session_usage.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 
 import 'fakes.dart';
 
 class LiveHandle
-    implements SessionLiveHandle, SessionTurnActionSource, SessionShellSource {
-  LiveHandle(this.session, {this.outbox, this.turnActions, this.shells});
+    implements
+        SessionLiveHandle,
+        SessionTurnActionSource,
+        SessionShellSource,
+        SessionUsageSource {
+  LiveHandle(
+    this.session, {
+    this.outbox,
+    this.turnActions,
+    this.shells,
+    this.usageCapabilities = const {},
+  });
   @override
   final SessionRef session;
   @override
@@ -24,6 +35,8 @@ class LiveHandle
   SessionTurnActionPort? turnActions;
   @override
   SessionShellPort? shells;
+  @override
+  Map<String, Capability> usageCapabilities;
   bool stopAvailable = false;
   Future<SessionStopState> Function(CommandId)? stopAction;
   final stops = <CommandId>[];
@@ -399,11 +412,13 @@ class LiveDirectory implements SessionLiveDirectory {
     SessionRef session, {
     PromptOutbox? outbox,
     SessionTurnActionPort? turnActions,
+    Map<String, Capability> usageCapabilities = const {},
   }) {
     final handle = LiveHandle(
       session,
       outbox: outbox,
       turnActions: turnActions,
+      usageCapabilities: usageCapabilities,
     );
     handles.add(handle);
     opens.last.complete(handle);

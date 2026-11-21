@@ -160,3 +160,20 @@ DateTime? _optionalEpoch(Object? value) {
 
 Never _malformed() =>
     throw const FormatException('Malformed OpenCode session metadata.');
+
+/// Parses the `GET /api/session/active` map into running native session IDs.
+Set<String> openCodeActiveSessions(Object? value) {
+  if (value is! Map<String, Object?> ||
+      value['data'] is! Map<String, Object?>) {
+    throw const FormatException('Malformed active map.');
+  }
+  final active = value['data']! as Map<String, Object?>;
+  for (final MapEntry(:key, :value) in active.entries) {
+    if (!key.startsWith('ses') ||
+        value is! Map<String, Object?> ||
+        value['type'] != 'running') {
+      throw const FormatException('Malformed active entry.');
+    }
+  }
+  return active.keys.toSet();
+}

@@ -2889,4 +2889,60 @@ class V2LocalizationsIt extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'Allegati: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'Uso del contesto';
+
+  @override
+  String get contextUsageUnavailable => 'Uso del contesto non disponibile';
+
+  @override
+  String get contextUsageUsage => 'Uso';
+
+  @override
+  String get contextUsageTokens => 'Token';
+
+  @override
+  String get contextUsageCost => 'Costo';
+
+  @override
+  String get contextUsageLimit => 'Limite';
+
+  @override
+  String get contextUsageInput => 'Input';
+
+  @override
+  String get contextUsageOutput => 'Output';
+
+  @override
+  String get contextUsageReasoning => 'Ragionamento';
+
+  @override
+  String get contextUsageCacheRead => 'Lettura cache';
+
+  @override
+  String get contextUsageCacheWrite => 'Scrittura cache';
+
+  @override
+  String get contextUsageEstimated => 'Stimato';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'La compattazione riassume il contesto precedente per rimanere nel limite del modello senza eliminare la conversazione.';
+
+  @override
+  String get contextUsageCompactNow => 'Compatta ora';
+
+  @override
+  String get contextUsageCompacting => 'Compattazione...';
+
+  @override
+  String get contextUsageQuotaNotExposed =>
+      'La quota non è esposta da questo harness.';
+
+  @override
+  String get contextUsageQuotaNone => 'Nessuna finestra di quota segnalata.';
+
+  @override
+  String get contextUsageUnknownCurrency => 'Valuta sconosciuta';
 }

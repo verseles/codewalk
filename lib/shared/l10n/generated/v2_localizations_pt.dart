@@ -2870,4 +2870,60 @@ class V2LocalizationsPt extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'Anexos: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'Uso de contexto';
+
+  @override
+  String get contextUsageUnavailable => 'Uso de contexto indisponível';
+
+  @override
+  String get contextUsageUsage => 'Uso';
+
+  @override
+  String get contextUsageTokens => 'Tokens';
+
+  @override
+  String get contextUsageCost => 'Custo';
+
+  @override
+  String get contextUsageLimit => 'Limite';
+
+  @override
+  String get contextUsageInput => 'Entrada';
+
+  @override
+  String get contextUsageOutput => 'Saída';
+
+  @override
+  String get contextUsageReasoning => 'Raciocínio';
+
+  @override
+  String get contextUsageCacheRead => 'Leitura de cache';
+
+  @override
+  String get contextUsageCacheWrite => 'Escrita de cache';
+
+  @override
+  String get contextUsageEstimated => 'Estimado';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'A compactação resume o contexto antigo para caber no limite do modelo sem apagar sua conversa.';
+
+  @override
+  String get contextUsageCompactNow => 'Compactar agora';
+
+  @override
+  String get contextUsageCompacting => 'Compactando...';
+
+  @override
+  String get contextUsageQuotaNotExposed =>
+      'A cota não é exposta por este harness.';
+
+  @override
+  String get contextUsageQuotaNone => 'Nenhuma janela de cota reportada.';
+
+  @override
+  String get contextUsageUnknownCurrency => 'Moeda desconhecida';
 }

@@ -38,10 +38,8 @@ Future<bool> confirmReplaceDraftDialog(BuildContext context) async {
 /// Tracks draft revisions and provenance, coordinating undo/redo/compact actions.
 class SessionTurnController extends ChangeNotifier
     implements builtin.SessionTurnActions {
-  SessionTurnController({
-    required this.live,
-    CommandId Function()? commandIds,
-  }) : _commandIds = commandIds ?? mintCommandId {
+  SessionTurnController({required this.live, CommandId Function()? commandIds})
+    : _commandIds = commandIds ?? mintCommandId {
     _lastDraftText = live.draft.text;
     live.draft.addListener(_onDraftChanged);
   }
@@ -81,12 +79,12 @@ class SessionTurnController extends ChangeNotifier
       port?.unavailable(shared.SessionTurnAction.redoNext) == null;
 
   bool get canRedoAll =>
-      !_disposed &&
-      port?.unavailable(shared.SessionTurnAction.redoAll) == null;
+      !_disposed && port?.unavailable(shared.SessionTurnAction.redoAll) == null;
 
   bool get canCompact =>
-      !_disposed &&
-      port?.unavailable(shared.SessionTurnAction.compact) == null;
+      !_disposed && port?.unavailable(shared.SessionTurnAction.compact) == null;
+
+  bool get compacting => !_disposed && port?.state.compacting == true;
 
   void _onDraftChanged() {
     if (_disposed) return;
@@ -141,15 +139,13 @@ class SessionTurnController extends ChangeNotifier
     final l = context.v2L10n;
     final isCompacting = port?.state.compacting == true;
     final msg = switch (refusal) {
-      shared.SessionTurnUnavailable.busy => isCompacting
-          ? l.turnUnavailableCompacting
-          : l.turnUnavailableBusy,
+      shared.SessionTurnUnavailable.busy =>
+        isCompacting ? l.turnUnavailableCompacting : l.turnUnavailableBusy,
       shared.SessionTurnUnavailable.revertStaged =>
         l.turnUnavailableRevertStaged,
       shared.SessionTurnUnavailable.targetUnknown ||
       shared.SessionTurnUnavailable.noRevert ||
-      shared.SessionTurnUnavailable.historyIncomplete =>
-        l.chatUndoNothing,
+      shared.SessionTurnUnavailable.historyIncomplete => l.chatUndoNothing,
       _ => l.turnUnavailableBusy,
     };
     showAppSnackBar(ScaffoldMessenger.maybeOf(context), msg);
@@ -208,7 +204,9 @@ class SessionTurnController extends ChangeNotifier
       if (_revision == initialRevision) {
         _setRestoredDraft(target.text);
       }
-    } else if (result.unavailable != null && context != null && context.mounted) {
+    } else if (result.unavailable != null &&
+        context != null &&
+        context.mounted) {
       _showRefusalSnackBar(context, result.unavailable!);
     }
     return result;
@@ -225,11 +223,7 @@ class SessionTurnController extends ChangeNotifier
         unavailable: shared.SessionTurnUnavailable.targetUnknown,
       );
     }
-    return stageUndo(
-      target: turns.last,
-      context: context,
-      confirm: confirm,
-    );
+    return stageUndo(target: turns.last, context: context, confirm: confirm);
   }
 
   /// Redoes the next cut turn.
@@ -255,7 +249,9 @@ class SessionTurnController extends ChangeNotifier
           _clearRestoredDraft();
         }
       }
-    } else if (result.unavailable != null && context != null && context.mounted) {
+    } else if (result.unavailable != null &&
+        context != null &&
+        context.mounted) {
       _showRefusalSnackBar(context, result.unavailable!);
     }
     return result;
@@ -279,7 +275,9 @@ class SessionTurnController extends ChangeNotifier
       if (hasUntouchedRestoredText) {
         _clearRestoredDraft();
       }
-    } else if (result.unavailable != null && context != null && context.mounted) {
+    } else if (result.unavailable != null &&
+        context != null &&
+        context.mounted) {
       _showRefusalSnackBar(context, result.unavailable!);
     }
     return result;
@@ -320,9 +318,10 @@ class SessionTurnController extends ChangeNotifier
     final reason = port.unavailable(sharedAction);
     if (reason != null) {
       return switch (reason) {
-        shared.SessionTurnUnavailable.busy => port.state.compacting
-            ? builtin.SessionTurnActionUnavailable.compacting
-            : builtin.SessionTurnActionUnavailable.busy,
+        shared.SessionTurnUnavailable.busy =>
+          port.state.compacting
+              ? builtin.SessionTurnActionUnavailable.compacting
+              : builtin.SessionTurnActionUnavailable.busy,
         shared.SessionTurnUnavailable.revertStaged =>
           builtin.SessionTurnActionUnavailable.revertStaged,
         shared.SessionTurnUnavailable.targetUnknown =>

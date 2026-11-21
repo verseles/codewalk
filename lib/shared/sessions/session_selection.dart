@@ -43,6 +43,7 @@ final class SessionSelectionState {
     this.agents = const [],
     this.defaultModel,
     this.defaultModelInputModalities = const {},
+    this.defaultModelContextLimit,
     this.providers = const {},
     this.loading = false,
     this.modelUnavailable,
@@ -67,6 +68,10 @@ final class SessionSelectionState {
   /// The declared input modalities of the model named by [defaultModel];
   /// empty while they are not known.
   final Map<String, bool?> defaultModelInputModalities;
+
+  /// The declared context window limit of the model named by [defaultModel];
+  /// null while unknown.
+  final int? defaultModelContextLimit;
 
   /// Provider display names by provider id; a provider not named here shows
   /// its id.
@@ -100,5 +105,29 @@ final class SessionSelectionState {
       }
     }
     return const {};
+  }
+
+  /// Positive context window limit for ([modelId], [providerId]) in [models],
+  /// or null when unknown or non-positive.
+  int? contextLimitForModel(String modelId, String? providerId) {
+    for (final m in models) {
+      if (m.id == modelId &&
+          (providerId == null || m.providerId == providerId)) {
+        final limit = m.contextLimit;
+        return limit != null && limit > 0 ? limit : null;
+      }
+    }
+    return null;
+  }
+
+  /// Active selected (or server default) model's positive context limit, or
+  /// null when unknown.
+  int? get activeModelContextLimit {
+    final modelId = selection?.modelId;
+    if (modelId == null) {
+      final limit = defaultModelContextLimit;
+      return limit != null && limit > 0 ? limit : null;
+    }
+    return contextLimitForModel(modelId, selection?.modelProviderId);
   }
 }

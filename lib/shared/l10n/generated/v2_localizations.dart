@@ -4987,6 +4987,114 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Attachments: {count}'**
   String attachmentCountLabel(int count);
+
+  /// No description provided for @contextUsageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Context usage'**
+  String get contextUsageTitle;
+
+  /// No description provided for @contextUsageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Context usage unavailable'**
+  String get contextUsageUnavailable;
+
+  /// No description provided for @contextUsageUsage.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage'**
+  String get contextUsageUsage;
+
+  /// No description provided for @contextUsageTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens'**
+  String get contextUsageTokens;
+
+  /// No description provided for @contextUsageCost.
+  ///
+  /// In en, this message translates to:
+  /// **'Cost'**
+  String get contextUsageCost;
+
+  /// No description provided for @contextUsageLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit'**
+  String get contextUsageLimit;
+
+  /// No description provided for @contextUsageInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Input'**
+  String get contextUsageInput;
+
+  /// No description provided for @contextUsageOutput.
+  ///
+  /// In en, this message translates to:
+  /// **'Output'**
+  String get contextUsageOutput;
+
+  /// No description provided for @contextUsageReasoning.
+  ///
+  /// In en, this message translates to:
+  /// **'Reasoning'**
+  String get contextUsageReasoning;
+
+  /// No description provided for @contextUsageCacheRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache read'**
+  String get contextUsageCacheRead;
+
+  /// No description provided for @contextUsageCacheWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Cache write'**
+  String get contextUsageCacheWrite;
+
+  /// No description provided for @contextUsageEstimated.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated'**
+  String get contextUsageEstimated;
+
+  /// No description provided for @contextUsageAutoCompactionNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Compaction summarizes older context to stay within the model limit without deleting your conversation.'**
+  String get contextUsageAutoCompactionNote;
+
+  /// No description provided for @contextUsageCompactNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact now'**
+  String get contextUsageCompactNow;
+
+  /// No description provided for @contextUsageCompacting.
+  ///
+  /// In en, this message translates to:
+  /// **'Compacting...'**
+  String get contextUsageCompacting;
+
+  /// No description provided for @contextUsageQuotaNotExposed.
+  ///
+  /// In en, this message translates to:
+  /// **'Quota is not exposed by this harness.'**
+  String get contextUsageQuotaNotExposed;
+
+  /// No description provided for @contextUsageQuotaNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No quota windows reported.'**
+  String get contextUsageQuotaNone;
+
+  /// No description provided for @contextUsageUnknownCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown currency'**
+  String get contextUsageUnknownCurrency;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

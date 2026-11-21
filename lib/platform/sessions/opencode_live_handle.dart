@@ -11,6 +11,7 @@ import '../../shared/sessions/session_shells.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/sessions/session_turn_actions.dart';
 import '../../shared/sessions/session_unrestricted.dart';
+import '../../shared/sessions/session_usage.dart';
 import 'opencode_profile_slot.dart';
 
 /// One live session's lease on an [OpenCodeProfileSlot]. It only delegates to
@@ -21,7 +22,8 @@ final class OpenCodeLiveHandle
         SessionLiveHandle,
         SessionTurnActionSource,
         SessionShellSource,
-        SessionAttachmentSource {
+        SessionAttachmentSource,
+        SessionUsageSource {
   OpenCodeLiveHandle(this._slot, this.session);
   final OpenCodeProfileSlot _slot;
   @override
@@ -54,6 +56,21 @@ final class OpenCodeLiveHandle
   @override
   SessionShellPort? get shells =>
       _closed ? null : _slot.shells?.port(session, () => !_closed);
+
+  String? _cachedUsageCapabilitiesVersion;
+  Map<String, Capability>? _cachedUsageCapabilities;
+
+  @override
+  Map<String, Capability> get usageCapabilities {
+    if (_closed) return const {};
+    final version = _slot.version;
+    if (_cachedUsageCapabilities != null &&
+        _cachedUsageCapabilitiesVersion == version) {
+      return _cachedUsageCapabilities!;
+    }
+    _cachedUsageCapabilitiesVersion = version;
+    return _cachedUsageCapabilities = openCodeUsageCapabilities(version);
+  }
 
   @override
   AttachmentFacet? get attachments => _closed ? null : _slot.attachments;

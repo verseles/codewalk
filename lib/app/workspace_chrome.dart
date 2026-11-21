@@ -6,6 +6,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../features/hosts/endpoint_health_view.dart';
+import '../features/sessions/session_context_usage.dart';
 import '../features/sessions/sessions_controller.dart';
 import '../features/sessions/workspace_draft_page.dart';
 import '../shared/l10n/generated/v2_localizations.dart';
@@ -117,18 +118,32 @@ class WorkspaceAppBarActions extends StatelessWidget {
 
   String _label(V2Localizations l, WorkspacePinnedAction action) =>
       switch (action) {
+        WorkspacePinnedAction.contextUsage => l.contextUsageTitle,
         WorkspacePinnedAction.newChat => l.chatNewChat,
         WorkspacePinnedAction.servers => l.settingsServersTitle,
         WorkspacePinnedAction.settings => l.settingsTitle,
       };
   IconData _icon(WorkspacePinnedAction action) => switch (action) {
+    WorkspacePinnedAction.contextUsage => Symbols.donut_large,
     WorkspacePinnedAction.newChat => Symbols.add_comment,
     WorkspacePinnedAction.servers => Symbols.dns,
     WorkspacePinnedAction.settings => Symbols.settings,
   };
-  VoidCallback? _run(BuildContext context, WorkspacePinnedAction action) {
+  VoidCallback? _run(
+    BuildContext context,
+    WorkspacePinnedAction action, {
+    required bool showUsageControl,
+    required WorkspaceChromeController? chrome,
+  }) {
     final catalog = context.read<SessionsController?>();
+    final live = chrome?.activeLive;
     return switch (action) {
+      WorkspacePinnedAction.contextUsage =>
+        showUsageControl && live != null
+            ? () => unawaited(
+                showContextUsageFromOverflow(context, live, compact: compact),
+              )
+            : null,
       WorkspacePinnedAction.newChat =>
         catalog == null || !canOpenWorkspaceDraft(catalog)
             ? null
@@ -146,7 +161,8 @@ class WorkspaceAppBarActions extends StatelessWidget {
     final live = chrome?.activeLive;
     final l = context.v2L10n;
     final wide = !compact;
-    final pins = preferences?.appBarPins ?? [WorkspacePinnedAction.newChat];
+    final pins =
+        preferences?.appBarPins ?? AppPreferencesController.defaultAppBarPins;
     // A Settings pin saved on a wide layout must not duplicate the fixed
     // drawer-header action when the compact bar renders.
     final shownPins = wide
@@ -156,6 +172,7 @@ class WorkspaceAppBarActions extends StatelessWidget {
               if (action != WorkspacePinnedAction.settings) action,
           ];
     const order = [
+      WorkspacePinnedAction.contextUsage,
       WorkspacePinnedAction.newChat,
       WorkspacePinnedAction.settings,
       WorkspacePinnedAction.servers,
@@ -166,190 +183,230 @@ class WorkspaceAppBarActions extends StatelessWidget {
             for (final action in order)
               if (action != WorkspacePinnedAction.settings) action,
           ];
-    final firstEnabled = menuOrder.firstWhere(
-      (action) => _run(context, action) != null,
-    );
-    Widget menu() => MenuAnchor(
-      builder: (context, controller, child) => IconButton(
-        key: const ValueKey('workspace-actions'),
-        icon: const Icon(Symbols.more_vert),
-        tooltip: l.chatAppBarMoreActions,
-        onPressed: controller.isOpen ? controller.close : controller.open,
-      ),
-      menuChildren: [
-        // v1: chat_page_mobile_overflow.dart:230-265 (items and dividers).
-        for (final action in order)
-          if (wide || action != WorkspacePinnedAction.settings) ...[
-            MenuItemButton(
-              // Pointer opening must also transfer keyboard focus into the menu.
-              autofocus: action == firstEnabled,
-              leadingIcon: Icon(_icon(action)),
-              onPressed: _run(context, action),
-              trailingIcon: preferences == null
-                  ? null
-                  : ListenableBuilder(
-                      listenable: preferences,
-                      builder: (context, _) {
-                        final pinned = preferences.appBarPins.contains(action);
-                        return IconButton(
-                          key: ValueKey('workspace-pin-${action.name}'),
-                          tooltip: pinned
-                              ? l.chatAppBarUnpinAction
-                              : l.chatAppBarPinAction,
-                          padding: const EdgeInsets.all(8),
-                          constraints: const BoxConstraints(
-                            minWidth: 34,
-                            minHeight: 34,
-                          ),
-                          iconSize: 18,
-                          icon: Icon(
-                            Symbols.push_pin,
-                            color: pinned
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(
-                                    context,
-                                  ).colorScheme.onSurfaceVariant,
-                          ),
-                          onPressed: preferences.canEditAppBarPins
-                              ? () =>
-                                    preferences.setAppBarPinned(action, !pinned)
-                              : null,
-                        );
-                      },
-                    ),
-              child: Text(_label(l, action)),
-            ),
-            if (action != WorkspacePinnedAction.servers || !wide)
-              const Divider(height: 1),
-          ],
-        const Divider(height: 1),
-        MenuItemButton(
-          key: const ValueKey('workspace-display-menu'),
-          leadingIcon: const Icon(Symbols.tune),
-          onPressed: preferences == null
-              ? null
-              : () => showWorkspaceDisplayMenu(context),
-          child: Text(l.chatDisplayMenu),
+    Widget menu(bool showUsageControl) {
+      final firstEnabled = menuOrder.firstWhere(
+        (action) =>
+            _run(
+              context,
+              action,
+              showUsageControl: showUsageControl,
+              chrome: chrome,
+            ) !=
+            null,
+        orElse: () => WorkspacePinnedAction.servers,
+      );
+      return MenuAnchor(
+        builder: (context, controller, child) => IconButton(
+          key: const ValueKey('workspace-actions'),
+          icon: const Icon(Symbols.more_vert),
+          tooltip: l.chatAppBarMoreActions,
+          onPressed: controller.isOpen ? controller.close : controller.open,
         ),
-        // v1: chat_page_mobile_overflow.dart:140, the search (#462); a wide
-        // window has it on the toolbar.
-        if (!wide) ...[
+        menuChildren: [
+          // v1: chat_page_mobile_overflow.dart:230-265 (items and dividers).
+          for (final action in order)
+            if (wide || action != WorkspacePinnedAction.settings) ...[
+              MenuItemButton(
+                key: action == WorkspacePinnedAction.contextUsage
+                    ? const ValueKey('workspace-menu-contextUsage')
+                    : null,
+                // Pointer opening must also transfer keyboard focus into the menu.
+                autofocus: action == firstEnabled,
+                leadingIcon: Icon(_icon(action)),
+                onPressed: _run(
+                  context,
+                  action,
+                  showUsageControl: showUsageControl,
+                  chrome: chrome,
+                ),
+                trailingIcon: preferences == null
+                    ? null
+                    : ListenableBuilder(
+                        listenable: preferences,
+                        builder: (context, _) {
+                          final pinned = preferences.appBarPins.contains(
+                            action,
+                          );
+                          return IconButton(
+                            key: ValueKey('workspace-pin-${action.name}'),
+                            tooltip: pinned
+                                ? l.chatAppBarUnpinAction
+                                : l.chatAppBarPinAction,
+                            padding: const EdgeInsets.all(8),
+                            constraints: const BoxConstraints(
+                              minWidth: 34,
+                              minHeight: 34,
+                            ),
+                            iconSize: 18,
+                            icon: Icon(
+                              Symbols.push_pin,
+                              color: pinned
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
+                            ),
+                            onPressed: preferences.canEditAppBarPins
+                                ? () => preferences.setAppBarPinned(
+                                    action,
+                                    !pinned,
+                                  )
+                                : null,
+                          );
+                        },
+                      ),
+                child: Text(_label(l, action)),
+              ),
+              if (action != WorkspacePinnedAction.servers || !wide)
+                const Divider(height: 1),
+            ],
           const Divider(height: 1),
           MenuItemButton(
-            key: const ValueKey('workspace-search'),
-            leadingIcon: const Icon(Symbols.search),
-            onPressed: live?.search.show,
-            child: Text(l.liveSearch),
+            key: const ValueKey('workspace-display-menu'),
+            leadingIcon: const Icon(Symbols.tune),
+            onPressed: preferences == null
+                ? null
+                : () => showWorkspaceDisplayMenu(context),
+            child: Text(l.chatDisplayMenu),
           ),
-          const Divider(height: 1),
-        ],
-        // v1: chat_page_mobile_overflow.dart:112-123. Undo is always listed and
-        // disabled without a turn to undo; redo and compact need a live session.
-        if (!wide) ...[
-          MenuItemButton(
-            key: const ValueKey('turn-menu-undo'),
-            leadingIcon: const Icon(Symbols.undo_rounded),
-            onPressed: live != null && live.turn.canUndo
-                ? () => unawaited(live.turn.undoLast(context: context))
-                : null,
-            child: Text(l.chatUndoLastTurn),
-          ),
-          if (live != null) ...[
+          // v1: chat_page_mobile_overflow.dart:140, the search (#462); a wide
+          // window has it on the toolbar.
+          if (!wide) ...[
             const Divider(height: 1),
             MenuItemButton(
-              key: const ValueKey('turn-menu-redo-next'),
-              leadingIcon: const Icon(Symbols.redo_rounded),
-              onPressed: live.turn.canRedoNext
-                  ? () => unawaited(live.turn.redoNext(context: context))
-                  : null,
-              child: Text(l.chatRedoLastTurn),
+              key: const ValueKey('workspace-search'),
+              leadingIcon: const Icon(Symbols.search),
+              onPressed: live?.search.show,
+              child: Text(l.liveSearch),
             ),
             const Divider(height: 1),
+          ],
+          // v1: chat_page_mobile_overflow.dart:112-123. Undo is always listed and
+          // disabled without a turn to undo; redo and compact need a live session.
+          if (!wide) ...[
             MenuItemButton(
-              key: const ValueKey('turn-menu-redo-all'),
-              leadingIcon: const Icon(Symbols.fast_forward),
-              onPressed: live.turn.canRedoAll
-                  ? () => unawaited(live.turn.redoAll(context: context))
+              key: const ValueKey('turn-menu-undo'),
+              leadingIcon: const Icon(Symbols.undo_rounded),
+              onPressed: live != null && live.turn.canUndo
+                  ? () => unawaited(live.turn.undoLast(context: context))
                   : null,
-              child: Text(l.chatRedoAll),
+              child: Text(l.chatUndoLastTurn),
             ),
-            const Divider(height: 1),
-            MenuItemButton(
-              key: const ValueKey('turn-menu-compact'),
-              leadingIcon: const Icon(Symbols.compress),
-              onPressed: live.turn.canCompact
-                  ? () => unawaited(live.turn.compact(context: context))
-                  : null,
-              child: Text(l.chatCompactContext),
-            ),
+            if (live != null) ...[
+              const Divider(height: 1),
+              MenuItemButton(
+                key: const ValueKey('turn-menu-redo-next'),
+                leadingIcon: const Icon(Symbols.redo_rounded),
+                onPressed: live.turn.canRedoNext
+                    ? () => unawaited(live.turn.redoNext(context: context))
+                    : null,
+                child: Text(l.chatRedoLastTurn),
+              ),
+              const Divider(height: 1),
+              MenuItemButton(
+                key: const ValueKey('turn-menu-redo-all'),
+                leadingIcon: const Icon(Symbols.fast_forward),
+                onPressed: live.turn.canRedoAll
+                    ? () => unawaited(live.turn.redoAll(context: context))
+                    : null,
+                child: Text(l.chatRedoAll),
+              ),
+              const Divider(height: 1),
+              MenuItemButton(
+                key: const ValueKey('turn-menu-compact'),
+                leadingIcon: const Icon(Symbols.compress),
+                onPressed: live.turn.canCompact
+                    ? () => unawaited(live.turn.compact(context: context))
+                    : null,
+                child: Text(l.chatCompactContext),
+              ),
+            ],
           ],
         ],
-      ],
-    );
-    Widget actions() => Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (final action in shownPins)
-          IconButton(
-            key: ValueKey('workspace-pinned-${action.name}'),
-            tooltip: _label(l, action),
-            onPressed: _run(context, action),
-            icon: Icon(_icon(action)),
-          ),
-        if (wide)
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // v1: chat_page_chrome.dart:983 (#462).
+      );
+    }
+
+    Widget actions() {
+      final showUsageControl = live != null && live.usageView.supportsAny;
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final action in shownPins)
+            if (action == WorkspacePinnedAction.contextUsage) ...[
+              if (showUsageControl)
+                ContextUsageButton(
+                  key: const ValueKey('workspace-pinned-contextUsage'),
+                  live: live,
+                  compact: compact,
+                ),
+            ] else
               IconButton(
-                key: const ValueKey('workspace-search'),
-                tooltip: l.liveSearch,
-                icon: const Icon(Symbols.search),
-                onPressed: live?.search.show,
+                key: ValueKey('workspace-pinned-${action.name}'),
+                tooltip: _label(l, action),
+                onPressed: _run(
+                  context,
+                  action,
+                  showUsageControl: showUsageControl,
+                  chrome: chrome,
+                ),
+                icon: Icon(_icon(action)),
               ),
-              IconButton(
-                key: const ValueKey('turn-menu-undo'),
-                tooltip: l.chatUndoLastTurn,
-                icon: const Icon(Symbols.undo_rounded),
-                onPressed: live != null && live.turn.canUndo
-                    ? () => unawaited(live.turn.undoLast(context: context))
-                    : null,
-              ),
-              if (live != null) ...[
+          if (wide)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // v1: chat_page_chrome.dart:983 (#462).
                 IconButton(
-                  key: const ValueKey('turn-menu-redo-next'),
-                  tooltip: l.chatRedoLastTurn,
-                  icon: const Icon(Symbols.redo_rounded),
-                  onPressed: live.turn.canRedoNext
-                      ? () => unawaited(live.turn.redoNext(context: context))
-                      : null,
+                  key: const ValueKey('workspace-search'),
+                  tooltip: l.liveSearch,
+                  icon: const Icon(Symbols.search),
+                  onPressed: live?.search.show,
                 ),
                 IconButton(
-                  key: const ValueKey('turn-menu-redo-all'),
-                  tooltip: l.chatRedoAll,
-                  icon: const Icon(Symbols.fast_forward),
-                  onPressed: live.turn.canRedoAll
-                      ? () => unawaited(live.turn.redoAll(context: context))
+                  key: const ValueKey('turn-menu-undo'),
+                  tooltip: l.chatUndoLastTurn,
+                  icon: const Icon(Symbols.undo_rounded),
+                  onPressed: live != null && live.turn.canUndo
+                      ? () => unawaited(live.turn.undoLast(context: context))
                       : null,
                 ),
-                IconButton(
-                  key: const ValueKey('turn-menu-compact'),
-                  tooltip: l.chatCompactContext,
-                  icon: const Icon(Symbols.compress),
-                  onPressed: live.turn.canCompact
-                      ? () => unawaited(live.turn.compact(context: context))
-                      : null,
-                ),
+                if (live != null) ...[
+                  IconButton(
+                    key: const ValueKey('turn-menu-redo-next'),
+                    tooltip: l.chatRedoLastTurn,
+                    icon: const Icon(Symbols.redo_rounded),
+                    onPressed: live.turn.canRedoNext
+                        ? () => unawaited(live.turn.redoNext(context: context))
+                        : null,
+                  ),
+                  IconButton(
+                    key: const ValueKey('turn-menu-redo-all'),
+                    tooltip: l.chatRedoAll,
+                    icon: const Icon(Symbols.fast_forward),
+                    onPressed: live.turn.canRedoAll
+                        ? () => unawaited(live.turn.redoAll(context: context))
+                        : null,
+                  ),
+                  IconButton(
+                    key: const ValueKey('turn-menu-compact'),
+                    tooltip: l.chatCompactContext,
+                    icon: const Icon(Symbols.compress),
+                    onPressed: live.turn.canCompact
+                        ? () => unawaited(live.turn.compact(context: context))
+                        : null,
+                  ),
+                ],
               ],
-            ],
-          ),
-        menu(),
-      ],
-    );
+            ),
+          menu(showUsageControl),
+        ],
+      );
+    }
+
     return live == null
         ? actions()
         : ListenableBuilder(
-            listenable: live.turn,
+            listenable: Listenable.merge([live, live.turn]),
             builder: (context, _) => actions(),
           );
   }

@@ -11,7 +11,7 @@ import '../shared/theme/chat_appearance.dart';
 import '../shared/theme/opencode_theme_preferences.dart';
 import '../shared/theme/theme_preferences.dart';
 
-enum WorkspacePinnedAction { servers, settings, newChat }
+enum WorkspacePinnedAction { contextUsage, servers, settings, newChat }
 
 /// What closing the desktop window does: quit, or keep running minimized.
 enum WindowCloseAction { close, minimize }
@@ -50,10 +50,15 @@ class AppPreferencesController extends ChangeNotifier {
   bool _disposed = false;
   bool _loadFailed = false;
   bool _shortcutLoadFailed = false;
+  static const appBarPinCap = 4;
+  static const defaultAppBarPins = <WorkspacePinnedAction>[
+    WorkspacePinnedAction.contextUsage,
+    WorkspacePinnedAction.newChat,
+  ];
   bool _pinsLoaded = false;
   bool _pinsLoading = false;
   bool _pinsUnreadable = false;
-  List<WorkspacePinnedAction> _appBarPins = [WorkspacePinnedAction.newChat];
+  List<WorkspacePinnedAction> _appBarPins = List.of(defaultAppBarPins);
   bool _hasPhysicalKeyboard = false;
   Map<String, dynamic> _shortcutOverrides = {};
   final Map<String, String?> _shortcutEdits = {};
@@ -88,9 +93,25 @@ class AppPreferencesController extends ChangeNotifier {
       return;
     }
     final next = [..._appBarPins]..remove(action);
-    if (pinned) next.add(action);
-    _appBarPins = next.length > 3 ? next.sublist(next.length - 3) : next;
+    if (pinned) {
+      if (action == WorkspacePinnedAction.contextUsage) {
+        _insertContextUsagePin(next);
+      } else {
+        next.add(action);
+      }
+    }
+    _appBarPins = next.length > appBarPinCap
+        ? next.sublist(next.length - appBarPinCap)
+        : next;
     _changed('appBarPins');
+  }
+
+  static void _insertContextUsagePin(List<WorkspacePinnedAction> pins) {
+    final newChatIndex = pins.indexOf(WorkspacePinnedAction.newChat);
+    pins.insert(
+      newChatIndex >= 0 ? newChatIndex : 0,
+      WorkspacePinnedAction.contextUsage,
+    );
   }
 
   /// The conversations pane beside the chat: its width stays within
@@ -346,7 +367,10 @@ class AppPreferencesController extends ChangeNotifier {
     'useAmoledDark': _useAmoledDark,
     'useDynamicColor': _useDynamicColor,
     'loggingEnabled': _loggingEnabled,
-    'appBarPins': jsonEncode(_appBarPins.map((action) => action.name).toList()),
+    'appBarPins': jsonEncode({
+      'v': 1,
+      'pins': _appBarPins.map((action) => action.name).toList(),
+    }),
     'sessionPaneWidth': _sessionPaneWidth,
     'sessionPaneHidden': _sessionPaneHidden ? true : null,
     'systemTextScale': _systemTextScale == 1 ? null : _systemTextScale,
@@ -389,9 +413,13 @@ class AppPreferencesController extends ChangeNotifier {
       }
       // Accepted shortcut writes must still merge their snapshot after disposal.
       _hydrateShortcuts(values['shortcuts']);
-      _hydratePins(values['appBarPins']);
+      final migratedPins = _hydratePins(values['appBarPins']);
       _pinsLoading = false;
       if (_disposed) return;
+      if (migratedPins && _revisions['appBarPins'] == null) {
+        _revisions['appBarPins'] = 0;
+        _persist('appBarPins', _values['appBarPins'], 0);
+      }
       // A choice made while storage was loading always wins over the snapshot.
       Object? value(String key) =>
           revisions[key] == null && _revisions[key] == null
@@ -540,18 +568,32 @@ class AppPreferencesController extends ChangeNotifier {
     }
   }
 
-  void _hydratePins(Object? raw) {
+  bool _hydratePins(Object? raw) {
     try {
+      var migrated = false;
       if (raw != null) {
         if (raw is! String || raw.length > V2MetadataStore.maxPreferenceChars) {
           throw const FormatException('Invalid pinned actions');
         }
         final decoded = jsonDecode(raw);
-        if (decoded is! List || decoded.length > 64) {
+        final List<dynamic> rawList;
+        final bool isLegacyList;
+        if (decoded is List) {
+          rawList = decoded;
+          isLegacyList = true;
+        } else if (decoded is Map<String, dynamic> &&
+            decoded['v'] == 1 &&
+            decoded['pins'] is List) {
+          rawList = decoded['pins'] as List<dynamic>;
+          isLegacyList = false;
+        } else {
+          throw const FormatException('Invalid pinned actions');
+        }
+        if (rawList.length > 64) {
           throw const FormatException('Invalid pinned actions');
         }
         final next = <WorkspacePinnedAction>[];
-        for (final name in decoded) {
+        for (final name in rawList) {
           // Refresh left the toolbar (#467): a pin saved before is dropped.
           if (name == 'refresh') continue;
           final action = WorkspacePinnedAction.values
@@ -563,13 +605,23 @@ class AppPreferencesController extends ChangeNotifier {
           next.remove(action);
           next.add(action);
         }
-        _appBarPins = next.length > 3 ? next.sublist(next.length - 3) : next;
+        if (isLegacyList) {
+          if (!next.contains(WorkspacePinnedAction.contextUsage)) {
+            _insertContextUsagePin(next);
+          }
+          migrated = true;
+        }
+        _appBarPins = next.length > appBarPinCap
+            ? next.sublist(next.length - appBarPinCap)
+            : next;
       }
       _pinsLoaded = true;
       _pinsUnreadable = false;
+      return migrated;
     } on FormatException {
       _pinsLoaded = true;
       _pinsUnreadable = true;
+      return false;
     }
   }
 

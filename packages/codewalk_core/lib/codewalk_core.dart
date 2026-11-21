@@ -19,6 +19,7 @@ export 'src/forms.dart';
 export 'src/interactions.dart';
 export 'src/work.dart';
 export 'src/usage.dart';
+export 'src/usage_view.dart';
 export 'src/session.dart';
 export 'src/catalog.dart';
 export 'src/workspace.dart';

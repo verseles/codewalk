@@ -604,15 +604,24 @@ void toolbarGroup() {
     // v1: chat_page_mobile_overflow.dart:230-276 (MenuAnchor / MenuItemButton).
     final items = find.byType(MenuItemButton);
     // The v1 actions without Refresh, which v2 no longer needs (#467), plus
-    // the v2 Display sheet entry and v1's Search timeline (#462).
-    expect(items, findsNWidgets(5));
+    // the v2 Display sheet entry, v1's Search timeline (#462) and Context usage (#294).
+    expect(items, findsNWidgets(6));
     expect(tester.getTopLeft(items.first).dy, greaterThanOrEqualTo(bottom));
     // v1: chat_page_mobile_overflow.dart:245-250 (18dp pins), :261 (dividers).
     final pin = tester.widget<IconButton>(
       find.byKey(const ValueKey('workspace-pin-newChat')),
     );
     expect(pin.iconSize, 18);
-    expect(find.byType(Divider), findsNWidgets(5));
+    expect(find.byType(Divider), findsNWidgets(6));
+    // No conversation is open on home: context usage details stay disabled.
+    expect(
+      tester
+          .widget<MenuItemButton>(
+            find.byKey(const ValueKey('workspace-menu-contextUsage')),
+          )
+          .onPressed,
+      isNull,
+    );
     // No conversation is open on home: nothing to search.
     expect(
       tester

@@ -18,6 +18,7 @@ import 'revert_projection.dart';
 import 'session_projection.dart';
 import 'session_rules.dart';
 import 'shell_client.dart';
+import 'usage_series.dart';
 import 'version_policy.dart';
 
 export 'model_catalog.dart'
@@ -66,22 +67,6 @@ const _hydrationListLimit = 4096;
 final _activePath = Uri(pathSegments: ['api', 'session', 'active']).toString();
 
 /// The ids of the active map: every entry is a running drain.
-Set<String> _activeSessions(Object? value) {
-  if (value is! Map<String, Object?> ||
-      value['data'] is! Map<String, Object?>) {
-    throw const FormatException('Malformed active map.');
-  }
-  final active = value['data']! as Map<String, Object?>;
-  for (final MapEntry(:key, :value) in active.entries) {
-    if (!key.startsWith('ses') ||
-        value is! Map<String, Object?> ||
-        value['type'] != 'running') {
-      throw const FormatException('Malformed active entry.');
-    }
-  }
-  return active.keys.toSet();
-}
-
 /// The owners of one location's pending permission requests or forms. The
 /// answer names its location, which must be the one asked for. A form may be
 /// owned by the endpoint's `global` sentinel, which is not a session.
@@ -480,7 +465,7 @@ final class OpenCodeSessionReader {
   /// owns. A session absent from the answer is not running.
   Future<Set<String>> readActiveSessions({RequestCancellation? cancellation}) {
     _checkOpen();
-    return _read(_activePath, _activeSessions, cancellation);
+    return _read(_activePath, openCodeActiveSessions, cancellation);
   }
 
   /// The sessions that wait for the user at one location: the owners of its
@@ -729,25 +714,25 @@ final class OpenCodeSessionReader {
     }
     String? native;
     for (var page = 0; page < maxHistoryPages; page++) {
-      final (
-        found,
-        next,
-        length,
-      ) = await _readMediaAware(_historyPath(ref, limit, 'desc', native), (
-        value,
-      ) {
-        final data = rows(value, limit);
-        final cursors = value is Map<String, Object?> ? value['cursor'] : null;
-        if (cursors is! Map<String, Object?>) {
-          throw const FormatException('Malformed history page.');
-        }
-        final next = _nativeCursor(cursors['next']);
-        if (next != null && next == native) {
-          throw const FormatException('History cursor did not advance.');
-        }
-        final match = data.where((row) => row['id'] == messageId);
-        return (match.firstOrNull, next, data.length);
-      }, cancellation);
+      final (found, next, length) = await _readMediaAware(
+        _historyPath(ref, limit, 'desc', native),
+        (value) {
+          final data = rows(value, limit);
+          final cursors = value is Map<String, Object?>
+              ? value['cursor']
+              : null;
+          if (cursors is! Map<String, Object?>) {
+            throw const FormatException('Malformed history page.');
+          }
+          final next = _nativeCursor(cursors['next']);
+          if (next != null && next == native) {
+            throw const FormatException('History cursor did not advance.');
+          }
+          final match = data.where((row) => row['id'] == messageId);
+          return (match.firstOrNull, next, data.length);
+        },
+        cancellation,
+      );
       if (found != null) {
         return found['type'] == 'user'
             ? const OpenCodePromptPromoted()
@@ -892,28 +877,16 @@ final class OpenCodeSessionReader {
 
     final (active, activeStart, activeEnd) = await timed(
       _activePath,
-      _activeSessions,
+      openCodeActiveSessions,
     );
     final running = active.contains(ref.nativeId);
     final (record, infoStart, infoEnd) = await timed(
       Uri(pathSegments: ['api', 'session', ref.nativeId]).toString(),
-      (value) {
-        if (value is! Map<String, Object?>) {
-          throw const FormatException('Malformed OpenCode session response.');
-        }
-        final result = projectOpenCodeSession(value['data'], harness);
-        if (result.info.ref != ref) {
-          throw const FormatException('Session response has another identity.');
-        }
-        // The staged revert is projected once the history page is known.
-        return (
-          result,
-          (value['data']! as Map)['revert'],
-          projectOpenCodeSelection(value['data']),
-        );
-      },
+      (value) => projectOpenCodeSessionEnvelope(value, harness, ref),
     );
-    final (summary, revert, selection) = record;
+    final summary = record.summary;
+    final revert = record.revert;
+    final selection = record.selection;
     final childRecords = {
       for (final child in childSummaries ?? const <SessionSummary>[])
         if (child.info.lineage.parent == ref &&
@@ -1217,6 +1190,19 @@ final class OpenCodeSessionReader {
         value: revertState,
         boundary: boundary('session.get', infoStart, infoEnd),
       ),
+      usage: SnapshotCollection(
+        values: [
+          ?openCodeHydratedSessionTotal(
+            record: record.data,
+            session: ref,
+            timeline: page.items,
+            sourceVersion: sourceVersion,
+            fallbackObservedAt: infoEnd,
+          ),
+        ],
+        boundary: boundary('session.get', infoStart, infoEnd),
+        complete: true,
+      ),
       nextHistoryCursor: more == null ? null : HistoryCursor(more),
       hasMoreHistory: more != null,
     );
@@ -1417,7 +1403,8 @@ final class OpenCodeSessionReader {
     RequestCancellation? parent, {
     int? maxBytes,
     Map<String, String> headers = const {},
-  }) => _reads.read(path, project, parent, maxBytes: maxBytes, headers: headers);
+  }) =>
+      _reads.read(path, project, parent, maxBytes: maxBytes, headers: headers);
 
   /// History and inbox read that negotiates `experimental-media-uri` (retrying
   /// once without the header on HTTP 400) and extracts any inline base64 media
@@ -1438,13 +1425,16 @@ final class OpenCodeSessionReader {
         run,
         parent,
         maxBytes: maxMediaBodyBytes,
-        headers: const {
-          openCodeCapabilitiesHeader: openCodeMediaUriCapability,
-        },
+        headers: const {openCodeCapabilitiesHeader: openCodeMediaUriCapability},
       );
     } on OpenCodeSessionReadException catch (error) {
       if (error.failure != OpenCodeSessionReadFailure.invalidRequest) rethrow;
-      final result = await _read(path, run, parent, maxBytes: maxMediaBodyBytes);
+      final result = await _read(
+        path,
+        run,
+        parent,
+        maxBytes: maxMediaBodyBytes,
+      );
       // Latch refusal only when the headerless retry actually succeeded so an
       // unrelated HTTP 400 (e.g. stale cursor) cannot downgrade negotiation.
       _mediaUriRefused = true;

@@ -59,6 +59,10 @@ final class OpenCodeSelectionLane {
       defaultModelInputModalities:
           entry.agentModelInputs[selection?.agentId ?? entry.defaultAgent] ??
           entry.defaultModelInputs,
+      defaultModelContextLimit:
+          entry.agentModelContextLimits[selection?.agentId ??
+              entry.defaultAgent] ??
+          entry.defaultModelContextLimit,
       providers: entry.providers,
       loading: entry.reading && !entry.read,
       modelUnavailable: entry.modelUnavailable,
@@ -330,9 +334,11 @@ final class OpenCodeSelectionLane {
         ..agents = const []
         ..agentModels = const {}
         ..agentModelInputs = const {}
+        ..agentModelContextLimits = const {}
         ..defaultAgent = null
         ..defaultModel = null
         ..defaultModelInputs = const {}
+        ..defaultModelContextLimit = null
         ..providers = const {}
         ..modelUnavailable = SessionSelectionUnavailable.locationUnknown
         ..agentUnavailable = SessionSelectionUnavailable.locationUnknown;
@@ -408,6 +414,13 @@ final class OpenCodeSelectionLane {
             if (offered(own.providerId, own.id) case final model?)
               agent: model.inputModalities,
       }
+      ..agentModelContextLimits = {
+        if (known)
+          for (final MapEntry(key: agent, value: own) in catalog.models.entries)
+            if (offered(own.providerId, own.id)?.contextLimit case final limit?
+                when limit > 0)
+              agent: limit,
+      }
       // The server's own choice of agent: the configured one, else build,
       // else the first it offers.
       ..defaultAgent = !known
@@ -427,6 +440,9 @@ final class OpenCodeSelectionLane {
           ? const {}
           : offered(fallback.providerId, fallback.id)?.inputModalities ??
                 const {}
+      ..defaultModelContextLimit = !known || fallback == null
+          ? null
+          : offered(fallback.providerId, fallback.id)?.contextLimit
       ..providers = providers ?? const {}
       ..modelUnavailable =
           modelFailure ??
@@ -523,12 +539,14 @@ final class _SelectionEntry {
 
   /// The declared input modalities of each agent's own model, by agent id.
   Map<String, Map<String, bool?>> agentModelInputs = const {};
+  Map<String, int> agentModelContextLimits = const {};
   String? defaultAgent;
   String? defaultModel;
 
   /// The declared input modalities of [defaultModel] when the location offers
   /// it; empty while unknown.
   Map<String, bool?> defaultModelInputs = const {};
+  int? defaultModelContextLimit;
   Map<String, String> providers = const {};
   SessionSelectionUnavailable? modelUnavailable;
   SessionSelectionUnavailable? agentUnavailable;

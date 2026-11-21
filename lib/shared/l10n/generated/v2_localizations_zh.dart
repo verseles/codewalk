@@ -2660,4 +2660,59 @@ class V2LocalizationsZh extends V2Localizations {
   String attachmentCountLabel(int count) {
     return '附件：$count';
   }
+
+  @override
+  String get contextUsageTitle => '上下文使用量';
+
+  @override
+  String get contextUsageUnavailable => '上下文使用量不可用';
+
+  @override
+  String get contextUsageUsage => '使用率';
+
+  @override
+  String get contextUsageTokens => '令牌';
+
+  @override
+  String get contextUsageCost => '费用';
+
+  @override
+  String get contextUsageLimit => '上限';
+
+  @override
+  String get contextUsageInput => '输入';
+
+  @override
+  String get contextUsageOutput => '输出';
+
+  @override
+  String get contextUsageReasoning => '推理';
+
+  @override
+  String get contextUsageCacheRead => '缓存读取';
+
+  @override
+  String get contextUsageCacheWrite => '缓存写入';
+
+  @override
+  String get contextUsageEstimated => '估算';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      '压缩会总结较早的上下文以保持在模型限制内，而不会删除你的对话。';
+
+  @override
+  String get contextUsageCompactNow => '立即压缩';
+
+  @override
+  String get contextUsageCompacting => '正在压缩...';
+
+  @override
+  String get contextUsageQuotaNotExposed => '此运行环境未提供配额信息。';
+
+  @override
+  String get contextUsageQuotaNone => '未报告配额窗口。';
+
+  @override
+  String get contextUsageUnknownCurrency => '未知货币';
 }

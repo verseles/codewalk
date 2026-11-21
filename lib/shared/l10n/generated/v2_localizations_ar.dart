@@ -2815,4 +2815,60 @@ class V2LocalizationsAr extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'المرفقات: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'استخدام السياق';
+
+  @override
+  String get contextUsageUnavailable => 'استخدام السياق غير متاح';
+
+  @override
+  String get contextUsageUsage => 'الاستخدام';
+
+  @override
+  String get contextUsageTokens => 'الرموز';
+
+  @override
+  String get contextUsageCost => 'التكلفة';
+
+  @override
+  String get contextUsageLimit => 'الحد';
+
+  @override
+  String get contextUsageInput => 'الإدخال';
+
+  @override
+  String get contextUsageOutput => 'الإخراج';
+
+  @override
+  String get contextUsageReasoning => 'الاستدلال';
+
+  @override
+  String get contextUsageCacheRead => 'قراءة الذاكرة المؤقتة';
+
+  @override
+  String get contextUsageCacheWrite => 'كتابة الذاكرة المؤقتة';
+
+  @override
+  String get contextUsageEstimated => 'تقديري';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'يقوم الضغط بتلخيص السياق الأقدم للبقاء ضمن حد النموذج دون حذف محادثتك.';
+
+  @override
+  String get contextUsageCompactNow => 'ضغط الآن';
+
+  @override
+  String get contextUsageCompacting => 'جارٍ الضغط...';
+
+  @override
+  String get contextUsageQuotaNotExposed =>
+      'لا يوفر هذا الـ harness بيانات الحصة.';
+
+  @override
+  String get contextUsageQuotaNone => 'لم يتم الإبلاغ عن نوافذ حصة.';
+
+  @override
+  String get contextUsageUnknownCurrency => 'عملة غير معروفة';
 }

@@ -2863,4 +2863,60 @@ class V2LocalizationsRu extends V2Localizations {
   String attachmentCountLabel(int count) {
     return 'Вложения: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'Использование контекста';
+
+  @override
+  String get contextUsageUnavailable => 'Использование контекста недоступно';
+
+  @override
+  String get contextUsageUsage => 'Использование';
+
+  @override
+  String get contextUsageTokens => 'Токены';
+
+  @override
+  String get contextUsageCost => 'Стоимость';
+
+  @override
+  String get contextUsageLimit => 'Лимит';
+
+  @override
+  String get contextUsageInput => 'Ввод';
+
+  @override
+  String get contextUsageOutput => 'Вывод';
+
+  @override
+  String get contextUsageReasoning => 'Рассуждения';
+
+  @override
+  String get contextUsageCacheRead => 'Чтение кэша';
+
+  @override
+  String get contextUsageCacheWrite => 'Запись кэша';
+
+  @override
+  String get contextUsageEstimated => 'Оценка';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      'Сжатие суммирует старый контекст, чтобы оставаться в пределах лимита модели без удаления беседы.';
+
+  @override
+  String get contextUsageCompactNow => 'Сжать сейчас';
+
+  @override
+  String get contextUsageCompacting => 'Сжатие...';
+
+  @override
+  String get contextUsageQuotaNotExposed =>
+      'Квота не предоставляется этим harness.';
+
+  @override
+  String get contextUsageQuotaNone => 'Окна квот не переданы.';
+
+  @override
+  String get contextUsageUnknownCurrency => 'Неизвестная валюта';
 }

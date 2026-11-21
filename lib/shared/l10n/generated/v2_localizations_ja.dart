@@ -2708,4 +2708,59 @@ class V2LocalizationsJa extends V2Localizations {
   String attachmentCountLabel(int count) {
     return '添付: $count';
   }
+
+  @override
+  String get contextUsageTitle => 'コンテキスト使用量';
+
+  @override
+  String get contextUsageUnavailable => 'コンテキスト使用量は利用できません';
+
+  @override
+  String get contextUsageUsage => '使用率';
+
+  @override
+  String get contextUsageTokens => 'トークン';
+
+  @override
+  String get contextUsageCost => 'コスト';
+
+  @override
+  String get contextUsageLimit => '上限';
+
+  @override
+  String get contextUsageInput => '入力';
+
+  @override
+  String get contextUsageOutput => '出力';
+
+  @override
+  String get contextUsageReasoning => '推論';
+
+  @override
+  String get contextUsageCacheRead => 'キャッシュ読込';
+
+  @override
+  String get contextUsageCacheWrite => 'キャッシュ書込';
+
+  @override
+  String get contextUsageEstimated => '推定';
+
+  @override
+  String get contextUsageAutoCompactionNote =>
+      '圧縮は会話を削除せずにモデルの制限内に収めるため、古いコンテキストを要約します。';
+
+  @override
+  String get contextUsageCompactNow => '今すぐ圧縮';
+
+  @override
+  String get contextUsageCompacting => '圧縮中...';
+
+  @override
+  String get contextUsageQuotaNotExposed => 'このハーネスではクォータが公開されていません。';
+
+  @override
+  String get contextUsageQuotaNone => '報告されたクォータウィンドウはありません。';
+
+  @override
+  String get contextUsageUnknownCurrency => '不明な通貨';
 }

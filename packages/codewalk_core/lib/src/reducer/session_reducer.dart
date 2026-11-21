@@ -1161,7 +1161,21 @@ final class _Draft {
 
   void limitUsage() {
     if (usage.length > limits.maxObservations) {
-      usage.removeRange(0, usage.length - limits.maxObservations);
+      // Evict oldest non-cumulative observations first so cumulative session
+      // series (e.g. session-total, context-occupancy) survive long sessions.
+      var excess = usage.length - limits.maxObservations;
+      for (var i = 0; i < usage.length && excess > 0;) {
+        final entry = usage[i];
+        if (!entry.cumulative || entry.partial) {
+          usage.removeAt(i);
+          excess--;
+        } else {
+          i++;
+        }
+      }
+      if (excess > 0) {
+        usage.removeRange(0, excess);
+      }
     }
     final retained = usage.map(_usageKey).toSet();
     usagePositions.removeWhere((key, _) => !retained.contains(key));

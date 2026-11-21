@@ -52,14 +52,24 @@ final class Cost {
 }
 
 final class ContextMeter {
-  ContextMeter({this.used, this.limit, required this.measurement}) {
+  ContextMeter({
+    this.used,
+    this.limit,
+    required this.measurement,
+    this.modelId,
+    this.modelProviderId,
+  }) {
     _nonNegative(used, 'used');
     _nonNegative(limit, 'limit');
+    _optionalNonempty(modelId, 'modelId');
+    _optionalNonempty(modelProviderId, 'modelProviderId');
   }
 
   final num? used;
   final num? limit;
   final OpenValue<ContextMeasurement> measurement;
+  final String? modelId;
+  final String? modelProviderId;
 }
 
 /// Native windows may report more than 100 percent and omit their reset time.
