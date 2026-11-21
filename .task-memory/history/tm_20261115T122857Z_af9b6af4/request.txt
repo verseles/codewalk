@@ -1,1 +1,0 @@
-Vamos ver icone do projeto (veja como a api informa, o app desktop/mobile ja exibe). Apenas icone do projeto.

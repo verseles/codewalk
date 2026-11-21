@@ -1,0 +1,1 @@
+Após concluir e validar o flow atual (commit, push e gate verde no SHA final), liberar uma release minor em main com texto de release aprovado autonomamente (CHANGELOG.md + make release + make watch-release), sem esperar nova confirmação.
