@@ -147,8 +147,9 @@ CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Cla
 ## Releases on `main`
 
 - CodeWalk 2 has graduated to stable releases (`v2.0.0+`). Never cut a release without an explicit owner order.
-- A release requires curated release notes (led by one `> 📣` line in English of at most 300 characters), a clean tree, `main == origin/main`, and a green local gate on that exact SHA. Never run a release in parallel with the gate; a published tag never moves.
-- `make release` commits only the version bump and `CHANGELOG.md` update, creates the tag and pushes atomically, followed by `make watch-release`. Commit all code first; a plain `push` is not a release.
+- A release requires curated release notes in `release-notes/vX.Y.Z.md` (led by one `> 📣` line in English of at most 300 characters, no `##` headings), a clean tree, `main == origin/main`, and a green local gate on that exact SHA. Never run a release in parallel with the gate; a published tag never moves.
+- Curate and approve release notes autonomously by default; do not pause to ask the owner to approve the release text unless explicitly asked.
+- `make release V=stable` (via `tool/release/cut_stable.py`, defaulting to `--bump minor`; invoke `python3 tool/release/cut_stable.py --bump patch` for a patch) reads the already committed and pushed `release-notes/vX.Y.Z.md`, prepends `CHANGELOG.md` automatically, bumps `pubspec.yaml`, commits both with `.task-memory`, creates the tag and pushes atomically, followed by `make watch-release`. Do not edit `CHANGELOG.md` manually before cutting; commit all code and release notes first. A plain `push` is not a release.
 - Keep `CHANGELOG.md` machine-readable: unique `## vX.Y.Z - YYYY-MM-DD` headings, newest first, `###` for subsections. Each release may have one leading `> 📣` line in English, up to 300 characters. Preserve prior sections.
 - Release rules for v1 live in the `AGENTS.md` of the `v1` branch.
 
