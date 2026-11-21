@@ -2,6 +2,22 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.2.0 - 2026-11-21
+
+> 📣 CodeWalk 2.2.0 brings the circular context-usage knob and session usage details back to the workspace toolbar — pinned by default beside New Chat, with token breakdown, cumulative session cost, and a one-tap Compact now action.
+
+### Context usage knob & toolbar pinning
+
+- Adds a circular context-usage ring button to the workspace AppBar, pinned by default immediately to the left of **New Chat** (with the AppBar pin cap raised from 3 to 4).
+- Existing installations migrate once to include the context-usage knob beside **New Chat**, and unpinning or re-pinning it from the `⋮` overflow menu persists cleanly across restarts.
+- Stays hidden from the toolbar when no live session is active or the connected harness exposes no usage capabilities, while remaining listed in the overflow menu so pinning stays accessible.
+
+### Session usage details & compaction
+
+- Opens a popover on wide layouts and a modal sheet or dialog on compact layouts showing live context occupancy (`used / limit` and percentage), input/output/reasoning/cache token breakdown, and cumulative session cost.
+- Follows the OpenCode 2 usage contract: context occupancy tracks the latest assistant step after the last completed compaction and before any staged revert boundary, never showing unknown or untouched values as zero.
+- Includes a full-width **Compact now** action inside the details panel whenever the active session supports compaction, alongside an honest notice when a harness does not expose remaining external quota windows.
+
 ## v2.1.1 - 2026-11-20
 
 > 📣 CodeWalk 2.1.1 fixes image attachments on sessions using the default or agent model: images now go inline to the model, and images sent as files preview from your device instead of showing "Preview unavailable".
