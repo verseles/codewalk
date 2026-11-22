@@ -15,7 +15,11 @@ import 'session_tool_details_dialog.dart';
 /// anywhere on the row opens [showToolDetailsDialog].
 class SessionToolResult extends StatelessWidget {
   SessionToolResult({required this.item, this.messageHeader})
-    : assert(item is ToolCall || item is ShellRun),
+    : assert(
+        item is ToolCall ||
+            item is ShellRun ||
+            (item is Notice && item.shellReport != null),
+      ),
       super(key: ValueKey('tool-result-${item.id.value}'));
 
   final TimelineItem item;
@@ -37,7 +41,8 @@ class SessionToolResult extends StatelessWidget {
     final hasDetails = toolHasDetails(item);
     final isShell =
         item is ShellRun ||
-        (item is ToolCall && (item as ToolCall).kind.known == ToolKind.shell);
+        (item is ToolCall && (item as ToolCall).kind.known == ToolKind.shell) ||
+        (item is Notice && (item as Notice).shellReport != null);
     final semanticsLabel = status == null ? summary : '$summary, $status';
 
     final content = LayoutBuilder(

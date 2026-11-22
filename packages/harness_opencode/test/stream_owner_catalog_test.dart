@@ -192,4 +192,106 @@ void main() {
     ]);
     expect(changes, isEmpty);
   });
+
+  test(
+    'archive, worktree, integration, config, and credential events emit catalog/location changes and open tools resync on execution end',
+    () async {
+      final harness = Harness('ses_a');
+      harness.reads.record = {
+        'data': {
+          'id': 'ses_a',
+          'title': 'Demo',
+          'projectID': 'prj_1',
+          'location': {'directory': '/work/main'},
+          'time': {'created': 1000, 'updated': 1000},
+        },
+      };
+      final changes = <OpenCodeCatalogChange>[];
+      final directories = <String>[];
+      harness.owner.catalogChanges.listen(changes.add);
+      harness.owner.locationCatalogChanges.listen(directories.add);
+      harness.owner.watch(harness.ref);
+      await harness.connect(1);
+
+      await harness.send([
+        {
+          'id': 'evt_arch',
+          'created': 1,
+          'type': 'session.archived',
+          'data': {'sessionID': 'ses_b'},
+        },
+        {
+          'id': 'evt_unarch',
+          'created': 2,
+          'type': 'session.unarchived',
+          'data': {'sessionID': 'ses_b'},
+        },
+        {
+          'id': 'evt_wt1',
+          'created': 3,
+          'type': 'worktree.updated',
+          'data': <String, Object?>{},
+        },
+        {
+          'id': 'evt_wt2',
+          'created': 4,
+          'type': 'worktree.resolved',
+          'data': <String, Object?>{},
+        },
+        {
+          'id': 'evt_int',
+          'created': 5,
+          'type': 'integration.updated',
+          'location': {'directory': '/work/int'},
+          'data': <String, Object?>{},
+        },
+        {
+          'id': 'evt_cfg',
+          'created': 6,
+          'type': 'config.updated',
+          'location': {'directory': '/work/cfg'},
+          'data': <String, Object?>{},
+        },
+        {
+          'id': 'evt_cred',
+          'created': 7,
+          'type': 'credential.updated',
+          'data': <String, Object?>{},
+        },
+      ]);
+      expect(changes, [
+        OpenCodeCatalogChange.archived,
+        OpenCodeCatalogChange.archived,
+        OpenCodeCatalogChange.project,
+        OpenCodeCatalogChange.project,
+      ]);
+      expect(directories, ['/work/int', '/work/cfg', '/work/main']);
+
+      // Execution ending while a ToolCall is still streaming triggers a repair hydration.
+      final readsBefore = harness.reads.paths.length;
+      await harness.send([
+        {
+          'id': 'evt_t1',
+          'created': 10,
+          'type': 'session.tool.input.started',
+          'data': {
+            'sessionID': 'ses_a',
+            'assistantMessageID': 'msg_1',
+            'id': 'call_1',
+            'name': 'read',
+          },
+          'durable': {'aggregateID': 'ses_a', 'seq': 1, 'version': 1},
+        },
+        {
+          'id': 'evt_e1',
+          'created': 11,
+          'type': 'session.execution.succeeded',
+          'data': {'sessionID': 'ses_a'},
+          'durable': {'aggregateID': 'ses_a', 'seq': 2, 'version': 1},
+        },
+      ]);
+      await harness.settle();
+      expect(harness.reads.paths.length, greaterThan(readsBefore));
+    },
+  );
 }

@@ -57,6 +57,7 @@ const owned = {
   'session.inbox.cancelled': 'inbox',
   'session.inbox.delivery.changed': 'inbox',
   'session.step.started': 'step',
+  'session.step.first-token': 'step',
   'session.step.streamed': 'step',
   'session.step.ended': 'step',
   'session.step.failed': 'step',
@@ -71,9 +72,13 @@ const owned = {
   'session.revert.committed': 'revert',
   'session.created': 'lifecycle',
   'session.renamed': 'lifecycle',
+  'session.moved': 'lifecycle',
+  'session.archived': 'lifecycle',
+  'session.unarchived': 'lifecycle',
   'session.deleted': 'lifecycle',
   'session.instructions.updated': 'notice',
   'session.synthetic': 'notice',
+  'session.skill.activated': 'notice',
   'session.compaction.started': 'compaction',
   'session.compaction.ended': 'compaction',
   'session.compaction.failed': 'compaction',
@@ -153,7 +158,7 @@ void main() {
       },
       frame('session.retry.scheduled', session: 'ses_b'),
       frame('session.future.fact', session: 'ses_b'),
-      {'type': 'session.moved'},
+      {'type': 'session.viewed'},
     ]) {
       expect(project(input, version: 'x'), isEmpty, reason: '$input');
     }
@@ -180,8 +185,8 @@ void main() {
       // Execution truth never comes from the legacy status pair.
       ('session.status', 'unprojected'),
       ('session.idle', 'unprojected'),
-      ('session.moved', 'unprojected'),
-      ('session.skill.activated', 'unprojected'),
+      ('session.viewed', 'unprojected'),
+      ('session.forked', 'unprojected'),
       ('session.future.fact', 'unrecognized'),
     ]) {
       final events = project(

@@ -152,6 +152,7 @@ final Map<String, _Producer> _routes = {
     type: projectOpenCodeInboxEvent,
   for (final type in const [
     'session.step.started',
+    'session.step.first-token',
     'session.step.streamed',
     'session.step.ended',
     'session.step.failed',
@@ -175,6 +176,9 @@ final Map<String, _Producer> _routes = {
   for (final type in const [
     'session.created',
     'session.renamed',
+    'session.moved',
+    'session.archived',
+    'session.unarchived',
     'session.deleted',
     'session.agent.selected',
     'session.model.selected',
@@ -183,6 +187,7 @@ final Map<String, _Producer> _routes = {
   for (final type in const [
     'session.instructions.updated',
     'session.synthetic',
+    'session.skill.activated',
   ])
     type: projectOpenCodeNoticeEvent,
   for (final type in const ['session.shell.started', 'session.shell.ended'])
@@ -195,14 +200,12 @@ final Map<String, _Producer> _routes = {
     type: projectOpenCodeCompactionEvent,
 };
 
-/// Official 2.0.22 session types that no producer projects yet; they stay
+/// Official OpenCode v2 session types that no producer projects yet; they stay
 /// visible as observations instead of half-mapped state.
 const _unprojected = {
-  'session.moved',
   'session.metadata.updated',
   'session.viewed',
   'session.forked',
-  'session.skill.activated',
   'session.usage.recorded',
   'session.message.content.updated',
   'session.status',

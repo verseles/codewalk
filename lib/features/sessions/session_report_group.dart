@@ -15,10 +15,12 @@ class SessionReportGroup extends StatefulWidget {
     super.key,
     required this.reports,
     this.onOpenChild,
+    this.onTapLink,
   });
 
   final List<Notice> reports;
   final ValueChanged<SessionRef>? onOpenChild;
+  final void Function(String text, String href, String? title)? onTapLink;
 
   @override
   State<SessionReportGroup> createState() => _SessionReportGroupState();
@@ -119,6 +121,7 @@ class _SessionReportGroupState extends State<SessionReportGroup> {
                       source: notice.text,
                       complete: true,
                       allowBasicHtml: false,
+                      onTapLink: widget.onTapLink,
                     ),
                   ),
                 if (notice.relatedSession case final child?
@@ -193,6 +196,7 @@ class SessionSubagentCalls extends StatefulWidget {
     required this.row,
     required this.expandedAnchors,
     this.onOpenChild,
+    this.onTapLink,
   });
   final SessionSubagentCallsRow row;
 
@@ -200,6 +204,7 @@ class SessionSubagentCalls extends StatefulWidget {
   /// an older call to the same group preserves the reader's choice.
   final Set<ItemId> expandedAnchors;
   final ValueChanged<ToolCall>? onOpenChild;
+  final void Function(String text, String href, String? title)? onTapLink;
 
   @override
   State<SessionSubagentCalls> createState() => _SessionSubagentCallsState();
@@ -270,6 +275,7 @@ class _SessionSubagentCallsState extends State<SessionSubagentCalls> {
               item: call.item,
               messageHeader: call.messageHeader,
               onOpenChild: widget.onOpenChild,
+              onTapLink: widget.onTapLink,
             ),
       ],
     );

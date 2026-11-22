@@ -921,4 +921,37 @@ void main() {
       );
     },
   );
+
+  test(
+    'shell tool cancellation and metadata.interrupted project as interrupted',
+    () {
+      var state = SessionState(historyRef);
+      state = reduce(
+        state,
+        projectTool(
+          toolFrame('input.started', id: 'evt_sh_c1', name: 'shell'),
+          current: state,
+        )!,
+      ).state;
+      final cancelled = toolFrame('failed', id: 'evt_sh_c2');
+      toolData(cancelled)['error'] = {
+        'type': 'tool.execution',
+        'message': 'Command cancelled',
+      };
+      final done =
+          projectTool(cancelled, current: state, seq: 2)! as ItemUpserted;
+      expect(done.item.status.known, ItemStatus.interrupted);
+
+      final interruptedByMeta = toolFrame('failed', id: 'evt_sh_c3');
+      toolData(interruptedByMeta)['error'] = {
+        'type': 'tool.execution',
+        'message': 'Signal received',
+      };
+      toolData(interruptedByMeta)['metadata'] = {'interrupted': true};
+      final doneMeta =
+          projectTool(interruptedByMeta, current: state, seq: 3)!
+              as ItemUpserted;
+      expect(doneMeta.item.status.known, ItemStatus.interrupted);
+    },
+  );
 }

@@ -14,6 +14,7 @@ import 'session_timeline_projection.dart';
 /// Material symbol matching the canonical kind of a tool or shell run.
 IconData toolIcon(TimelineItem item) => switch (item) {
   ShellRun() => Symbols.terminal,
+  Notice(shellReport: _?) => Symbols.terminal,
   ToolCall(:final kind) => switch (kind.known) {
     ToolKind.shell => Symbols.terminal,
     ToolKind.read => Symbols.description,
@@ -33,6 +34,7 @@ IconData toolIcon(TimelineItem item) => switch (item) {
 /// Short localized kind label for a compact tool or shell row.
 String toolKindLabel(TimelineItem item, V2Localizations l10n) => switch (item) {
   ShellRun() => l10n.toolKindShell,
+  Notice(shellReport: _?) => l10n.toolKindShell,
   ToolCall(:final kind, :final rawName) => switch (kind.known) {
     ToolKind.shell => l10n.toolKindShell,
     ToolKind.read => l10n.toolKindRead,
@@ -68,6 +70,8 @@ String? toolTarget(TimelineItem item) {
   switch (item) {
     case ShellRun(:final command):
       return clean(command);
+    case Notice(:final shellReport?):
+      return clean(shellReport.command);
     case ToolCall(:final input):
       final value = input?.value;
       if (value is! Map<Object?, Object?>) return null;
@@ -120,6 +124,20 @@ bool _factsRunning(ToolRunFacts facts) =>
 enum ToolProgress { queued, running, done, attention, unknown }
 
 ToolProgress toolProgress(TimelineItem item) {
+  if (item case Notice(shellReport: final report?)) {
+    if (report.timedOut ||
+        report.killed ||
+        report.outcome == OutcomeKind.failed ||
+        report.outcome == OutcomeKind.interrupted) {
+      return ToolProgress.attention;
+    }
+    if (report.exitCode != null) {
+      return report.exitCode == 0 ? ToolProgress.done : ToolProgress.attention;
+    }
+    if (report.outcome == OutcomeKind.succeeded) return ToolProgress.done;
+    if (report.exitToken != null) return ToolProgress.unknown;
+    return ToolProgress.done;
+  }
   if (item case ShellRun(:final shellStatus?)) {
     return switch (shellStatus.known) {
       ShellStatus.running => ToolProgress.running,
@@ -277,6 +295,12 @@ class _ToolDetailsBody extends StatelessWidget {
 
 /// Whether a tool or shell run ended in a failure the reader must see.
 bool toolFailed(TimelineItem item) => switch (item) {
+  Notice(shellReport: final report?) =>
+    report.timedOut ||
+        report.killed ||
+        report.outcome == OutcomeKind.failed ||
+        report.outcome == OutcomeKind.interrupted ||
+        (report.exitCode != null && report.exitCode != 0),
   ShellRun(shellStatus: OpenValue(known: final status?)) => switch (status) {
     ShellStatus.timeout || ShellStatus.killed => true,
     ShellStatus.exited => item.exitCode != null && item.exitCode != 0,
@@ -303,6 +327,26 @@ String? toolStatusLabel(
   V2Localizations l10n, {
   bool includeDone = false,
 }) {
+  if (item case Notice(shellReport: final report?)) {
+    final exit = report.exitCode?.toString() ?? report.exitToken;
+    final code = exit == null ? '' : ' · ${l10n.liveShellExitCode} $exit';
+    if (report.timedOut) return '${l10n.liveShellTimedOut}$code';
+    if (report.killed) return '${l10n.liveShellKilled}$code';
+    if (report.outcome == OutcomeKind.interrupted) {
+      return '${l10n.liveToolInterrupted}$code';
+    }
+    if (report.outcome == OutcomeKind.failed ||
+        (report.exitCode != null && report.exitCode != 0)) {
+      return '${l10n.statusFailed}$code';
+    }
+    if (report.outcome == OutcomeKind.succeeded || report.exitCode == 0) {
+      return includeDone ? l10n.liveToolDone : null;
+    }
+    if (report.exitToken != null) {
+      return '${l10n.liveShellExitCode} ${report.exitToken}';
+    }
+    return includeDone ? l10n.liveToolDone : null;
+  }
   if (item case ShellRun(:final shellStatus?)) {
     final exit = item.exitCode?.toString() ?? item.exitToken;
     final code = exit == null ? '' : ' · ${l10n.liveShellExitCode} $exit';
@@ -366,6 +410,7 @@ bool toolHasDetails(TimelineItem item) => switch (item) {
   ToolCall(:final input, :final output, :final error) =>
     input != null || output != null || error != null,
   ShellRun() => true,
+  Notice(shellReport: _?) => true,
   _ => false,
 };
 
@@ -395,6 +440,18 @@ List<_Section> _sections(TimelineItem item, V2Localizations l10n) {
                 ? l10n.liveShellOutputPartial
                 : null,
           ),
+      ];
+    case Notice(shellReport: final report?, :final text):
+      final command = report.command?.trim();
+      final body = text.trim().isEmpty ? l10n.liveShellOutputEmpty : text;
+      return [
+        if (command != null && command.isNotEmpty)
+          _Section(l10n.chatMessageToolCommand, command),
+        _Section(
+          l10n.liveToolOutput,
+          body,
+          notice: report.truncated ? l10n.liveShellOutputPartial : null,
+        ),
       ];
     default:
       return const [];

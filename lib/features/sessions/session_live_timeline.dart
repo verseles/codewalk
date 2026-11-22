@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/rendering/markdown_link_opener.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_error_card.dart';
@@ -45,6 +46,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.errorRecovery,
     this.onOpenChild,
     this.onOpenReportChild,
+    this.onTapLink,
     this.bottomEndOverlay,
     this.emptyBuilder,
     this.userTurnRevert,
@@ -84,6 +86,10 @@ class SessionLiveTimeline extends StatefulWidget {
   /// Opens the sub-conversation of a subagent card; null for none.
   final ValueChanged<ToolCall>? onOpenChild;
   final ValueChanged<SessionRef>? onOpenReportChild;
+
+  /// Handles tapping a Markdown link inside timeline items; defaults to
+  /// [openExternalMarkdownLink].
+  final void Function(String text, String href, String? title)? onTapLink;
 
   /// The block below the header while there is no item: a loader while the
   /// session loads, or the empty conversation once it is known to be empty.
@@ -853,6 +859,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
             SessionItemRow(:final item, :final messageHeader) =>
               SessionTimelineTile(
                 item: item,
+                onTapLink:
+                    widget.onTapLink ??
+                    (_, href, _) =>
+                        unawaited(openExternalMarkdownLink(context, href)),
                 errorRecovery: widget.errorRecovery,
                 onOpenChild: widget.onOpenChild,
                 messageHeader: messageHeader,
@@ -868,10 +878,18 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               row: row,
               expandedAnchors: _expandedSubagentCalls,
               onOpenChild: widget.onOpenChild,
+              onTapLink:
+                  widget.onTapLink ??
+                  (_, href, _) =>
+                      unawaited(openExternalMarkdownLink(context, href)),
             ),
             SessionReportRow() => SessionReportGroup(
               reports: row.reports,
               onOpenChild: widget.onOpenReportChild,
+              onTapLink:
+                  widget.onTapLink ??
+                  (_, href, _) =>
+                      unawaited(openExternalMarkdownLink(context, href)),
             ),
             SessionActivityStretchRow() => SessionActivityStretchHeader(
               row: row,
@@ -1113,6 +1131,7 @@ _ItemSignature _itemSignature(TimelineItem item) => (
   },
   exitCode: switch (item) {
     ShellRun(:final exitCode) => exitCode,
+    Notice(:final shellReport?) => shellReport.exitCode,
     _ => null,
   },
   // A tool's input, output and runtime facts, compared by value: a re-read
@@ -1124,6 +1143,7 @@ _ItemSignature _itemSignature(TimelineItem item) => (
       output,
       runFacts,
     ),
+    Notice(:final shellReport?) => shellReport,
     TurnOutcome(:final error) => (error?.kind.value, error?.rawMessage),
     _ => null,
   },

@@ -1,5 +1,6 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
+import 'package:harness_opencode/src/history_projection.dart';
 import 'package:harness_opencode/src/session_projection.dart';
 import 'package:test/test.dart';
 
@@ -393,5 +394,94 @@ void main() {
       ).title,
       hasLength(256 * 1024),
     );
+  });
+
+  test('moved updates project directory, emits move notice matching history, and ignores moved-in-place notice', () {
+    final initial = infoOf(projectLifecycle(lifecycleFrame('created')).single);
+    final state = withInfo(initial);
+
+    // Directory changed -> SessionInfoChanged + Notice(system, newDir).
+    final moved = projectLifecycle(
+      lifecycleFrame(
+        'moved',
+        id: 'evt_mv1',
+        data: {
+          'location': {'directory': '/workspace/new-dir'},
+          'projectID': 'prj_b',
+        },
+        seq: 5,
+      ),
+      current: state,
+    );
+    expect(moved, hasLength(2));
+    final updatedInfo = infoOf(moved.first);
+    expect(updatedInfo.project?.canonicalDirectory, '/workspace/new-dir');
+    expect(updatedInfo.project?.upstreamProjectId, 'prj_b');
+    final notice = (moved.last as ItemUpserted).item as Notice;
+    expect(notice.kind.known, NoticeKind.system);
+    expect(notice.text, '/workspace/new-dir');
+
+    // Matches history location-switched item identity and text.
+    final histMoved =
+        projectOpenCodeHistory(
+              [
+                message('mv1', 'location-switched', {
+                  'location': {'directory': '/workspace/new-dir'},
+                  'previous': {
+                    'location': {'directory': '/workspace/project'},
+                  },
+                }),
+              ],
+              historyRef,
+              sourceVersion: '2.3.0',
+            ).single
+            as Notice;
+    expect(notice.id, histMoved.id);
+    expect(histMoved.kind.known, NoticeKind.system);
+    expect(histMoved.text, '/workspace/new-dir');
+
+    // Moved in place (same directory) -> updates info without emitting a notice.
+    final inPlace = projectLifecycle(
+      lifecycleFrame(
+        'moved',
+        id: 'evt_mv2',
+        data: {
+          'location': {'directory': '/workspace/project'},
+        },
+        seq: 6,
+      ),
+      current: state,
+    );
+    expect(inPlace, hasLength(1));
+    expect(inPlace.single, isA<SessionInfoChanged>());
+
+    // Moved without resident info requests resync.
+    final noResident = projectLifecycle(
+      lifecycleFrame(
+        'moved',
+        data: {
+          'location': {'directory': '/workspace/new-dir'},
+        },
+      ),
+    );
+    expect(
+      (noResident.single as ResyncRequired).reason,
+      'sessionInfoUnproven',
+    );
+  });
+
+  test('archived and unarchived are validated durable no-ops', () {
+    for (final phase in ['archived', 'unarchived']) {
+      expect(
+        projectLifecycle(lifecycleFrame(phase, data: const {})),
+        isEmpty,
+      );
+      expect(
+        () => projectLifecycle(
+          lifecycleFrame(phase, version: 2, data: const {}),
+        ),
+        failsWith(OpenCodeSessionLifecycleProjectionFailure.unsupportedVersion),
+      );
+    }
   });
 }

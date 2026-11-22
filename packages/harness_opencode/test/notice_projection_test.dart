@@ -434,4 +434,154 @@ void main() {
       expect(counts, {'session.instructions.updated': 40});
     },
   );
+
+  test(
+    'background shell synthetic notices parse <shell> and <background-result> envelopes with redaction and fallback',
+    () {
+      // Exact v2.0/v2.2 legacy format (including unmarked fallback with no metadata).
+      const legacyText =
+          '<shell id="sh_01KPN1" state="completed" command="nohup websockify --web /usr/share/novnc 6080 localhost:5900 >/tmp/novnc.log 2>&1 &\necho &quot;ok&quot;">\n(no output)\n</shell>';
+      final unmarked = noticeOf(
+        projectNotice(noticeFrame('session.synthetic', data: {'text': legacyText})),
+      );
+      expect(unmarked.shellReport, isNotNull);
+      expect(unmarked.shellReport!.shellId, 'sh_01KPN1');
+      expect(unmarked.shellReport!.outcome, OutcomeKind.succeeded);
+      expect(
+        unmarked.shellReport!.command,
+        contains('nohup websockify --web /usr/share/novnc 6080'),
+      );
+      expect(unmarked.text, isEmpty);
+
+      // v2.3+ <background-result kind="shell"> with metadata, exitCode, truncation, and secrets.
+      final v23Payload = {
+        'text':
+            '<background-result kind="shell" id="sh_02" state="error" exitCode="2" truncated="true" command="curl --token supersecret123456 https://example.com">\nAuthorization: Bearer topsecret999\n[full output saved to /tmp/opencode-secret/sh_02.log]\n</background-result>',
+        'metadata': {
+          'source': 'shell',
+          'shellID': 'sh_02',
+          'state': 'error',
+          'exitCode': 2,
+          'truncated': true,
+        },
+      };
+      for (final notice in [
+        noticeOf(projectNotice(noticeFrame('session.synthetic', data: v23Payload))),
+        projectOpenCodeHistory(
+              [message('sh_hist', 'synthetic', v23Payload)],
+              historyRef,
+              sourceVersion: '2.3.0',
+            ).single
+            as Notice,
+      ]) {
+        expect(notice.shellReport, isNotNull);
+        expect(notice.shellReport!.shellId, 'sh_02');
+        expect(notice.shellReport!.outcome, OutcomeKind.failed);
+        expect(notice.shellReport!.exitCode, 2);
+        expect(notice.shellReport!.truncated, isTrue);
+        expect(notice.shellReport!.command, isNot(contains('supersecret123456')));
+        expect(notice.text, isNot(contains('topsecret999')));
+        expect(notice.text, isNot(contains('/tmp/opencode-secret')));
+        expect(notice.text, contains('[redacted]'));
+      }
+
+      // User shell prefix + timeout/killed/cancelled variants.
+      final userShellPayload = {
+        'text':
+            'The following shell command was executed by the user:\n<shell id="sh_u1" state="cancelled" killed="true" signal="SIGKILL" command="sleep 99">\n[no output; output file: /tmp/opencode/out.log]\n</shell>',
+        'metadata': {'source': 'shell'},
+      };
+      final userShellNotice = noticeOf(
+        projectNotice(noticeFrame('session.synthetic', data: userShellPayload)),
+      );
+      expect(userShellNotice.shellReport?.shellId, 'sh_u1');
+      expect(userShellNotice.shellReport?.outcome, OutcomeKind.interrupted);
+      expect(userShellNotice.shellReport?.killed, isTrue);
+      expect(userShellNotice.text, isNot(contains('/tmp/opencode/out.log')));
+
+      // v2.3+ <background-result kind="subagent"> and other background/reminder envelopes.
+      final bgSubagent = {
+        'text':
+            '<background-result kind="subagent" sessionID="ses_child" state="completed" description="audit">\nFound 2 bugs.\n</background-result>',
+        'description': 'audit',
+        'metadata': {
+          'source': 'subagent',
+          'agent': 'Reviewer',
+          'childID': 'ses_child',
+          'state': 'completed',
+        },
+      };
+      final sub = noticeOf(
+        projectNotice(noticeFrame('session.synthetic', data: bgSubagent)),
+      );
+      expect(sub.report?.agent, 'Reviewer');
+      expect(sub.report?.outcome, OutcomeKind.succeeded);
+      expect(sub.text, 'Found 2 bugs.');
+
+      final codemode = noticeOf(
+        projectNotice(
+          noticeFrame(
+            'session.synthetic',
+            data: {
+              'text':
+                  '<background-result kind="codemode" id="cm_1" state="completed">\nDone with token=abc123456789\n</background-result>',
+              'metadata': {'source': 'codemode'},
+            },
+          ),
+        ),
+      );
+      expect(codemode.shellReport, isNull);
+      expect(codemode.text, isNot(contains('<background-result')));
+      expect(codemode.text, isNot(contains('abc123456789')));
+
+      for (final tag in ['system-update', 'fork-notice']) {
+        final wrapped = noticeOf(
+          projectNotice(
+            noticeFrame(
+              'session.synthetic',
+              data: {'text': '<$tag>\nWorkspace note\n</$tag>'},
+            ),
+          ),
+        );
+        expect(wrapped.text, 'Workspace note');
+      }
+    },
+  );
+
+  test('session.skill.activated matches history skill row and redacts name', () {
+    final live = noticeOf(
+      projectNotice(
+        noticeFrame(
+          'session.skill.activated',
+          id: 'evt_sk1',
+          version: 1,
+          data: {'name': 'flutter-review'},
+        ),
+      ),
+    );
+    final history =
+        projectOpenCodeHistory(
+              [
+                message('sk1', 'skill', {'name': 'flutter-review'}),
+              ],
+              historyRef,
+              sourceVersion: '2.3.0',
+            ).single
+            as Notice;
+    expect(live.id, history.id);
+    expect(live.kind.known, NoticeKind.skillActivated);
+    expect(history.kind.known, NoticeKind.skillActivated);
+    expect(live.text, 'flutter-review');
+    expect(history.text, 'flutter-review');
+    expect(
+      () => projectNotice(
+        noticeFrame(
+          'session.skill.activated',
+          version: 1,
+          data: {'name': 42},
+        ),
+      ),
+      failsWith(OpenCodeNoticeProjectionFailure.malformed),
+    );
+  });
 }

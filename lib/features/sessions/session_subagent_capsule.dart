@@ -107,11 +107,16 @@ final class CapsuleShellEntry {
 String? _timelineShellId(TimelineItem item) => switch (item) {
   ToolCall(:final runFacts) => runFacts?.shellId,
   ShellRun(:final shellId) => shellId,
+  Notice(:final shellReport?) => shellReport.shellId,
   _ => null,
 };
 
 String _timelineShellCommand(TimelineItem item) => switch (item) {
   ShellRun(:final command) => redactCredentialText(command).trim(),
+  Notice(:final shellReport?) =>
+    shellReport.command == null
+        ? ''
+        : redactCredentialText(shellReport.command!).trim(),
   ToolCall(:final input) => () {
     final map = input?.value;
     if (map is Map && map['command'] is String) {
@@ -121,6 +126,20 @@ String _timelineShellCommand(TimelineItem item) => switch (item) {
   }(),
   _ => '',
 };
+
+ShellStatus? _shellReportStatus(ShellReport report) {
+  if (report.timedOut) return ShellStatus.timeout;
+  if (report.killed || report.outcome == OutcomeKind.interrupted) {
+    return ShellStatus.killed;
+  }
+  if (report.outcome == OutcomeKind.succeeded ||
+      report.outcome == OutcomeKind.failed ||
+      report.exitCode != null ||
+      report.exitToken != null) {
+    return ShellStatus.exited;
+  }
+  return null;
+}
 
 /// Projects deduplicated shell entries for [state].
 ///
@@ -268,6 +287,37 @@ List<CapsuleShellEntry> sessionShellEntries(
         status: effectiveStatus,
         exitCode: exitCode,
         exitToken: exitToken,
+      ),
+    );
+  }
+
+  // Overlay completed background shell report notices so backgrounded tool
+  // calls acquire their terminal outcome/output and detached reports stay
+  // inspectable when their launch call is outside the resident window.
+  for (final item in state.timeline) {
+    if (item is! Notice || item.shellReport == null) continue;
+    final report = item.shellReport!;
+    final shellId = report.shellId;
+    final key = shellId ?? item.id.value;
+    final prior = byKey[key];
+    if (prior?.timelineItem is ShellRun) continue;
+    final reportCommand = _timelineShellCommand(item);
+    final command = (prior?.command.isNotEmpty ?? false)
+        ? prior!.command
+        : reportCommand;
+    final status = _shellReportStatus(report) ?? prior?.status;
+    put(
+      key,
+      CapsuleShellEntry(
+        key: key,
+        command: command,
+        isRunning: false,
+        isUnconfirmed: false,
+        shellId: shellId ?? prior?.shellId,
+        timelineItem: item,
+        status: status,
+        exitCode: report.exitCode ?? prior?.exitCode,
+        exitToken: report.exitToken ?? prior?.exitToken,
       ),
     );
   }
@@ -705,7 +755,15 @@ class _SubagentPopinState extends State<_SubagentPopin> {
         (final int code, _) =>
           '${l10n.statusFailed} · ${l10n.liveShellExitCode} $code',
         (null, final String token) => '${l10n.liveShellExitCode} $token',
-        _ => l10n.liveSubagentsUnknown,
+        _ => switch (entry.timelineItem) {
+          Notice(shellReport: ShellReport(outcome: OutcomeKind.succeeded)) =>
+            l10n.liveToolDone,
+          Notice(shellReport: ShellReport(outcome: OutcomeKind.failed)) =>
+            l10n.statusFailed,
+          Notice(shellReport: ShellReport(outcome: OutcomeKind.interrupted)) =>
+            l10n.liveToolInterrupted,
+          _ => l10n.liveSubagentsUnknown,
+        },
       },
       ShellStatus.running => l10n.toolRunning,
       null => l10n.liveSubagentsUnknown,

@@ -38,15 +38,15 @@ String _checkedMetaText(String value, int cap) {
 /// [ToolKind.other]; underscored names are never guessed as MCP tools.
 ToolKind openCodeToolKind(String name) => switch (name) {
   'read' => ToolKind.read,
-  'edit' || 'patch' => ToolKind.edit,
+  'edit' || 'patch' || 'apply_patch' => ToolKind.edit,
   'write' => ToolKind.write,
   'grep' || 'glob' => ToolKind.search,
   'webfetch' => ToolKind.fetch,
   'websearch' => ToolKind.webSearch,
-  'shell' => ToolKind.shell,
+  'shell' || 'bash' => ToolKind.shell,
   'skill' => ToolKind.skill,
   'question' => ToolKind.question,
-  openCodeSubagentTool => ToolKind.subagent,
+  openCodeSubagentTool || 'task' => ToolKind.subagent,
   _ => ToolKind.other,
 };
 
@@ -80,8 +80,9 @@ ToolRunFacts? openCodeShellToolRunFacts(
     shellId = _checkedMetaText(raw, _metaLimit);
   }
 
-  if (metadata.containsKey('exit') && metadata['exit'] != null) {
-    final exit = openCodeShellExit(metadata['exit']);
+  final rawExit = metadata['exit'] ?? metadata['exitCode'];
+  if (rawExit != null) {
+    final exit = openCodeShellExit(rawExit);
     exitCode = exit.code;
     exitToken = exit.token;
   }
@@ -123,6 +124,33 @@ ToolRunFacts? openCodeShellToolRunFacts(
       throw const FormatException('Malformed shell tool background.');
     }
     background = raw;
+  }
+
+  var killed = false;
+  if (metadata.containsKey('killed') && metadata['killed'] != null) {
+    final raw = metadata['killed'];
+    if (raw is! bool) {
+      throw const FormatException('Malformed shell tool killed.');
+    }
+    killed = raw;
+  }
+
+  String? signal;
+  if (metadata.containsKey('signal') && metadata['signal'] != null) {
+    final raw = metadata['signal'];
+    if (raw is! String || raw.isEmpty) {
+      throw const FormatException('Malformed shell tool signal.');
+    }
+    signal = _checkedMetaText(raw, _metaLimit);
+  }
+
+  if (!timedOut &&
+      (killed ||
+          (signal != null &&
+              exitCode == null &&
+              (shellStatus == null ||
+                  shellStatus.known == ShellStatus.exited)))) {
+    shellStatus = const OpenValue.known(ShellStatus.killed);
   }
 
   final facts = ToolRunFacts(

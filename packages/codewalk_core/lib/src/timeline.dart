@@ -46,6 +46,9 @@ enum NoticeKind {
 
   /// An observed step interruption, not a terminal execution outcome.
   interruption,
+
+  /// A harness skill activated in this session.
+  skillActivated,
 }
 
 enum OutcomeKind { succeeded, failed, interrupted }
@@ -363,6 +366,7 @@ sealed class TimelineItem {
       relatedSession: item.relatedSession,
       selection: item.selection,
       report: item.report,
+      shellReport: item.shellReport,
     ),
     final TurnOutcome item => TurnOutcome(
       meta: meta,
@@ -614,6 +618,55 @@ final class SubagentReport {
   final OutcomeKind? outcome;
 }
 
+/// What the harness identified as a completion report from a background shell.
+final class ShellReport {
+  ShellReport({
+    this.command,
+    this.outcome,
+    this.exitCode,
+    this.exitToken,
+    this.timedOut = false,
+    this.killed = false,
+    this.truncated = false,
+    String? shellId,
+  }) : shellId = shellId == null ? null : requireText(shellId, 'shellId');
+
+  final String? command;
+  final OutcomeKind? outcome;
+  final int? exitCode;
+  final String? exitToken;
+  final bool timedOut;
+  final bool killed;
+  final bool truncated;
+
+  /// Opaque harness identifier linking this report to its shell run or tool.
+  final String? shellId;
+
+  @override
+  bool operator ==(Object other) =>
+      other is ShellReport &&
+      other.command == command &&
+      other.outcome == outcome &&
+      other.exitCode == exitCode &&
+      other.exitToken == exitToken &&
+      other.timedOut == timedOut &&
+      other.killed == killed &&
+      other.truncated == truncated &&
+      other.shellId == shellId;
+
+  @override
+  int get hashCode => Object.hash(
+    command,
+    outcome,
+    exitCode,
+    exitToken,
+    timedOut,
+    killed,
+    truncated,
+    shellId,
+  );
+}
+
 /// A related child's notice belongs to this item's owner, not that child.
 /// It does not establish the child's own execution outcome.
 final class Notice extends TimelineItem {
@@ -623,6 +676,7 @@ final class Notice extends TimelineItem {
     required this.text,
     this.relatedSession,
     this.report,
+    this.shellReport,
     this.selection,
   });
 
@@ -630,6 +684,7 @@ final class Notice extends TimelineItem {
   final String text;
   final SessionRef? relatedSession;
   final SubagentReport? report;
+  final ShellReport? shellReport;
 
   /// For a [NoticeKind.selectionChanged] notice, what the session switched
   /// to at this point of the conversation (#426): the agent, or the model

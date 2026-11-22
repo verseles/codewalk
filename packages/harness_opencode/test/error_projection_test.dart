@@ -103,4 +103,18 @@ void main() {
     expect(crossing.rawMessage, isNot(contains('token-value')));
     expect(utf8.encode(crossing.rawMessage).length <= 8 * 1024, isTrue);
   });
+
+  test('OpenCode 2.3+ provider limit error types map to quota', () {
+    for (final type in [
+      'provider.free-limit',
+      'provider.go-limit',
+      'provider.budget-limit',
+      'provider.model-budget-limit',
+    ]) {
+      final error = openCodeErrorInfo(type, 'Limit reached.');
+      expect(error.kind.known, ErrorKind.quota, reason: type);
+      expect(error.action?.known, ErrorAction.changeModel, reason: type);
+      expect(openCodeErrorHasCard(type), isTrue, reason: type);
+    }
+  });
 }

@@ -203,6 +203,7 @@ final class SessionTimelinePresentation {
     Reasoning() => true,
     ShellRun(:final shellStatus) => shellStatus?.known != null,
     ToolCall(:final kind) => kind.known != ToolKind.subagent,
+    Notice(shellReport: _?) => true,
     _ => false,
   };
 
@@ -395,12 +396,15 @@ final class SessionTimelinePresentation {
   /// work in flight, whatever its own status.
   static bool _isReminder(TimelineItem item) =>
       item is Notice &&
+      item.shellReport == null &&
       (item.kind.known == NoticeKind.continuation ||
-          item.kind.known == NoticeKind.system);
+          item.kind.known == NoticeKind.system ||
+          item.kind.known == NoticeKind.skillActivated);
 
   /// Whether an item can be published in Block render mode.
   static bool _ended(TimelineItem item) {
     if (_isReminder(item)) return true;
+    if (item is Notice && item.shellReport != null) return true;
     final message = item.meta.message;
     if (message != null) return message.completed != null;
     return switch (item.status.known) {
@@ -412,6 +416,7 @@ final class SessionTimelinePresentation {
   /// Whether a call ended: completed, failed or interrupted (never a
   /// backgrounded shell tool still running via [ToolCall.runFacts]).
   static bool _callEnded(TimelineItem item) => switch (item) {
+    Notice(shellReport: _?) => true,
     ShellRun(:final shellStatus?) =>
       shellStatus.known != null && shellStatus.known != ShellStatus.running,
     ToolCall() =>
@@ -475,6 +480,12 @@ final class SessionTimelinePresentation {
   };
 
   static bool _isFailedItem(TimelineItem item) => switch (item) {
+    Notice(shellReport: final report?) =>
+      report.timedOut ||
+          report.killed ||
+          report.outcome == OutcomeKind.failed ||
+          report.outcome == OutcomeKind.interrupted ||
+          (report.exitCode != null && report.exitCode != 0),
     ShellRun(:final shellStatus, :final exitCode) =>
       shellStatus?.known == ShellStatus.timeout ||
           shellStatus?.known == ShellStatus.killed ||
@@ -517,7 +528,7 @@ final class _Rows {
 
   bool _shows(TimelineItem item) => switch (item) {
     Reasoning() => showReasoning,
-    ToolCall() || ShellRun() => showToolCalls,
+    ToolCall() || ShellRun() || Notice(shellReport: _?) => showToolCalls,
     _ => true,
   };
 
@@ -589,7 +600,19 @@ class SessionTimelineScope extends InheritedWidget {
 
 /// The items a timeline shows: a succeeded turn needs no row of its own, the
 /// header already reports it; failed and interrupted turns keep theirs.
-List<TimelineItem> sessionTimelineItems(List<TimelineItem> items) => [
-  for (final item in items)
-    if (item is! TurnOutcome || item.kind.known != OutcomeKind.succeeded) item,
-];
+/// Synthetic shell completion notices that duplicate a user [ShellRun] with the
+/// same `shellId` are omitted (mirroring the official client's `echoesUserShell`).
+List<TimelineItem> sessionTimelineItems(List<TimelineItem> items) {
+  final userShellIds = <String>{
+    for (final item in items)
+      if (item case ShellRun(shellId: final id?)) id,
+  };
+  return [
+    for (final item in items)
+      if ((item is! TurnOutcome || item.kind.known != OutcomeKind.succeeded) &&
+          !(item is Notice &&
+              item.shellReport?.shellId != null &&
+              userShellIds.contains(item.shellReport!.shellId)))
+        item,
+  ];
+}

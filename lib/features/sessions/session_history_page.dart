@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:codewalk_core/codewalk_core.dart' show ItemId;
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/rendering/markdown_link_opener.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_attachment_scope.dart';
@@ -11,8 +14,13 @@ import 'session_timeline_tile.dart';
 import 'session_work_group.dart';
 
 class SessionHistoryPage extends StatefulWidget {
-  const SessionHistoryPage({super.key, required this.controller});
+  const SessionHistoryPage({
+    super.key,
+    required this.controller,
+    this.onTapLink,
+  });
   final SessionHistoryController controller;
+  final void Function(String text, String href, String? title)? onTapLink;
   @override
   State<SessionHistoryPage> createState() => _SessionHistoryPageState();
 }
@@ -133,17 +141,28 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                           );
                         }
                         final row = rows[index - 1];
+                        void tapLink(String text, String href, String? title) {
+                          final handler = widget.onTapLink;
+                          if (handler != null) {
+                            handler(text, href, title);
+                          } else {
+                            unawaited(openExternalMarkdownLink(context, href));
+                          }
+                        }
+
                         if (row is SessionSubagentCallsRow) {
                           return SessionSubagentCalls(
                             key: row.key,
                             row: row,
                             expandedAnchors: _expandedSubagentCalls,
+                            onTapLink: tapLink,
                           );
                         }
                         if (row is SessionReportRow) {
                           return SessionReportGroup(
                             key: row.key,
                             reports: row.reports,
+                            onTapLink: tapLink,
                           );
                         }
                         if (row is SessionActivityStretchRow) {
@@ -159,6 +178,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                         return SessionTimelineTile(
                           key: ValueKey(item.id),
                           item: item,
+                          onTapLink: tapLink,
                           minimizeUnknownShell: true,
                           messageHeader: single.messageHeader,
                         );

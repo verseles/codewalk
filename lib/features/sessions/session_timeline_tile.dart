@@ -113,12 +113,25 @@ class SessionTimelineTile extends StatelessWidget {
         selection: selection,
       );
     }
+    if (item case Notice(
+      kind: OpenValue(known: NoticeKind.skillActivated),
+    )) {
+      final name = item.text.trim();
+      if (name.isEmpty) return const SizedBox.shrink();
+      return SessionLightNote(
+        key: ValueKey('timeline-note-${item.id.value}'),
+        text: '${l10n.toolKindSkill} · $name',
+        icon: Symbols.auto_stories,
+        rich: false,
+      );
+    }
     // Reminders the harness adds, other system notes, a compaction that did
     // not fail and unknown parts are light lines, like the switch notes, so
     // the conversation leads (#491).
     final light = switch (item) {
       Notice(
         kind: OpenValue(known: NoticeKind.system || NoticeKind.continuation),
+        shellReport: null,
       ) =>
         item.text,
       // A compaction says nothing until it ends: its card stands till then.
@@ -171,7 +184,8 @@ class SessionTimelineTile extends StatelessWidget {
     final compactTool =
         (item is ToolCall && item.kind.known != ToolKind.subagent) ||
         (item is ShellRun &&
-            !(minimizeUnknownShell && item.shellStatus?.known == null));
+            !(minimizeUnknownShell && item.shellStatus?.known == null)) ||
+        (item is Notice && item.shellReport != null);
     if (compactTool) {
       return Align(
         alignment: AlignmentDirectional.centerStart,
@@ -770,6 +784,7 @@ class SessionLightNote extends StatefulWidget {
   const SessionLightNote({
     super.key,
     required this.text,
+    this.icon = Symbols.info,
     this.rich = true,
     this.onTapLink,
     this.onTapFilePath,
@@ -777,6 +792,7 @@ class SessionLightNote extends StatefulWidget {
   });
 
   final String text;
+  final IconData icon;
 
   /// Whether the open note renders its text as Markdown, selectable, with
   /// links, file paths and code copy working.
@@ -797,50 +813,69 @@ class _SessionLightNoteState extends State<SessionLightNote> {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     final text = widget.text.trim();
-    return ConversationTextScale(
-      child: Semantics(
-        button: true,
-        expanded: _open,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(8),
-          onTap: () => setState(() => _open = !_open),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Symbols.info, size: 16, color: muted),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: _open && widget.rich
-                      ? SelectionArea(
-                          child: CanonicalMessageBody(
-                            source: text,
-                            complete: true,
-                            allowBasicHtml: false,
-                            bodyStyle: theme.textTheme.labelMedium?.copyWith(
-                              color: muted,
-                            ),
-                            onTapLink: widget.onTapLink,
-                            onTapFilePath: widget.onTapFilePath,
-                            onCopyCode: widget.onCopyCode,
-                          ),
-                        )
-                      : Text(
-                          _open ? text : text.replaceAll(RegExp(r'\s+'), ' '),
-                          maxLines: _open ? null : 1,
-                          overflow: _open ? null : TextOverflow.ellipsis,
-                          style: theme.textTheme.labelMedium?.copyWith(
-                            color: muted,
-                          ),
-                        ),
+    final richOpen = _open && widget.rich;
+    final icon = Icon(widget.icon, size: 16, color: muted);
+    final row = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (richOpen)
+            Semantics(
+              button: true,
+              expanded: true,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => setState(() => _open = false),
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: icon,
                 ),
-              ],
-            ),
+              ),
+            )
+          else
+            icon,
+          const SizedBox(width: 8),
+          Flexible(
+            child: richOpen
+                ? SelectionArea(
+                    child: CanonicalMessageBody(
+                      source: text,
+                      complete: true,
+                      allowBasicHtml: false,
+                      bodyStyle: theme.textTheme.labelMedium?.copyWith(
+                        color: muted,
+                      ),
+                      onTapLink: widget.onTapLink,
+                      onTapFilePath: widget.onTapFilePath,
+                      onCopyCode: widget.onCopyCode,
+                    ),
+                  )
+                : Text(
+                    _open ? text : text.replaceAll(RegExp(r'\s+'), ' '),
+                    maxLines: _open ? null : 1,
+                    overflow: _open ? null : TextOverflow.ellipsis,
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: muted,
+                    ),
+                  ),
           ),
-        ),
+        ],
       ),
+    );
+    return ConversationTextScale(
+      child: richOpen
+          ? row
+          : Semantics(
+              button: true,
+              expanded: _open,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () => setState(() => _open = !_open),
+                child: row,
+              ),
+            ),
     );
   }
 }

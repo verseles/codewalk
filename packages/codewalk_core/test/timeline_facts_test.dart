@@ -162,4 +162,45 @@ void main() {
       expect(afterGap.completed, end);
     },
   );
+
+  test('ShellReport validates shellId, compares by value, and survives withMeta', () {
+    expect(() => ShellReport(shellId: ''), throwsArgumentError);
+    final report = ShellReport(
+      command: 'echo hi',
+      outcome: OutcomeKind.succeeded,
+      exitCode: 0,
+      truncated: true,
+      shellId: 'sh_1',
+    );
+    final equal = ShellReport(
+      command: 'echo hi',
+      outcome: OutcomeKind.succeeded,
+      exitCode: 0,
+      truncated: true,
+      shellId: 'sh_1',
+    );
+    expect(report, equal);
+    expect(report.hashCode, equal.hashCode);
+    expect(
+      report,
+      isNot(ShellReport(command: 'echo hi', outcome: OutcomeKind.failed)),
+    );
+
+    final notice = Notice(
+      meta: _meta('n1', status: ItemStatus.completed),
+      kind: const OpenValue.known(NoticeKind.continuation),
+      text: 'hi',
+      shellReport: report,
+    );
+    final updated =
+        notice.withMeta(_meta('n1', status: ItemStatus.completed)) as Notice;
+    expect(updated.shellReport, report);
+
+    final skill = Notice(
+      meta: _meta('sk1', status: ItemStatus.completed),
+      kind: const OpenValue.known(NoticeKind.skillActivated),
+      text: 'review',
+    );
+    expect(skill.kind.known, NoticeKind.skillActivated);
+  });
 }

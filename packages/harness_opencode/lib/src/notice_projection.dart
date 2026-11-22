@@ -30,7 +30,12 @@ const _safeInteger = 9007199254740991;
 const _maxEpochMillis = 8640000000000000;
 const _instructions = 'session.instructions.updated';
 const _synthetic = 'session.synthetic';
-const _durableVersions = {_instructions: 2, _synthetic: 1};
+const _skillActivated = 'session.skill.activated';
+const _durableVersions = {
+  _instructions: 2,
+  _synthetic: 1,
+  _skillActivated: 1,
+};
 
 /// Projects the durable 2.0.22 instruction-update and synthetic events into
 /// [Notice] items without owning a stream or clock.
@@ -104,6 +109,16 @@ List<SessionEvent> projectOpenCodeNoticeEvent(
         ? _text(data['text'], cap: _textLimit)
         : null;
     kind = NoticeKind.system;
+  } else if (type == _skillActivated) {
+    if (data.containsKey('id')) {
+      _text(data['id'], cap: _idLimit, nonempty: true);
+    }
+    final name = _text(data['name'], cap: _idLimit, nonempty: true);
+    if (data.containsKey('text')) {
+      _text(data['text'], cap: _textLimit);
+    }
+    text = redactCredentialText(name);
+    kind = NoticeKind.skillActivated;
   } else {
     text = _text(data['text'], cap: _textLimit);
     if (data.containsKey('description')) {
@@ -161,7 +176,7 @@ List<SessionEvent> projectOpenCodeNoticeEvent(
           : Notice(
               meta: meta,
               kind: OpenValue.known(kind),
-              text: openCodeNoticeText(text),
+              text: type == _skillActivated ? text : openCodeNoticeText(text),
             ),
     ),
   ]);

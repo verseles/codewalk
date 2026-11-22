@@ -30,12 +30,18 @@ const _safeInteger = 9007199254740991;
 const _maxEpochMillis = 8640000000000000;
 const _created = 'session.created';
 const _renamed = 'session.renamed';
+const _moved = 'session.moved';
+const _archived = 'session.archived';
+const _unarchived = 'session.unarchived';
 const _deleted = 'session.deleted';
 const _agentSelected = 'session.agent.selected';
 const _modelSelected = 'session.model.selected';
 const _durableVersions = {
   _created: 1,
   _renamed: 1,
+  _moved: 1,
+  _archived: 1,
+  _unarchived: 1,
   _deleted: 2,
   _agentSelected: 1,
   _modelSelected: 1,
@@ -117,6 +123,8 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
   Selection? selection;
   // What the switch changed, for its note in the conversation (#426).
   Selection? switched;
+  // The destination directory when a move changed the session's directory.
+  String? movedToDirectory;
   String? resync;
   final resident = current.selection;
   switch (type) {
@@ -181,6 +189,48 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
           metadata: resident.metadata,
         );
       }
+    case _moved:
+      final location = _object(data['location']);
+      final directory = _text(location['directory'], nonempty: true);
+      if (location.containsKey('workspaceID')) {
+        _text(location['workspaceID']);
+      }
+      final providedProjectId = data.containsKey('projectID')
+          ? _text(data['projectID'], nonempty: true)
+          : null;
+      if (data.containsKey('subpath')) _text(data['subpath']);
+      final resident = current.info;
+      if (resident == null || resident.ref != ref) {
+        resync = 'sessionInfoUnproven';
+      } else {
+        final previousDir = resident.project?.canonicalDirectory;
+        final projectId =
+            providedProjectId ?? resident.project?.upstreamProjectId;
+        final existingMeta = resident.metadata?.value;
+        final nextMeta = <String, Object?>{
+          if (existingMeta is Map<String, Object?>) ...existingMeta,
+          'nativeProjectId': ?projectId,
+          'nativeDirectory': directory,
+        };
+        info = SessionInfo(
+          ref: resident.ref,
+          title: resident.title,
+          ownership: resident.ownership,
+          project: ProjectRef(
+            ref.host,
+            directory,
+            upstreamProjectId:
+                projectId != null && projectId != 'global' ? projectId : null,
+          ),
+          lineage: resident.lineage,
+          metadata: CanonicalValue(nextMeta),
+        );
+        if (previousDir != directory) movedToDirectory = directory;
+      }
+    case _archived:
+    case _unarchived:
+      // Catalog refresh is owned by the stream owner; timeline stays unchanged.
+      return const [];
     case _deleted:
       resync = 'sessionDeleted';
     case _agentSelected:
@@ -237,41 +287,48 @@ List<SessionEvent> projectOpenCodeSessionLifecycleEvent(
   // message the server records for the event (`evt_` becomes `msg_`), so the
   // live note and the history read are one item.
   final Notice? note;
-  if (switched == null) {
+  if (switched == null && movedToDirectory == null) {
     note = null;
   } else {
     final messageId = 'msg_${nativeId.substring(4)}';
-    note = Notice(
-      meta: ItemMeta(
-        id: ItemId(jsonEncode([ref.storageKey, messageId, 'notice', 0])),
-        anchor: openCodeMessageAnchor(messageId),
-        generation: jsonEncode([
-          'live',
-          ref.storageKey,
-          messageId,
-          position.id,
-          position.epoch,
-        ]),
-        status: const OpenValue.known(ItemStatus.completed),
-        source: SourceProvenance(
-          harness: ref.harnessRef,
-          version: sourceVersion,
-          nativeType: type,
-          nativeEventId: nativeId,
-          aggregateId: sessionId,
-          aggregateSeq: aggregateSeq,
-          durability: const OpenValue.known(Durability.durable),
-          extra: CanonicalValue({
-            'nativeCreated': created,
-            'nativeDurableVersion': durableVersion,
-            'nativeMessageId': messageId,
-          }),
-        ),
+    final itemMeta = ItemMeta(
+      id: ItemId(jsonEncode([ref.storageKey, messageId, 'notice', 0])),
+      anchor: openCodeMessageAnchor(messageId),
+      generation: jsonEncode([
+        'live',
+        ref.storageKey,
+        messageId,
+        position.id,
+        position.epoch,
+      ]),
+      status: const OpenValue.known(ItemStatus.completed),
+      source: SourceProvenance(
+        harness: ref.harnessRef,
+        version: sourceVersion,
+        nativeType: type,
+        nativeEventId: nativeId,
+        aggregateId: sessionId,
+        aggregateSeq: aggregateSeq,
+        durability: const OpenValue.known(Durability.durable),
+        extra: CanonicalValue({
+          'nativeCreated': created,
+          'nativeDurableVersion': durableVersion,
+          'nativeMessageId': messageId,
+        }),
       ),
-      kind: const OpenValue.known(NoticeKind.selectionChanged),
-      text: '',
-      selection: switched,
     );
+    note = switched != null
+        ? Notice(
+            meta: itemMeta,
+            kind: const OpenValue.known(NoticeKind.selectionChanged),
+            text: '',
+            selection: switched,
+          )
+        : Notice(
+            meta: itemMeta,
+            kind: const OpenValue.known(NoticeKind.system),
+            text: movedToDirectory!,
+          );
   }
   return List.unmodifiable([
     if (info != null) SessionInfoChanged(meta: meta, info: info),

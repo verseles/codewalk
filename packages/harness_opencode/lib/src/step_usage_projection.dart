@@ -27,11 +27,12 @@ const _listLimit = 4096;
 const _safeInteger = 9007199254740991;
 const _maxEpochMillis = 8640000000000000;
 const _started = 'session.step.started';
+const _firstToken = 'session.step.first-token';
 const _streamed = 'session.step.streamed';
 const _ended = 'session.step.ended';
 const _failed = 'session.step.failed';
 const _usage = 'session.usage.updated';
-const _types = {_started, _streamed, _ended, _failed, _usage};
+const _types = {_started, _firstToken, _streamed, _ended, _failed, _usage};
 const _finishes = {
   'stop',
   'length',
@@ -148,6 +149,7 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
         agentId: agent,
       );
       resumes = current.execution?.kind.known == ExecutionKind.retrying;
+    case _firstToken:
     case _streamed:
       break;
     case _ended:
@@ -353,6 +355,7 @@ void _stepTail(Map<String, Object?> data) {
   _optionalText(data, 'rawFinish');
   _optionalText(data, 'snapshot');
   if (data.containsKey('providerState')) _object(data['providerState']);
+  if (data.containsKey('native')) _object(data['native']);
   if (data.containsKey('files')) {
     final files = data['files'];
     if (files is! List<Object?>) {

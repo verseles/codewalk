@@ -203,11 +203,6 @@ SessionEvent? projectOpenCodeToolEvent(
     if (errorType.isEmpty) {
       _fail(OpenCodeToolProjectionFailure.unsupportedValue);
     }
-    status = errorType == 'aborted'
-        ? ItemStatus.interrupted
-        : ItemStatus.failed;
-    // The message is shown, so it is redacted and bounded; the response body
-    // is never copied.
     var message = '';
     if (rawError.containsKey('message')) {
       final raw = _text(rawError['message'], cap: _textLimit);
@@ -215,6 +210,13 @@ SessionEvent? projectOpenCodeToolEvent(
       message = kept.text;
       errorRedacted = kept.redacted;
     }
+    final shellStopped =
+        isShellTool &&
+        (message == 'Command cancelled' ||
+            terminalMetadata?['interrupted'] == true);
+    status = errorType == 'aborted' || shellStopped
+        ? ItemStatus.interrupted
+        : ItemStatus.failed;
     error = ErrorInfo(
       kind: const OpenValue.known(ErrorKind.toolFailure),
       rawType: errorType,

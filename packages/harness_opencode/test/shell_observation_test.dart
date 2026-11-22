@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 import 'package:harness_opencode/src/history_projection.dart';
+import 'package:harness_opencode/src/tool_metadata.dart';
 import 'package:test/test.dart';
 
 const _host = HostId('host');
@@ -360,6 +361,39 @@ void main() {
       expect(outJson, contains('sh_bg1'));
       expect(outJson, isNot(contains('opencode-secret-capture')));
       expect(outJson, isNot(contains('Output is streaming to:')));
+
+      // v2.3+ PID line + interrupted capture path stripping.
+      const bgWithPid =
+          'Command moved to the background (shell ID: sh_bg2).\n'
+          'PID: 4242\n'
+          'Output is streaming to: /tmp/opencode/sh_bg2.log';
+      expect(
+        openCodeSanitizeShellToolOutputText(bgWithPid),
+        'Command moved to the background (shell ID: sh_bg2).',
+      );
+      expect(
+        openCodeSanitizeShellToolOutputText(
+          'partial\n[full output saved to /tmp/opencode/cap.log]',
+        ),
+        'partial',
+      );
+      expect(
+        openCodeSanitizeShellToolOutputText(
+          '[no output; output file: /tmp/opencode/cap.log]',
+        ),
+        '',
+      );
+
+      // Legacy v1-migrated tool aliases and killed/signal shell tool facts.
+      expect(openCodeToolKind('bash'), ToolKind.shell);
+      expect(openCodeToolKind('apply_patch'), ToolKind.edit);
+      expect(openCodeToolKind('task'), ToolKind.subagent);
+
+      final killedFacts = openCodeShellToolRunFacts(
+        const {'killed': true, 'signal': 'SIGKILL', 'exit': 137},
+      );
+      expect(killedFacts?.shellStatus?.known, ShellStatus.killed);
+      expect(killedFacts?.exitCode, 137);
     },
   );
 }

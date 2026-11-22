@@ -33,6 +33,7 @@ List<String> activitySummaryParts(
       case Reasoning():
         thought++;
       case ShellRun():
+      case Notice(shellReport: _?):
         commands++;
       case ToolCall(:final kind):
         switch (kind.known) {

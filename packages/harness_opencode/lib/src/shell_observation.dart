@@ -12,17 +12,38 @@ const _maxEpochMs = 8640000000000000;
 const _shellEventTypes = {'shell.created', 'shell.exited', 'shell.deleted'};
 
 final _backgroundCaptureNotice = RegExp(
-  r'(Command moved to the background \(shell ID: sh_[^)\r\n]+\)\.)\r?\nOutput is streaming to:[^\r\n]*',
+  r'(Command moved to the background \(shell ID: sh_[^)\r\n]+\)\.)(?:\r?\nPID: \d+)?\r?\nOutput is streaming to:[^\r\n]*',
 );
 
-/// Strips OpenCode's background capture-file path line (`Output is streaming
-/// to: ...`) only when paired with OpenCode's generated background notice line,
-/// so host-private capture paths never reach canonical timeline items or detail
-/// dialogs while ordinary user shell output is left intact.
-String openCodeSanitizeShellToolOutputText(String text) =>
-    _backgroundCaptureNotice.hasMatch(text)
-    ? text.replaceAllMapped(_backgroundCaptureNotice, (m) => m[1]!)
-    : text;
+final _interruptedCaptureNotice = RegExp(
+  r'\[(?:no output; output file:|full output saved to) [^\r\n\]]+\]\r?\n\r?\n(Command interrupted by the user \(shell ID: sh_[^)\r\n]+\)[^\r\n]*)',
+);
+
+final _standaloneCaptureNotice = RegExp(
+  r'(?:^|\r?\n)\[(?:no output; output file:|full output saved to) [^\r\n\]]+\](?=$|\r?\n)',
+);
+
+/// Strips OpenCode's host-private capture-file path lines (and background PID)
+/// when paired with OpenCode's generated shell notices, so host-private paths
+/// and PIDs never reach canonical timeline items or detail dialogs while
+/// ordinary user shell output is left intact.
+String openCodeSanitizeShellToolOutputText(String text) {
+  var result = _backgroundCaptureNotice.hasMatch(text)
+      ? text.replaceAllMapped(_backgroundCaptureNotice, (m) => m[1]!)
+      : text;
+  if (_interruptedCaptureNotice.hasMatch(result)) {
+    result = result.replaceAllMapped(_interruptedCaptureNotice, (m) => m[1]!);
+  }
+  if (_standaloneCaptureNotice.hasMatch(result)) {
+    result = result.replaceAll(_standaloneCaptureNotice, '');
+    if (result.startsWith('\r\n')) {
+      result = result.substring(2);
+    } else if (result.startsWith('\n')) {
+      result = result.substring(1);
+    }
+  }
+  return result;
+}
 
 /// Whether [type] is one of the OpenCode v2 ephemeral shell lifecycle events.
 bool isOpenCodeShellLifecycleEvent(Object? type) =>

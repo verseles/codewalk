@@ -632,4 +632,31 @@ void main() {
       failsWith(OpenCodeStepUsageProjectionFailure.malformed),
     );
   });
+
+  test('session.step.first-token is an owned no-op and step tail accepts native', () {
+    final firstToken = {
+      'id': 'evt_ft',
+      'created': 1000,
+      'type': 'session.step.first-token',
+      'data': {'sessionID': 'ses_a', 'assistantMessageID': 'msg_step'},
+      'durable': {'aggregateID': 'ses_a', 'seq': 2, 'version': 1},
+    };
+    expect(projectStepUsage(firstToken), isEmpty);
+    expect(
+      () => projectStepUsage(
+        edit(firstToken, (f) => dataOf(f)['assistantMessageID'] = 'bad'),
+      ),
+      failsWith(OpenCodeStepUsageProjectionFailure.malformed),
+    );
+    expect(
+      projectStepUsage(
+        stepFrame('ended', fields: {'native': {'provider': 'ok'}}),
+      ),
+      hasLength(1),
+    );
+    expect(
+      () => projectStepUsage(stepFrame('ended', fields: {'native': 'bad'})),
+      failsWith(OpenCodeStepUsageProjectionFailure.malformed),
+    );
+  });
 }

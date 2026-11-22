@@ -129,6 +129,10 @@ final class OpenCodeSelectionLane {
         );
       }
     }
+    final directory = current.state?.info?.project?.canonicalDirectory;
+    if ((entry.read || entry.reading) && directory != entry.lastDirectory) {
+      entry.needsRead = true;
+    }
     if (entry.needsRead && !entry.reading) {
       entry.needsRead = false;
       unawaited(_readCatalog(ref, entry, current));
@@ -327,6 +331,7 @@ final class OpenCodeSelectionLane {
     SessionLiveView current,
   ) async {
     final directory = current.state?.info?.project?.canonicalDirectory;
+    entry.lastDirectory = directory;
     if (directory == null) {
       entry
         ..read = true
@@ -451,6 +456,13 @@ final class OpenCodeSelectionLane {
           agentFailure ??
           (agents!.isEmpty ? SessionSelectionUnavailable.emptyCatalog : null);
     publish(ref);
+    if (entry.needsRead) {
+      final latest = view(ref);
+      if (latest.phase == SessionLivePhase.live && !latest.stale) {
+        entry.needsRead = false;
+        unawaited(_readCatalog(ref, entry, latest));
+      }
+    }
   }
 
   static Future<(T?, SessionSelectionUnavailable?)> _attempt<T>(
@@ -526,6 +538,7 @@ final class _SelectionEntry {
   final cancellation = RequestCancellation();
   bool needsRead = true;
   bool reading = false;
+  String? lastDirectory;
 
   /// The catalog was read at least once.
   bool read = false;

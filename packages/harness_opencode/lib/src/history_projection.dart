@@ -125,7 +125,7 @@ List<TimelineItem> projectOpenCodeHistory(
     final time = map(value);
     return {
       'created': epoch(time['created']),
-      for (final key in ['completed', 'streamed', 'ran'])
+      for (final key in ['completed', 'streamed', 'firstToken', 'ran'])
         if (time.containsKey(key)) key: epoch(time[key]),
     };
   }
@@ -490,13 +490,6 @@ List<TimelineItem> projectOpenCodeHistory(
                   cap: 4096,
                   nonempty: true,
                 );
-                status = OpenValue.known(
-                  errorType == 'aborted'
-                      ? ItemStatus.interrupted
-                      : ItemStatus.failed,
-                );
-                // The message is shown, so it is redacted and bounded; the
-                // response body is never copied.
                 var message = '';
                 if (rawError.containsKey('message')) {
                   final raw = text(rawError['message'], charge: false);
@@ -504,6 +497,15 @@ List<TimelineItem> projectOpenCodeHistory(
                   message = kept.text;
                   if (kept.redacted) extra['errorRedacted'] = true;
                 }
+                final shellStopped =
+                    toolKind == ToolKind.shell &&
+                    (message == 'Command cancelled' ||
+                        (runFacts?.interrupted ?? false));
+                status = OpenValue.known(
+                  errorType == 'aborted' || shellStopped
+                      ? ItemStatus.interrupted
+                      : ItemStatus.failed,
+                );
                 error = ErrorInfo(
                   kind: const OpenValue.known(ErrorKind.toolFailure),
                   rawType: errorType,
@@ -698,16 +700,101 @@ List<TimelineItem> projectOpenCodeHistory(
             text: text(compact.text),
           ),
         );
+      case 'skill':
+        if (message.containsKey('skill')) {
+          text(message['skill'], cap: 4096, nonempty: true, charge: false);
+        }
+        final skillName = text(message['name'], cap: 4096, nonempty: true);
+        if (message.containsKey('text')) {
+          text(message['text'], charge: false);
+        }
+        add(
+          Notice(
+            meta: meta('notice', 0, status: completed),
+            kind: const OpenValue.known(NoticeKind.skillActivated),
+            text: redactCredentialText(skillName),
+          ),
+        );
+      case 'location-switched':
+        final location = map(message['location']);
+        final directory = text(location['directory'], cap: 4096, nonempty: true);
+        if (location.containsKey('workspaceID')) {
+          text(location['workspaceID'], cap: 4096, charge: false);
+        }
+        if (message.containsKey('projectID')) {
+          text(message['projectID'], cap: 4096, nonempty: true, charge: false);
+        }
+        if (message.containsKey('subpath')) {
+          text(message['subpath'], cap: 4096, charge: false);
+        }
+        String? previousDir;
+        if (message.containsKey('previous') && message['previous'] != null) {
+          final previous = map(message['previous']);
+          final prevLoc = map(previous['location']);
+          previousDir = text(
+            prevLoc['directory'],
+            cap: 4096,
+            nonempty: true,
+            charge: false,
+          );
+          if (prevLoc.containsKey('workspaceID')) {
+            text(prevLoc['workspaceID'], cap: 4096, charge: false);
+          }
+          if (previous.containsKey('projectID')) {
+            text(
+              previous['projectID'],
+              cap: 4096,
+              nonempty: true,
+              charge: false,
+            );
+          }
+          if (previous.containsKey('subpath')) {
+            text(previous['subpath'], cap: 4096, charge: false);
+          }
+        }
+        // Moving to the same directory changes nothing (official `movedInPlace`).
+        if (previousDir != directory) {
+          add(
+            Notice(
+              meta: meta('notice', 0, status: completed),
+              kind: const OpenValue.known(NoticeKind.system),
+              text: directory,
+            ),
+          );
+        }
       case 'idle':
         final outcome = OpenValue.parse(
           text(message['outcome'], cap: 4096, nonempty: true),
           OutcomeKind.values,
         );
+        ErrorInfo? idleError;
+        if (message.containsKey('error') && message['error'] != null) {
+          final error = map(message['error']);
+          final errorType = text(
+            error['type'],
+            cap: 4096,
+            nonempty: true,
+            charge: false,
+          );
+          String? errorMessage;
+          if (error.containsKey('message')) {
+            node();
+            final raw = error['message'];
+            if (raw is! String) malformed();
+            errorMessage = raw;
+          }
+          if (openCodeErrorHasCard(errorType)) {
+            idleError = openCodeErrorInfo(errorType, errorMessage);
+            text(idleError.rawMessage, charge: false);
+          }
+        }
         add(
           TurnOutcome(
             meta: meta('outcome', 0, status: completed),
             kind: outcome,
-            error: outcome.known == OutcomeKind.failed ? failure : null,
+            error: outcome.known == OutcomeKind.failed
+                ? (idleError ?? failure)
+                : null,
           ),
         );
         failure = null;

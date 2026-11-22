@@ -44,6 +44,7 @@ enum OpenCodeCatalogChange {
   renamed,
   deleted,
   moved,
+  archived,
   viewed,
   idled,
   started,
@@ -635,6 +636,8 @@ final class OpenCodeStreamOwner {
     if (type is! String) return null;
     switch (type) {
       case 'project.updated':
+      case 'worktree.updated':
+      case 'worktree.resolved':
         return OpenCodeCatalogChange.project;
       case 'session.created':
         return OpenCodeCatalogChange.created;
@@ -644,6 +647,9 @@ final class OpenCodeStreamOwner {
         return OpenCodeCatalogChange.renamed;
       case 'session.deleted':
         return OpenCodeCatalogChange.deleted;
+      case 'session.archived':
+      case 'session.unarchived':
+        return OpenCodeCatalogChange.archived;
       case 'session.moved':
         // A move changes the session's location, so the group it belongs to
         // changes with it.
@@ -673,8 +679,25 @@ final class OpenCodeStreamOwner {
 
   void _emitLocationCatalog(Map<String, Object?> value) {
     if (_closed || _locationCatalogs.isClosed) return;
-    if (value['type']
-        case 'model.updated' || 'agent.updated' || 'provider.updated') {
+    final type = value['type'];
+    if (type == 'credential.updated' || type == 'credential.switched') {
+      // Credential changes affect provider/model catalogs across every watched
+      // location (matching the official client, which receives no `location`).
+      final directories = <String>{};
+      for (final ref in _watched.keys) {
+        final dir = store.read(ref)?.info?.project?.canonicalDirectory;
+        if (dir != null && dir.isNotEmpty && directories.add(dir)) {
+          _locationCatalogs.add(dir);
+        }
+      }
+      return;
+    }
+    if (type
+        case 'model.updated' ||
+            'agent.updated' ||
+            'provider.updated' ||
+            'integration.updated' ||
+            'config.updated') {
       if (value['location'] case {
         'directory': final String directory,
       } when directory.isNotEmpty) {
@@ -1330,6 +1353,26 @@ final class OpenCodeStreamOwner {
       if (_watched[ref] case final watch?) _noteTrim(ref, watch);
       _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
       _handle(ref, result.effects);
+    }
+    // Mirror the official client (`data.ts`): if a terminal execution event
+    // settles the turn while any tool call is still streaming or pending,
+    // resync the session so no tool stays stuck running.
+    if (type == 'session.execution.succeeded' ||
+        type == 'session.execution.failed' ||
+        (type == 'session.execution.interrupted' &&
+            (value['data'] is Map<String, Object?> &&
+                (value['data']! as Map<String, Object?>)['reason'] !=
+                    'shutdown'))) {
+      final after = store.read(ref);
+      if (after != null &&
+          after.timeline.any(
+            (item) =>
+                item is ToolCall &&
+                (item.status.known == ItemStatus.streaming ||
+                    item.status.known == ItemStatus.pending),
+          )) {
+        _repair(ref);
+      }
     }
   }
 

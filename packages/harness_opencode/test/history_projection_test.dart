@@ -970,4 +970,66 @@ void main() {
       expect((items[9] as ToolCall).kind.known, ToolKind.other);
     },
   );
+
+  test(
+    'history supports v2.3+ firstToken, skill, location-switched, idle direct error, and interrupted shell tool',
+    () {
+      final items = project([
+        {
+          'id': 'msg_asst',
+          'type': 'assistant',
+          'time': {'created': 1000, 'firstToken': 1100, 'completed': 2000},
+          'content': [
+            {
+              'type': 'tool',
+              'id': 'call_sh',
+              'name': 'shell',
+              'time': {'created': 1000},
+              'state': {
+                'status': 'error',
+                'input': {'command': 'sleep 99'},
+                'error': {
+                  'type': 'tool.execution',
+                  'message': 'Command cancelled',
+                },
+                'metadata': {'interrupted': true},
+              },
+            },
+          ],
+        },
+        message('sk_h', 'skill', {'name': 'dart-lint'}),
+        message('mv_same', 'location-switched', {
+          'location': {'directory': '/a'},
+          'previous': {
+            'location': {'directory': '/a'},
+          },
+        }),
+        message('mv_diff', 'location-switched', {
+          'location': {'directory': '/b'},
+          'previous': {
+            'location': {'directory': '/a'},
+          },
+        }),
+        message('idle_err', 'idle', {
+          'outcome': 'failed',
+          'error': {
+            'type': 'provider.budget-limit',
+            'message': 'Budget exhausted',
+          },
+        }),
+      ]);
+      expect(items, hasLength(4)); // mv_same omitted
+      expect((items[0] as ToolCall).status.known, ItemStatus.interrupted);
+      final skill = items[1] as Notice;
+      expect(skill.kind.known, NoticeKind.skillActivated);
+      expect(skill.text, 'dart-lint');
+      final moved = items[2] as Notice;
+      expect(moved.kind.known, NoticeKind.system);
+      expect(moved.text, '/b');
+      final outcome = items[3] as TurnOutcome;
+      expect(outcome.kind.known, OutcomeKind.failed);
+      expect(outcome.error?.kind.known, ErrorKind.quota);
+      expect(outcome.error?.rawMessage, 'Budget exhausted');
+    },
+  );
 }
