@@ -1,0 +1,1 @@
+Tem uma pasta com as docs da v2, visita o site oficial e atualiza as docs, todas, se necessário faz commit.
