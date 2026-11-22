@@ -2006,5 +2006,8 @@
   "contextUsageCompacting": "Сжатие...",
   "contextUsageQuotaNotExposed": "Квота не предоставляется этим harness.",
   "contextUsageQuotaNone": "Окна квот не переданы.",
-  "contextUsageUnknownCurrency": "Неизвестная валюта"
+  "contextUsageUnknownCurrency": "Неизвестная валюта",
+  "updatesCachedInstall": "Обновление загружено. Нажмите, чтобы установить.",
+  "updatesNotificationTitle": "CodeWalk обновлён",
+  "updatesNotificationBody": "Нажмите, чтобы снова открыть CodeWalk."
 }

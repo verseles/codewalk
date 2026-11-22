@@ -91,7 +91,15 @@ class FakeStore implements ApkFileStore {
   Future<String?> sha256(String path) async => files[path];
 
   @override
-  Future<void> cleanupStale() async {}
+  Future<void> writeSidecar(ApkCachedRecord record) async {}
+
+  @override
+  Future<ApkCachedRecord?> restoreCached({
+    required int installedBuildNumber,
+  }) async => null;
+
+  @override
+  Future<void> cleanupStale({int? installedBuildNumber}) async {}
 }
 
 class FakeFetcher implements ApkAssetFetcher {
@@ -136,10 +144,24 @@ class FakeInstaller implements ApkInstaller {
   String? openedPath;
 
   @override
-  Future<ApkInstallOutcome> open(String path) async {
+  Stream<ApkInstallSignal> get signals =>
+      const Stream<ApkInstallSignal>.empty();
+
+  @override
+  Future<ApkInstallOutcome> open(
+    String path, {
+    int? versionCode,
+    String? tag,
+    String? notificationTitle,
+    String? notificationBody,
+    String? notificationChannel,
+  }) async {
     openedPath = path;
     return ApkInstallOutcome.opened;
   }
+
+  @override
+  Future<void> clearPendingMarker() async {}
 }
 
 String listing(String tag) => jsonEncode([

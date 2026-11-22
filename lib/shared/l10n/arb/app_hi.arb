@@ -2006,5 +2006,8 @@
   "contextUsageCompacting": "संकुचित हो रहा है...",
   "contextUsageQuotaNotExposed": "यह हार्नेस कोटा प्रदान नहीं करता।",
   "contextUsageQuotaNone": "कोई कोटा विंडो रिपोर्ट नहीं की गई।",
-  "contextUsageUnknownCurrency": "अज्ञात मुद्रा"
+  "contextUsageUnknownCurrency": "अज्ञात मुद्रा",
+  "updatesCachedInstall": "अपडेट डाउनलोड हो गया है। इंस्टॉल करने के लिए टैप करें।",
+  "updatesNotificationTitle": "CodeWalk अपडेट हो गया",
+  "updatesNotificationBody": "CodeWalk को फिर से खोलने के लिए टैप करें।"
 }

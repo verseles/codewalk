@@ -2897,4 +2897,15 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => 'अज्ञात मुद्रा';
+
+  @override
+  String get updatesCachedInstall =>
+      'अपडेट डाउनलोड हो गया है। इंस्टॉल करने के लिए टैप करें।';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk अपडेट हो गया';
+
+  @override
+  String get updatesNotificationBody =>
+      'CodeWalk को फिर से खोलने के लिए टैप करें।';
 }

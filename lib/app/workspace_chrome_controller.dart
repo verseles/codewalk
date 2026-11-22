@@ -4,9 +4,13 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../features/hosts/endpoint_health_controller.dart';
+import '../features/sessions/session_list_projection.dart';
 import '../features/sessions/session_live_controller.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
+import '../features/settings/apk_update_controller.dart';
+import '../features/settings/update_check_controller.dart';
+import '../shared/releases/update_selector.dart';
 import '../shared/sessions/session_activity.dart';
 import '../shared/sessions/session_live_source.dart';
 
@@ -16,6 +20,8 @@ enum WorkspaceBadgeKind {
   syncAlert,
   error,
   needsInput,
+  updateReady,
+  updateAvailable,
   unread,
   syncing,
 }
@@ -34,15 +40,21 @@ final class WorkspaceChromeController extends ChangeNotifier {
     required this.health,
     required this.catalog,
     required this.tabs,
+    this.apkUpdates,
+    this.updates,
   }) {
     health.addListener(_changed);
     catalog.addListener(_changed);
     tabs.addListener(_changed);
+    apkUpdates?.addListener(_changed);
+    updates?.addListener(_changed);
   }
 
   final EndpointHealthController health;
   final SessionsController catalog;
   final SessionTabsController tabs;
+  final ApkUpdateController? apkUpdates;
+  final UpdateCheckController? updates;
   final _observed = <SessionLiveController>{};
   Timer? _timer;
   String _location = '';
@@ -58,6 +70,20 @@ final class WorkspaceChromeController extends ChangeNotifier {
   bool _disposed = false;
   int _warning = 0;
   int get warningRevision => _warning;
+
+  bool get hasPendingCachedUpdate => apkUpdates?.hasPendingCachedUpdate == true;
+
+  UpdateCandidate? get pendingCachedCandidate =>
+      hasPendingCachedUpdate ? apkUpdates?.candidate : null;
+
+  UpdateCandidate? get availableUpdateCandidate =>
+      hasPendingCachedUpdate ? null : updates?.visibleCandidate;
+
+  Future<void> installPendingCachedUpdate() async {
+    final apk = apkUpdates;
+    if (apk == null || !apk.hasPendingCachedUpdate) return;
+    await apk.openInstaller();
+  }
 
   bool get _workspace =>
       _location == '/' ||
@@ -125,9 +151,14 @@ final class WorkspaceChromeController extends ChangeNotifier {
       }
     }
     final project = catalog.selectedProject?.project;
-    WorkspaceBadge? attention;
-    for (final row in catalog.sessions) {
-      if (row.info.ref == currentSession ||
+    final loaded = catalog.loadedSessions;
+    final hidden = catalog.hiddenIn(loaded);
+    WorkspaceBadge? needsInput;
+    WorkspaceBadge? unread;
+    for (final row in loaded) {
+      if (hidden.contains(row.info.ref) ||
+          row.info.lineage.parent != null ||
+          row.info.ref == currentSession ||
           row.info.ref.host.value != catalog.selectedProfile?.id ||
           row.info.project != project) {
         continue;
@@ -149,21 +180,38 @@ final class WorkspaceChromeController extends ChangeNotifier {
             ExecutionKind.waitingForApproval,
             ExecutionKind.waitingForInput,
           }.contains(execution?.kind.known)) {
-        attention = WorkspaceBadge(
+        needsInput ??= WorkspaceBadge(
           WorkspaceBadgeKind.needsInput,
           session: row.info.ref,
           title: row.info.title,
         );
-      } else if (attention == null &&
-          marks.contains(SessionActivityMark.unread)) {
-        attention = WorkspaceBadge(
-          WorkspaceBadgeKind.unread,
-          session: row.info.ref,
-          title: row.info.title,
-        );
+      } else if (unread == null && marks.contains(SessionActivityMark.unread)) {
+        final view = row.view;
+        final fresh =
+            view == null || now.isBefore(view.idleAt.add(unreadEmphasis));
+        if (fresh) {
+          unread = WorkspaceBadge(
+            WorkspaceBadgeKind.unread,
+            session: row.info.ref,
+            title: row.info.title,
+          );
+        }
       }
     }
-    if (attention != null) return attention;
+    if (needsInput != null) return needsInput;
+    if (pendingCachedCandidate case final candidate?) {
+      return WorkspaceBadge(
+        WorkspaceBadgeKind.updateReady,
+        title: '${candidate.version}',
+      );
+    }
+    if (availableUpdateCandidate case final candidate?) {
+      return WorkspaceBadge(
+        WorkspaceBadgeKind.updateAvailable,
+        title: '${candidate.version}',
+      );
+    }
+    if (unread != null) return unread;
     if ((_resuming && _recovering) || _catalogSyncing) {
       return const WorkspaceBadge(WorkspaceBadgeKind.syncing);
     }
@@ -256,6 +304,27 @@ final class WorkspaceChromeController extends ChangeNotifier {
           _warning++;
         }
       }
+      final project = catalog.selectedProject?.project;
+      final loaded = catalog.loadedSessions;
+      final hidden = catalog.hiddenIn(loaded);
+      for (final row in loaded) {
+        final view = row.view;
+        if (view == null ||
+            hidden.contains(row.info.ref) ||
+            row.info.lineage.parent != null ||
+            row.info.ref == currentSession ||
+            row.info.ref.host.value != profile ||
+            row.info.project != project) {
+          continue;
+        }
+        if (!catalog.activityMarks(row).contains(SessionActivityMark.unread)) {
+          continue;
+        }
+        final expiry = view.idleAt.add(unreadEmphasis);
+        if (expiry.isAfter(now)) {
+          deadlines.add(expiry);
+        }
+      }
     }
     deadlines.sort();
     _timer = deadlines.isEmpty
@@ -272,6 +341,8 @@ final class WorkspaceChromeController extends ChangeNotifier {
     health.removeListener(_changed);
     catalog.removeListener(_changed);
     tabs.removeListener(_changed);
+    apkUpdates?.removeListener(_changed);
+    updates?.removeListener(_changed);
     for (final live in _observed) {
       live.removeListener(_changed);
     }

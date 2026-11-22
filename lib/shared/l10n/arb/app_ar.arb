@@ -2005,5 +2005,8 @@
   "contextUsageCompacting": "جارٍ الضغط...",
   "contextUsageQuotaNotExposed": "لا يوفر هذا الـ harness بيانات الحصة.",
   "contextUsageQuotaNone": "لم يتم الإبلاغ عن نوافذ حصة.",
-  "contextUsageUnknownCurrency": "عملة غير معروفة"
+  "contextUsageUnknownCurrency": "عملة غير معروفة",
+  "updatesCachedInstall": "تم تنزيل التحديث. انقر للتثبيت.",
+  "updatesNotificationTitle": "تم تحديث CodeWalk",
+  "updatesNotificationBody": "انقر لإعادة فتح CodeWalk."
 }

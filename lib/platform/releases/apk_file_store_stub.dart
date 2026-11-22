@@ -24,5 +24,13 @@ final class _UnsupportedFileStore implements ApkFileStore {
   Future<String?> sha256(String path) async => null;
 
   @override
-  Future<void> cleanupStale() async {}
+  Future<void> writeSidecar(ApkCachedRecord record) async {}
+
+  @override
+  Future<ApkCachedRecord?> restoreCached({
+    required int installedBuildNumber,
+  }) async => null;
+
+  @override
+  Future<void> cleanupStale({int? installedBuildNumber}) async {}
 }

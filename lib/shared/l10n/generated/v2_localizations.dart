@@ -5095,6 +5095,24 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Unknown currency'**
   String get contextUsageUnknownCurrency;
+
+  /// No description provided for @updatesCachedInstall.
+  ///
+  /// In en, this message translates to:
+  /// **'Update downloaded. Tap to install.'**
+  String get updatesCachedInstall;
+
+  /// No description provided for @updatesNotificationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CodeWalk updated'**
+  String get updatesNotificationTitle;
+
+  /// No description provided for @updatesNotificationBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to reopen CodeWalk.'**
+  String get updatesNotificationBody;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

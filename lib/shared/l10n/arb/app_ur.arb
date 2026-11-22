@@ -2006,5 +2006,8 @@
   "contextUsageCompacting": "کمپیکٹ ہو رہا ہے...",
   "contextUsageQuotaNotExposed": "یہ ہارنس کوٹہ فراہم نہیں کرتا۔",
   "contextUsageQuotaNone": "کوئی کوٹہ ونڈو رپورٹ نہیں ہوئی۔",
-  "contextUsageUnknownCurrency": "نامعلوم کرنسی"
+  "contextUsageUnknownCurrency": "نامعلوم کرنسی",
+  "updatesCachedInstall": "اپڈیٹ ڈاؤن لوڈ ہو گئی ہے۔ انسٹال کرنے کے لیے ٹیپ کریں۔",
+  "updatesNotificationTitle": "CodeWalk اپڈیٹ ہو گیا",
+  "updatesNotificationBody": "CodeWalk دوبارہ کھولنے کے لیے ٹیپ کریں۔"
 }

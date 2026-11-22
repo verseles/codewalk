@@ -2919,4 +2919,15 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => 'Неизвестная валюта';
+
+  @override
+  String get updatesCachedInstall =>
+      'Обновление загружено. Нажмите, чтобы установить.';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk обновлён';
+
+  @override
+  String get updatesNotificationBody =>
+      'Нажмите, чтобы снова открыть CodeWalk.';
 }

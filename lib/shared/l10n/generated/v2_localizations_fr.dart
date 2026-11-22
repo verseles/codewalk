@@ -2947,4 +2947,14 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => 'Devise inconnue';
+
+  @override
+  String get updatesCachedInstall =>
+      'Mise à jour téléchargée. Appuyez pour installer.';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk mis à jour';
+
+  @override
+  String get updatesNotificationBody => 'Appuyez pour rouvrir CodeWalk.';
 }

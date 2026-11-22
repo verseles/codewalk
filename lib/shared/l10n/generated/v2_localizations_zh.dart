@@ -2715,4 +2715,13 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => '未知货币';
+
+  @override
+  String get updatesCachedInstall => '更新已下载。点按即可安装。';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk 已更新';
+
+  @override
+  String get updatesNotificationBody => '点按即可重新打开 CodeWalk。';
 }

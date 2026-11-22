@@ -315,6 +315,7 @@ AppDependencies createAppDependencies({
     target: currentUpdateTarget(),
     installedBuild: () async => (await PackageInfo.fromPlatform()).buildNumber,
   );
+  final l10nBridge = locator<L10nBridge>();
   final apkUpdates = currentUpdateTarget() == UpdateTarget.androidArm64
       ? ApkUpdateController(
           fetcher: createApkFetcher(),
@@ -328,6 +329,14 @@ AppDependencies createAppDependencies({
           isForeground: () =>
               WidgetsBinding.instance.lifecycleState ==
               AppLifecycleState.resumed,
+          notificationCopy: () {
+            final l = l10nBridge.current;
+            return (
+              l.updatesNotificationTitle,
+              l.updatesNotificationBody,
+              l.settingsGroupVersionUpdates,
+            );
+          },
         )
       : null;
   final sessionDrafts =
@@ -335,7 +344,7 @@ AppDependencies createAppDependencies({
   return AppDependencies(
     preferences: locator<AppPreferencesController>(),
     navigation: navigation,
-    localizations: locator<L10nBridge>(),
+    localizations: l10nBridge,
     router: locator<GoRouter>(),
     hosts: locator<HostsController>(),
     endpointHealth: endpointHealth,
@@ -343,6 +352,8 @@ AppDependencies createAppDependencies({
       health: endpointHealth,
       catalog: locator<SessionsController>(),
       tabs: sessionTabs,
+      apkUpdates: apkUpdates,
+      updates: updates,
     ),
     sessions: locator<SessionsController>(),
     historyFactory:

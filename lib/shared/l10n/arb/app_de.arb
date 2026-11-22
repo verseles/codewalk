@@ -2006,5 +2006,8 @@
   "contextUsageCompacting": "Komprimierung läuft...",
   "contextUsageQuotaNotExposed": "Kontingent wird von diesem Harness nicht bereitgestellt.",
   "contextUsageQuotaNone": "Keine Kontingentfenster gemeldet.",
-  "contextUsageUnknownCurrency": "Unbekannte Währung"
+  "contextUsageUnknownCurrency": "Unbekannte Währung",
+  "updatesCachedInstall": "Update heruntergeladen. Zum Installieren tippen.",
+  "updatesNotificationTitle": "CodeWalk aktualisiert",
+  "updatesNotificationBody": "Tippen, um CodeWalk wieder zu öffnen."
 }

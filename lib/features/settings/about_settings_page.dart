@@ -57,7 +57,11 @@ class AboutSettingsPage extends StatelessWidget {
             install.status != ApkUpdateStatus.idle &&
             (install.status != ApkUpdateStatus.failed ||
                 install.hasVerifiedPackage));
-    final candidate = checks?.visibleCandidate;
+    final candidate =
+        checks?.visibleCandidate ??
+        (install != null && install.hasPendingCachedUpdate
+            ? install.candidate
+            : null);
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
@@ -88,12 +92,16 @@ class AboutSettingsPage extends StatelessWidget {
                   candidate: candidate,
                   install: install,
                   showInstalled: true,
-                  onDismiss: () async {
-                    final messenger = ScaffoldMessenger.maybeOf(context);
-                    if (!await checks.dismissCandidate()) {
-                      showAppSnackBar(messenger, l.settingsStorageError);
-                    }
-                  },
+                  onDismiss:
+                      checks.visibleCandidate != null &&
+                          !(install?.hasPendingCachedUpdate ?? false)
+                      ? () async {
+                          final messenger = ScaffoldMessenger.maybeOf(context);
+                          if (!await checks.dismissCandidate()) {
+                            showAppSnackBar(messenger, l.settingsStorageError);
+                          }
+                        }
+                      : null,
                 ),
               if (candidate == null && onHistory != null)
                 ReleaseNewsCard(onHistory: onHistory!),

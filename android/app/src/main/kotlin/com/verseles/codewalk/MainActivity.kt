@@ -44,6 +44,41 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
+        ApkInstallBridge.attach(
+            this,
+            MethodChannel(
+                flutterEngine.dartExecutor.binaryMessenger,
+                ApkInstallBridge.CHANNEL_NAME,
+            ),
+        )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        ApkInstallBridge.onActivityResume(this)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (ApkInstallBridge.onActivityResult(requestCode)) {
+            return
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        if (ApkInstallBridge.onRequestPermissionsResult(requestCode)) {
+            return
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    override fun onDestroy() {
+        ApkInstallBridge.detach(this)
+        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent) {

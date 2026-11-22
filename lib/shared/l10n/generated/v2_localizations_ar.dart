@@ -2871,4 +2871,13 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => 'عملة غير معروفة';
+
+  @override
+  String get updatesCachedInstall => 'تم تنزيل التحديث. انقر للتثبيت.';
+
+  @override
+  String get updatesNotificationTitle => 'تم تحديث CodeWalk';
+
+  @override
+  String get updatesNotificationBody => 'انقر لإعادة فتح CodeWalk.';
 }

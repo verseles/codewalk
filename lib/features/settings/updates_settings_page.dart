@@ -74,6 +74,7 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
                   install.status == ApkUpdateStatus.verifying ||
                   install.status == ApkUpdateStatus.ready ||
                   install.status == ApkUpdateStatus.handingOff ||
+                  install.status == ApkUpdateStatus.installing ||
                   install.status == ApkUpdateStatus.installerOpened ||
                   (install.status == ApkUpdateStatus.failed &&
                       install.hasVerifiedPackage));
@@ -156,6 +157,15 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           UpdateCandidateCard(
             target: controller.target!,
             candidate: candidate,
+            install: install,
+          )
+        else if (controller.target == UpdateTarget.androidArm64 &&
+            install != null &&
+            install.hasPendingCachedUpdate &&
+            install.candidate != null)
+          UpdateCandidateCard(
+            target: controller.target!,
+            candidate: install.candidate!,
             install: install,
           ),
       ]);
@@ -307,6 +317,32 @@ class UpdateCandidateCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(l.updatesVerifying),
+          ],
+        );
+      case ApkUpdateStatus.installing:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: AppIndeterminateRing(size: 16, strokeWidth: 2),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  l.appShellInstallingUpdate,
+                  key: const ValueKey('updates_installing'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            TextButton(
+              key: const ValueKey('updates_dismiss_install'),
+              onPressed: install.dismiss,
+              child: Text(l.settingsAboutDismiss),
+            ),
           ],
         );
       case ApkUpdateStatus.ready:

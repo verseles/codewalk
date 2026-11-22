@@ -2892,4 +2892,15 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => 'نامعلوم کرنسی';
+
+  @override
+  String get updatesCachedInstall =>
+      'اپڈیٹ ڈاؤن لوڈ ہو گئی ہے۔ انسٹال کرنے کے لیے ٹیپ کریں۔';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk اپڈیٹ ہو گیا';
+
+  @override
+  String get updatesNotificationBody =>
+      'CodeWalk دوبارہ کھولنے کے لیے ٹیپ کریں۔';
 }

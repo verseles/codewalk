@@ -3497,5 +3497,8 @@
   "contextUsageCompacting": "Compacting...",
   "contextUsageQuotaNotExposed": "Quota is not exposed by this harness.",
   "contextUsageQuotaNone": "No quota windows reported.",
-  "contextUsageUnknownCurrency": "Unknown currency"
+  "contextUsageUnknownCurrency": "Unknown currency",
+  "updatesCachedInstall": "Update downloaded. Tap to install.",
+  "updatesNotificationTitle": "CodeWalk updated",
+  "updatesNotificationBody": "Tap to reopen CodeWalk."
 }

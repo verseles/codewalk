@@ -24,6 +24,10 @@ String workspaceBadgeText(V2Localizations l, WorkspaceBadge badge) =>
       WorkspaceBadgeKind.needsInput => l.chatBadgeConversationNeedsInput(
         badge.title,
       ),
+      WorkspaceBadgeKind.updateReady => l.updatesCachedInstall,
+      WorkspaceBadgeKind.updateAvailable => l.settingsAboutUpdateAvailable(
+        badge.title,
+      ),
       WorkspaceBadgeKind.unread => l.chatBadgeConversationNewReply(badge.title),
       WorkspaceBadgeKind.syncing ||
       WorkspaceBadgeKind.syncAlert => l.chatBadgeSyncing,
@@ -37,6 +41,9 @@ class WorkspaceMenuButton extends StatelessWidget {
     final badge =
         context.watch<WorkspaceChromeController?>()?.badge ??
         const WorkspaceBadge(WorkspaceBadgeKind.none);
+    final isUpdateBadge =
+        badge.kind == WorkspaceBadgeKind.updateReady ||
+        badge.kind == WorkspaceBadgeKind.updateAvailable;
     return IconButton(
       key: const ValueKey('workspace-drawer'),
       tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
@@ -54,9 +61,10 @@ class WorkspaceMenuButton extends StatelessWidget {
                 child: badge.kind == WorkspaceBadgeKind.syncing
                     ? const AppIndeterminateRing(size: 12, strokeWidth: 2)
                     : Icon(
-                        Symbols.circle,
+                        isUpdateBadge ? Symbols.download : Symbols.circle,
                         key: ValueKey('workspace-badge-${badge.kind.name}'),
-                        size: 10,
+                        size: isUpdateBadge ? 12 : 10,
+                        fill: 1,
                         color: switch (badge.kind) {
                           WorkspaceBadgeKind.serverAlert ||
                           WorkspaceBadgeKind.syncAlert ||
@@ -81,32 +89,85 @@ class WorkspaceDrawerNotice extends StatelessWidget {
   const WorkspaceDrawerNotice({super.key});
   @override
   Widget build(BuildContext context) {
-    final badge = context.watch<WorkspaceChromeController?>()?.badge;
-    if (badge == null || badge.kind == WorkspaceBadgeKind.none) {
+    final chrome = context.watch<WorkspaceChromeController?>();
+    if (chrome == null) return const SizedBox.shrink();
+    final badge = chrome.badge;
+    final showSecondaryUpdateTile =
+        chrome.hasPendingCachedUpdate &&
+        badge.kind != WorkspaceBadgeKind.updateReady;
+    if (badge.kind == WorkspaceBadgeKind.none && !showSecondaryUpdateTile) {
       return const SizedBox.shrink();
     }
-    return ListTile(
-      key: const ValueKey('workspace-drawer-notice'),
-      dense: true,
-      leading: Icon(
-        badge.kind == WorkspaceBadgeKind.syncing ? Symbols.sync : Symbols.info,
-      ),
-      title: Text(workspaceBadgeText(context.v2L10n, badge)),
-      onTap:
-          badge.session == null && badge.kind != WorkspaceBadgeKind.serverAlert
-          ? null
-          : () {
-              Scaffold.maybeOf(context)?.closeDrawer();
-              if (badge.session case final ref?) {
-                context.go(
-                  Uri(
-                    pathSegments: ['', 's', ref.host.value, ref.nativeId],
-                  ).path,
-                );
-              } else {
-                context.push('/hosts');
-              }
+    final l = context.v2L10n;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final tiles = <Widget>[
+      if (showSecondaryUpdateTile)
+        ListTile(
+          key: const ValueKey('workspace-update-notice'),
+          dense: true,
+          leading: Icon(Symbols.download, color: primaryColor),
+          title: Text(l.updatesCachedInstall),
+          onTap: () {
+            Scaffold.maybeOf(context)?.closeDrawer();
+            unawaited(chrome.installPendingCachedUpdate());
+          },
+        ),
+      if (badge.kind != WorkspaceBadgeKind.none)
+        ListTile(
+          key: const ValueKey('workspace-drawer-notice'),
+          dense: true,
+          leading: Icon(
+            switch (badge.kind) {
+              WorkspaceBadgeKind.syncing => Symbols.sync,
+              WorkspaceBadgeKind.updateReady ||
+              WorkspaceBadgeKind.updateAvailable => Symbols.download,
+              _ => Symbols.info,
             },
+            color:
+                badge.kind == WorkspaceBadgeKind.updateReady ||
+                    badge.kind == WorkspaceBadgeKind.updateAvailable
+                ? primaryColor
+                : null,
+          ),
+          title: Text(workspaceBadgeText(l, badge)),
+          onTap: switch (badge.kind) {
+            WorkspaceBadgeKind.updateReady => () {
+              Scaffold.maybeOf(context)?.closeDrawer();
+              unawaited(chrome.installPendingCachedUpdate());
+            },
+            WorkspaceBadgeKind.updateAvailable => () {
+              Scaffold.maybeOf(context)?.closeDrawer();
+              context.push('/settings');
+            },
+            _ =>
+              badge.session == null &&
+                      badge.kind != WorkspaceBadgeKind.serverAlert
+                  ? null
+                  : () {
+                      Scaffold.maybeOf(context)?.closeDrawer();
+                      if (badge.session case final ref?) {
+                        context.go(
+                          Uri(
+                            pathSegments: [
+                              '',
+                              's',
+                              ref.host.value,
+                              ref.nativeId,
+                            ],
+                          ).path,
+                        );
+                      } else {
+                        context.push('/hosts');
+                      }
+                    },
+          },
+        ),
+    ];
+    if (tiles.length == 1) return tiles.single;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: tiles,
     );
   }
 }

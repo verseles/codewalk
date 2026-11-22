@@ -2926,4 +2926,14 @@ class V2LocalizationsPt extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => 'Moeda desconhecida';
+
+  @override
+  String get updatesCachedInstall =>
+      'Atualização baixada. Toque para instalar.';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk atualizado';
+
+  @override
+  String get updatesNotificationBody => 'Toque para reabrir o CodeWalk.';
 }

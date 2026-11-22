@@ -2006,5 +2006,8 @@
   "contextUsageCompacting": "Compactando...",
   "contextUsageQuotaNotExposed": "A cota não é exposta por este harness.",
   "contextUsageQuotaNone": "Nenhuma janela de cota reportada.",
-  "contextUsageUnknownCurrency": "Moeda desconhecida"
+  "contextUsageUnknownCurrency": "Moeda desconhecida",
+  "updatesCachedInstall": "Atualização baixada. Toque para instalar.",
+  "updatesNotificationTitle": "CodeWalk atualizado",
+  "updatesNotificationBody": "Toque para reabrir o CodeWalk."
 }

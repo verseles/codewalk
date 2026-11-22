@@ -284,3 +284,85 @@ CHECK_COPY = {
 NEW_KEYS += CHECK_KEYS
 for _locale in COPY:
     COPY[_locale] += tuple(_text.replace("'", "''") for _text in CHECK_COPY[_locale])
+
+# PackageInstaller self-update notification and cached APK drawer reminder.
+PACKAGE_INSTALL_KEYS = (
+    'updatesCachedInstall',
+    'updatesNotificationTitle',
+    'updatesNotificationBody',
+)
+PACKAGE_INSTALL_COPY = {
+    'en': (
+        'Update downloaded. Tap to install.',
+        'CodeWalk updated',
+        'Tap to reopen CodeWalk.',
+    ),
+    'pt': (
+        'Atualização baixada. Toque para instalar.',
+        'CodeWalk atualizado',
+        'Toque para reabrir o CodeWalk.',
+    ),
+    'es': (
+        'Actualización descargada. Toca para instalar.',
+        'CodeWalk actualizado',
+        'Toca para volver a abrir CodeWalk.',
+    ),
+    'fr': (
+        'Mise à jour téléchargée. Appuyez pour installer.',
+        'CodeWalk mis à jour',
+        'Appuyez pour rouvrir CodeWalk.',
+    ),
+    'de': (
+        'Update heruntergeladen. Zum Installieren tippen.',
+        'CodeWalk aktualisiert',
+        'Tippen, um CodeWalk wieder zu öffnen.',
+    ),
+    'it': (
+        'Aggiornamento scaricato. Tocca per installare.',
+        'CodeWalk aggiornato',
+        'Tocca per riaprire CodeWalk.',
+    ),
+    'ru': (
+        'Обновление загружено. Нажмите, чтобы установить.',
+        'CodeWalk обновлён',
+        'Нажмите, чтобы снова открыть CodeWalk.',
+    ),
+    'ja': (
+        'アップデートをダウンロードしました。タップしてインストールします。',
+        'CodeWalk を更新しました',
+        'タップして CodeWalk を再度開きます。',
+    ),
+    'ko': (
+        '업데이트가 다운로드되었습니다. 탭하여 설치하세요.',
+        'CodeWalk 업데이트됨',
+        '탭하여 CodeWalk를 다시 여세요.',
+    ),
+    'zh': (
+        '更新已下载。点按即可安装。',
+        'CodeWalk 已更新',
+        '点按即可重新打开 CodeWalk。',
+    ),
+    'hi': (
+        'अपडेट डाउनलोड हो गया है। इंस्टॉल करने के लिए टैप करें।',
+        'CodeWalk अपडेट हो गया',
+        'CodeWalk को फिर से खोलने के लिए टैप करें।',
+    ),
+    'bn': (
+        'আপডেট ডাউনলোড হয়েছে। ইনস্টল করতে ট্যাপ করুন।',
+        'CodeWalk আপডেট হয়েছে',
+        'CodeWalk পুনরায় খুলতে ট্যাপ করুন।',
+    ),
+    'ar': (
+        'تم تنزيل التحديث. انقر للتثبيت.',
+        'تم تحديث CodeWalk',
+        'انقر لإعادة فتح CodeWalk.',
+    ),
+    'ur': (
+        'اپڈیٹ ڈاؤن لوڈ ہو گئی ہے۔ انسٹال کرنے کے لیے ٹیپ کریں۔',
+        'CodeWalk اپڈیٹ ہو گیا',
+        'CodeWalk دوبارہ کھولنے کے لیے ٹیپ کریں۔',
+    ),
+}
+NEW_KEYS += PACKAGE_INSTALL_KEYS
+for _locale in COPY:
+    COPY[_locale] += tuple(_text.replace("'", "''") for _text in PACKAGE_INSTALL_COPY[_locale])

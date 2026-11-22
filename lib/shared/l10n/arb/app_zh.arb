@@ -2006,5 +2006,8 @@
   "contextUsageCompacting": "正在压缩...",
   "contextUsageQuotaNotExposed": "此运行环境未提供配额信息。",
   "contextUsageQuotaNone": "未报告配额窗口。",
-  "contextUsageUnknownCurrency": "未知货币"
+  "contextUsageUnknownCurrency": "未知货币",
+  "updatesCachedInstall": "更新已下载。点按即可安装。",
+  "updatesNotificationTitle": "CodeWalk 已更新",
+  "updatesNotificationBody": "点按即可重新打开 CodeWalk。"
 }

@@ -2044,5 +2044,8 @@
   "contextUsageCompacting": "압축 중...",
   "contextUsageQuotaNotExposed": "이 하네스는 할당량을 제공하지 않습니다.",
   "contextUsageQuotaNone": "보고된 할당량 기간이 없습니다.",
-  "contextUsageUnknownCurrency": "알 수 없는 통화"
+  "contextUsageUnknownCurrency": "알 수 없는 통화",
+  "updatesCachedInstall": "업데이트가 다운로드되었습니다. 탭하여 설치하세요.",
+  "updatesNotificationTitle": "CodeWalk 업데이트됨",
+  "updatesNotificationBody": "탭하여 CodeWalk를 다시 여세요."
 }

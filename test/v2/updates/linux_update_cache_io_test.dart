@@ -169,6 +169,73 @@ void main() {
   }
 
   test(
+    'APK cleanup retains still-newer verified sidecar APK past 24h and removes installed or stale partials',
+    () async {
+      final store = ApkFileStoreIo(
+        temporaryDirectory: () async => temporary.path,
+      );
+      final stalePart = File(await store.partPath('v2.1.0'));
+      await stalePart.parent.create(recursive: true);
+      await stalePart.writeAsString('partial');
+      await stalePart.setLastModified(
+        DateTime.now().subtract(const Duration(hours: 30)),
+      );
+
+      final obsoleteApk = File(await store.finalPath('v2.1.0'));
+      await obsoleteApk.writeAsString('installed-apk');
+      await obsoleteApk.setLastModified(
+        DateTime.now().subtract(const Duration(hours: 30)),
+      );
+      await store.writeSidecar(
+        ApkCachedRecord(
+          tag: 'v2.1.0',
+          version: '2.1.0',
+          versionCode: 10,
+          assetUrl: Uri.parse(
+            'https://github.com/verseles/codewalk/releases/download/v2.1.0/codewalk-android-arm64.apk',
+          ),
+          sha256: 'a' * 64,
+          size: 13,
+          path: obsoleteApk.path,
+          savedAt: DateTime.now().toUtc().subtract(const Duration(hours: 30)),
+        ),
+      );
+
+      final pendingApk = File(await store.finalPath('v2.2.0'));
+      await pendingApk.parent.create(recursive: true);
+      await pendingApk.writeAsString('pending-apk');
+      await pendingApk.setLastModified(
+        DateTime.now().subtract(const Duration(hours: 30)),
+      );
+      await store.writeSidecar(
+        ApkCachedRecord(
+          tag: 'v2.2.0',
+          version: '2.2.0',
+          versionCode: 20,
+          assetUrl: Uri.parse(
+            'https://github.com/verseles/codewalk/releases/download/v2.2.0/codewalk-android-arm64.apk',
+          ),
+          sha256: 'b' * 64,
+          size: 11,
+          path: pendingApk.path,
+          savedAt: DateTime.now().toUtc().subtract(const Duration(hours: 30)),
+        ),
+      );
+
+      await store.cleanupStale(installedBuildNumber: 10);
+      expect(stalePart.existsSync(), isFalse);
+      expect(obsoleteApk.existsSync(), isFalse);
+      expect(File('${obsoleteApk.path}.json').existsSync(), isFalse);
+      expect(pendingApk.existsSync(), isTrue);
+      expect(File('${pendingApk.path}.json').existsSync(), isTrue);
+
+      final restored = await store.restoreCached(installedBuildNumber: 10);
+      expect(restored?.tag, 'v2.2.0');
+      expect(restored?.versionCode, 20);
+    },
+  );
+
+  test(
     'detached relaunch uses stable cwd and preserves desktop credentials',
     () async {
       final output = '${temporary.path}/environment';

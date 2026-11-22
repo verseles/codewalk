@@ -2006,5 +2006,8 @@
   "contextUsageCompacting": "কম্প্যাক্ট হচ্ছে...",
   "contextUsageQuotaNotExposed": "এই হারনেস কোটা প্রদান করে না।",
   "contextUsageQuotaNone": "কোনো কোটা উইন্ডো রিপোর্ট করা হয়নি।",
-  "contextUsageUnknownCurrency": "অজানা মুদ্রা"
+  "contextUsageUnknownCurrency": "অজানা মুদ্রা",
+  "updatesCachedInstall": "আপডেট ডাউনলোড হয়েছে। ইনস্টল করতে ট্যাপ করুন।",
+  "updatesNotificationTitle": "CodeWalk আপডেট হয়েছে",
+  "updatesNotificationBody": "CodeWalk পুনরায় খুলতে ট্যাপ করুন।"
 }

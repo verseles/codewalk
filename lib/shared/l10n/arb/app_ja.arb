@@ -2006,5 +2006,8 @@
   "contextUsageCompacting": "圧縮中...",
   "contextUsageQuotaNotExposed": "このハーネスではクォータが公開されていません。",
   "contextUsageQuotaNone": "報告されたクォータウィンドウはありません。",
-  "contextUsageUnknownCurrency": "不明な通貨"
+  "contextUsageUnknownCurrency": "不明な通貨",
+  "updatesCachedInstall": "アップデートをダウンロードしました。タップしてインストールします。",
+  "updatesNotificationTitle": "CodeWalk を更新しました",
+  "updatesNotificationBody": "タップして CodeWalk を再度開きます。"
 }

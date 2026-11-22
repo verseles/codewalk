@@ -2763,4 +2763,13 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => '不明な通貨';
+
+  @override
+  String get updatesCachedInstall => 'アップデートをダウンロードしました。タップしてインストールします。';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk を更新しました';
+
+  @override
+  String get updatesNotificationBody => 'タップして CodeWalk を再度開きます。';
 }

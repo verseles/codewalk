@@ -2945,4 +2945,14 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => 'Valuta sconosciuta';
+
+  @override
+  String get updatesCachedInstall =>
+      'Aggiornamento scaricato. Tocca per installare.';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk aggiornato';
+
+  @override
+  String get updatesNotificationBody => 'Tocca per riaprire CodeWalk.';
 }

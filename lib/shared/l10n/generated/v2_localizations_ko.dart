@@ -2761,4 +2761,13 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => '알 수 없는 통화';
+
+  @override
+  String get updatesCachedInstall => '업데이트가 다운로드되었습니다. 탭하여 설치하세요.';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk 업데이트됨';
+
+  @override
+  String get updatesNotificationBody => '탭하여 CodeWalk를 다시 여세요.';
 }

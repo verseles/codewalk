@@ -2892,4 +2892,14 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get contextUsageUnknownCurrency => 'অজানা মুদ্রা';
+
+  @override
+  String get updatesCachedInstall =>
+      'আপডেট ডাউনলোড হয়েছে। ইনস্টল করতে ট্যাপ করুন।';
+
+  @override
+  String get updatesNotificationTitle => 'CodeWalk আপডেট হয়েছে';
+
+  @override
+  String get updatesNotificationBody => 'CodeWalk পুনরায় খুলতে ট্যাপ করুন।';
 }
