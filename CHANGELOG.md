@@ -2,6 +2,23 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.3.0 - 2026-11-22
+
+> 📣 CodeWalk 2.3.0 upgrades the Android updater to a native PackageInstaller session for unattended self-updates on Android 12+, keeps downloaded APKs cached across restarts with a drawer quick-install tile, and cleans up the workspace hamburger badge.
+
+### Unattended Android self-updates & post-update notification
+
+- Replaces the external file-opener handoff in the Android updater with a native `PackageInstaller` session (`MODE_FULL_INSTALL`) that uses `USER_ACTION_NOT_REQUIRED` and `UPDATE_PACKAGES_WITHOUT_USER_ACTION` on Android 12+ (API 31+) to install verified updates without a confirmation prompt whenever the OS permits.
+- Automatically launches the native confirmation screen when Android returns `STATUS_PENDING_USER_ACTION`, and returns cleanly to **Install** (`ready`) without an error banner if the confirmation dialog is cancelled (`STATUS_FAILURE_ABORTED`).
+- On Android 8+ (API 26+), checks `canRequestPackageInstalls()` before creating a session and opens the system **Install unknown apps** settings screen for CodeWalk if needed, continuing directly into the installation when granted on return.
+- Posts a local notification after a CodeWalk-initiated self-update replaces the app (`ACTION_MY_PACKAGE_REPLACED` gated by a private 24-hour update marker, never firing on external or ADB installs) so CodeWalk can be reopened in one tap.
+
+### Persistent cached APK & workspace update reminder
+
+- Stores downloaded verified Android APKs in persistent non-backed-up storage (`noBackupFilesDir/updates`) with a metadata sidecar so a postponed or interrupted installation survives the 24-hour partial cleanup and app restarts without re-downloading.
+- Displays a download/update icon on the workspace hamburger button and a one-tap quick-install notice at the top of the navigation drawer whenever a verified update is cached on disk (or a new release is available).
+- Excludes child/sub-agent sessions, hidden sessions, and unread replies older than 1 hour from the workspace hamburger badge, and renders active alert dots filled instead of hollow.
+
 ## v2.2.0 - 2026-11-21
 
 > 📣 CodeWalk 2.2.0 brings the circular context-usage knob and session usage details back to the workspace toolbar — pinned by default beside New Chat, with token breakdown, cumulative session cost, and a one-tap Compact now action.
