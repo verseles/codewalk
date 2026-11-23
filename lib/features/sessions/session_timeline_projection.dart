@@ -202,7 +202,8 @@ final class SessionTimelinePresentation {
   static bool isCompactable(TimelineItem item) => switch (item) {
     Reasoning() => true,
     ShellRun(:final shellStatus) => shellStatus?.known != null,
-    ToolCall(:final kind) => kind.known != ToolKind.subagent,
+    ToolCall(:final kind) =>
+      kind.known != ToolKind.subagent && kind.known != ToolKind.plan,
     Notice(shellReport: _?) => true,
     _ => false,
   };
@@ -599,9 +600,10 @@ class SessionTimelineScope extends InheritedWidget {
 }
 
 /// The items a timeline shows: a succeeded turn needs no row of its own, the
-/// header already reports it; failed and interrupted turns keep theirs.
-/// Synthetic shell completion notices that duplicate a user [ShellRun] with the
-/// same `shellId` are omitted (mirroring the official client's `echoesUserShell`).
+/// header already reports it; structured plan tools are shown in the task list
+/// panel instead of timeline rows; synthetic shell completion notices that
+/// duplicate a user [ShellRun] with the same `shellId` are omitted (mirroring
+/// the official client's `echoesUserShell`).
 List<TimelineItem> sessionTimelineItems(List<TimelineItem> items) {
   final userShellIds = <String>{
     for (final item in items)
@@ -610,6 +612,7 @@ List<TimelineItem> sessionTimelineItems(List<TimelineItem> items) {
   return [
     for (final item in items)
       if ((item is! TurnOutcome || item.kind.known != OutcomeKind.succeeded) &&
+          !(item is ToolCall && item.kind.known == ToolKind.plan) &&
           !(item is Notice &&
               item.shellReport?.shellId != null &&
               userShellIds.contains(item.shellReport!.shellId)))

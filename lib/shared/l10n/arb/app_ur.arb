@@ -2009,5 +2009,16 @@
   "contextUsageUnknownCurrency": "نامعلوم کرنسی",
   "updatesCachedInstall": "اپڈیٹ ڈاؤن لوڈ ہو گئی ہے۔ انسٹال کرنے کے لیے ٹیپ کریں۔",
   "updatesNotificationTitle": "CodeWalk اپڈیٹ ہو گیا",
-  "updatesNotificationBody": "CodeWalk دوبارہ کھولنے کے لیے ٹیپ کریں۔"
+  "updatesNotificationBody": "CodeWalk دوبارہ کھولنے کے لیے ٹیپ کریں۔",
+  "settingsAppearanceTaskList": "کاموں کی فہرست",
+  "sessionTodoTasksCount": "کام ({count})",
+  "sessionTodoTaskProgress": "کام {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} مکمل",
+  "sessionTodoCompletedCount": "{count}/{total} کام مکمل",
+  "sessionTodoCancelledCount": "{count} منسوخ",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "مزید {count} جاری ہیں",
+  "sessionTodoStatusPending": "زیر التوا",
+  "sessionTodoProgressSemantic": "{total} میں سے {completed} کام مکمل"
 }

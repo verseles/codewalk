@@ -36,6 +36,8 @@ export 'src/interaction_projection.dart'
     hide openCodePendingForm, openCodePendingPermission;
 export 'src/notice_projection.dart';
 export 'src/compaction_projection.dart' hide openCodeCompactionNotice;
+export 'src/plan_capabilities.dart';
+export 'src/plan_projection.dart';
 export 'src/revert_projection.dart' hide openCodeStagedRevert;
 export 'src/session_lifecycle_projection.dart';
 export 'src/step_usage_projection.dart';

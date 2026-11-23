@@ -18,6 +18,7 @@ export 'src/events.dart';
 export 'src/forms.dart';
 export 'src/interactions.dart';
 export 'src/work.dart';
+export 'src/plan_visibility.dart';
 export 'src/usage.dart';
 export 'src/usage_view.dart';
 export 'src/session.dart';

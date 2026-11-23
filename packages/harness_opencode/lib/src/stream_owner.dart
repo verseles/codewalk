@@ -7,6 +7,7 @@ import 'package:codewalk_net/codewalk_net.dart';
 import 'event_projection.dart';
 import 'execution_projection.dart';
 import 'interaction_projection.dart';
+import 'plan_projection.dart';
 import 'session_projection.dart';
 import 'session_reader.dart';
 import 'session_rules.dart';
@@ -518,6 +519,53 @@ final class OpenCodeStreamOwner {
       _noteTrim(ref, watch);
       _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
       _handle(ref, result.effects);
+      // Fill an initially unknown (or unproven empty after revert) plan from the
+      // merged timeline without ever replacing a newer plan already observed.
+      final existingPlan = result.state.plan;
+      final needsPlanFill =
+          existingPlan == null ||
+          (existingPlan.entries.isEmpty && existingPlan.anchor == null);
+      if (needsPlanFill) {
+        final stagedCut = result.state.revert?.kind.known == RevertKind.staged
+            ? result.state.revert?.anchor
+            : null;
+        final scanItems = stagedCut == null
+            ? result.state.timeline
+            : [
+                for (final item in result.state.timeline)
+                  if (item.meta.anchor == null ||
+                      item.meta.anchor!.compareTo(stagedCut) < 0)
+                    item,
+              ];
+        final older = openCodeLatestPlan(
+          scanItems,
+          ref: ref,
+          sourceVersion: sourceVersion,
+          hasMoreHistory: result.state.hasMoreHistory,
+        );
+        if (older.authoritative &&
+            older.snapshot != null &&
+            older.snapshot != existingPlan) {
+          final filled = store.apply(
+            ref,
+            PlanChanged(
+              meta: EventMeta(
+                owner: SessionOwner(ref),
+                position: _position(++_seq),
+                receivedAt: _now(),
+                source: SourceProvenance(
+                  harness: harness,
+                  version: sourceVersion,
+                  nativeType: 'session.message.list',
+                ),
+              ),
+              plan: older.snapshot!,
+            ),
+          );
+          _emit(OpenCodeSessionUpdated(ref, filled.state, filled.effects));
+          _handle(ref, filled.effects);
+        }
+      }
       return true;
     } on OpenCodeSessionReadException catch (error) {
       if (!_current(ref, watch, generation) ||

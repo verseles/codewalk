@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'item_ids.dart';
+import 'plan_projection.dart';
 import 'version_policy.dart';
 
 enum OpenCodeRevertProjectionFailure {
@@ -160,7 +161,24 @@ List<SessionEvent> projectOpenCodeRevertEvent(
       ),
     ),
   ];
-  if (type != _committed) return List.unmodifiable(events);
+  if (type == _staged || type == _cleared) {
+    final stagedCut = type == _staged
+        ? openCodeMessageAnchor(messageId!)
+        : null;
+    final nextPlan = openCodePlanForRevertBoundary(
+      current.timeline,
+      ref: ref,
+      sourceVersion: sourceVersion,
+      source: eventMeta.source,
+      stagedCut: stagedCut,
+      hasMoreHistory: current.hasMoreHistory,
+    );
+    if ((current.plan != null || nextPlan.entries.isNotEmpty) &&
+        current.plan != nextPlan) {
+      events.add(PlanChanged(meta: eventMeta, plan: nextPlan));
+    }
+    return List.unmodifiable(events);
+  }
 
   final to = messageId!;
   String? resync;
@@ -177,6 +195,17 @@ List<SessionEvent> projectOpenCodeRevertEvent(
       events.add(
         ItemsRemoved(meta: eventMeta, fromItemId: current.timeline[cut].id),
       );
+      final nextPlan = openCodePlanAfterCommittedRevert(
+        current.timeline.sublist(0, cut),
+        ref: ref,
+        sourceVersion: sourceVersion,
+        source: eventMeta.source,
+        hasMoreHistory: current.hasMoreHistory,
+      );
+      if ((current.plan != null || nextPlan.entries.isNotEmpty) &&
+          current.plan != nextPlan) {
+        events.add(PlanChanged(meta: eventMeta, plan: nextPlan));
+      }
     }
   }
 

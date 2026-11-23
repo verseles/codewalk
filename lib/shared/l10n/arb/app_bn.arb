@@ -2009,5 +2009,16 @@
   "contextUsageUnknownCurrency": "অজানা মুদ্রা",
   "updatesCachedInstall": "আপডেট ডাউনলোড হয়েছে। ইনস্টল করতে ট্যাপ করুন।",
   "updatesNotificationTitle": "CodeWalk আপডেট হয়েছে",
-  "updatesNotificationBody": "CodeWalk পুনরায় খুলতে ট্যাপ করুন।"
+  "updatesNotificationBody": "CodeWalk পুনরায় খুলতে ট্যাপ করুন।",
+  "settingsAppearanceTaskList": "কাজের তালিকা",
+  "sessionTodoTasksCount": "কাজ ({count})",
+  "sessionTodoTaskProgress": "কাজ {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} সম্পন্ন",
+  "sessionTodoCompletedCount": "{count}/{total} কাজ সম্পন্ন",
+  "sessionTodoCancelledCount": "{count} বাতিল",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "আরও {count}টি চলছে",
+  "sessionTodoStatusPending": "অপেক্ষমাণ",
+  "sessionTodoProgressSemantic": "{total}টি কাজের মধ্যে {completed}টি সম্পন্ন"
 }

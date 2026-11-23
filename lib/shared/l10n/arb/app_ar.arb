@@ -2008,5 +2008,16 @@
   "contextUsageUnknownCurrency": "عملة غير معروفة",
   "updatesCachedInstall": "تم تنزيل التحديث. انقر للتثبيت.",
   "updatesNotificationTitle": "تم تحديث CodeWalk",
-  "updatesNotificationBody": "انقر لإعادة فتح CodeWalk."
+  "updatesNotificationBody": "انقر لإعادة فتح CodeWalk.",
+  "settingsAppearanceTaskList": "قائمة المهام",
+  "sessionTodoTasksCount": "المهام ({count})",
+  "sessionTodoTaskProgress": "المهمة {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "أُنجز {count}/{total}",
+  "sessionTodoCompletedCount": "أُنجز {count}/{total} من المهام",
+  "sessionTodoCancelledCount": "{count} ملغاة",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "{count} أخرى قيد التنفيذ",
+  "sessionTodoStatusPending": "قيد الانتظار",
+  "sessionTodoProgressSemantic": "تم إنجاز {completed} من {total} مهام"
 }

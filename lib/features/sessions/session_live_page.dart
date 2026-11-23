@@ -9,6 +9,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../../app/app_keyboard_shortcuts.dart';
+import '../../app/app_preferences_controller.dart';
 import '../../app/workspace_actions.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -32,6 +33,7 @@ import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
 import 'session_subagent_capsule.dart';
 import 'session_switch_note.dart';
+import 'session_task_list.dart';
 import 'session_timeline_projection.dart';
 import 'session_timeline_tile.dart';
 import 'sessions_controller.dart';
@@ -174,6 +176,25 @@ class _SessionLivePageState extends State<SessionLivePage>
     if (old.controller.session == session) return;
     _catalog?.leave(old.controller.session);
     if (_foreground(WidgetsBinding.instance.lifecycleState)) _show();
+  }
+
+  /// Whether the platform reports an on-screen software keyboard inset.
+  bool _softwareKeyboardOpen = false;
+  bool _localTaskListCollapsed = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _softwareKeyboardOpen = (View.maybeOf(context)?.viewInsets.bottom ?? 0) > 0;
+  }
+
+  @override
+  void didChangeMetrics() {
+    if (!mounted) return;
+    final open = (View.maybeOf(context)?.viewInsets.bottom ?? 0) > 0;
+    if (open != _softwareKeyboardOpen) {
+      setState(() => _softwareKeyboardOpen = open);
+    }
   }
 
   @override
@@ -399,15 +420,25 @@ class _SessionLivePageState extends State<SessionLivePage>
         ExecutionKind.unknown => false,
       };
       final textTheme = Theme.of(context).textTheme;
+      final preferences = context.watch<AppPreferencesController?>();
+      final showTaskList = preferences?.showTaskList ?? true;
+      final activePlan = showTaskList
+          ? visiblePlan(
+              state,
+              stagedCut: cut,
+              useStateRevert: c.turnActions == null,
+            )
+          : null;
       final search = c.search;
       final appearance = ChatAppearance.maybeOf(context);
       final reasoning = appearance?.showReasoning ?? true;
+      final timelineItems = sessionTimelineItems(items);
       final held = SessionTimelinePresentation.heldText(
         items,
         settled: settled,
         renderMode: appearance?.renderMode ?? ChatRenderMode.live,
       );
-      _searchItems = items;
+      _searchItems = timelineItems;
       _searchReasoning = reasoning;
       _searchHeld = held;
       return Scaffold(
@@ -461,6 +492,33 @@ class _SessionLivePageState extends State<SessionLivePage>
                 state,
                 canObserveShells: c.shells?.canObserve ?? false,
               );
+              final compactViewport = MediaQuery.sizeOf(context).width < 600;
+              final taskListPreferredCollapsed =
+                  preferences?.taskListCollapsed ?? _localTaskListCollapsed;
+              final forceCollapseTaskList =
+                  tight ||
+                  body.maxHeight < 260 ||
+                  (_softwareKeyboardOpen && compactViewport) ||
+                  (_softwareKeyboardOpen && hasCards);
+              final taskListCollapsed =
+                  forceCollapseTaskList || taskListPreferredCollapsed;
+              // On an extreme tiny body (e.g. tiny split-screen with open
+              // keyboard or large text scale), drop the pinned panel so the
+              // composer never overflows.
+              final collapsedPlanHeight = SessionTaskListPanel.collapsedHeightOf(
+                context,
+              );
+              final showPlanPanel =
+                  activePlan != null &&
+                  body.maxHeight >= max(140.0, collapsedPlanHeight + 64.0);
+              final taskListHeight = !showPlanPanel
+                  ? 0.0
+                  : taskListCollapsed
+                  ? collapsedPlanHeight
+                  : SessionTaskListPanel.expandedHeightOf(
+                      context,
+                      body.maxHeight,
+                    );
               final chrome =
                   (c.summary.info.lineage.parent != null
                       ? returnToParentHeight(context)
@@ -469,6 +527,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                   (c.canRetry ? 48.0 : 0.0) +
                   (c.outbox == null ? SessionComposerStatus.height : 0.0) +
                   (c.search.open ? SessionSearchBar.heightOf(context) : 0.0) +
+                  taskListHeight +
                   (stopButton ? 56.0 : 0.0) +
                   (stopNotice ? 24.0 : 0.0);
               final space = max(0.0, body.maxHeight - pad - chrome);
@@ -498,10 +557,32 @@ class _SessionLivePageState extends State<SessionLivePage>
                       if (search.open)
                         SessionSearchBar(
                           search: search,
-                          items: items,
+                          items: timelineItems,
                           reasoning: reasoning,
                           held: held,
                           onClose: _focusComposer,
+                        ),
+                      if (showPlanPanel)
+                        SessionTaskListPanel(
+                          plan: activePlan,
+                          collapsed: taskListPreferredCollapsed,
+                          forceCollapsed: forceCollapseTaskList,
+                          maxListHeight: SessionTaskListPanel.listMaxHeightFor(
+                            body.maxHeight,
+                          ),
+                          onToggleCollapsed: () {
+                            if (forceCollapseTaskList) return;
+                            if (preferences != null) {
+                              preferences.setTaskListCollapsed(
+                                !taskListPreferredCollapsed,
+                              );
+                            } else {
+                              setState(
+                                () => _localTaskListCollapsed =
+                                    !_localTaskListCollapsed,
+                              );
+                            }
+                          },
                         ),
                       Expanded(
                         child: SessionAttachmentScope(
@@ -510,63 +591,63 @@ class _SessionLivePageState extends State<SessionLivePage>
                             models: c.selectionState.models,
                             agents: c.selectionState.agents,
                             child: SessionLiveTimeline(
-                            bottomEndOverlay: hasCapsule
-                                ? SessionSubagentCapsule(
-                                    live: c,
-                                    onOpen: _openRosterChild,
-                                  )
-                                : null,
-                            highlight: search.open ? search.current : null,
-                            reveals: search.reveals,
-                            onOpenChild: _openChild,
-                            onOpenReportChild: canReadChild
-                                ? _openRosterChild
-                                : null,
-                            items: items,
-                            // A turn reverts from its message menu, where
-                            // the session can (#492).
-                            userTurnRevert: (turnItem, isLatest) =>
-                                c.turn.canUndo
-                                ? SessionBubbleAction(
-                                    label: isLatest
-                                        ? l10n.msgInfoUndoThisTurn
-                                        : l10n.chatMessageRewindEdit,
-                                    icon: isLatest
-                                        ? Symbols.undo_rounded
-                                        : Symbols.settings_backup_restore,
-                                    onSelected: (context) => unawaited(
-                                      c.turn.stageUndo(
-                                        target: turnItem,
-                                        context: context,
-                                      ),
-                                    ),
-                                  )
-                                : null,
-                            emptyBuilder: _empty(c, l10n),
-                            scroll: widget.controller.scroll,
-                            settled: settled,
-                            olderLoading: c.olderHistory.loading,
-                            topBuilder: _top(c, l10n),
-                            onLoadOlder: c.canLoadOlderHistory
-                                ? c.loadOlderHistory
-                                : null,
-                            errorRecovery: (error) => sessionErrorRecovery(
-                              l10n,
-                              error,
-                              chooseModel: canShowSessionSelection(c)
-                                  ? () => showSessionSelection(context, c)
+                              bottomEndOverlay: hasCapsule
+                                  ? SessionSubagentCapsule(
+                                      live: c,
+                                      onOpen: _openRosterChild,
+                                    )
                                   : null,
-                              openServers: () => context.push('/hosts'),
-                            ),
-                            headerBuilder: (context) => _header(
-                              context,
-                              c,
-                              l10n,
-                              textTheme,
-                              canAct: canAct,
+                              highlight: search.open ? search.current : null,
+                              reveals: search.reveals,
+                              onOpenChild: _openChild,
+                              onOpenReportChild: canReadChild
+                                  ? _openRosterChild
+                                  : null,
+                              items: items,
+                              // A turn reverts from its message menu, where
+                              // the session can (#492).
+                              userTurnRevert: (turnItem, isLatest) =>
+                                  c.turn.canUndo
+                                  ? SessionBubbleAction(
+                                      label: isLatest
+                                          ? l10n.msgInfoUndoThisTurn
+                                          : l10n.chatMessageRewindEdit,
+                                      icon: isLatest
+                                          ? Symbols.undo_rounded
+                                          : Symbols.settings_backup_restore,
+                                      onSelected: (context) => unawaited(
+                                        c.turn.stageUndo(
+                                          target: turnItem,
+                                          context: context,
+                                        ),
+                                      ),
+                                    )
+                                  : null,
+                              emptyBuilder: _empty(c, l10n),
+                              scroll: widget.controller.scroll,
+                              settled: settled,
+                              olderLoading: c.olderHistory.loading,
+                              topBuilder: _top(c, l10n),
+                              onLoadOlder: c.canLoadOlderHistory
+                                  ? c.loadOlderHistory
+                                  : null,
+                              errorRecovery: (error) => sessionErrorRecovery(
+                                l10n,
+                                error,
+                                chooseModel: canShowSessionSelection(c)
+                                    ? () => showSessionSelection(context, c)
+                                    : null,
+                                openServers: () => context.push('/hosts'),
+                              ),
+                              headerBuilder: (context) => _header(
+                                context,
+                                c,
+                                l10n,
+                                textTheme,
+                                canAct: canAct,
+                              ),
                             ),
                           ),
-                        ),
                         ),
                       ),
                       SafeArea(

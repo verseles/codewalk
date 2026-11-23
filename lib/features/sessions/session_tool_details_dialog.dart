@@ -26,6 +26,7 @@ IconData toolIcon(TimelineItem item) => switch (item) {
     ToolKind.skill => Symbols.auto_stories,
     ToolKind.question => Symbols.help,
     ToolKind.subagent => Symbols.smart_toy,
+    ToolKind.plan => Symbols.checklist,
     ToolKind.mcp || ToolKind.other || null => Symbols.build,
   },
   _ => Symbols.build,
@@ -46,6 +47,7 @@ String toolKindLabel(TimelineItem item, V2Localizations l10n) => switch (item) {
     ToolKind.skill => l10n.toolKindSkill,
     ToolKind.question => l10n.toolKindQuestion,
     ToolKind.subagent => l10n.liveSubagentsTitle,
+    ToolKind.plan => l10n.sessionTabIconPresetTasks,
     ToolKind.mcp || ToolKind.other || null =>
       redactCredentialText(rawName).trim().isNotEmpty
           ? redactCredentialText(rawName).trim()

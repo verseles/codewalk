@@ -3500,5 +3500,115 @@
   "contextUsageUnknownCurrency": "Unknown currency",
   "updatesCachedInstall": "Update downloaded. Tap to install.",
   "updatesNotificationTitle": "CodeWalk updated",
-  "updatesNotificationBody": "Tap to reopen CodeWalk."
+  "updatesNotificationBody": "Tap to reopen CodeWalk.",
+  "settingsAppearanceTaskList": "Task list",
+  "@settingsAppearanceTaskList": {
+    "description": "Display menu toggle label for showing or hiding the session task list panel"
+  },
+  "sessionTodoTasksCount": "Tasks ({count})",
+  "@sessionTodoTasksCount": {
+    "description": "Expanded task list header showing total task count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoTaskProgress": "Task {index}/{total} · {content}",
+  "@sessionTodoTaskProgress": {
+    "description": "Wide collapsed task list summary showing the active task index, total, and content",
+    "placeholders": {
+      "index": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "content": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "@sessionTodoInProgressCompact": {
+    "description": "Compact mobile collapsed task list summary showing count-first active task",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "content": {
+        "type": "String"
+      }
+    }
+  },
+  "sessionTodoDoneCompact": "{count}/{total} done",
+  "@sessionTodoDoneCompact": {
+    "description": "Compact mobile collapsed task list completion summary when no task is in progress",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoCompletedCount": "Tasks {count}/{total} completed",
+  "@sessionTodoCompletedCount": {
+    "description": "Wide collapsed task list completion summary when no task is in progress",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoCancelledCount": "{count} cancelled",
+  "@sessionTodoCancelledCount": {
+    "description": "Count of cancelled tasks in the session task list",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoMoreInProgress": "+{count}",
+  "@sessionTodoMoreInProgress": {
+    "description": "Compact badge for additional tasks running in parallel",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoMoreInProgressSemantic": "{count} more in progress",
+  "@sessionTodoMoreInProgressSemantic": {
+    "description": "Accessible label for additional tasks running in parallel",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sessionTodoStatusPending": "Pending",
+  "@sessionTodoStatusPending": {
+    "description": "Accessible status label for a pending task"
+  },
+  "sessionTodoProgressSemantic": "{completed} of {total} tasks completed",
+  "@sessionTodoProgressSemantic": {
+    "description": "Accessible label for the task list progress indicator",
+    "placeholders": {
+      "completed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  }
 }

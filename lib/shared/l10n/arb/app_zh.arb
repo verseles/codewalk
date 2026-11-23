@@ -2009,5 +2009,16 @@
   "contextUsageUnknownCurrency": "未知货币",
   "updatesCachedInstall": "更新已下载。点按即可安装。",
   "updatesNotificationTitle": "CodeWalk 已更新",
-  "updatesNotificationBody": "点按即可重新打开 CodeWalk。"
+  "updatesNotificationBody": "点按即可重新打开 CodeWalk。",
+  "settingsAppearanceTaskList": "任务列表",
+  "sessionTodoTasksCount": "任务 ({count})",
+  "sessionTodoTaskProgress": "任务 {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "已完成 {count}/{total}",
+  "sessionTodoCompletedCount": "已完成 {count}/{total} 项任务",
+  "sessionTodoCancelledCount": "已取消 {count} 项",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "另有 {count} 项进行中",
+  "sessionTodoStatusPending": "待处理",
+  "sessionTodoProgressSemantic": "已完成 {completed}/{total} 项任务"
 }

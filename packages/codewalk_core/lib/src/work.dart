@@ -64,6 +64,17 @@ final class PlanEntry {
   final String title;
   final OpenValue<PlanStatus> status;
   final CanonicalValue? metadata;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PlanEntry &&
+      id == other.id &&
+      title == other.title &&
+      status == other.status &&
+      metadata == other.metadata;
+
+  @override
+  int get hashCode => Object.hash(id, title, status, metadata);
 }
 
 /// A complete structured level-set; replacing it does not merge old entries.
@@ -72,11 +83,32 @@ final class PlanSnapshot {
     required this.owner,
     required Iterable<PlanEntry> entries,
     this.source,
+    this.anchor,
   }) : entries = immutableList(entries);
 
   final DomainOwner owner;
   final List<PlanEntry> entries;
   final SourceProvenance? source;
+
+  /// The harness message that produced this level-set, when known.
+  ///
+  /// Adapters that want turn- and revert-scoped visibility set [anchor]. A null
+  /// anchor stays visible until the next [PlanChanged] (unless hidden by a
+  /// staged revert cut).
+  final MessageAnchor? anchor;
+
+  @override
+  bool operator ==(Object other) =>
+      other is PlanSnapshot &&
+      owner == other.owner &&
+      anchor == other.anchor &&
+      entries.length == other.entries.length &&
+      Iterable<int>.generate(
+        entries.length,
+      ).every((i) => entries[i] == other.entries[i]);
+
+  @override
+  int get hashCode => Object.hash(owner, anchor, Object.hashAll(entries));
 }
 
 /// One harness-observed shell command owned by a session, kept isolated from

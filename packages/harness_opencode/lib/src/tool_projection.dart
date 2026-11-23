@@ -4,6 +4,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 
 import 'item_ids.dart';
 import 'message_context.dart';
+import 'plan_projection.dart';
 import 'shell_observation.dart';
 import 'shell_projection.dart';
 import 'subagent_child.dart';
@@ -453,6 +454,89 @@ SessionEvent? projectOpenCodeToolEvent(
       runFacts: runFacts,
     ),
   );
+}
+
+/// Projects an OpenCode v2 tool event into one or more canonical events.
+///
+/// Always includes the result of [projectOpenCodeToolEvent] and, on a
+/// completed `todowrite` call with a valid `todos` list, appends the matching
+/// [PlanChanged] event.
+List<SessionEvent> projectOpenCodeToolEvents(
+  Object? value,
+  SessionState current, {
+  required String sourceVersion,
+  required StreamPosition position,
+  required DateTime receivedAt,
+}) {
+  final event = projectOpenCodeToolEvent(
+    value,
+    current,
+    sourceVersion: sourceVersion,
+    position: position,
+    receivedAt: receivedAt,
+  );
+  if (event == null) return const [];
+  if (event is ItemUpserted &&
+      event.item is ToolCall &&
+      (event.item as ToolCall).rawName == openCodePlanWriteTool &&
+      event.item.status.known == ItemStatus.completed) {
+    final call = event.item as ToolCall;
+    Map<String, Object?>? metadata;
+    if (value is Map<String, Object?>) {
+      final data = value['data'];
+      if (data is Map<String, Object?> &&
+          data['metadata'] is Map<String, Object?>) {
+        metadata = data['metadata']! as Map<String, Object?>;
+      }
+    }
+    final plan = openCodePlanFromToolCall(
+      call,
+      ref: current.ref,
+      source: event.meta.source,
+      metadata: metadata,
+    );
+    var toolEvent = event;
+    if (plan != null) {
+      final inputValue = call.input?.value;
+      final hasInputTodos =
+          inputValue is Map && inputValue.containsKey('todos');
+      if (!hasInputTodos) {
+        final mergedInput = <String, Object?>{
+          if (inputValue is Map<String, Object?>) ...inputValue,
+          'todos': openCodeSerializedPlanTodos(plan.entries),
+        };
+        toolEvent = ItemUpserted(
+          meta: event.meta,
+          item: ToolCall(
+            meta: call.meta,
+            kind: call.kind,
+            rawName: call.rawName,
+            input: CanonicalValue(mergedInput),
+            output: call.output,
+            outputRef: call.outputRef,
+            child: call.child,
+            childEvidence: call.childEvidence,
+            error: call.error,
+            runFacts: call.runFacts,
+          ),
+        );
+      }
+    }
+    final stagedCut = current.revert?.kind.known == RevertKind.staged
+        ? current.revert?.anchor
+        : null;
+    final blockedByStagedCut =
+        stagedCut != null &&
+        (plan?.anchor == null || plan!.anchor!.compareTo(stagedCut) >= 0);
+    if (plan != null && !blockedByStagedCut) {
+      return List.unmodifiable([
+        toolEvent,
+        PlanChanged(meta: event.meta, plan: plan),
+      ]);
+    }
+    return List.unmodifiable([toolEvent]);
+  }
+  return List.unmodifiable([event]);
 }
 
 ToolKind _kind(String name) => openCodeToolKind(name);

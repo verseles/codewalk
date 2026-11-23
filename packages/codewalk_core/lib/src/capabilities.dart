@@ -29,6 +29,14 @@ abstract final class UsageCapabilities {
   static const keys = <String>[tokens, cost, context, quota];
 }
 
+/// Canonical capability keys for structured session plans / task lists.
+abstract final class PlanCapabilities {
+  /// Observing structured agent-controlled task/plan updates for a session.
+  static const observe = 'plan.observe';
+
+  static const keys = <String>[observe];
+}
+
 enum Support { native, host, extension, experimental, unavailable, unknown }
 
 final class Capability {

@@ -6,6 +6,7 @@ import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/session_attachments.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_permission_reply.dart';
+import '../../shared/sessions/session_plan.dart';
 import '../../shared/sessions/session_selection.dart';
 import '../../shared/sessions/session_shells.dart';
 import '../../shared/sessions/session_stop.dart';
@@ -23,6 +24,7 @@ final class OpenCodeLiveHandle
         SessionTurnActionSource,
         SessionShellSource,
         SessionAttachmentSource,
+        SessionPlanSource,
         SessionUsageSource {
   OpenCodeLiveHandle(this._slot, this.session);
   final OpenCodeProfileSlot _slot;
@@ -70,6 +72,21 @@ final class OpenCodeLiveHandle
     }
     _cachedUsageCapabilitiesVersion = version;
     return _cachedUsageCapabilities = openCodeUsageCapabilities(version);
+  }
+
+  String? _cachedPlanCapabilitiesVersion;
+  Map<String, Capability>? _cachedPlanCapabilities;
+
+  @override
+  Map<String, Capability> get planCapabilities {
+    if (_closed) return const {};
+    final version = _slot.version;
+    if (_cachedPlanCapabilities != null &&
+        _cachedPlanCapabilitiesVersion == version) {
+      return _cachedPlanCapabilities!;
+    }
+    _cachedPlanCapabilitiesVersion = version;
+    return _cachedPlanCapabilities = openCodePlanCapabilities(version);
   }
 
   @override

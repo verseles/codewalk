@@ -815,7 +815,49 @@ final class _Draft {
 
   void limitTimeline() {
     if (timeline.length > limits.maxItems) {
-      timeline.removeRange(0, timeline.length - limits.maxItems);
+      final excess = timeline.length - limits.maxItems;
+      final activePlan = plan;
+      final planAnchor = activePlan?.anchor;
+      if (activePlan != null &&
+          activePlan.entries.isNotEmpty &&
+          planAnchor != null) {
+        final stagedCut = revert?.kind.known == RevertKind.staged
+            ? revert?.anchor
+            : null;
+        final superseding = planSupersedingUserInput(
+          timeline,
+          planAnchor,
+          stagedCut: stagedCut,
+        );
+        if (superseding != null) {
+          var supersedingEvicted = false;
+          for (var i = 0; i < excess; i++) {
+            if (identical(timeline[i], superseding)) {
+              supersedingEvicted = true;
+              break;
+            }
+          }
+          var planAnchorSurvives = false;
+          if (!supersedingEvicted) {
+            for (var i = excess; i < timeline.length; i++) {
+              final item = timeline[i];
+              if (item is! UserInput && item.meta.anchor == planAnchor) {
+                planAnchorSurvives = true;
+                break;
+              }
+            }
+          }
+          if (supersedingEvicted || !planAnchorSurvives) {
+            plan = PlanSnapshot(
+              owner: activePlan.owner,
+              entries: const [],
+              source: activePlan.source,
+              anchor: superseding.meta.anchor,
+            );
+          }
+        }
+      }
+      timeline.removeRange(0, excess);
       hasMoreHistory = true;
       timelineTruncated = true;
     }

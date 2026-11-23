@@ -2009,5 +2009,16 @@
   "contextUsageUnknownCurrency": "अज्ञात मुद्रा",
   "updatesCachedInstall": "अपडेट डाउनलोड हो गया है। इंस्टॉल करने के लिए टैप करें।",
   "updatesNotificationTitle": "CodeWalk अपडेट हो गया",
-  "updatesNotificationBody": "CodeWalk को फिर से खोलने के लिए टैप करें।"
+  "updatesNotificationBody": "CodeWalk को फिर से खोलने के लिए टैप करें।",
+  "settingsAppearanceTaskList": "कार्य सूची",
+  "sessionTodoTasksCount": "कार्य ({count})",
+  "sessionTodoTaskProgress": "कार्य {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} पूर्ण",
+  "sessionTodoCompletedCount": "{count}/{total} कार्य पूर्ण",
+  "sessionTodoCancelledCount": "{count} रद्द",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "{count} और प्रगति पर",
+  "sessionTodoStatusPending": "लंबित",
+  "sessionTodoProgressSemantic": "{total} में से {completed} कार्य पूर्ण"
 }

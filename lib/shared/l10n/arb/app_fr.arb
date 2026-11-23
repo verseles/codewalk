@@ -2009,5 +2009,16 @@
   "contextUsageUnknownCurrency": "Devise inconnue",
   "updatesCachedInstall": "Mise à jour téléchargée. Appuyez pour installer.",
   "updatesNotificationTitle": "CodeWalk mis à jour",
-  "updatesNotificationBody": "Appuyez pour rouvrir CodeWalk."
+  "updatesNotificationBody": "Appuyez pour rouvrir CodeWalk.",
+  "settingsAppearanceTaskList": "Liste des tâches",
+  "sessionTodoTasksCount": "Tâches ({count})",
+  "sessionTodoTaskProgress": "Tâche {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} terminées",
+  "sessionTodoCompletedCount": "Tâches {count}/{total} terminées",
+  "sessionTodoCancelledCount": "{count} annulées",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "{count} autres en cours",
+  "sessionTodoStatusPending": "En attente",
+  "sessionTodoProgressSemantic": "{completed} tâches sur {total} terminées"
 }

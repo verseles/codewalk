@@ -53,6 +53,8 @@ List<String> activitySummaryParts(
             steps++;
           case ToolKind.subagent:
             steps++;
+          case ToolKind.plan:
+            break;
         }
       default:
         steps++;

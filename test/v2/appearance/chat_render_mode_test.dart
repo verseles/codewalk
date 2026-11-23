@@ -44,6 +44,8 @@ void main() {
         ..setChatRenderMode(ChatRenderMode.block)
         ..setShowReasoning(false)
         ..setShowToolCalls(false)
+        ..setShowTaskList(false)
+        ..setTaskListCollapsed(true)
         ..setComposerSpellCheck(false)
         ..setComposerTips(false)
         ..setComposerQueue(true);
@@ -51,6 +53,8 @@ void main() {
       expect(backend.values['cw2.settings.chatRenderMode'], 'block');
       expect(backend.values['cw2.settings.showReasoning'], false);
       expect(backend.values['cw2.settings.showToolCalls'], false);
+      expect(backend.values['cw2.settings.showTaskList'], false);
+      expect(backend.values['cw2.settings.taskListCollapsed'], true);
       expect(backend.values['cw2.settings.composerSpellCheck'], false);
       expect(backend.values['cw2.settings.composerTips'], false);
       expect(backend.values['cw2.settings.composerQueue'], true);
@@ -61,6 +65,8 @@ void main() {
       expect(second.chatRenderMode, ChatRenderMode.block);
       expect(second.showReasoning, isFalse);
       expect(second.showToolCalls, isFalse);
+      expect(second.showTaskList, isFalse);
+      expect(second.taskListCollapsed, isTrue);
       expect(second.composerSpellCheck, isFalse);
       expect(second.composerTips, isFalse);
       expect(second.composerQueue, isTrue);
@@ -69,6 +75,8 @@ void main() {
         ..setChatRenderMode(ChatRenderMode.live)
         ..setShowReasoning(true)
         ..setShowToolCalls(true)
+        ..setShowTaskList(true)
+        ..setTaskListCollapsed(false)
         ..setComposerSpellCheck(true)
         ..setComposerTips(true)
         ..setComposerQueue(false);
@@ -77,6 +85,8 @@ void main() {
         'chatRenderMode',
         'showReasoning',
         'showToolCalls',
+        'showTaskList',
+        'taskListCollapsed',
         'composerSpellCheck',
         'composerTips',
         'composerQueue',
@@ -92,6 +102,8 @@ void main() {
           'cw2.settings.chatRenderMode': 'stream',
           'cw2.settings.showReasoning': 'no',
           'cw2.settings.showToolCalls': 0,
+          'cw2.settings.showTaskList': 'off',
+          'cw2.settings.taskListCollapsed': 1,
           'cw2.settings.composerSpellCheck': 'off',
           'cw2.settings.composerTips': 1,
           'cw2.settings.composerQueue': 'queue',
@@ -102,6 +114,8 @@ void main() {
       expect(p.chatRenderMode, ChatRenderMode.live);
       expect(p.showReasoning, isTrue);
       expect(p.showToolCalls, isTrue);
+      expect(p.showTaskList, isTrue);
+      expect(p.taskListCollapsed, isFalse);
       expect(p.composerSpellCheck, isTrue);
       expect(p.composerTips, isTrue);
       expect(p.composerQueue, isFalse);

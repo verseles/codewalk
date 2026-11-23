@@ -2009,5 +2009,16 @@
   "contextUsageUnknownCurrency": "Moeda desconhecida",
   "updatesCachedInstall": "Atualização baixada. Toque para instalar.",
   "updatesNotificationTitle": "CodeWalk atualizado",
-  "updatesNotificationBody": "Toque para reabrir o CodeWalk."
+  "updatesNotificationBody": "Toque para reabrir o CodeWalk.",
+  "settingsAppearanceTaskList": "Lista de tarefas",
+  "sessionTodoTasksCount": "Tarefas ({count})",
+  "sessionTodoTaskProgress": "Tarefa {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} concluídas",
+  "sessionTodoCompletedCount": "Tarefas {count}/{total} concluídas",
+  "sessionTodoCancelledCount": "{count} canceladas",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "mais {count} em andamento",
+  "sessionTodoStatusPending": "Pendente",
+  "sessionTodoProgressSemantic": "{completed} de {total} tarefas concluídas"
 }

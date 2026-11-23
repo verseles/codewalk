@@ -2908,4 +2908,55 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get updatesNotificationBody =>
       'CodeWalk को फिर से खोलने के लिए टैप करें।';
+
+  @override
+  String get settingsAppearanceTaskList => 'कार्य सूची';
+
+  @override
+  String sessionTodoTasksCount(int count) {
+    return 'कार्य ($count)';
+  }
+
+  @override
+  String sessionTodoTaskProgress(int index, int total, String content) {
+    return 'कार्य $index/$total · $content';
+  }
+
+  @override
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
+  }
+
+  @override
+  String sessionTodoDoneCompact(int count, int total) {
+    return '$count/$total पूर्ण';
+  }
+
+  @override
+  String sessionTodoCompletedCount(int count, int total) {
+    return '$count/$total कार्य पूर्ण';
+  }
+
+  @override
+  String sessionTodoCancelledCount(int count) {
+    return '$count रद्द';
+  }
+
+  @override
+  String sessionTodoMoreInProgress(int count) {
+    return '+$count';
+  }
+
+  @override
+  String sessionTodoMoreInProgressSemantic(int count) {
+    return '$count और प्रगति पर';
+  }
+
+  @override
+  String get sessionTodoStatusPending => 'लंबित';
+
+  @override
+  String sessionTodoProgressSemantic(int completed, int total) {
+    return '$total में से $completed कार्य पूर्ण';
+  }
 }

@@ -53,9 +53,6 @@ List<String> composerTips(V2Localizations l10n) => [
   l10n.composerTipHoldSend,
 ];
 
-/// Calls that say nothing about what the assistant does now.
-const _quietTools = {'todowrite', 'todoread'};
-
 /// What [state] reports the assistant doing, or null while it does not work.
 /// Only the messages still in flight of the last turn count: the last call
 /// or reasoning in them, the reasoning by the heading it opens with. A call
@@ -79,9 +76,8 @@ ComposerActivity? composerActivity(SessionState? state, V2Localizations l10n) {
     if (message?.completed != null) continue;
     if (message == null && !_runs(item)) continue;
     switch (item) {
-      case ToolCall(:final kind, :final rawName)
-          when kind.known == ToolKind.subagent ||
-              _quietTools.contains(rawName.toLowerCase()):
+      case ToolCall(:final kind)
+          when kind.known == ToolKind.subagent || kind.known == ToolKind.plan:
         continue;
       case ToolCall() || ShellRun():
         return (

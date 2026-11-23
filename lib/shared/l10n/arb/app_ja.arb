@@ -2009,5 +2009,16 @@
   "contextUsageUnknownCurrency": "不明な通貨",
   "updatesCachedInstall": "アップデートをダウンロードしました。タップしてインストールします。",
   "updatesNotificationTitle": "CodeWalk を更新しました",
-  "updatesNotificationBody": "タップして CodeWalk を再度開きます。"
+  "updatesNotificationBody": "タップして CodeWalk を再度開きます。",
+  "settingsAppearanceTaskList": "タスクリスト",
+  "sessionTodoTasksCount": "タスク ({count})",
+  "sessionTodoTaskProgress": "タスク {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} 完了",
+  "sessionTodoCompletedCount": "タスク {count}/{total} 完了",
+  "sessionTodoCancelledCount": "{count} 件キャンセル",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "他に {count} 件進行中",
+  "sessionTodoStatusPending": "保留中",
+  "sessionTodoProgressSemantic": "{total} 件中 {completed} 件のタスクが完了"
 }

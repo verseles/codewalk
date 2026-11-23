@@ -143,7 +143,7 @@ void main() {
         _prompt('u1'),
         _tool('t1', 'm1', ended: true),
         _tool('t2', 'm2', name: 'task', kind: ToolKind.subagent),
-        _tool('t3', 'm2', name: 'todowrite', kind: ToolKind.other),
+        _tool('t3', 'm2', name: 'todowrite', kind: ToolKind.plan),
       ]),
       (kind: ComposerStatusKind.working, label: l10n.chatReasoning),
     );

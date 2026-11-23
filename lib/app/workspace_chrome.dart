@@ -566,6 +566,12 @@ class _WorkspaceDisplaySheet extends StatelessWidget {
             onChanged: preferences.setShowToolCalls,
           ),
           SwitchListTile.adaptive(
+            key: const ValueKey('display-toggle-task-list'),
+            title: Text(l.settingsAppearanceTaskList),
+            value: preferences.showTaskList,
+            onChanged: preferences.setShowTaskList,
+          ),
+          SwitchListTile.adaptive(
             key: const ValueKey('display-toggle-composer-tips'),
             title: Text(l.settingsAppearanceComposerTips),
             value: preferences.composerTips,

@@ -3,6 +3,7 @@ import 'package:codewalk/shared/sessions/prompt_outbox.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_permission_reply.dart';
+import 'package:codewalk/shared/sessions/session_plan.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk/shared/sessions/session_shells.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
@@ -19,12 +20,14 @@ class LiveHandle
         SessionLiveHandle,
         SessionTurnActionSource,
         SessionShellSource,
+        SessionPlanSource,
         SessionUsageSource {
   LiveHandle(
     this.session, {
     this.outbox,
     this.turnActions,
     this.shells,
+    this.planCapabilities = const {},
     this.usageCapabilities = const {},
   });
   @override
@@ -35,6 +38,8 @@ class LiveHandle
   SessionTurnActionPort? turnActions;
   @override
   SessionShellPort? shells;
+  @override
+  Map<String, Capability> planCapabilities;
   @override
   Map<String, Capability> usageCapabilities;
   bool stopAvailable = false;

@@ -89,13 +89,12 @@ List<SessionEvent> _tool(
   required String sourceVersion,
   required StreamPosition position,
   required DateTime receivedAt,
-}) => _single(
-  projectOpenCodeToolEvent,
+}) => projectOpenCodeToolEvents(
   value,
   current,
-  sourceVersion,
-  position,
-  receivedAt,
+  sourceVersion: sourceVersion,
+  position: position,
+  receivedAt: receivedAt,
 );
 
 List<SessionEvent> _interaction(

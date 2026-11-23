@@ -14,6 +14,7 @@ import 'json_reads.dart';
 import 'interaction_projection.dart';
 import 'media_client.dart';
 import 'model_catalog.dart';
+import 'plan_projection.dart';
 import 'revert_projection.dart';
 import 'session_projection.dart';
 import 'session_rules.dart';
@@ -1167,6 +1168,14 @@ final class OpenCodeSessionReader {
         complete: true,
       ),
       shells: shellsSnapshot,
+      plan: openCodeHydratedPlan(
+        page.items,
+        ref: ref,
+        sourceVersion: sourceVersion,
+        boundary: boundary('session.message.list', historyStart, historyEnd),
+        hasMoreHistory: more != null,
+        revert: revertState,
+      ),
       timeline: SnapshotCollection(
         values: [...page.items, ...admissions],
         boundary: boundary('session.message.list', historyStart, historyEnd),

@@ -122,7 +122,6 @@ Ordem aprovada pelo owner em 2026-11-05: UI/UX primeiro, depois o harness Codex,
 - Paridade visual por pixel com a v1 (2026-11-05).
 - Editor dos padrões do OpenCode, rótulos de origem e card de permissões: o OpenCode 2 não grava config (#450).
 - Busca de símbolos no `@`: o OpenCode 2 removeu `GET /find/symbol`.
-- Task list e progresso de tarefas: o OpenCode 2 não tem todo.
 - Share/copy link e "view tasks": sem rota no 2.0.22.
 - Três linhas do painel lateral: Atualizar + Configurações e "Conectar a um servidor em execução" (as três funções seguem na toolbar) e o rótulo "Projetos abertos".
 - Rótulos relativos de data nas mensagens ("há 5 min", "ontem"), trocados pela hora.

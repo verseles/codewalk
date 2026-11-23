@@ -22,6 +22,55 @@ enum DeliveryState {
   cancelled,
 }
 
+/// Whether [item] represents an active user prompt that starts a new turn.
+///
+/// Draft, cancelled, and rejected prompts never clear a prior turn's plan.
+bool isActivePlanUserInput(UserInput item) {
+  if (item.confirmed) return true;
+  final known = item.delivery.known;
+  if (known == null) return false;
+  return switch (known) {
+    DeliveryState.draft ||
+    DeliveryState.cancelled ||
+    DeliveryState.rejected => false,
+    DeliveryState.submitting ||
+    DeliveryState.accepted ||
+    DeliveryState.queued ||
+    DeliveryState.delivered ||
+    DeliveryState.uncertain ||
+    DeliveryState.cancelRequested ||
+    DeliveryState.cancelSubmitting ||
+    DeliveryState.cancelUncertain => true,
+  };
+}
+
+/// Returns the first active [UserInput] in [items] (ignoring items at or after
+/// [stagedCut]) that supersedes a plan anchored at [planAnchor], either by
+/// appearing after a non-user item carrying [planAnchor] in delivery order
+/// (such as a promoted queued prompt) or by having an anchor ordered strictly
+/// after [planAnchor].
+UserInput? planSupersedingUserInput(
+  Iterable<TimelineItem> items,
+  MessageAnchor planAnchor, {
+  MessageAnchor? stagedCut,
+}) {
+  var seenPlanMessage = false;
+  for (final item in items) {
+    final itemAnchor = item.meta.anchor;
+    if (itemAnchor == null) continue;
+    if (stagedCut != null && itemAnchor.compareTo(stagedCut) >= 0) continue;
+    if (item is UserInput) {
+      if (isActivePlanUserInput(item) &&
+          (seenPlanMessage || itemAnchor.compareTo(planAnchor) > 0)) {
+        return item;
+      }
+    } else if (itemAnchor == planAnchor) {
+      seenPlanMessage = true;
+    }
+  }
+  return null;
+}
+
 enum ToolKind {
   shell,
   read,
@@ -35,6 +84,9 @@ enum ToolKind {
   question,
   skill,
   other,
+
+  /// Structured task/plan read or write tool (hidden from ordinary timeline rows).
+  plan,
 }
 
 enum NoticeKind {

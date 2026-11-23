@@ -2724,4 +2724,55 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get updatesNotificationBody => '点按即可重新打开 CodeWalk。';
+
+  @override
+  String get settingsAppearanceTaskList => '任务列表';
+
+  @override
+  String sessionTodoTasksCount(int count) {
+    return '任务 ($count)';
+  }
+
+  @override
+  String sessionTodoTaskProgress(int index, int total, String content) {
+    return '任务 $index/$total · $content';
+  }
+
+  @override
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
+  }
+
+  @override
+  String sessionTodoDoneCompact(int count, int total) {
+    return '已完成 $count/$total';
+  }
+
+  @override
+  String sessionTodoCompletedCount(int count, int total) {
+    return '已完成 $count/$total 项任务';
+  }
+
+  @override
+  String sessionTodoCancelledCount(int count) {
+    return '已取消 $count 项';
+  }
+
+  @override
+  String sessionTodoMoreInProgress(int count) {
+    return '+$count';
+  }
+
+  @override
+  String sessionTodoMoreInProgressSemantic(int count) {
+    return '另有 $count 项进行中';
+  }
+
+  @override
+  String get sessionTodoStatusPending => '待处理';
+
+  @override
+  String sessionTodoProgressSemantic(int completed, int total) {
+    return '已完成 $completed/$total 项任务';
+  }
 }

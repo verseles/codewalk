@@ -2772,4 +2772,55 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get updatesNotificationBody => 'タップして CodeWalk を再度開きます。';
+
+  @override
+  String get settingsAppearanceTaskList => 'タスクリスト';
+
+  @override
+  String sessionTodoTasksCount(int count) {
+    return 'タスク ($count)';
+  }
+
+  @override
+  String sessionTodoTaskProgress(int index, int total, String content) {
+    return 'タスク $index/$total · $content';
+  }
+
+  @override
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
+  }
+
+  @override
+  String sessionTodoDoneCompact(int count, int total) {
+    return '$count/$total 完了';
+  }
+
+  @override
+  String sessionTodoCompletedCount(int count, int total) {
+    return 'タスク $count/$total 完了';
+  }
+
+  @override
+  String sessionTodoCancelledCount(int count) {
+    return '$count 件キャンセル';
+  }
+
+  @override
+  String sessionTodoMoreInProgress(int count) {
+    return '+$count';
+  }
+
+  @override
+  String sessionTodoMoreInProgressSemantic(int count) {
+    return '他に $count 件進行中';
+  }
+
+  @override
+  String get sessionTodoStatusPending => '保留中';
+
+  @override
+  String sessionTodoProgressSemantic(int completed, int total) {
+    return '$total 件中 $completed 件のタスクが完了';
+  }
 }

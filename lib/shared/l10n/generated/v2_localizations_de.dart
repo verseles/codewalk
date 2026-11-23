@@ -2960,4 +2960,55 @@ class V2LocalizationsDe extends V2Localizations {
 
   @override
   String get updatesNotificationBody => 'Tippen, um CodeWalk wieder zu öffnen.';
+
+  @override
+  String get settingsAppearanceTaskList => 'Aufgabenliste';
+
+  @override
+  String sessionTodoTasksCount(int count) {
+    return 'Aufgaben ($count)';
+  }
+
+  @override
+  String sessionTodoTaskProgress(int index, int total, String content) {
+    return 'Aufgabe $index/$total · $content';
+  }
+
+  @override
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
+  }
+
+  @override
+  String sessionTodoDoneCompact(int count, int total) {
+    return '$count/$total erledigt';
+  }
+
+  @override
+  String sessionTodoCompletedCount(int count, int total) {
+    return 'Aufgaben $count/$total abgeschlossen';
+  }
+
+  @override
+  String sessionTodoCancelledCount(int count) {
+    return '$count abgebrochen';
+  }
+
+  @override
+  String sessionTodoMoreInProgress(int count) {
+    return '+$count';
+  }
+
+  @override
+  String sessionTodoMoreInProgressSemantic(int count) {
+    return '$count weitere in Bearbeitung';
+  }
+
+  @override
+  String get sessionTodoStatusPending => 'Ausstehend';
+
+  @override
+  String sessionTodoProgressSemantic(int completed, int total) {
+    return '$completed von $total Aufgaben abgeschlossen';
+  }
 }

@@ -2770,4 +2770,55 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get updatesNotificationBody => '탭하여 CodeWalk를 다시 여세요.';
+
+  @override
+  String get settingsAppearanceTaskList => '작업 목록';
+
+  @override
+  String sessionTodoTasksCount(int count) {
+    return '작업 ($count)';
+  }
+
+  @override
+  String sessionTodoTaskProgress(int index, int total, String content) {
+    return '작업 $index/$total · $content';
+  }
+
+  @override
+  String sessionTodoInProgressCompact(int current, int total, String content) {
+    return '$current/$total $content';
+  }
+
+  @override
+  String sessionTodoDoneCompact(int count, int total) {
+    return '$count/$total 완료';
+  }
+
+  @override
+  String sessionTodoCompletedCount(int count, int total) {
+    return '작업 $count/$total 완료';
+  }
+
+  @override
+  String sessionTodoCancelledCount(int count) {
+    return '$count개 취소됨';
+  }
+
+  @override
+  String sessionTodoMoreInProgress(int count) {
+    return '+$count';
+  }
+
+  @override
+  String sessionTodoMoreInProgressSemantic(int count) {
+    return '$count개 더 진행 중';
+  }
+
+  @override
+  String get sessionTodoStatusPending => '대기 중';
+
+  @override
+  String sessionTodoProgressSemantic(int completed, int total) {
+    return '작업 $total개 중 $completed개 완료';
+  }
 }

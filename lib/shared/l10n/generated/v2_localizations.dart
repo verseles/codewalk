@@ -5113,6 +5113,72 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Tap to reopen CodeWalk.'**
   String get updatesNotificationBody;
+
+  /// Display menu toggle label for showing or hiding the session task list panel
+  ///
+  /// In en, this message translates to:
+  /// **'Task list'**
+  String get settingsAppearanceTaskList;
+
+  /// Expanded task list header showing total task count
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks ({count})'**
+  String sessionTodoTasksCount(int count);
+
+  /// Wide collapsed task list summary showing the active task index, total, and content
+  ///
+  /// In en, this message translates to:
+  /// **'Task {index}/{total} · {content}'**
+  String sessionTodoTaskProgress(int index, int total, String content);
+
+  /// Compact mobile collapsed task list summary showing count-first active task
+  ///
+  /// In en, this message translates to:
+  /// **'{current}/{total} {content}'**
+  String sessionTodoInProgressCompact(int current, int total, String content);
+
+  /// Compact mobile collapsed task list completion summary when no task is in progress
+  ///
+  /// In en, this message translates to:
+  /// **'{count}/{total} done'**
+  String sessionTodoDoneCompact(int count, int total);
+
+  /// Wide collapsed task list completion summary when no task is in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Tasks {count}/{total} completed'**
+  String sessionTodoCompletedCount(int count, int total);
+
+  /// Count of cancelled tasks in the session task list
+  ///
+  /// In en, this message translates to:
+  /// **'{count} cancelled'**
+  String sessionTodoCancelledCount(int count);
+
+  /// Compact badge for additional tasks running in parallel
+  ///
+  /// In en, this message translates to:
+  /// **'+{count}'**
+  String sessionTodoMoreInProgress(int count);
+
+  /// Accessible label for additional tasks running in parallel
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more in progress'**
+  String sessionTodoMoreInProgressSemantic(int count);
+
+  /// Accessible status label for a pending task
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get sessionTodoStatusPending;
+
+  /// Accessible label for the task list progress indicator
+  ///
+  /// In en, this message translates to:
+  /// **'{completed} of {total} tasks completed'**
+  String sessionTodoProgressSemantic(int completed, int total);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

@@ -46,6 +46,7 @@ ToolKind openCodeToolKind(String name) => switch (name) {
   'shell' || 'bash' => ToolKind.shell,
   'skill' => ToolKind.skill,
   'question' => ToolKind.question,
+  'todowrite' || 'todoread' => ToolKind.plan,
   openCodeSubagentTool || 'task' => ToolKind.subagent,
   _ => ToolKind.other,
 };

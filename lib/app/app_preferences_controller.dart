@@ -174,14 +174,18 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('mathRendering');
   }
 
-  /// How assistant responses reach the timeline, and whether reasoning and
-  /// tool calls show there; live and both shown by default.
+  /// How assistant responses reach the timeline, and whether reasoning,
+  /// tool calls, and the session task list show; live and all shown by default.
   ChatRenderMode _chatRenderMode = ChatRenderMode.live;
   bool _showReasoning = true;
   bool _showToolCalls = true;
+  bool _showTaskList = true;
+  bool _taskListCollapsed = false;
   ChatRenderMode get chatRenderMode => _chatRenderMode;
   bool get showReasoning => _showReasoning;
   bool get showToolCalls => _showToolCalls;
+  bool get showTaskList => _showTaskList;
+  bool get taskListCollapsed => _taskListCollapsed;
 
   void setChatRenderMode(ChatRenderMode value) {
     if (_disposed || _chatRenderMode == value) return;
@@ -199,6 +203,18 @@ class AppPreferencesController extends ChangeNotifier {
     if (_disposed || _showToolCalls == value) return;
     _showToolCalls = value;
     _changed('showToolCalls');
+  }
+
+  void setShowTaskList(bool value) {
+    if (_disposed || _showTaskList == value) return;
+    _showTaskList = value;
+    _changed('showTaskList');
+  }
+
+  void setTaskListCollapsed(bool value) {
+    if (_disposed || _taskListCollapsed == value) return;
+    _taskListCollapsed = value;
+    _changed('taskListCollapsed');
   }
 
   /// Whether the composer uses the platform's native spell check,
@@ -383,6 +399,8 @@ class AppPreferencesController extends ChangeNotifier {
         : _chatRenderMode.name,
     'showReasoning': _showReasoning ? null : false,
     'showToolCalls': _showToolCalls ? null : false,
+    'showTaskList': _showTaskList ? null : false,
+    'taskListCollapsed': _taskListCollapsed ? true : null,
     'composerSpellCheck': _composerSpellCheck ? null : false,
     'composerTips': _composerTips ? null : false,
     'composerQueue': _composerQueue ? true : null,
@@ -493,6 +511,10 @@ class AppPreferencesController extends ChangeNotifier {
       if (reasoning is bool) _showReasoning = reasoning;
       final tools = value('showToolCalls');
       if (tools is bool) _showToolCalls = tools;
+      final taskList = value('showTaskList');
+      if (taskList is bool) _showTaskList = taskList;
+      final taskListCollapsed = value('taskListCollapsed');
+      if (taskListCollapsed is bool) _taskListCollapsed = taskListCollapsed;
       final spellCheck = value('composerSpellCheck');
       if (spellCheck is bool) _composerSpellCheck = spellCheck;
       final tips = value('composerTips');

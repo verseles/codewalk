@@ -2009,5 +2009,16 @@
   "contextUsageUnknownCurrency": "Неизвестная валюта",
   "updatesCachedInstall": "Обновление загружено. Нажмите, чтобы установить.",
   "updatesNotificationTitle": "CodeWalk обновлён",
-  "updatesNotificationBody": "Нажмите, чтобы снова открыть CodeWalk."
+  "updatesNotificationBody": "Нажмите, чтобы снова открыть CodeWalk.",
+  "settingsAppearanceTaskList": "Список задач",
+  "sessionTodoTasksCount": "Задачи ({count})",
+  "sessionTodoTaskProgress": "Задача {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} готово",
+  "sessionTodoCompletedCount": "Задачи: выполнено {count}/{total}",
+  "sessionTodoCancelledCount": "{count} отменено",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "ещё {count} в работе",
+  "sessionTodoStatusPending": "Ожидает",
+  "sessionTodoProgressSemantic": "Выполнено {completed} из {total} задач"
 }

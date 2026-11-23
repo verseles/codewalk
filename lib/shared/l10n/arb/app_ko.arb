@@ -2047,5 +2047,16 @@
   "contextUsageUnknownCurrency": "알 수 없는 통화",
   "updatesCachedInstall": "업데이트가 다운로드되었습니다. 탭하여 설치하세요.",
   "updatesNotificationTitle": "CodeWalk 업데이트됨",
-  "updatesNotificationBody": "탭하여 CodeWalk를 다시 여세요."
+  "updatesNotificationBody": "탭하여 CodeWalk를 다시 여세요.",
+  "settingsAppearanceTaskList": "작업 목록",
+  "sessionTodoTasksCount": "작업 ({count})",
+  "sessionTodoTaskProgress": "작업 {index}/{total} · {content}",
+  "sessionTodoInProgressCompact": "{current}/{total} {content}",
+  "sessionTodoDoneCompact": "{count}/{total} 완료",
+  "sessionTodoCompletedCount": "작업 {count}/{total} 완료",
+  "sessionTodoCancelledCount": "{count}개 취소됨",
+  "sessionTodoMoreInProgress": "+{count}",
+  "sessionTodoMoreInProgressSemantic": "{count}개 더 진행 중",
+  "sessionTodoStatusPending": "대기 중",
+  "sessionTodoProgressSemantic": "작업 {total}개 중 {completed}개 완료"
 }
