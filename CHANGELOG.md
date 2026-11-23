@@ -2,6 +2,23 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.5.0 - 2026-11-23
+
+> 📣 CodeWalk 2.5.0 brings back the top-pinned visual session task list with distinct collapsed and expanded views, an animated progress bar, a Display menu toggle, and clean OpenCode v2 structured plan integration.
+
+### Top-pinned visual session task list
+
+- Adds a read-only task list panel pinned at the top of live conversations with distinct collapsed and expanded views over a shared full-width animated progress bar: collapsed shows the active task and count-first summary (`2/5 Title` on phones, `Task 2/5 · Title` on wide screens) plus a `+N` badge for parallel tasks; expanded shows `Tasks (N)`, `completed/total`, optional cancelled and parallel badges, and a bounded scrollable task list that auto-scrolls to the active item.
+- Keeps the current turn's task list visible during execution and after the turn ends (including at 100% completed or cancelled) until you send a new message, while keeping it visible across permission approvals and question forms within the same turn.
+- Restores the surviving earlier turn's task list during staged Undo and brings back the newer list on Redo, and recovers older current-turn plans when loading older conversation history.
+- Adds a persisted **Task list** toggle in the workspace **Display** menu (enabled by default), persists collapsed state across restarts, automatically collapses on compact viewports while the software keyboard is open without altering your preference, and supports all 14 locales, RTL layouts, 2x text scaling, reduced motion, and screen-reader announcements.
+
+### Clean timeline & harness-neutral OpenCode v2 plan projection
+
+- Derives OpenCode v2 plans directly from completed `todowrite` tool calls (supporting both `experimental.todo` config and `OPENCODE_FLAGS=todo`) with strict input size bounds, UTF-16 surrogate checks, and credential redaction.
+- Hides structured plan tool calls (`todowrite` / `todoread`) from the live and history timelines, activity stretches, composer status, and conversation search.
+- Exposes structured plans and the `plan.observe` capability through canonical `codewalk_core` types so future harnesses (Codex, Claude Code, Muse, Grok) share the same panel seamlessly.
+
 ## v2.4.0 - 2026-11-22
 
 > 📣 CodeWalk 2.4.0 makes Markdown links clickable across chats, notices, and subagent reports, renders background shell completion results cleanly instead of raw XML, and aligns OpenCode event handling with the official v2.3+ Web client.
