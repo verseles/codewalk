@@ -159,6 +159,7 @@ CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Cla
 - Translations: change only the needed keys, keep ARB and generated code in sync, and inspect the diff after any regeneration for unintended removals.
 - If `/tmp` is full, export `TMPPREFIX`, `TMPDIR`, `TEMP` and `TMP` to a directory with space on the same filesystem instead of deleting other processes' files.
 - After `dart format`, inspect the hunks and revert churn outside the intended change; reformatting other code goes in its own commit, never mixed with a feature or fix.
+- Credential redaction before truncation: when capping potentially sensitive strings in projections or UI, redact against the full source text with `redactCredentialSlice` before applying the byte cut—never slice with a fixed lookahead first, or credentials and PEM blocks crossing the cut boundary can leak.
 
 ## Keeping this file current
 
