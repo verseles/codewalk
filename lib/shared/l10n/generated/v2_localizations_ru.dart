@@ -1394,6 +1394,9 @@ class V2LocalizationsRu extends V2Localizations {
   String get liveToolInterrupted => 'Прервано';
 
   @override
+  String get liveToolValueShortened => 'Вывод был сокращён.';
+
+  @override
   String get liveShellExitCode => 'Код выхода';
 
   @override

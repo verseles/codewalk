@@ -353,20 +353,23 @@ void main() {
     expect(item.source.extra!.value, containsPair('inputRedacted', true));
   });
 
-  test('keys are measured as kept, not as redacted', () {
-    // Keys keep their text: one that reads like a credential assignment must
-    // still count at its full size.
-    final input = <String, Object?>{
-      'token=${'a' * 40000}': 1,
-      'token=${'b' * 40000}': 2,
-    };
-    expect(
-      () => projectTool(
-        toolFrame('called', input: input),
-        current: startedTool(),
-      ),
-      fails(OpenCodeToolProjectionFailure.limitExceeded),
-    );
+  test('keys are measured as kept, not as redacted, and bounded at 64 KiB', () {
+    // Keys keep their text: one that reads like a credential assignment still
+    // counts at its full size, so the second 40 KiB key is truncated out.
+    final keyA = 'token=${'a' * 40000}';
+    final keyB = 'token=${'b' * 40000}';
+    final input = <String, Object?>{keyA: 1, keyB: 2};
+    final event =
+        projectTool(
+              toolFrame('called', input: input),
+              current: startedTool(),
+            )!
+            as ItemUpserted;
+    final item = event.item as ToolCall;
+    final kept = item.input!.value as Map<String, Object?>;
+    expect(kept.keys, [keyA]);
+    expect(utf8.encode(jsonEncode(kept)).length, lessThanOrEqualTo(65536));
+    expect(item.source.extra!.value, containsPair('inputTruncated', true));
   });
 
   test('redaction expansion is bounded before canonical copy', () {
@@ -375,11 +378,31 @@ void main() {
       'entries': List.generate(3000, (_) => <String, Object?>{'token': 0}),
     };
     expect(utf8.encode(jsonEncode(dense)).length, lessThan(65536));
+    final truncatedEvent =
+        projectTool(toolFrame('called', input: dense), current: state)!
+            as ItemUpserted;
+    final truncatedCall = truncatedEvent.item as ToolCall;
+    final truncatedInput = truncatedCall.input!.value as Map<String, Object?>;
     expect(
-      () => projectTool(toolFrame('called', input: dense), current: state),
-      fails(OpenCodeToolProjectionFailure.limitExceeded),
+      utf8.encode(jsonEncode(truncatedInput)).length,
+      lessThanOrEqualTo(65536),
     );
-    expect((state.timeline.single as ToolCall).input, isNull);
+    expect(
+      truncatedInput['entries'],
+      everyElement({'token': '[redacted]'}),
+    );
+    expect(
+      (truncatedInput['entries'] as List).length,
+      lessThan(3000),
+    );
+    expect(
+      truncatedCall.source.extra!.value,
+      containsPair('inputTruncated', true),
+    );
+    expect(
+      truncatedCall.source.extra!.value,
+      containsPair('inputRedacted', true),
+    );
     final bounded = <String, Object?>{
       'entries': List.generate(1000, (_) => <String, Object?>{'token': 0}),
     };
@@ -428,11 +451,17 @@ void main() {
       });
       expect(toolManifest(event), isNot(contains('fake-private')));
       final over = residentState(withInput({'value': 'a' * 65536}));
+      final boundedOver =
+          projectTool(toolFrame('success'), current: over)! as ItemUpserted;
+      final boundedItem = boundedOver.item as ToolCall;
       expect(
-        () => projectTool(toolFrame('success'), current: over),
-        fails(OpenCodeToolProjectionFailure.limitExceeded),
+        utf8.encode(jsonEncode(boundedItem.input!.value)).length,
+        lessThanOrEqualTo(65536),
       );
-      expect(over.timeline.single.status.known, ItemStatus.streaming);
+      expect(
+        boundedItem.source.extra!.value,
+        containsPair('inputTruncated', true),
+      );
       final wrongInput = residentState(withInput('raw private arguments'));
       expect(
         () => projectTool(toolFrame('success'), current: wrongInput),
@@ -694,29 +723,72 @@ void main() {
         projectTool(toolFrame('input.started', name: '😀' * 1024)),
         isA<ItemUpserted>(),
       );
+      // Discarded raw streaming argument frames allow >64 KiB (up to 16 MiB)
+      // while still rejecting lone surrogates.
       for (final phase in ['input.delta', 'input.ended']) {
         final frame = toolFrame(phase);
-        toolData(frame)[phase == 'input.delta' ? 'delta' : 'text'] =
-            'a' * 65537;
+        final key = phase == 'input.delta' ? 'delta' : 'text';
+        toolData(frame)[key] = 'a' * (128 * 1024);
+        expect(projectTool(frame, current: state), isNull);
+        toolData(frame)[key] = 'bad${String.fromCharCode(0xd800)}';
         expect(
           () => projectTool(frame, current: state),
-          fails(OpenCodeToolProjectionFailure.limitExceeded),
+          fails(OpenCodeToolProjectionFailure.malformed),
         );
       }
       Object? deep = 0;
       for (var i = 0; i < 17; i++) {
         deep = [deep];
       }
+      expect(
+        () => projectTool(
+          toolFrame('called', input: {'value': deep}),
+          current: state,
+        ),
+        fails(OpenCodeToolProjectionFailure.limitExceeded),
+      );
+      // Oversized tool inputs keep a bounded prefix <= 64 KiB and preserve
+      // priority compact-target keys first.
       for (final input in [
-        {'value': 'a' * 65536},
+        {'value': 'a' * 65536, 'filePath': 'lib/main.dart'},
         {'value': '\u0001' * 11000},
-        {'value': deep},
         {'value': List.filled(16384, 0)},
       ]) {
+        final event =
+            projectTool(toolFrame('called', input: input), current: state)!
+                as ItemUpserted;
+        final call = event.item as ToolCall;
         expect(
-          () => projectTool(toolFrame('called', input: input), current: state),
-          fails(OpenCodeToolProjectionFailure.limitExceeded),
+          utf8.encode(jsonEncode(call.input!.value)).length,
+          lessThanOrEqualTo(65536),
         );
+        expect(call.source.extra!.value, containsPair('inputTruncated', true));
+        if (input.containsKey('filePath')) {
+          expect(
+            (call.input!.value as Map<String, Object?>)['filePath'],
+            'lib/main.dart',
+          );
+          // Subsequent terminal events preserve inputTruncated from called.
+          final calledSeq2 =
+              projectTool(
+                    toolFrame('called', id: 'evt_called_trunc', input: input),
+                    current: state,
+                    seq: 2,
+                  )!
+                  as ItemUpserted;
+          final afterCalled = reduce(state, calledSeq2).state;
+          final done =
+              projectTool(
+                    toolFrame('success', id: 'evt_done_trunc'),
+                    current: afterCalled,
+                    seq: 3,
+                  )!
+                  as ItemUpserted;
+          expect(
+            (done.item as ToolCall).source.extra!.value,
+            containsPair('inputTruncated', true),
+          );
+        }
       }
       expect(
         () => projectTool(
@@ -754,24 +826,70 @@ void main() {
         ),
         isA<ItemUpserted>(),
       );
+      // >128 parts and >64 KiB output truncate cleanly with outputRef.
+      final manyParts =
+          projectTool(
+                toolFrame('success', content: List.filled(129, part)),
+                current: state,
+              )!
+              as ItemUpserted;
+      final manyCall = manyParts.item as ToolCall;
+      expect(manyCall.output!.value as List, hasLength(128));
+      expect(manyCall.outputRef?.id, 'functions.read:0');
+      expect(manyCall.outputRef?.truncated, isTrue);
       expect(
-        () => projectTool(
-          toolFrame('success', content: List.filled(129, part)),
-          current: state,
-        ),
-        fails(OpenCodeToolProjectionFailure.limitExceeded),
+        manyCall.source.extra!.value,
+        containsPair('outputTruncated', true),
+      );
+
+      final bigOutput =
+          projectTool(
+                toolFrame(
+                  'success',
+                  content: [
+                    {'type': 'text', 'text': 'a' * 80000},
+                  ],
+                ),
+                current: state,
+              )!
+              as ItemUpserted;
+      final bigCall = bigOutput.item as ToolCall;
+      expect(
+        utf8.encode(jsonEncode(bigCall.output!.value)).length,
+        lessThanOrEqualTo(65536),
+      );
+      expect(bigCall.outputRef?.id, 'functions.read:0');
+      expect(bigCall.outputRef?.truncated, isTrue);
+      expect(
+        bigCall.source.extra!.value,
+        containsPair('outputTruncated', true),
+      );
+
+      // Oversized tool error (>256 KiB) bounds to 8 KiB redacted prefix (#432).
+      final failedFrame = toolFrame('failed');
+      toolData(failedFrame)['error'] = {
+        'type': 'tool.execution',
+        'message': '${'e' * 8180} token=topsecret999 ${'x' * 300000}',
+      };
+      final failedEvent =
+          projectTool(failedFrame, current: state)! as ItemUpserted;
+      final failedCall = failedEvent.item as ToolCall;
+      expect(
+        utf8.encode(failedCall.error!.rawMessage).length,
+        lessThanOrEqualTo(8 * 1024),
+      );
+      expect(failedCall.error!.rawMessage, isNot(contains('topsecret999')));
+      expect(
+        failedCall.error!.details!.value,
+        containsPair('messageTruncated', true),
       );
       expect(
-        () => projectTool(
-          toolFrame(
-            'success',
-            content: [
-              {'type': 'text', 'text': 'a' * 65536},
-            ],
-          ),
-          current: state,
-        ),
-        fails(OpenCodeToolProjectionFailure.limitExceeded),
+        failedCall.error!.details!.value,
+        containsPair('messageRedacted', true),
+      );
+      expect(
+        failedCall.source.extra!.value,
+        containsPair('errorTruncated', true),
       );
       expect((state.timeline.single as ToolCall).input, isNull);
       expect(state.timeline.single.status.known, ItemStatus.streaming);

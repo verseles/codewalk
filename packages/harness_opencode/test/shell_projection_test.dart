@@ -303,7 +303,7 @@ void main() {
         historyRef,
         sourceVersion: '2.0.22',
       ),
-      throwsFormatException,
+      throwsA(isA<OpenCodeHistoryBudgetException>()),
     );
   });
 

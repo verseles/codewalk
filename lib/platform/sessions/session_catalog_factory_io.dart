@@ -270,7 +270,8 @@ SessionCatalogFailure _failure(
   OpenCodeSessionReadFailure.invalidScope ||
   OpenCodeSessionReadFailure.invalidRequest ||
   OpenCodeSessionReadFailure.incompatibleResponse ||
-  OpenCodeSessionReadFailure.bodyTooLarge =>
+  OpenCodeSessionReadFailure.bodyTooLarge ||
+  OpenCodeSessionReadFailure.projectionBudget =>
     SessionCatalogFailure.incompatibleResponse,
   OpenCodeSessionReadFailure.connection => SessionCatalogFailure.connection,
 };

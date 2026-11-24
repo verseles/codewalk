@@ -2619,6 +2619,12 @@ abstract class V2Localizations {
   /// **'Interrupted'**
   String get liveToolInterrupted;
 
+  /// Notice shown in tool details when a tool output was shortened locally.
+  ///
+  /// In en, this message translates to:
+  /// **'The output was shortened.'**
+  String get liveToolValueShortened;
+
   /// V2 live read-only session view
   ///
   /// In en, this message translates to:

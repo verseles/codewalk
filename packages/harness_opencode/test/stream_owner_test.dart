@@ -162,7 +162,7 @@ final class Harness {
       store: store,
       harness: historyHarness,
       sourceVersion: '2.0.22',
-      now: () => DateTime.utc(2026, 10, 14),
+      now: () => clock,
       delay: (_) async {},
       observeChildren: observeChildren,
       maxChildren: maxChildren,
@@ -170,6 +170,7 @@ final class Harness {
     owner.updates.listen(updates.add);
   }
 
+  DateTime clock = DateTime.utc(2026, 10, 14);
   final SessionRef ref;
   final Reads reads;
   final connection = ScriptedConnection();
@@ -1108,6 +1109,152 @@ void main() {
           }, id: 'evt_cancel'),
         ]);
         expect(h.state.interactions, isEmpty);
+      },
+    );
+
+    test(
+      'routine child session creations and explicit refreshes do not exhaust error repair budget (#424)',
+      () async {
+        final h = Harness('ses_a', observeChildren: true);
+        h.owner.watch(h.ref);
+        await h.connect(1);
+        for (var i = 0; i < 10; i++) {
+          final childId = 'ses_child_$i';
+          h.reads.children = [
+            for (var j = 0; j <= i; j++) 'ses_child_$j',
+          ];
+          h.reads.active = {
+            'data': {
+              for (var j = 0; j <= i; j++) 'ses_child_$j': running,
+            },
+          };
+          await h.send([
+            {
+              'type': 'session.created',
+              'data': {'sessionID': childId, 'parentID': 'ses_a'},
+            },
+          ]);
+        }
+        for (var i = 0; i < 5; i++) {
+          h.owner.refresh(h.ref);
+          await h.settle();
+        }
+        expect(
+          h.updates.whereType<OpenCodeConnectionUpdated>().map((u) => u.kind),
+          isNot(contains(ConnectionKind.degraded)),
+        );
+        expect(children(h), hasLength(10));
+      },
+    );
+
+    test(
+      'repair budget recovers after 30s healthy cooldown even across periodic child refreshes and after clean settled turns (#424)',
+      () async {
+        final h = Harness('ses_a', observeChildren: true);
+        h.owner.watch(h.ref);
+        await h.connect(1);
+        final bad = {
+          'type': 'session.text.started',
+          'data': {'sessionID': 'ses_a'},
+        };
+        // Five isolated malformed frames separated by 36s total, with child
+        // refreshes every 12s in between, must still satisfy the 30s cooldown.
+        for (var i = 0; i < 5; i++) {
+          await h.send([bad]);
+          for (var step = 0; step < 3; step++) {
+            h.clock = h.clock.add(const Duration(seconds: 12));
+            final cid = 'ses_tick_${i}_$step';
+            h.reads.children = [...h.reads.children, cid];
+            await h.send([
+              {
+                'type': 'session.created',
+                'data': {'sessionID': cid, 'parentID': 'ses_a'},
+              },
+            ]);
+          }
+        }
+        expect(
+          h.updates.whereType<OpenCodeConnectionUpdated>().map((u) => u.kind),
+          isNot(contains(ConnectionKind.degraded)),
+        );
+        // Two rapid repairs followed by a clean turn settle reset repairs to 0,
+        // so two more rapid repairs still stay live.
+        await h.send([bad]);
+        await h.send([bad]);
+        await h.send([executionFrame('succeeded', session: 'ses_a')]);
+        await h.send([bad]);
+        await h.send([bad]);
+        expect(
+          h.updates.whereType<OpenCodeConnectionUpdated>().map((u) => u.kind),
+          isNot(contains(ConnectionKind.degraded)),
+        );
+        // Three rapid malformed frames without cooldown or clean turn still set aside.
+        for (var i = 0; i < 4; i++) {
+          await h.send([bad]);
+        }
+        final aside = h.updates.whereType<OpenCodeConnectionUpdated>().last;
+        expect(aside.kind, ConnectionKind.degraded);
+        expect(aside.failure, OpenCodeStreamFailure.hydrationExhausted);
+      },
+    );
+
+    test(
+      'bursts of valid no-op tool input deltas during hydration do not overflow maxHeldFrames, while malformed deltas still trigger repair',
+      () async {
+        final h = Harness('ses_a');
+        await h.connect(1);
+        h.reads.gate = Completer();
+        h.owner.watch(h.ref);
+        await h.settle();
+        await h.send([
+          for (var i = 0; i < 300; i++)
+            {
+              'type': 'session.tool.input.delta',
+              'id': 'evt_d_$i',
+              'created': 100 + i,
+              'data': {
+                'sessionID': 'ses_a',
+                'assistantMessageID': 'msg_a',
+                'id': 'call_1',
+                'delta': 'chunk-$i',
+              },
+            },
+        ]);
+        h.reads.gate!.complete();
+        h.reads.gate = null;
+        await h.settle();
+        expect(
+          h.updates.whereType<OpenCodeConnectionUpdated>().map((u) => u.kind),
+          isNot(contains(ConnectionKind.degraded)),
+        );
+        expect(h.state.connection.kind.known, ConnectionKind.live);
+
+        // A malformed input.delta with a lone surrogate while hydrating is NOT
+        // silently dropped: it replays after hydration and triggers a repair.
+        final h2 = Harness('ses_b');
+        await h2.connect(1);
+        h2.reads.gate = Completer();
+        h2.owner.watch(h2.ref);
+        await h2.settle();
+        final beforeReads = h2.reads.paths.length;
+        await h2.send([
+          {
+            'type': 'session.tool.input.delta',
+            'id': 'evt_bad_surrogate',
+            'created': 500,
+            'data': {
+              'sessionID': 'ses_b',
+              'assistantMessageID': 'msg_a',
+              'id': 'call_1',
+              'delta': 'bad${String.fromCharCode(0xd800)}',
+            },
+          },
+        ]);
+        h2.reads.gate!.complete();
+        h2.reads.gate = null;
+        await h2.settle();
+        // Initial hydration (6 reads) + 1 repair re-hydration (6 reads) = 12.
+        expect(h2.reads.paths.length - beforeReads, 11);
       },
     );
   });

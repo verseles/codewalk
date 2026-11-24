@@ -13,6 +13,7 @@ import 'session_reader.dart';
 import 'session_rules.dart';
 import 'shell_client.dart';
 import 'shell_observation.dart';
+import 'stream_owner_watch.dart';
 
 /// Readiness predicate for the event stream connection: the transport must be
 /// built with `connectedWhen: openCodeServerConnected`, so it holds every
@@ -88,41 +89,6 @@ final class OpenCodeConnectionUpdated extends OpenCodeStreamUpdate {
 
   /// Set when the failure concerns one session rather than the stream.
   final SessionRef? session;
-}
-
-final class _Watch {
-  bool ready = false;
-  bool stalled = false;
-  bool hydrating = false;
-  bool dirty = false;
-  int repairs = 0;
-  RequestCancellation? cancellation;
-
-  /// The older-history read in flight; one per watched session.
-  RequestCancellation? olderCancellation;
-
-  /// The oldest row a read put in the window. Once the window's first row is
-  /// another one, the window was trimmed in front and the cursor now skips
-  /// rows that are no longer resident, so older paging stops.
-  ItemId? oldestCovered;
-
-  /// Once the window lost rows in front, it stays known until a fresh
-  /// hydration covers it again, even if later removals empty the window.
-  bool trimmed = false;
-
-  /// Frames kept until the first snapshot; a child frame names its child.
-  final held = <(int, Map<String, Object?>, SessionRef?)>[];
-
-  /// Bounded side buffer for shell exit/delete frames arriving before the
-  /// first snapshot, isolated from [held] so foreign shell traffic can never
-  /// exhaust [maxHeldFrames] or degrade the session.
-  final heldShellTerminals = <(int, Map<String, Object?>, String)>[];
-  final mutatedShellIdsWhileRefreshing = <String>{};
-  bool shellsRetried = false;
-  bool shellsRefreshing = false;
-  bool shellsRefreshInvalidated = false;
-  RequestCancellation? shellsCancellation;
-  Timer? shellsRetryTimer;
 }
 
 const _maxHeldShellTerminals = 64;
@@ -207,7 +173,7 @@ final class OpenCodeStreamOwner {
   final _updates = StreamController<OpenCodeStreamUpdate>.broadcast();
   final _catalogChanges = StreamController<OpenCodeCatalogChange>.broadcast();
   final _locationCatalogs = StreamController<String>.broadcast();
-  final _watched = <SessionRef, _Watch>{};
+  final _watched = <SessionRef, OpenCodeWatch>{};
   final _children = <SessionRef, Set<SessionRef>>{};
   final _shellLocations = <String, String>{};
   StreamSubscription<SseRecoveryUpdate>? _subscription;
@@ -241,8 +207,9 @@ final class OpenCodeStreamOwner {
       Set.unmodifiable(_children[parent] ?? const <SessionRef>{});
 
   /// One coalesced re-read of [ref], for example after a reply was refused
-  /// because someone else answered first.
-  void refresh(SessionRef ref) => _repair(ref);
+  /// because someone else answered first. Does not consume the error repair
+  /// budget.
+  void refresh(SessionRef ref) => _refresh(ref);
 
   /// Adapter-private verified directory for [shellId], retained from its
   /// `shell.created` frame or `listRunning` response for per-shell routing.
@@ -420,8 +387,9 @@ final class OpenCodeStreamOwner {
   }
 
   /// The page size of hydration and of every older page: the history cursor
-  /// encodes it, so a continuation must use the same one.
-  static const historyPageLimit = 200;
+  /// encodes it, so a continuation must use the same one. Matches the official
+  /// OpenCode Web/TUI default (`20`).
+  static const historyPageLimit = 20;
 
   /// Whether [loadOlderHistory] would read: the session is current, an older
   /// cursor exists, the window has room and was never trimmed in front.
@@ -453,7 +421,7 @@ final class OpenCodeStreamOwner {
     return watch.trimmed;
   }
 
-  void _noteTrim(SessionRef ref, _Watch watch) {
+  void _noteTrim(SessionRef ref, OpenCodeWatch watch) {
     if (watch.trimmed) return;
     final covered = watch.oldestCovered;
     final first = store.read(ref)?.timeline.firstOrNull;
@@ -580,8 +548,13 @@ final class OpenCodeStreamOwner {
     }
   }
 
-  void _adopt(SessionRef parent, Iterable<SessionRef> children) {
-    _reconcileChildren(parent, [...children, ...?_children[parent]]);
+  bool _adopt(SessionRef parent, Iterable<SessionRef> children) {
+    final before = _children[parent];
+    _reconcileChildren(parent, [...children, ...?before]);
+    final after = _children[parent];
+    if (before == null) return after != null && after.isNotEmpty;
+    if (after == null || before.length != after.length) return true;
+    return !after.containsAll(before);
   }
 
   void _reconcileChildren(SessionRef parent, Iterable<SessionRef> listed) {
@@ -630,7 +603,7 @@ final class OpenCodeStreamOwner {
     if (_watched.containsKey(ref)) return true;
     if (_watched.length >= store.maxSessions) return false;
     store.open(ref);
-    _watched[ref] = _Watch();
+    _watched[ref] = OpenCodeWatch();
     // During the gate the generation loop picks it up before release.
     if (_generation != null && _released) unawaited(_hydrate(ref));
     return true;
@@ -679,52 +652,6 @@ final class OpenCodeStreamOwner {
     _updates.add(update);
   }
 
-  /// The lifecycle change a frame carries, or null for every other frame.
-  static OpenCodeCatalogChange? _catalogChangeOf(Object? type) {
-    if (type is! String) return null;
-    switch (type) {
-      case 'project.updated':
-      case 'worktree.updated':
-      case 'worktree.resolved':
-        return OpenCodeCatalogChange.project;
-      case 'session.created':
-        return OpenCodeCatalogChange.created;
-      case 'session.forked':
-        return OpenCodeCatalogChange.forked;
-      case 'session.renamed':
-        return OpenCodeCatalogChange.renamed;
-      case 'session.deleted':
-        return OpenCodeCatalogChange.deleted;
-      case 'session.archived':
-      case 'session.unarchived':
-        return OpenCodeCatalogChange.archived;
-      case 'session.moved':
-        // A move changes the session's location, so the group it belongs to
-        // changes with it.
-        return OpenCodeCatalogChange.moved;
-      case 'session.viewed':
-        // A view updates the unread watermark, so the marker changes with it.
-        return OpenCodeCatalogChange.viewed;
-      case 'session.execution.succeeded':
-      case 'session.execution.failed':
-      case 'session.execution.interrupted':
-        // The session went idle: the endpoint's unread marker advances with
-        // it, so the list re-reads.
-        return OpenCodeCatalogChange.idled;
-      case 'session.execution.started':
-        return OpenCodeCatalogChange.started;
-      case 'permission.asked':
-      case 'permission.replied':
-      case 'form.created':
-      case 'form.replied':
-      case 'form.cancelled':
-        // What waits for the user changed: the pending lists are re-read.
-        return OpenCodeCatalogChange.waiting;
-      default:
-        return null;
-    }
-  }
-
   void _emitLocationCatalog(Map<String, Object?> value) {
     if (_closed || _locationCatalogs.isClosed) return;
     final type = value['type'];
@@ -756,7 +683,7 @@ final class OpenCodeStreamOwner {
 
   void _emitCatalogChange(Object? type) {
     if (_closed) return;
-    final change = _catalogChangeOf(type);
+    final change = openCodeCatalogChangeOf(type);
     if (change == null || _catalogChanges.isClosed) return;
     _catalogChanges.add(change);
   }
@@ -807,7 +734,7 @@ final class OpenCodeStreamOwner {
     // Fresh per-generation bookkeeping: work left over from an older
     // generation sees a different watch and stops touching this one.
     for (final ref in _watched.keys.toList()) {
-      _watched[ref] = _Watch();
+      _watched[ref] = OpenCodeWatch();
     }
     _emit(const OpenCodeConnectionUpdated(ConnectionKind.hydrating));
     // Sequential, including sessions watched while the gate is open.
@@ -826,8 +753,15 @@ final class OpenCodeStreamOwner {
     _emit(const OpenCodeConnectionUpdated(ConnectionKind.live));
     for (final MapEntry(key: ref, value: watch) in _watched.entries.toList()) {
       if (watch.dirty) {
-        watch.dirty = false;
-        _repair(ref);
+        final isRepair = watch.dirtyIsRepair;
+        watch
+          ..dirty = false
+          ..dirtyIsRepair = false;
+        if (isRepair) {
+          _repair(ref);
+        } else {
+          _refresh(ref);
+        }
       }
     }
   }
@@ -897,7 +831,12 @@ final class OpenCodeStreamOwner {
             onShellLocations: _recordShellLocations,
           );
           if (!_current(ref, watch, generation) || watch.stalled) return;
-          final result = store.applySnapshot(ref, snapshot);
+          final priorState = store.read(ref);
+          final reconciled = openCodeReconcileTailSnapshot(
+            priorState,
+            snapshot,
+          );
+          final result = store.applySnapshot(ref, reconciled.snapshot);
           // Evicted by another user of a shared store during the read: the
           // snapshot was not stored, so read again into a reopened state.
           if (result.effects.any(
@@ -910,9 +849,14 @@ final class OpenCodeStreamOwner {
           _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
           watch
             ..ready = true
-            ..stalled = false
-            ..oldestCovered = snapshot.timeline?.values.firstOrNull?.id
-            ..trimmed = false;
+            ..stalled = false;
+          if (reconciled.preservedPrefix) {
+            watch.oldestCovered ??= priorState?.timeline.firstOrNull?.id;
+          } else {
+            watch
+              ..oldestCovered = snapshot.timeline?.values.firstOrNull?.id
+              ..trimmed = false;
+          }
           if (snapshot.shells != null) watch.shellsRetried = false;
           _noteTrim(ref, watch);
           final held = List.of(watch.held);
@@ -969,7 +913,11 @@ final class OpenCodeStreamOwner {
               (child) => followed.contains(child) && !resident.contains(child),
             );
           }
+          final hadRepairEffects = openCodeEffectsRequestRepair(result.effects);
           _handle(ref, result.effects);
+          if (!hadRepairEffects && !watch.dirtyIsRepair && !watch.stalled) {
+            watch.lastHealthyHydrationAt ??= _now();
+          }
           return;
         } on OpenCodeSessionReadException catch (error) {
           if (!_current(ref, watch, generation) ||
@@ -995,18 +943,25 @@ final class OpenCodeStreamOwner {
       watch.hydrating = false;
       watch.cancellation = null;
       if (watch.dirty && _released && _current(ref, watch, generation)) {
-        watch.dirty = false;
-        _repair(ref);
+        final isRepair = watch.dirtyIsRepair;
+        watch
+          ..dirty = false
+          ..dirtyIsRepair = false;
+        if (isRepair) {
+          _repair(ref);
+        } else {
+          _refresh(ref);
+        }
       }
     }
   }
 
-  bool _current(SessionRef ref, _Watch watch, int generation) =>
+  bool _current(SessionRef ref, OpenCodeWatch watch, int generation) =>
       !_closed && _generation == generation && identical(_watched[ref], watch);
 
   Future<void> _retryShellsOnce(
     SessionRef ref,
-    _Watch watch,
+    OpenCodeWatch watch,
     int generation,
   ) async {
     if (_customDelay != null) {
@@ -1023,7 +978,7 @@ final class OpenCodeStreamOwner {
     });
   }
 
-  void _setAside(SessionRef ref, _Watch watch) {
+  void _setAside(SessionRef ref, OpenCodeWatch watch) {
     watch.cancellation?.cancel();
     watch.olderCancellation?.cancel();
     watch.shellsCancellation?.cancel();
@@ -1056,14 +1011,38 @@ final class OpenCodeStreamOwner {
     _emit(OpenCodeSessionEvicted(ref));
   }
 
-  /// One coalesced, bounded re-hydration on the current generation.
-  void _repair(SessionRef ref) {
+  /// One coalesced routine re-hydration (child adoption/deletion or explicit
+  /// refresh) that never consumes the error repair budget.
+  void _refresh(SessionRef ref) {
     final watch = _watched[ref];
     if (watch == null || watch.stalled) return;
     if (watch.hydrating || !_released) {
       watch.dirty = true;
       return;
     }
+    unawaited(_hydrate(ref));
+  }
+
+  /// One coalesced, bounded error re-hydration on the current generation.
+  /// Restores the repair budget after [openCodeRepairCooldown] of healthy
+  /// operation so long-lived sessions survive isolated hiccups while rapid
+  /// failure loops still trip [maxRepairs].
+  void _repair(SessionRef ref) {
+    final watch = _watched[ref];
+    if (watch == null || watch.stalled) return;
+    if (watch.hydrating || !_released) {
+      watch
+        ..dirty = true
+        ..dirtyIsRepair = true;
+      return;
+    }
+    final healthyAt = watch.lastHealthyHydrationAt;
+    if (watch.repairs > 0 &&
+        healthyAt != null &&
+        _now().difference(healthyAt) >= openCodeRepairCooldown) {
+      watch.repairs = 0;
+    }
+    watch.lastHealthyHydrationAt = null;
     if (watch.repairs >= maxRepairs) {
       _setAside(ref, watch);
       return;
@@ -1175,12 +1154,15 @@ final class OpenCodeStreamOwner {
 
   void _hold(
     SessionRef ref,
-    _Watch watch,
+    OpenCodeWatch watch,
     Map<String, Object?> value,
     int seq,
     SessionRef? child,
   ) {
     if (!watch.ready) {
+      if (child == null && openCodeIsNoOpToolInputFrame(value)) {
+        return;
+      }
       if (watch.held.length >= maxHeldFrames) {
         _setAside(ref, watch);
         return;
@@ -1212,9 +1194,8 @@ final class OpenCodeStreamOwner {
         return;
       }
       final parent = SessionRef(harness.host, harness.harness, parentId);
-      if (_watched.containsKey(parent)) {
-        _adopt(parent, [ref]);
-        _repair(parent);
+      if (_watched.containsKey(parent) && _adopt(parent, [ref])) {
+        _refresh(parent);
       }
       return;
     }
@@ -1260,7 +1241,7 @@ final class OpenCodeStreamOwner {
         // child as running.
         final watch = _watched[parent];
         final reading = watch != null && (!watch.ready || watch.hydrating);
-        if (owned || reading) _repair(parent);
+        if (owned || reading) _refresh(parent);
       }
       return;
     }
@@ -1394,32 +1375,43 @@ final class OpenCodeStreamOwner {
       _repair(ref);
       return;
     }
+    var frameRequestedRepair = false;
     for (final event in events) {
       final result = store.apply(ref, event);
       // Before the update is seen, so a removal that empties a trimmed
       // window cannot hide the trim.
       if (_watched[ref] case final watch?) _noteTrim(ref, watch);
       _emit(OpenCodeSessionUpdated(ref, result.state, result.effects));
+      if (openCodeEffectsRequestRepair(result.effects)) {
+        frameRequestedRepair = true;
+      }
       _handle(ref, result.effects);
     }
     // Mirror the official client (`data.ts`): if a terminal execution event
     // settles the turn while any tool call is still streaming or pending,
-    // resync the session so no tool stays stuck running.
-    if (type == 'session.execution.succeeded' ||
-        type == 'session.execution.failed' ||
-        (type == 'session.execution.interrupted' &&
-            (value['data'] is Map<String, Object?> &&
-                (value['data']! as Map<String, Object?>)['reason'] !=
-                    'shutdown'))) {
+    // resync the session so no tool stays stuck running. Otherwise, a clean
+    // settled turn restores the session's repair budget.
+    if (openCodeIsTurnSettlementFrame(value)) {
       final after = store.read(ref);
-      if (after != null &&
+      final stuckTool =
+          after != null &&
           after.timeline.any(
             (item) =>
                 item is ToolCall &&
                 (item.status.known == ItemStatus.streaming ||
                     item.status.known == ItemStatus.pending),
-          )) {
+          );
+      if (stuckTool) {
         _repair(ref);
+      } else if (!frameRequestedRepair) {
+        final watch = _watched[ref];
+        if (watch != null &&
+            watch.ready &&
+            !watch.hydrating &&
+            !watch.dirty &&
+            watch.lastHealthyHydrationAt != null) {
+          watch.repairs = 0;
+        }
       }
     }
   }

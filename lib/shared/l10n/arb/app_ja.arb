@@ -1145,6 +1145,10 @@
   "@liveToolInterrupted": {
     "description": "V2 live read-only session view"
   },
+  "liveToolValueShortened": "出力は短縮されました。",
+  "@liveToolValueShortened": {
+    "description": "Notice shown in tool details when a tool output was shortened locally."
+  },
   "liveShellExitCode": "終了コード",
   "@liveShellExitCode": {
     "description": "V2 live read-only session view"

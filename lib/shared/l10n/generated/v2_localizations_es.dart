@@ -1401,6 +1401,9 @@ class V2LocalizationsEs extends V2Localizations {
   String get liveToolInterrupted => 'Interrumpido';
 
   @override
+  String get liveToolValueShortened => 'La salida se acortó.';
+
+  @override
   String get liveShellExitCode => 'Código de salida';
 
   @override

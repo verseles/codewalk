@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'bounded_structure.dart';
 import 'error_projection.dart';
 import 'item_ids.dart';
 import 'version_policy.dart';
@@ -206,11 +207,17 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
     'failed' => () {
       final error = _object(data['error']);
       final type = _text(error['type'], cap: 4096);
-      final message = error['message'] == null ? null : _text(error['message']);
-      return (
-        status: ItemStatus.failed,
-        text: openCodeErrorInfo(type, message).rawMessage,
-      );
+      final rawMessage = error['message'];
+      if (rawMessage != null && rawMessage is! String) {
+        _fail(OpenCodeCompactionProjectionFailure.malformed);
+      }
+      final info = openCodeErrorInfo(type, rawMessage as String?);
+      try {
+        validateOpenCodeUtf16(info.rawMessage);
+      } on FormatException {
+        _fail(OpenCodeCompactionProjectionFailure.malformed);
+      }
+      return (status: ItemStatus.failed, text: info.rawMessage);
     }(),
     _ => null,
   };

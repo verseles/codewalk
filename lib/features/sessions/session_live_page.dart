@@ -631,6 +631,12 @@ class _SessionLivePageState extends State<SessionLivePage>
                               onLoadOlder: c.canLoadOlderHistory
                                   ? c.loadOlderHistory
                                   : null,
+                              onFillOlder:
+                                  c.canLoadOlderHistory &&
+                                      c.olderHistory.failure == null &&
+                                      !c.olderHistory.loading
+                                  ? c.loadOlderHistory
+                                  : null,
                               errorRecovery: (error) => sessionErrorRecovery(
                                 l10n,
                                 error,

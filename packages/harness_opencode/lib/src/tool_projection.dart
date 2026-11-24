@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'bounded_structure.dart';
+import 'error_projection.dart';
 import 'item_ids.dart';
 import 'message_context.dart';
 import 'plan_projection.dart';
-import 'shell_observation.dart';
-import 'shell_projection.dart';
 import 'subagent_child.dart';
 import 'tool_metadata.dart';
 import 'version_policy.dart';
@@ -30,9 +30,6 @@ final class OpenCodeToolProjectionException implements Exception {
 }
 
 const _idLimit = 4096;
-const _argumentLimit = 65536;
-const _fieldLimit = 65536;
-const _textLimit = 256 * 1024;
 const _safeInteger = 9007199254740991;
 const _types = {
   'session.tool.input.started',
@@ -43,38 +40,22 @@ const _types = {
   'session.tool.success',
   'session.tool.failed',
 };
-const _credentials = {
-  'password',
-  'passwd',
-  'secret',
-  'apikey',
-  'xapikey',
-  'authorization',
-  'token',
-  'accesstoken',
-  'refreshtoken',
-  'apitoken',
-  'privatekey',
-  'secretaccesskey',
-  'awssecretaccesskey',
-  'clientsecret',
-  'providerstate',
-  'providerresultstate',
-};
 
 /// Projects the selected 2.0.22 tool phases without owning a stream or clock.
 ///
 /// Project and reduce each observation against the latest [current] state.
-/// Raw argument fragments/boundaries are validated and omitted: the finite
-/// credential-key policy is safe only on structured `called.input`. Arbitrary
-/// progress metadata is omitted. These three recognized phases return null.
-/// Missing observed names or incompatible resident provenance request recovery;
-/// this function never adopts a history/prior-epoch row or invents a tool name.
+/// Raw argument fragments/boundaries are validated up to the 16 MiB SSE frame
+/// ceiling and omitted: the finite credential-key policy is safe only on
+/// structured `called.input`. Arbitrary progress metadata is omitted. These
+/// three recognized phases return null. Missing observed names or incompatible
+/// resident provenance request recovery; this function never adopts a
+/// history/prior-epoch row or invents a tool name.
 ///
-/// Selected strings have 4 KiB identity or 64 KiB raw-argument limits. Structured
-/// input/output each have a 64 KiB JSON-escaped budget, depth 16 and 16384 shared
-/// node visits; output has at most 128 parts. Text's 256 KiB cap is subordinate
-/// to the structured-field budget. Rejection is atomic, without truncation.
+/// Selected identifiers have a 4 KiB cap. Structured input/output each keep a
+/// redacted prefix within 64 KiB JSON-escaped bytes and 4096 nodes (at most
+/// 128 output parts), and failed tool error messages keep a redacted 8 KiB
+/// prefix; depth > 16, bad types, non-finite numbers, and unpaired UTF-16
+/// surrogates in kept prefixes fail closed.
 /// These guards do not bound upstream decoding or total process memory.
 SessionEvent? projectOpenCodeToolEvent(
   Object? value,
@@ -137,33 +118,42 @@ SessionEvent? projectOpenCodeToolEvent(
     aggregateSeq = BigInt.from(_integer(durable['seq']));
   }
   if (type == 'session.tool.input.delta') {
-    _text(data['delta'], cap: _argumentLimit);
+    _validateDiscardedInput(data['delta']);
     return null;
   }
   if (type == 'session.tool.input.ended') {
-    _text(data['text'], cap: _argumentLimit);
+    _validateDiscardedInput(data['text']);
     return null;
   }
   final progress = type == 'session.tool.progress';
   // Progress replaces live metadata; only a subagent's child is kept.
   final progressMetadata = progress ? _object(data['metadata']) : null;
 
-  final budget = _SelectedBudget();
   var inputRedacted = false;
-  CanonicalValue selectedInput(Object? value) => budget.structured(
-    _object(value),
-    redact: true,
-    onRedacted: () => inputRedacted = true,
-  );
+  var inputTruncated = false;
+  CanonicalValue selectedInput(Object? value) {
+    final bounded = _boundStructure(
+      _object(value),
+      redact: true,
+      priorityKeys: openCodeToolInputPriorityKeys,
+    );
+    if (bounded.redacted) inputRedacted = true;
+    if (bounded.truncated) inputTruncated = true;
+    return bounded.value;
+  }
+
   var name = started ? _text(data['name'], cap: _idLimit) : '';
   CanonicalValue? input;
   CanonicalValue? output;
+  OutputRef? outputRef;
   ErrorInfo? error;
   bool? executed;
   bool? truncated;
   var outputOmitted = false;
   var outputRedacted = false;
+  var outputTruncated = false;
   var errorRedacted = false;
+  var errorTruncated = false;
   var status = ItemStatus.streaming;
   if (called || terminal) {
     executed = _boolean(data['executed']);
@@ -183,11 +173,12 @@ SessionEvent? projectOpenCodeToolEvent(
       ToolKind.shell;
   if (called) input = selectedInput(data['input']);
   if (success || (failed && data.containsKey('content'))) {
-    (output, outputOmitted, outputRedacted) = _content(
-      data['content'],
-      budget,
-      shellTool: isShellTool,
-    );
+    final bounded = _boundContent(data['content'], shellTool: isShellTool);
+    output = bounded.value;
+    outputOmitted = bounded.omitted;
+    outputRedacted = bounded.redacted;
+    outputTruncated = bounded.truncated;
+    if (outputTruncated) outputRef = OutputRef(id: callId, truncated: true);
   }
   Map<String, Object?>? terminalMetadata;
   if (terminal && data.containsKey('metadata')) {
@@ -204,13 +195,21 @@ SessionEvent? projectOpenCodeToolEvent(
     if (errorType.isEmpty) {
       _fail(OpenCodeToolProjectionFailure.unsupportedValue);
     }
-    var message = '';
+    String? rawMessage;
     if (rawError.containsKey('message')) {
-      final raw = _text(rawError['message'], cap: _textLimit);
-      final kept = openCodeRedactedText(raw, 8 * 1024);
-      message = kept.text;
-      errorRedacted = kept.redacted;
+      final raw = rawError['message'];
+      if (raw is! String) _fail(OpenCodeToolProjectionFailure.malformed);
+      rawMessage = raw;
     }
+    final ({ErrorInfo error, bool redacted, bool truncated}) projectedError;
+    try {
+      projectedError = openCodeToolErrorInfo(errorType, rawMessage);
+    } on FormatException {
+      _fail(OpenCodeToolProjectionFailure.malformed);
+    }
+    errorRedacted = projectedError.redacted;
+    errorTruncated = projectedError.truncated;
+    final message = projectedError.error.rawMessage;
     final shellStopped =
         isShellTool &&
         (message == 'Command cancelled' ||
@@ -218,11 +217,7 @@ SessionEvent? projectOpenCodeToolEvent(
     status = errorType == 'aborted' || shellStopped
         ? ItemStatus.interrupted
         : ItemStatus.failed;
-    error = ErrorInfo(
-      kind: const OpenValue.known(ErrorKind.toolFailure),
-      rawType: errorType,
-      rawMessage: message,
-    );
+    error = projectedError.error;
   }
 
   final generation = jsonEncode([
@@ -252,8 +247,11 @@ SessionEvent? projectOpenCodeToolEvent(
         'rawInputNotProjected': true,
         if (input == null) 'inputNotProjected': true,
         if (inputRedacted) 'inputRedacted': true,
+        if (inputTruncated) 'inputTruncated': true,
         if (outputRedacted) 'outputRedacted': true,
+        if (outputTruncated) 'outputTruncated': true,
         if (errorRedacted) 'errorRedacted': true,
+        if (errorTruncated) 'errorTruncated': true,
         if (outputOmitted) 'outputContentOmitted': true,
         'executed': ?executed,
         'truncated': ?truncated,
@@ -404,6 +402,11 @@ SessionEvent? projectOpenCodeToolEvent(
     // Carry only revalidated selected input, never arbitrary source/other fields.
     if (!called && resident.input != null) {
       input = selectedInput(resident.input!.value);
+      final priorExtra = resident.source.extra?.value;
+      if (priorExtra is Map<Object?, Object?>) {
+        if (priorExtra['inputTruncated'] == true) inputTruncated = true;
+        if (priorExtra['inputRedacted'] == true) inputRedacted = true;
+      }
     }
   } else if (!started) {
     return ResyncRequired(meta: meta(), reason: 'toolStartMissing');
@@ -448,6 +451,7 @@ SessionEvent? projectOpenCodeToolEvent(
       rawName: name,
       input: input,
       output: output,
+      outputRef: outputRef ?? (terminal ? null : prior?.outputRef),
       child: child,
       childEvidence: evidence,
       error: error,
@@ -560,145 +564,66 @@ bool _settled(ToolCall item) => const {
   ItemStatus.interrupted,
 }.contains(item.status.known);
 
-(CanonicalValue, bool, bool) _content(
-  Object? value,
-  _SelectedBudget budget, {
-  bool shellTool = false,
-}) {
-  if (value is! List<Object?> || value.isEmpty) {
+void _validateDiscardedInput(Object? value) {
+  try {
+    validateOpenCodeDiscardedText(
+      value,
+      maxBytes: openCodeLiveDiscardedInputLimit,
+    );
+  } on RangeError {
+    _fail(OpenCodeToolProjectionFailure.limitExceeded);
+  } on FormatException {
     _fail(OpenCodeToolProjectionFailure.malformed);
   }
-  if (value.length > 128) _fail(OpenCodeToolProjectionFailure.limitExceeded);
-  var omitted = false;
-  var redacted = false;
-  final selected = <Object?>[];
-  for (final raw in value) {
-    final part = _object(raw);
-    final type = _text(part['type'], cap: _idLimit, nonempty: true);
-    if (type == 'text') {
-      final raw = _text(part['text'], cap: _textLimit);
-      final sanitized = shellTool
-          ? openCodeSanitizeShellToolOutputText(raw)
-          : raw;
-      final clean = redactCredentialText(sanitized);
-      redacted = redacted || clean != raw;
-      selected.add({'type': 'text', 'text': clean});
-    } else if (type == 'file') {
-      selected.add({
-        'type': 'file',
-        'mime': _text(part['mime'], cap: _idLimit),
-        'available': false,
-      });
-      omitted = true;
-    } else {
-      _fail(OpenCodeToolProjectionFailure.malformed);
-    }
-  }
-  return (budget.structured(selected), omitted, redacted);
 }
 
-final class _SelectedBudget {
-  var nodes = 0;
-  var bytes = 0;
-
-  CanonicalValue structured(
-    Object? value, {
-    bool redact = false,
-    void Function()? onRedacted,
-  }) {
-    var fieldBytes = 0;
-    void measure(Object? v, int depth, {bool key = false}) {
-      if (++nodes > 16384 || depth > 16) {
-        _fail(OpenCodeToolProjectionFailure.limitExceeded);
-      }
-      if (v is String) {
-        // A redacted value is measured as it will be kept.
-        final kept = redact && !key ? redactCredentialText(v) : v;
-        _bytes(v, _fieldLimit);
-        fieldBytes += _bytes(kept, _fieldLimit) + 2;
-        for (final unit in kept.codeUnits) {
-          if (unit == 0x22 ||
-              unit == 0x5c ||
-              unit == 8 ||
-              unit == 9 ||
-              unit == 10 ||
-              unit == 12 ||
-              unit == 13) {
-            fieldBytes++;
-          } else if (unit < 0x20) {
-            fieldBytes += 5;
-          }
-        }
-      } else if (v is num) {
-        if (!v.isFinite) _fail(OpenCodeToolProjectionFailure.malformed);
-        fieldBytes += v.toString().length;
-      } else if (v == null || v is bool) {
-        fieldBytes += 5;
-      } else if (v is List) {
-        fieldBytes += 2 + v.length;
-        if (fieldBytes > _fieldLimit) {
-          _fail(OpenCodeToolProjectionFailure.limitExceeded);
-        }
-        for (final child in v) {
-          measure(child, depth + 1);
-        }
-      } else if (v is Map<String, Object?>) {
-        fieldBytes += 2 + v.length * 2;
-        if (fieldBytes > _fieldLimit) {
-          _fail(OpenCodeToolProjectionFailure.limitExceeded);
-        }
-        for (final entry in v.entries) {
-          measure(entry.key, depth + 1, key: true);
-          final before = fieldBytes;
-          measure(entry.value, depth + 1);
-          // Short values expand to the JSON string "[redacted]" (12 bytes).
-          // Retain the raw-tree guard while also bounding the canonical copy.
-          if (redact && _credentialKey(entry.key) && fieldBytes - before < 12) {
-            fieldBytes += 12 - (fieldBytes - before);
-          }
-        }
-      } else {
-        _fail(OpenCodeToolProjectionFailure.unsupportedValue);
-      }
-      if (fieldBytes > _fieldLimit) {
-        _fail(OpenCodeToolProjectionFailure.limitExceeded);
-      }
-    }
-
-    measure(value, 0);
-    if ((bytes += fieldBytes) > 1024 * 1024) {
-      _fail(OpenCodeToolProjectionFailure.limitExceeded);
-    }
-    Object? copy(Object? v) {
-      if (v is List) return v.map(copy).toList();
-      if (v is Map<String, Object?>) {
-        return <String, Object?>{
-          for (final entry in v.entries)
-            entry.key: redact && _credentialKey(entry.key)
-                ? (() {
-                    onRedacted?.call();
-                    return '[redacted]';
-                  })()
-                : copy(entry.value),
-        };
-      }
-      if (redact && v is String) {
-        final clean = redactCredentialText(v);
-        if (clean != v) onRedacted?.call();
-        return clean;
-      }
-      return v;
-    }
-
-    return CanonicalValue(copy(value));
+({CanonicalValue value, int bytes, int nodes, bool truncated, bool redacted})
+_boundStructure(
+  Object? value, {
+  required bool redact,
+  List<String> priorityKeys = const [],
+}) {
+  try {
+    return boundOpenCodeStructure(
+      value,
+      redact: redact,
+      priorityKeys: priorityKeys,
+    );
+  } on OpenCodeBoundedStructureException catch (error) {
+    _fail(switch (error.failure) {
+      OpenCodeBoundedStructureFailure.malformed =>
+        OpenCodeToolProjectionFailure.malformed,
+      OpenCodeBoundedStructureFailure.depthExceeded ||
+      OpenCodeBoundedStructureFailure.limitExceeded =>
+        OpenCodeToolProjectionFailure.limitExceeded,
+      OpenCodeBoundedStructureFailure.unsupportedValue =>
+        OpenCodeToolProjectionFailure.unsupportedValue,
+    });
   }
 }
 
-/// A credential key: a named one, or any whose normalized name ends with
-/// `authorization` (`Proxy-Authorization`, `HTTP_AUTHORIZATION`).
-bool _credentialKey(String key) {
-  final name = key.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), '');
-  return _credentials.contains(name) || name.endsWith('authorization');
+({
+  CanonicalValue value,
+  int bytes,
+  int nodes,
+  bool truncated,
+  bool omitted,
+  bool redacted,
+})
+_boundContent(Object? value, {bool shellTool = false}) {
+  try {
+    return boundOpenCodeToolContent(value, shellTool: shellTool);
+  } on OpenCodeBoundedStructureException catch (error) {
+    _fail(switch (error.failure) {
+      OpenCodeBoundedStructureFailure.malformed =>
+        OpenCodeToolProjectionFailure.malformed,
+      OpenCodeBoundedStructureFailure.depthExceeded ||
+      OpenCodeBoundedStructureFailure.limitExceeded =>
+        OpenCodeToolProjectionFailure.limitExceeded,
+      OpenCodeBoundedStructureFailure.unsupportedValue =>
+        OpenCodeToolProjectionFailure.unsupportedValue,
+    });
+  }
 }
 
 Map<String, Object?> _object(Object? value) {

@@ -1384,6 +1384,9 @@ class V2LocalizationsUr extends V2Localizations {
   String get liveToolInterrupted => 'روک دیا گیا';
 
   @override
+  String get liveToolValueShortened => 'آؤٹ پٹ مختصر کر دیا گیا۔';
+
+  @override
   String get liveShellExitCode => 'ایگزٹ کوڈ';
 
   @override

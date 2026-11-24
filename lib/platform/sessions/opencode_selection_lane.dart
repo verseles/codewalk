@@ -480,6 +480,7 @@ final class OpenCodeSelectionLane {
             SessionSelectionUnavailable.authenticationRequired,
           OpenCodeSessionReadFailure.incompatibleResponse ||
           OpenCodeSessionReadFailure.bodyTooLarge ||
+          OpenCodeSessionReadFailure.projectionBudget ||
           OpenCodeSessionReadFailure.invalidRequest =>
             SessionSelectionUnavailable.catalogUnreadable,
           _ => SessionSelectionUnavailable.serviceUnavailable,

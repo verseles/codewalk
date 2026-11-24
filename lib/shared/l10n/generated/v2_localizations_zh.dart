@@ -1300,6 +1300,9 @@ class V2LocalizationsZh extends V2Localizations {
   String get liveToolInterrupted => '已中断';
 
   @override
+  String get liveToolValueShortened => '输出已被截短。';
+
+  @override
   String get liveShellExitCode => '退出代码';
 
   @override

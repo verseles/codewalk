@@ -418,16 +418,26 @@ bool toolHasDetails(TimelineItem item) => switch (item) {
 
 List<_Section> _sections(TimelineItem item, V2Localizations l10n) {
   switch (item) {
-    case ToolCall(:final input, :final output, :final error):
+    case ToolCall(:final input, :final output, :final outputRef, :final error):
+      final errorDetails = error?.details?.value;
+      final errorShortened =
+          errorDetails is Map && errorDetails['messageTruncated'] == true;
       return [
         if (input != null)
           _Section(l10n.chatMessageToolInput, _json(input.value)),
         if (output != null)
-          _Section(l10n.liveToolOutput, _toolOutput(output.value)),
+          _Section(
+            l10n.liveToolOutput,
+            _toolOutput(output.value),
+            notice: (outputRef?.truncated ?? false)
+                ? l10n.liveToolValueShortened
+                : null,
+          ),
         if (error != null)
           _Section(
             l10n.diagnosticsError,
             error.rawMessage.isEmpty ? error.rawType : error.rawMessage,
+            notice: errorShortened ? l10n.liveErrorShortened : null,
             error: true,
           ),
       ];

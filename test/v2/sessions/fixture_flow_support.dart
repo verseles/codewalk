@@ -620,6 +620,23 @@ List<FixtureRoute> sessionRoutes({
     FixtureRoute(
       _exchange(
         method: 'GET',
+        path: '/api/session/$ses/message?limit=20&order=desc',
+        status: 200,
+        response: _page(desc.take(20).toList()),
+      ),
+      times: times,
+      respond: descFn == null
+          ? null
+          : (_) {
+              final custom = descFn();
+              return _page(<Object?>[
+                for (final row in (custom ?? desc).take(20)) row,
+              ]);
+            },
+    ),
+    FixtureRoute(
+      _exchange(
+        method: 'GET',
         path: '/api/session/$ses/message?limit=200&order=desc',
         status: 200,
         response: _page(desc),
@@ -691,6 +708,15 @@ List<FixtureRoute> sessionRoutes({
           path: '/api/session/${extra['id']}/inbox',
           status: 200,
           response: {'data': const <Object?>[]},
+        ),
+        times: times,
+      ),
+      FixtureRoute(
+        _exchange(
+          method: 'GET',
+          path: '/api/session/${extra['id']}/message?limit=20&order=desc',
+          status: 200,
+          response: _page(const []),
         ),
         times: times,
       ),

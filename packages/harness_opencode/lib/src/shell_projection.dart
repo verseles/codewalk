@@ -107,23 +107,23 @@ ShellStatus? openCodeShellStatus(Object? value) => switch (value) {
   return (text: text, cut: false);
 }
 
-/// The redacted leading part of [text] within [limit] UTF-8 bytes. A slice
-/// with some margin is redacted first, so a credential that crosses the limit
-/// is still recognized whole, and the redacted text is cut again, so the
-/// replacement never takes the value past the limit.
+/// The redacted leading part of [text] within [limit] UTF-8 bytes. Uses
+/// [redactCredentialSlice] against the full string so a credential or PEM block
+/// starting inside the kept prefix and completing past [limit] is still
+/// recognized whole, then cuts again so the replacement never passes [limit].
 ({String text, bool cut, bool redacted}) openCodeRedactedText(
   String text,
   int limit,
 ) {
-  final slice = openCodeBoundedText(text, limit + 4096);
-  final clean = redactCredentialText(slice.text);
+  final unredacted = openCodeBoundedText(text, limit);
+  final clean = redactCredentialSlice(text, 0, unredacted.text.length);
   final bounded = openCodeBoundedText(clean, limit);
   // Whether what is kept differs from the same prefix unredacted: a
   // credential that only appeared past the limit was not shown anyway.
   return (
     text: bounded.text,
-    cut: slice.cut || bounded.cut,
-    redacted: bounded.text != openCodeBoundedText(text, limit).text,
+    cut: unredacted.cut || bounded.cut,
+    redacted: bounded.text != unredacted.text,
   );
 }
 

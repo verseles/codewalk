@@ -490,4 +490,214 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     live.rig.dispose();
   });
+
+  testWidgets(
+    'viewport fill probe auto-loads older pages for a non-overflowing followed list and stops on failure or cap',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final rig = CatalogRig();
+      await rig.save('a');
+      final directory = LiveDirectory();
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/sessions'),
+        profileRepository: rig.repository,
+        endpointProber: FakeProber(),
+        sessionCatalogFactory: rig.create,
+        sessionLiveDirectory: () => directory,
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+      await showSessionList(tester);
+      final read = dependencies.sessions!.selectProfile('profile_a');
+      final catalog = rig.sources.single;
+      final row = catalog.row('fill', title: 'Fill');
+      catalog.respond([row]);
+      await read;
+      await tester.pumpAndSettle();
+      final button = find.byKey(
+        ValueKey('live-open-${row.info.ref.storageKey}'),
+      );
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pump();
+      await tester.pump();
+      final handle = directory.grant(row.info.ref);
+      // Start with only 2 short rows + older cursor, paging 4 rows at a time.
+      var first = 98;
+      SessionLiveView buildView() => SessionLiveView(
+        session: row.info.ref,
+        phase: SessionLivePhase.live,
+        state: liveState(
+          row.info.ref,
+          items: _rows(row.info.ref, first, 100),
+          execution: const ExecutionState(
+            kind: OpenValue.known(ExecutionKind.idle),
+          ),
+          cursor: first > 0 ? '$first' : null,
+          hasMore: first > 0,
+        ),
+      );
+      handle.olderAction = () async {
+        first = (first - 4).clamp(0, 100);
+        handle.emit(buildView());
+        return null;
+      };
+      await tester.pump();
+      handle.emit(buildView());
+      await tester.pumpAndSettle();
+      // Fill probe automatically loaded pages until the scroll extent passed
+      // the 220 px top-rearm threshold, staying under the 9-page cap.
+      expect(handle.olderLoads, greaterThan(0));
+      expect(handle.olderLoads, lessThanOrEqualTo(9));
+      final controller = _controller(tester);
+      expect(
+        controller.position.maxScrollExtent -
+            controller.position.minScrollExtent,
+        greaterThan(220),
+      );
+      // Still following newest content, with no jump-to-latest mark.
+      expect(find.byKey(const ValueKey('live-jump-latest')), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+      rig.dispose();
+    },
+  );
+
+  testWidgets(
+    'viewport fill probe stops on failure, keeps retry control, and does not loop',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final rig = CatalogRig();
+      await rig.save('a');
+      final directory = LiveDirectory();
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/sessions'),
+        profileRepository: rig.repository,
+        endpointProber: FakeProber(),
+        sessionCatalogFactory: rig.create,
+        sessionLiveDirectory: () => directory,
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+      await showSessionList(tester);
+      final read = dependencies.sessions!.selectProfile('profile_a');
+      final catalog = rig.sources.single;
+      final row = catalog.row('fill_fail', title: 'Fill Fail');
+      catalog.respond([row]);
+      await read;
+      await tester.pumpAndSettle();
+      final button = find.byKey(
+        ValueKey('live-open-${row.info.ref.storageKey}'),
+      );
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pump();
+      await tester.pump();
+      final handle = directory.grant(row.info.ref);
+      handle.olderAction = () async => SessionLiveFailure.timeout;
+      await tester.pump();
+      handle.emit(
+        SessionLiveView(
+          session: row.info.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            row.info.ref,
+            items: _rows(row.info.ref, 98, 100),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+            cursor: '98',
+            hasMore: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(handle.olderLoads, 1);
+      expect(find.byKey(const ValueKey('live-older-retry')), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+      rig.dispose();
+    },
+  );
+
+  testWidgets(
+    'viewport fill probe resets its page budget in the same frame when a displaced pivot replaces the window',
+    (tester) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final rig = CatalogRig();
+      await rig.save('a');
+      final directory = LiveDirectory();
+      final dependencies = createAppDependencies(
+        initialLink: Uri(path: '/sessions'),
+        profileRepository: rig.repository,
+        endpointProber: FakeProber(),
+        sessionCatalogFactory: rig.create,
+        sessionLiveDirectory: () => directory,
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
+      await showSessionList(tester);
+      final read = dependencies.sessions!.selectProfile('profile_a');
+      final catalog = rig.sources.single;
+      final row = catalog.row('fill_reset', title: 'Fill Reset');
+      catalog.respond([row]);
+      await read;
+      await tester.pumpAndSettle();
+      final button = find.byKey(
+        ValueKey('live-open-${row.info.ref.storageKey}'),
+      );
+      await tester.ensureVisible(button);
+      await tester.tap(button);
+      await tester.pump();
+      await tester.pump();
+      final handle = directory.grant(row.info.ref);
+      // Exhaust all 9 fill pages with no-op responses (short non-overflowing list).
+      handle.olderAction = () async => null;
+      await tester.pump();
+      handle.emit(
+        SessionLiveView(
+          session: row.info.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            row.info.ref,
+            items: _rows(row.info.ref, 10, 12),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+            cursor: '10',
+            hasMore: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(handle.olderLoads, 9);
+
+      // Emit a disjoint window (replacing the pivot in one frame without
+      // passing through empty): _placePivot resets _fillPages before
+      // _scheduleFillOlder runs, so auto-fill fires immediately.
+      handle.emit(
+        SessionLiveView(
+          session: row.info.ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            row.info.ref,
+            items: _rows(row.info.ref, 90, 92),
+            execution: const ExecutionState(
+              kind: OpenValue.known(ExecutionKind.idle),
+            ),
+            cursor: '90',
+            hasMore: true,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(handle.olderLoads, 18);
+      await tester.pumpWidget(const SizedBox.shrink());
+      rig.dispose();
+    },
+  );
 }

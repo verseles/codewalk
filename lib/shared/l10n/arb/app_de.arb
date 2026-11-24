@@ -1145,6 +1145,10 @@
   "@liveToolInterrupted": {
     "description": "V2 live read-only session view"
   },
+  "liveToolValueShortened": "Die Ausgabe wurde gekürzt.",
+  "@liveToolValueShortened": {
+    "description": "Notice shown in tool details when a tool output was shortened locally."
+  },
   "liveShellExitCode": "Exit-Code",
   "@liveShellExitCode": {
     "description": "V2 live read-only session view"

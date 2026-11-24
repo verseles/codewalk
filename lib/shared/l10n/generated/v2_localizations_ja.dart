@@ -1323,6 +1323,9 @@ class V2LocalizationsJa extends V2Localizations {
   String get liveToolInterrupted => '中断';
 
   @override
+  String get liveToolValueShortened => '出力は短縮されました。';
+
+  @override
   String get liveShellExitCode => '終了コード';
 
   @override

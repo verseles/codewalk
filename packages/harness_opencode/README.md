@@ -124,13 +124,24 @@ same reader with `readHistory(SessionRef, sourceVersion: ..., limit: ..., cursor
   omitted; only the known tool `truncated` boolean is retained. Conversation text
   and textual tool output are application content, not diagnostics; this is not
   a universal secret-removal guarantee.
-- Reads retain the 20-second deadline and 1-MiB body limit. Projection fails
-  atomically rather than truncating: at most 128 assistant blocks per message,
-  2,000 projected items per page (`maxHistoryItems` may lower this), depth 16,
-  16,384 selected node visits, 256 KiB per text, 64 KiB per structured field and
-  1 MiB of selected-content accounting. Values ultimately retained in a canonical
-  manifest are charged there rather than again during string validation. These
-  are application guards, not an absolute process-memory or OS-buffer quota.
+- Reads retain the 20-second deadline and 1-MiB body limit; `readHistory` and
+  `hydrateSession` halve the requested message count automatically down to `1`
+  when a page hits `bodyTooLarge` or an aggregate projection budget
+  (`OpenCodeHistoryBudgetException` / `OpenCodeSessionReadFailure.projectionBudget`).
+  Oversized tool inputs and outputs are bounded via `bounded_structure.dart` to
+  64 KiB JSON-escaped, 4,096 nodes and 128 output parts (retaining priority
+  target keys first, redacting credentials against the full source text via
+  `redactCredentialSlice`, flagging cut outputs with `OutputRef(truncated: true)`,
+  and recording `inputTruncated` in provenance); oversized tool errors are
+  bounded to 8 KiB via `openCodeToolErrorInfo` (`ErrorInfo.details`
+  `messageTruncated`/`messageRedacted`), failed compaction errors are bounded
+  the same way, and discarded streaming tool inputs are validated up to the
+  32-MiB history ceiling. Plain user/assistant text stays capped at 256 KiB and
+  aggregate page caps remain 128 assistant blocks per message, 2,000 projected
+  items per page (`maxHistoryItems` may lower this), depth 16, 16,384 selected
+  node visits, and 1 MiB of selected-content accounting (without charging
+  internal `SourceProvenance.extra` maps). These are application guards, not an
+  absolute process-memory or OS-buffer quota.
 
 The official contract is pinned to OpenCode `05018b8862a8fc198ec9810aafd397c96bb7d86e`
 (`2.0.22`, `packages/protocol/src/groups/message.ts` and
@@ -207,7 +218,17 @@ and `openCodeServerConnected`, the readiness predicate the injected
   the generation as epoch and count every frame. A session watched after the
   release keeps its own frames until its first snapshot.
 - Reducer repair requests and rejected frames coalesce into one bounded
-  re-hydration per session; a session whose hydration keeps failing is set aside
+  re-hydration per session (reading `historyPageLimit = 20` messages by default,
+  adaptively halved on body/projection budget overflow); routine child and
+  manual refreshes coalesce through `_refresh` without consuming `watch.repairs`.
+  Error repairs remain capped at 3 strikes per generation and reset after a
+  30-second clean healthy hydration cooldown (`openCodeRepairCooldown`) or a
+  clean settled turn without open tools. Overlapping partial tail re-hydrations
+  preserve resident older prefixes, `nextHistoryCursor`, and untrimmed coverage
+  (`openCodeReconcileTailSnapshot`), while disjoint tails with empty pending
+  inputs replace stale windows cleanly; validated pre-hydration no-op
+  `session.tool.input.delta`/`ended` frames are dropped without occupying
+  `maxHeldFrames`. A session whose hydration keeps failing is set aside
   (`degraded`, `hydrationExhausted`) without holding the others back; a missing
   session is evicted (`OpenCodeSessionEvicted`). A disconnect abandons the
   generation, marks every watched session and reports `reconnecting`, or
@@ -364,11 +385,18 @@ against the latest `SessionState`.
   are never read. Files keep only MIME and an unavailable marker; terminal
   metadata keeps only the `truncated` flag. An empty error type is unsupported.
   Failures are finite `OpenCodeToolProjectionException` categories.
-- Selected IDs, name, MIME and error type are limited to 4 KiB; raw argument
-  strings to 64 KiB. Structured input and output each have a 64 KiB JSON-escaped
-  budget (including redaction expansion), depth 16, 16384 shared node visits and
-  at most 128 output parts; text's 256 KiB cap is subordinate. Rejection is atomic,
-  without truncation. These guards do not bound upstream decoding or process memory.
+- Selected IDs, name, MIME and error type are limited to 4 KiB; discarded raw
+  streaming argument strings (`input.delta`, `input.ended`) are validated for
+  String type and UTF-16 surrogates up to the 16-MiB live transport ceiling
+  without retention. Structured input and output are bounded via
+  `bounded_structure.dart` to 64 KiB JSON-escaped (redacted against the full
+  source text via `redactCredentialSlice`), depth 16, 4,096 nodes per field,
+  and at most 128 output parts, marking client-cut outputs with
+  `OutputRef(truncated: true)` and client-cut inputs with `inputTruncated` in
+  provenance (preserved across post-`called` transitions); tool error messages
+  are bounded to 8 KiB via `openCodeToolErrorInfo`. Depth > 16, non-finite
+  numbers, unsupported types, and kept-prefix lone surrogates remain atomic
+  rejections. These guards do not bound upstream decoding or process memory.
 
 Offline A replay projects the 27 actual frames and yields four history-matching
 content items. B captures verify that progress supplies no terminal content, that

@@ -427,4 +427,23 @@ void main() {
       expect(failed, 2);
     },
   );
+
+  test('failed compaction bounds >256 KiB error message to 8 KiB', () {
+    final rawError = '${'e' * 8180} token=secret987 ${'z' * 300000}';
+    final events = project(
+      frame(
+        'failed',
+        id: 'evt_big_err',
+        data: {
+          'inputID': 'msg_big',
+          'error': {'type': 'compaction.failed', 'message': rawError},
+        },
+      ),
+      SessionState(historyRef),
+    );
+    final notice = (events.single as ItemUpserted).item as Notice;
+    expect(notice.status.known, ItemStatus.failed);
+    expect(utf8.encode(notice.text).length, lessThanOrEqualTo(8 * 1024));
+    expect(notice.text, isNot(contains('secret987')));
+  });
 }

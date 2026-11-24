@@ -293,7 +293,7 @@ void main() {
         6,
         (i) => message('large_$i', 'user', {'text': 'x' * (200 * 1024)}),
       );
-      expect(() => project(rows), throwsFormatException);
+      expect(() => project(rows), throwsA(isA<OpenCodeHistoryBudgetException>()));
     },
   );
 
@@ -841,7 +841,7 @@ void main() {
   }
 
   test(
-    'depth/node/structured byte/fanout budgets reject before publishing a partial result',
+    'depth/page-budget limits reject cleanly while oversized tool inputs, outputs, and errors project bounded redacted prefixes',
     () {
       Object nested = 'leaf';
       for (var i = 0; i < 18; i++) {
@@ -855,14 +855,148 @@ void main() {
         ]),
         throwsFormatException,
       );
+      // Oversized tool input (#416): keeps priority keys first and a redacted
+      // prefix within 64 KiB JSON-escaped bytes instead of failing the page,
+      // including credentials completing more than 4 KiB past the cut boundary.
+      final longSecret = 's' * 10000;
+      final oversizedInputTool =
+          project([
+                assistant('a', [
+                  toolBlock(
+                    'id',
+                    'running',
+                    input: {
+                      'content':
+                          '${'x' * 65450} https://user:$longSecret@example.com/api',
+                      'filePath': 'lib/app.dart',
+                    },
+                  ),
+                ]),
+              ]).single
+              as ToolCall;
+      final inputMap = oversizedInputTool.input!.value as Map<String, Object?>;
+      expect(inputMap['filePath'], 'lib/app.dart');
+      expect(
+        utf8.encode(jsonEncode(inputMap)).length,
+        lessThanOrEqualTo(65536),
+      );
+      expect(jsonEncode(inputMap), isNot(contains('user:ssss')));
+      expect(
+        (oversizedInputTool.source.extra!.value as Map)['inputTruncated'],
+        isTrue,
+      );
+      expect(
+        (oversizedInputTool.source.extra!.value as Map)['inputRedacted'],
+        isTrue,
+      );
+
+      // Oversized tool output (#416) sets OutputRef(truncated: true) and redacts
+      // credentials completing past the 4 KiB lookahead.
+      final oversizedOutputTool =
+          project([
+                assistant('b', [
+                  toolBlock(
+                    'out_1',
+                    'completed',
+                    content: [
+                      {
+                        'type': 'text',
+                        'text':
+                            '${'y' * 65450} https://user:$longSecret@example.com/out',
+                      },
+                    ],
+                  ),
+                ]),
+              ]).single
+              as ToolCall;
+      expect(
+        utf8.encode(jsonEncode(oversizedOutputTool.output!.value)).length,
+        lessThanOrEqualTo(65536),
+      );
+      expect(
+        jsonEncode(oversizedOutputTool.output!.value),
+        isNot(contains('user:ssss')),
+      );
+      expect(
+        oversizedOutputTool.outputRef,
+        OutputRef(id: 'out_1', truncated: true),
+      );
+      expect(
+        (oversizedOutputTool.source.extra!.value as Map)['outputTruncated'],
+        isTrue,
+      );
+      expect(
+        (oversizedOutputTool.source.extra!.value as Map)['outputRedacted'],
+        isTrue,
+      );
+
+      // Oversized tool error (#432): >256 KiB error message with a credential
+      // completing >4 KiB past the 8 KiB cut projects cleanly redacted.
+      final oversizedErrorTool =
+          project([
+                assistant('c', [
+                  toolBlock(
+                    'err_1',
+                    'error',
+                    error: {
+                      'type': 'tool.execution',
+                      'message':
+                          '${'e' * 8160} https://user:$longSecret@example.com ${'q' * 300000}',
+                    },
+                  ),
+                ]),
+              ]).single
+              as ToolCall;
+      expect(
+        utf8.encode(oversizedErrorTool.error!.rawMessage).length,
+        lessThanOrEqualTo(8 * 1024),
+      );
+      expect(
+        oversizedErrorTool.error!.rawMessage,
+        isNot(contains('user:ssss')),
+      );
+      expect(
+        (oversizedErrorTool.error!.details!.value as Map)['messageTruncated'],
+        isTrue,
+      );
+      expect(
+        (oversizedErrorTool.error!.details!.value as Map)['messageRedacted'],
+        isTrue,
+      );
+      expect(
+        (oversizedErrorTool.source.extra!.value as Map)['errorTruncated'],
+        isTrue,
+      );
+
+      // Discarded streaming tool input above 256 KiB succeeds (up to 32 MiB),
+      // while a lone surrogate still fails closed.
+      final streamingBig =
+          project([
+                assistant('d', [
+                  toolBlock('stream_1', 'streaming', input: 'a' * (300 * 1024)),
+                ]),
+              ]).single
+              as ToolCall;
+      expect(streamingBig.input, isNull);
+      expect(
+        (streamingBig.source.extra!.value as Map)['inputNotProjected'],
+        isTrue,
+      );
       expect(
         () => project([
-          assistant('a', [
-            toolBlock('id', 'running', input: {'value': 'x' * 65536}),
+          assistant('d2', [
+            toolBlock(
+              'stream_bad',
+              'streaming',
+              input: 'ok${String.fromCharCode(0xd800)}',
+            ),
           ]),
         ]),
         throwsFormatException,
       );
+
+      // Page-level item/node/byte budgets throw OpenCodeHistoryBudgetException
+      // (distinct from FormatException so the reader can adaptively halve).
       expect(
         () => project(
           List.generate(
@@ -870,14 +1004,21 @@ void main() {
             (i) => assistant('$i', List.generate(128, (_) => textBlock(''))),
           ),
         ),
-        throwsFormatException,
+        throwsA(isA<OpenCodeHistoryBudgetException>()),
       );
       expect(
         () => project([
           message('a', 'user', {'text': ''}),
           message('b', 'user', {'text': ''}),
         ], maxItems: 1),
-        throwsFormatException,
+        throwsA(isA<OpenCodeHistoryBudgetException>()),
+      );
+      expect(
+        () => project([
+          for (var i = 0; i < 6; i++)
+            message('big_$i', 'user', {'text': 'z' * (200 * 1024)}),
+        ]),
+        throwsA(isA<OpenCodeHistoryBudgetException>()),
       );
       expect(
         () => project([

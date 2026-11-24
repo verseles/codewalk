@@ -8,6 +8,7 @@ import 'package:codewalk_net/codewalk_net.dart';
 import 'agent_color.dart';
 import 'attachment_projection.dart';
 import 'execution_projection.dart';
+import 'history_cursor.dart';
 import 'history_projection.dart';
 import 'inbox_projection.dart';
 import 'json_reads.dart';
@@ -45,6 +46,7 @@ enum OpenCodeSessionReadFailure {
   incompatibleResponse,
   timeout,
   bodyTooLarge,
+  projectionBudget,
   connection,
 }
 
@@ -1269,8 +1271,10 @@ final class OpenCodeSessionReader {
           cancellation,
         );
       } on OpenCodeSessionReadException catch (error) {
-        if (error.failure != OpenCodeSessionReadFailure.bodyTooLarge ||
-            effective <= 1) {
+        final shrinkable =
+            error.failure == OpenCodeSessionReadFailure.bodyTooLarge ||
+            error.failure == OpenCodeSessionReadFailure.projectionBudget;
+        if (!shrinkable || effective <= 1) {
           rethrow;
         }
         effective = effective ~/ 2;
@@ -1304,55 +1308,33 @@ final class OpenCodeSessionReader {
     if (next != null && next == native) {
       throw const FormatException('History cursor did not advance.');
     }
-    final items = projectOpenCodeHistory(
-      order == 'desc' ? rows.reversed.toList() : rows.cast<Object?>(),
-      ref,
-      sourceVersion: sourceVersion,
-      maxItems: maxHistoryItems,
-      onInlineMedia: onInlineMedia,
-    );
+    final List<TimelineItem> items;
+    try {
+      items = projectOpenCodeHistory(
+        order == 'desc' ? rows.reversed.toList() : rows.cast<Object?>(),
+        ref,
+        sourceVersion: sourceVersion,
+        maxItems: maxHistoryItems,
+        onInlineMedia: onInlineMedia,
+      );
+    } on OpenCodeHistoryBudgetException {
+      throw const OpenCodeSessionReadException(
+        OpenCodeSessionReadFailure.projectionBudget,
+      );
+    }
     return Page<TimelineItem>(
       items: items,
       nextCursor: next == null
           ? null
-          : _encodeHistoryCursor(
+          : encodeOpenCodeHistoryCursor(
               next,
-              ref,
-              cursorLimit ?? limit,
-              sourceVersion,
-              order,
+              scope: _cursorScope,
+              ref: ref,
+              limit: cursorLimit ?? limit,
+              sourceVersion: sourceVersion,
+              order: order,
             ),
     );
-  }
-
-  String _encodeHistoryCursor(
-    String native,
-    SessionRef ref,
-    int limit,
-    String sourceVersion,
-    String order,
-  ) {
-    if (utf8.decode(utf8.encode(native)) != native) {
-      throw const FormatException('Malformed history continuation.');
-    }
-    final encoded = base64Url.encode(
-      utf8.encode(
-        jsonEncode({
-          'version': 2,
-          'kind': 'history',
-          'scope': _cursorScope,
-          'ref': ref.storageKey,
-          'order': order,
-          'limit': limit,
-          'sourceVersion': sourceVersion,
-          'native': native,
-        }),
-      ),
-    );
-    if (encoded.length > 32 * 1024) {
-      throw const FormatException('History continuation exceeds its limit.');
-    }
-    return encoded;
   }
 
   ({String native, String order}) _decodeHistoryCursor(
@@ -1360,31 +1342,13 @@ final class OpenCodeSessionReader {
     SessionRef ref,
     int limit,
     String sourceVersion,
-  ) {
-    try {
-      if (value.length > 32 * 1024) throw const FormatException();
-      final data = jsonDecode(utf8.decode(base64Url.decode(value)));
-      if (data is! Map<String, Object?> ||
-          data['version'] != 2 ||
-          data['kind'] != 'history' ||
-          data['scope'] != _cursorScope ||
-          data['ref'] != ref.storageKey ||
-          (data['order'] != 'asc' && data['order'] != 'desc') ||
-          data['limit'] != limit ||
-          data['sourceVersion'] != sourceVersion) {
-        throw const FormatException();
-      }
-      return (
-        native:
-            _nativeCursor(data['native']) ?? (throw const FormatException()),
-        order: data['order']! as String,
-      );
-    } on FormatException {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.invalidCursor,
-      );
-    }
-  }
+  ) => decodeOpenCodeHistoryCursor(
+    value,
+    scope: _cursorScope,
+    ref: ref,
+    limit: limit,
+    sourceVersion: sourceVersion,
+  );
 
   /// Disposes owned reads, never the borrowed transport or caller signal.
   void dispose() {
@@ -1453,42 +1417,19 @@ final class OpenCodeSessionReader {
 
   /// A list cursor names its reader and the directory it pages, so it never
   /// continues another reader's list or another directory's.
-  String _encodeCursor(String native, String? directory) => base64Url.encode(
-    utf8.encode(
-      jsonEncode({
-        'version': 1,
-        'scope': _cursorScope,
-        'directory': ?directory,
-        'native': native,
-      }),
-    ),
-  );
-
-  String _decodeCursor(String value, String? directory) {
-    try {
-      if (value.length > 32 * 1024) throw const FormatException();
-      final data = jsonDecode(utf8.decode(base64Url.decode(value)));
-      if (data is! Map<String, Object?> ||
-          data['version'] != 1 ||
-          data['scope'] != _cursorScope ||
-          data['directory'] != directory) {
-        throw const FormatException();
-      }
-      return _nativeCursor(data['native']) ?? (throw const FormatException());
-    } on FormatException {
-      throw const OpenCodeSessionReadException(
-        OpenCodeSessionReadFailure.invalidCursor,
+  String _encodeCursor(String native, String? directory) =>
+      encodeOpenCodeListCursor(
+        native,
+        scope: _cursorScope,
+        directory: directory,
       );
-    }
-  }
 
-  String? _nativeCursor(Object? value) {
-    if (value == null) return null;
-    if (value is! String ||
-        value.isEmpty ||
-        utf8.encode(value).length > 16 * 1024) {
-      throw const FormatException('Malformed OpenCode cursor.');
-    }
-    return value;
-  }
+  String _decodeCursor(String value, String? directory) =>
+      decodeOpenCodeListCursor(
+        value,
+        scope: _cursorScope,
+        directory: directory,
+      );
+
+  String? _nativeCursor(Object? value) => parseOpenCodeNativeCursor(value);
 }

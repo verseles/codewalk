@@ -376,7 +376,7 @@ void main() {
       addTearDown(reader.dispose);
       await expectLater(
         reader.readHistory(historyRef, sourceVersion: '2.0.22', limit: 1),
-        throwsA(failure(OpenCodeSessionReadFailure.incompatibleResponse)),
+        throwsA(failure(OpenCodeSessionReadFailure.projectionBudget)),
       );
       final bounded = OpenCodeSessionReader(
         transport,

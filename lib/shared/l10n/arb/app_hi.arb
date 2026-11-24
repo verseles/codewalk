@@ -1145,6 +1145,10 @@
   "@liveToolInterrupted": {
     "description": "V2 live read-only session view"
   },
+  "liveToolValueShortened": "आउटपुट छोटा कर दिया गया।",
+  "@liveToolValueShortened": {
+    "description": "Notice shown in tool details when a tool output was shortened locally."
+  },
   "liveShellExitCode": "एग्ज़िट कोड",
   "@liveShellExitCode": {
     "description": "V2 live read-only session view"

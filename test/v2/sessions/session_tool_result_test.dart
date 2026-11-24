@@ -23,6 +23,7 @@ ToolCall _tool(
   ItemStatus status, {
   Object? input = const {'path': 'lib/main.dart'},
   Object? output,
+  OutputRef? outputRef,
   ErrorInfo? error,
 }) => ToolCall(
   meta: _meta(id, status),
@@ -30,6 +31,7 @@ ToolCall _tool(
   rawName: 'read',
   input: input == null ? null : CanonicalValue(input),
   output: output == null ? null : CanonicalValue(output),
+  outputRef: outputRef,
   error: error,
 );
 
@@ -522,6 +524,32 @@ void main() {
       } finally {
         semantics.dispose();
       }
+    },
+  );
+
+  testWidgets(
+    'tool details dialog shows localized shortened notices for client-cut output and error',
+    (tester) async {
+      final l10n = await _pump(tester, [
+        _tool(
+          'cut',
+          ItemStatus.failed,
+          output: const [
+            {'type': 'text', 'text': 'bounded output prefix'},
+          ],
+          outputRef: OutputRef(id: 'call_cut', truncated: true),
+          error: ErrorInfo(
+            kind: const OpenValue.known(ErrorKind.toolFailure),
+            rawType: 'tool.execution',
+            rawMessage: 'bounded error prefix',
+            details: CanonicalValue(const {'messageTruncated': true}),
+          ),
+        ),
+      ]);
+      await _open(tester, 'cut');
+      expect(find.text(l10n.liveToolValueShortened), findsOneWidget);
+      expect(find.text(l10n.liveErrorShortened), findsOneWidget);
+      await _close(tester);
     },
   );
 }

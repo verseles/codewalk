@@ -1376,6 +1376,9 @@ class V2LocalizationsAr extends V2Localizations {
   String get liveToolInterrupted => 'تمت المقاطعة';
 
   @override
+  String get liveToolValueShortened => 'تم اختصار المخرجات.';
+
+  @override
   String get liveShellExitCode => 'رمز الخروج';
 
   @override

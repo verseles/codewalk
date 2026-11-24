@@ -1313,12 +1313,12 @@ final class OpenCodeProfileSlot {
           ref,
           SessionLiveView(
             session: ref,
-            phase: previous.phase == SessionLivePhase.degraded
+            phase: previous.phase == SessionLivePhase.degraded && !live
                 ? SessionLivePhase.degraded
                 : _phase == SessionLivePhase.live && !live
                 ? SessionLivePhase.hydrating
                 : _phase,
-            failure: previous.failure,
+            failure: live ? null : previous.failure,
             version: version,
             lastSyncedAt: live ? _now() : previous.lastSyncedAt,
             // Stale means it was current once; a first hydration is not.

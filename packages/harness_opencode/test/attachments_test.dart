@@ -799,5 +799,80 @@ void main() {
       );
       expect(secondPage.items.whereType<UserInput>().single.text, 'Fits at limit=1');
     });
+
+    test('readHistory adaptively halves limit on projectionBudget without shrinking malformed pages', () async {
+      final requestedLimits = <String?>[];
+      final transport = _FakeTransport((req) async {
+        final uri = Uri.parse(req.path);
+        final lim = int.parse(uri.queryParameters['limit'] ?? '50');
+        requestedLimits.add('$lim');
+        // Each message carries 200 KiB of user text; 4+ exceed 1 MiB page cap,
+        // 2 fit cleanly within 1 MiB (400 KiB).
+        return _jsonResponse(200, {
+          'data': [
+            for (var i = 0; i < lim; i++)
+              {
+                'id': 'msg_dense_$i',
+                'type': 'user',
+                'time': {'created': 1700000000000 + i},
+                'text': 'a' * (240 * 1024),
+              },
+          ],
+          'cursor': {
+            'previous': null,
+            'next': uri.queryParameters['cursor'] == null ? 'cur_dense' : null,
+          },
+        });
+      });
+
+      final reader = OpenCodeSessionReader(transport, harness: _harness);
+      final firstPage = await reader.readHistory(
+        _session,
+        sourceVersion: '2.0.22',
+        limit: 8,
+      );
+      // 8 * 240 KiB > 1 MiB -> halves to 4 (960 KiB <= 1 MiB) and succeeds!
+      expect(requestedLimits, ['8', '4']);
+      expect(firstPage.items, hasLength(4));
+      expect(firstPage.nextCursor, isNotNull);
+
+      // Continuation cursor still validates against caller's original limit=8.
+      final secondPage = await reader.readHistory(
+        _session,
+        sourceVersion: '2.0.22',
+        limit: 8,
+        cursor: firstPage.nextCursor,
+      );
+      expect(secondPage.items, hasLength(4));
+
+      // A genuinely malformed payload does NOT shrink.
+      final badLimits = <String?>[];
+      final badTransport = _FakeTransport((req) async {
+        badLimits.add(Uri.parse(req.path).queryParameters['limit']);
+        return _jsonResponse(200, {
+          'data': [
+            {
+              'id': 'msg_bad',
+              'type': 'user',
+              'time': {'created': 1700000000000},
+              'text': 123, // malformed non-string
+            },
+          ],
+          'cursor': {'previous': null, 'next': null},
+        });
+      });
+      final badReader = OpenCodeSessionReader(badTransport, harness: _harness);
+      await expectLater(
+        () => badReader.readHistory(_session, sourceVersion: '2.0.22', limit: 8),
+        throwsA(
+          isA<OpenCodeSessionReadException>().having(
+            (e) => e.failure,
+            'failure',
+            OpenCodeSessionReadFailure.incompatibleResponse,
+          ),
+        ),
+      );
+      expect(badLimits, ['8']);
+    });
   });
 }

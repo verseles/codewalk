@@ -1,5 +1,6 @@
 import 'package:codewalk_core/codewalk_core.dart';
 
+import 'bounded_structure.dart';
 import 'shell_projection.dart';
 
 /// The shown error text is kept within this many UTF-8 bytes, as a tool
@@ -67,5 +68,33 @@ ErrorInfo openCodeErrorInfo(String type, String? message) {
             if (kept.redacted) 'messageRedacted': true,
           })
         : null,
+  );
+}
+
+/// Bounded, credential-redacted [ErrorInfo] for a failed tool call (`#432`).
+///
+/// Redacts and cuts [rawMessage] to [openCodeErrorMessageLimit] before
+/// validating UTF-16 surrogates on the kept prefix, so large tool stack traces
+/// never fail history hydration or live tool frames.
+({ErrorInfo error, bool redacted, bool truncated}) openCodeToolErrorInfo(
+  String type,
+  String? rawMessage,
+) {
+  final kept = openCodeRedactedText(rawMessage ?? '', openCodeErrorMessageLimit);
+  validateOpenCodeUtf16(kept.text);
+  return (
+    error: ErrorInfo(
+      kind: const OpenValue.known(ErrorKind.toolFailure),
+      rawType: type,
+      rawMessage: kept.text,
+      details: kept.cut || kept.redacted
+          ? CanonicalValue({
+              if (kept.cut) 'messageTruncated': true,
+              if (kept.redacted) 'messageRedacted': true,
+            })
+          : null,
+    ),
+    redacted: kept.redacted,
+    truncated: kept.cut,
   );
 }

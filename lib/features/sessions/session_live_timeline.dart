@@ -42,6 +42,7 @@ class SessionLiveTimeline extends StatefulWidget {
     required this.settled,
     this.olderLoading = false,
     this.onLoadOlder,
+    this.onFillOlder,
     this.topBuilder,
     this.errorRecovery,
     this.onOpenChild,
@@ -76,6 +77,11 @@ class SessionLiveTimeline extends StatefulWidget {
   /// asks for it by reaching the top of the list, and the jump to the first
   /// message waits for the page before landing on it.
   final Future<void> Function()? onLoadOlder;
+
+  /// Reads one older page while following a viewport whose scrollable extent
+  /// does not yet pass the top-reach rearm threshold; null when fill is paused
+  /// (loading, failed, or no older history remains).
+  final Future<void> Function()? onFillOlder;
 
   /// The recovery a failed turn's error card offers; null for none.
   final SessionErrorRecovery? Function(ErrorInfo error)? errorRecovery;
@@ -193,6 +199,14 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// flight, and its landing belongs to the reader who asked once.
   bool _jumpToFirstPending = false;
 
+  /// Bounded post-layout fill probe: loads at most 9 extra pages (up to 200
+  /// native messages alongside the initial 20) while following a short
+  /// viewport that cannot yet arm scroll-to-top pagination.
+  static const int _maxFillPages = 9;
+  int _fillPages = 0;
+  bool _fillScheduled = false;
+  bool _fillInFlight = false;
+
   /// The distance from the top within which the reader reached the top, and
   /// the distance that arms it again, in logical pixels; the retained
   /// reference's values.
@@ -223,6 +237,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     if (old.scroll != widget.scroll) {
       old.scroll.controller.removeListener(old.scroll.onViewportChanged);
       widget.scroll.controller.addListener(widget.scroll.onViewportChanged);
+      _fillPages = 0;
     }
     if (old.settled != widget.settled) _settledChanged();
     if (widget.highlight == null) {
@@ -453,7 +468,49 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
         _afterNextFrame(widget.scroll.syncJumpToFirst);
       }
     }
+    if (widget.scroll.following && widget.onFillOlder != null) {
+      _scheduleFillOlder();
+    }
     return false;
+  }
+
+  void _scheduleFillOlder() {
+    if (_fillScheduled ||
+        _fillInFlight ||
+        _fillPages >= _maxFillPages ||
+        widget.onFillOlder == null ||
+        !widget.scroll.following) {
+      return;
+    }
+    _fillScheduled = true;
+    _afterNextFrame(() {
+      _fillScheduled = false;
+      _maybeFillOlder();
+    });
+  }
+
+  void _maybeFillOlder() {
+    if (!mounted ||
+        _fillInFlight ||
+        _fillPages >= _maxFillPages ||
+        !widget.scroll.following) {
+      return;
+    }
+    final fill = widget.onFillOlder;
+    final controller = widget.scroll.controller;
+    if (fill == null || !controller.hasClients) return;
+    final position = controller.position;
+    if (position.maxScrollExtent - position.minScrollExtent > _topRearm) {
+      return;
+    }
+    _fillInFlight = true;
+    _fillPages++;
+    unawaited(
+      fill().whenComplete(() {
+        _fillInFlight = false;
+        if (mounted) _scheduleFillOlder();
+      }),
+    );
   }
 
   /// Content arrived: a new item, or a last item that grew or changed. It is
@@ -650,6 +707,10 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     }
     final rowIndex = {for (final (i, row) in rows.indexed) row.key: i};
     _placePivot(rows);
+    if (items.isEmpty) _fillPages = 0;
+    if (widget.onFillOlder != null && widget.scroll.following) {
+      _scheduleFillOlder();
+    }
     // The answer row sets its context again when the list lays it out.
     _answerContext = null;
     final answerIndex = _lastAnswerIndex(rows);
@@ -819,6 +880,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       return;
     }
     // The pending row holds no item.
+    if (pivot != null) _fillPages = 0;
     _pivot = rows.expand((row) => row.items).firstOrNull?.id;
     _olderCount = 0;
   }
@@ -1138,11 +1200,14 @@ _ItemSignature _itemSignature(TimelineItem item) => (
   // that brings the same values back is not an arrival. A failed turn's error
   // card too.
   payload: switch (item) {
-    ToolCall(:final input, :final output, :final runFacts) => (
-      input,
-      output,
-      runFacts,
-    ),
+    ToolCall(
+      :final input,
+      :final output,
+      :final outputRef,
+      :final error,
+      :final runFacts,
+    ) =>
+      (input, output, outputRef, error?.details, runFacts),
     Notice(:final shellReport?) => shellReport,
     TurnOutcome(:final error) => (error?.kind.value, error?.rawMessage),
     _ => null,

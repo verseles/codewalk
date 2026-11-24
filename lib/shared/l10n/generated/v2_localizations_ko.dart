@@ -1325,6 +1325,9 @@ class V2LocalizationsKo extends V2Localizations {
   String get liveToolInterrupted => '중단됨';
 
   @override
+  String get liveToolValueShortened => '출력이 줄여졌습니다.';
+
+  @override
   String get liveShellExitCode => '종료 코드';
 
   @override

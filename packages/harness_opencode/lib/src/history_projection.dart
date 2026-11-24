@@ -3,19 +3,33 @@ import 'dart:convert';
 import 'package:codewalk_core/codewalk_core.dart';
 
 import 'attachment_projection.dart';
+import 'bounded_structure.dart';
 import 'compaction_projection.dart';
 import 'display_label.dart';
 import 'error_projection.dart';
 import 'item_ids.dart';
 import 'notice_text.dart';
-import 'shell_observation.dart';
 import 'shell_projection.dart';
 import 'subagent_child.dart';
 import 'tool_metadata.dart';
 
+/// Thrown when an entire history page exceeds its aggregate projection budget
+/// (node count, projected bytes, or item count) and may succeed with a smaller
+/// page limit. Does not extend [FormatException] so malformed payloads remain
+/// distinct from shrinkable dense pages.
+final class OpenCodeHistoryBudgetException implements Exception {
+  const OpenCodeHistoryBudgetException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => 'OpenCodeHistoryBudgetException: $message';
+}
+
 /// Atomic, flat HTTP history projection. These are selected-content limits,
 /// not OS memory limits: 128 blocks/message, 2000 items/page, depth 16,
-/// 16384 nodes/page, 256 KiB/text, 64 KiB/structured field, 1 MiB/page.
+/// 16384 nodes/page, 256 KiB/text, 64 KiB/4096 nodes per structured tool field
+/// (bounded to a redacted prefix), 8 KiB/tool error, and 1 MiB/page.
 /// Generations are deterministic, full-session/message-scoped history identities;
 /// they are not live-stream generations or turn/completion evidence.
 ///
@@ -41,36 +55,25 @@ List<TimelineItem> projectOpenCodeHistory(
   var labelBytes = 0;
   final items = <TimelineItem>[];
   final messageIds = <String>{};
-  const credentials = {
-    'password',
-    'passwd',
-    'secret',
-    'apikey',
-    'xapikey',
-    'authorization',
-    'token',
-    'accesstoken',
-    'refreshtoken',
-    'apitoken',
-    'privatekey',
-    'secretaccesskey',
-    'awssecretaccesskey',
-    'clientsecret',
-    'providerstate',
-    'providerresultstate',
-  };
-
-  /// A credential key: a named one, or any whose normalized name ends with
-  /// `authorization` (`Proxy-Authorization`, `HTTP_AUTHORIZATION`).
-  bool credentialKey(String key) {
-    final name = key.toLowerCase().replaceAll(RegExp('[^a-z0-9]'), '');
-    return credentials.contains(name) || name.endsWith('authorization');
-  }
 
   Never malformed() =>
       throw const FormatException('Malformed history content.');
+  Never budgetExceeded(String reason) =>
+      throw OpenCodeHistoryBudgetException(reason);
   void node() {
-    if (++nodes > 16384) malformed();
+    if (++nodes > 16384) budgetExceeded('History node budget exceeded.');
+  }
+
+  void chargeNodes(int count) {
+    if ((nodes += count) > 16384) {
+      budgetExceeded('History node budget exceeded.');
+    }
+  }
+
+  void chargeBytes(int size) {
+    if ((bytes += size) > 1024 * 1024) {
+      budgetExceeded('History byte budget exceeded.');
+    }
   }
 
   int stringBytes(String value) {
@@ -97,7 +100,8 @@ List<TimelineItem> projectOpenCodeHistory(
     node();
     if (value is! String || (nonempty && value.isEmpty)) malformed();
     final size = stringBytes(value);
-    if (size > cap || (charge && (bytes += size) > 1024 * 1024)) malformed();
+    if (size > cap) malformed();
+    if (charge) chargeBytes(size);
     return value;
   }
 
@@ -131,95 +135,22 @@ List<TimelineItem> projectOpenCodeHistory(
   }
 
   void add(TimelineItem item) {
-    if (items.length >= maxItems || items.length >= 2000) malformed();
+    if (items.length >= maxItems || items.length >= 2000) {
+      budgetExceeded('History item budget exceeded.');
+    }
     items.add(item);
   }
 
-  // Validate the entire selected tree before copying or CanonicalValue freezing.
-  CanonicalValue structured(
-    Object? value, {
-    required bool redact,
-    required void Function() onRedacted,
-  }) {
-    var fieldBytes = 0;
-    void measure(Object? v, int depth, {bool key = false}) {
-      node();
-      if (depth > 16) malformed();
-      if (v is String) {
-        // A redacted value is measured as it will be kept.
-        final kept = redact && !key ? redactCredentialText(v) : v;
-        stringBytes(v);
-        fieldBytes += stringBytes(kept) + 2;
-        for (final unit in kept.codeUnits) {
-          if (unit == 0x22 ||
-              unit == 0x5c ||
-              unit == 8 ||
-              unit == 9 ||
-              unit == 10 ||
-              unit == 12 ||
-              unit == 13) {
-            fieldBytes++;
-          } else if (unit < 0x20) {
-            fieldBytes += 5;
-          }
-        }
-      } else if (v is num) {
-        if (!v.isFinite) malformed();
-        fieldBytes += v.toString().length;
-      } else if (v == null || v is bool) {
-        fieldBytes += 5;
-      } else if (v is List) {
-        fieldBytes += 2 + v.length;
-        if (fieldBytes > 65536) malformed();
-        for (final child in v) {
-          measure(child, depth + 1);
-        }
-      } else if (v is Map<String, Object?>) {
-        fieldBytes += 2 + v.length * 2;
-        if (fieldBytes > 65536) malformed();
-        for (final entry in v.entries) {
-          measure(entry.key, depth + 1, key: true);
-          final before = fieldBytes;
-          measure(entry.value, depth + 1);
-          // Short values expand to the JSON string "[redacted]" (12 bytes).
-          if (redact && credentialKey(entry.key) && fieldBytes - before < 12) {
-            fieldBytes += 12 - (fieldBytes - before);
-          }
-        }
-      } else {
-        malformed();
-      }
-      if (fieldBytes > 65536) malformed();
+  CanonicalValue manifest(Object? value) {
+    try {
+      final bounded = boundOpenCodeStructure(value, redact: false);
+      chargeNodes(bounded.nodes);
+      chargeBytes(bounded.bytes);
+      return bounded.value;
+    } on OpenCodeBoundedStructureException {
+      malformed();
     }
-
-    measure(value, 0);
-    if ((bytes += fieldBytes) > 1024 * 1024) malformed();
-    Object? copy(Object? v) {
-      if (v is List) return v.map(copy).toList();
-      if (v is Map<String, Object?>) {
-        return <String, Object?>{
-          for (final e in v.entries)
-            e.key: redact && credentialKey(e.key)
-                ? (() {
-                    onRedacted();
-                    return '[redacted]';
-                  })()
-                : copy(e.value),
-        };
-      }
-      if (redact && v is String) {
-        final clean = redactCredentialText(v);
-        if (clean != v) onRedacted();
-        return clean;
-      }
-      return v;
-    }
-
-    return CanonicalValue(copy(value));
   }
-
-  CanonicalValue manifest(Object? value) =>
-      structured(value, redact: false, onRedacted: () {});
   String? historyLabel(Object? raw) {
     final label = openCodeDisplayLabel(raw);
     if (label == null) return null;
@@ -234,9 +165,7 @@ List<TimelineItem> projectOpenCodeHistory(
   ErrorInfo? failure;
   for (final row in messages) {
     final message = map(row);
-    // Trace manifests charge this identifier when retaining it; validation
-    // itself must not consume the selected-content budget a second time.
-    final id = text(message['id'], cap: 4096, charge: false);
+    final id = text(message['id'], cap: 4096);
     if (!id.startsWith('msg_') || !messageIds.add(id)) malformed();
     final type = text(message['type'], cap: 4096, nonempty: true);
     final time = times(message['time']);
@@ -261,7 +190,11 @@ List<TimelineItem> projectOpenCodeHistory(
         version: sourceVersion,
         nativeType: type,
         durability: const OpenValue.known(Durability.unknown),
-        extra: manifest({'nativeMessageId': id, 'timestamps': time, ...extra}),
+        extra: CanonicalValue({
+          'nativeMessageId': id,
+          'timestamps': time,
+          ...extra,
+        }),
       ),
     );
     void unknown(
@@ -374,7 +307,7 @@ List<TimelineItem> projectOpenCodeHistory(
                       ),
               );
             case 'tool':
-              final callId = text(block['id'], cap: 4096, charge: false);
+              final callId = text(block['id'], cap: 4096);
               final name = text(block['name'], cap: 4096);
               if (!callIds.add(callId)) malformed();
               final toolTime = times(block['time']);
@@ -410,53 +343,58 @@ List<TimelineItem> projectOpenCodeHistory(
               CanonicalValue? canonicalInput;
               if (stateType == 'streaming') {
                 // A JSON fragment cannot be safely inspected by the finite
-                // credential-key policy. Preserve its state, not its bytes.
-                text(state['input'], cap: 65536, charge: false);
+                // credential-key policy. Validate up to the media body ceiling
+                // without charging page budgets, and preserve state only.
+                try {
+                  validateOpenCodeDiscardedText(
+                    state['input'],
+                    maxBytes: openCodeHistoryDiscardedInputLimit,
+                  );
+                } on FormatException {
+                  malformed();
+                } on RangeError {
+                  malformed();
+                }
                 extra['inputNotProjected'] = true;
               } else {
-                canonicalInput = structured(
-                  map(state['input']),
-                  redact: true,
-                  onRedacted: () {
-                    redacted = true;
-                  },
-                );
+                final rawInput = map(state['input']);
+                try {
+                  final bounded = boundOpenCodeStructure(
+                    rawInput,
+                    redact: true,
+                    priorityKeys: openCodeToolInputPriorityKeys,
+                  );
+                  chargeNodes(bounded.nodes);
+                  chargeBytes(bounded.bytes);
+                  canonicalInput = bounded.value;
+                  redacted = bounded.redacted;
+                  if (bounded.truncated) extra['inputTruncated'] = true;
+                } on OpenCodeBoundedStructureException {
+                  malformed();
+                }
               }
               final toolKind = openCodeToolKind(name);
               CanonicalValue? output;
+              OutputRef? outputRef;
               if (stateType == 'completed' ||
                   (stateType == 'error' && state.containsKey('content'))) {
-                final content = list(state['content']);
-                if (content.isEmpty) malformed();
-                final selected = <Object?>[];
-                for (final raw in content) {
-                  final part = map(raw);
-                  final kind = text(
-                    part['type'],
-                    cap: 4096,
-                    nonempty: true,
-                    charge: false,
+                try {
+                  final bounded = boundOpenCodeToolContent(
+                    state['content'],
+                    shellTool: toolKind == ToolKind.shell,
                   );
-                  if (kind == 'text') {
-                    final raw = text(part['text'], charge: false);
-                    final sanitized = toolKind == ToolKind.shell
-                        ? openCodeSanitizeShellToolOutputText(raw)
-                        : raw;
-                    final clean = redactCredentialText(sanitized);
-                    if (clean != raw) extra['outputRedacted'] = true;
-                    selected.add({'type': 'text', 'text': clean});
-                  } else if (kind == 'file') {
-                    selected.add({
-                      'type': 'file',
-                      'mime': text(part['mime'], cap: 4096, charge: false),
-                      'available': false,
-                    });
-                    extra['outputContentOmitted'] = true;
-                  } else {
-                    malformed();
+                  chargeNodes(bounded.nodes);
+                  chargeBytes(bounded.bytes);
+                  output = bounded.value;
+                  if (bounded.redacted) extra['outputRedacted'] = true;
+                  if (bounded.omitted) extra['outputContentOmitted'] = true;
+                  if (bounded.truncated) {
+                    extra['outputTruncated'] = true;
+                    outputRef = OutputRef(id: callId, truncated: true);
                   }
+                } on OpenCodeBoundedStructureException {
+                  malformed();
                 }
-                output = manifest(selected);
               }
               ({bool present, SessionRef? child})? named;
               ToolRunFacts? runFacts;
@@ -490,13 +428,24 @@ List<TimelineItem> projectOpenCodeHistory(
                   cap: 4096,
                   nonempty: true,
                 );
-                var message = '';
+                String? rawMessage;
                 if (rawError.containsKey('message')) {
-                  final raw = text(rawError['message'], charge: false);
-                  final kept = openCodeRedactedText(raw, 8 * 1024);
-                  message = kept.text;
-                  if (kept.redacted) extra['errorRedacted'] = true;
+                  node();
+                  final raw = rawError['message'];
+                  if (raw is! String) malformed();
+                  rawMessage = raw;
                 }
+                final ({ErrorInfo error, bool redacted, bool truncated})
+                projectedError;
+                try {
+                  projectedError = openCodeToolErrorInfo(errorType, rawMessage);
+                } on FormatException {
+                  malformed();
+                }
+                if (projectedError.redacted) extra['errorRedacted'] = true;
+                if (projectedError.truncated) extra['errorTruncated'] = true;
+                chargeBytes(utf8.encode(projectedError.error.rawMessage).length);
+                final message = projectedError.error.rawMessage;
                 final shellStopped =
                     toolKind == ToolKind.shell &&
                     (message == 'Command cancelled' ||
@@ -506,11 +455,7 @@ List<TimelineItem> projectOpenCodeHistory(
                       ? ItemStatus.interrupted
                       : ItemStatus.failed,
                 );
-                error = ErrorInfo(
-                  kind: const OpenValue.known(ErrorKind.toolFailure),
-                  rawType: errorType,
-                  rawMessage: message,
-                );
+                error = projectedError.error;
               }
               if (redacted) extra['inputRedacted'] = true;
               final itemMeta = meta(
@@ -534,6 +479,7 @@ List<TimelineItem> projectOpenCodeHistory(
                   rawName: name,
                   input: canonicalInput,
                   output: output,
+                  outputRef: outputRef,
                   child: observed?.child,
                   childEvidence: observed?.evidence,
                   error: error,

@@ -1377,6 +1377,9 @@ class V2LocalizationsBn extends V2Localizations {
   String get liveToolInterrupted => 'বাধাগ্রস্ত';
 
   @override
+  String get liveToolValueShortened => 'আউটপুট ছোট করা হয়েছে।';
+
+  @override
   String get liveShellExitCode => 'এক্সিট কোড';
 
   @override
