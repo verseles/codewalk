@@ -8,9 +8,9 @@ The owner is short on time. These orders are enough; do not ask for routine tech
 
 | Order | What the agent does |
 |---|---|
-| `avançar` / `continuar` | Resumes unfinished work, otherwise runs the first open line of `ROADMAP.md`, from issue to push. No release. |
-| `avançar N` | Runs the next N lines, one review boundary each. No release. |
-| `flow` | Runs the requested work or current unit end-to-end: plan when triggered, implement, commit boundary, run local gate + reviewers in parallel, fix, update docs/Issue, squash, push and `make watch-ci`. No release. |
+| `avançar` / `continuar` | Resumes unfinished work, otherwise runs the first open item of active priority Issue #527 (while open) or `ROADMAP.md`, from issue to push. No release. |
+| `avançar N` | Runs the next N items, one review boundary each. No release. |
+| `flow` | Extends the global `flow` for the requested work or current unit: plan when triggered (asking necessary clarifying questions via `hey` before implementing), implement, commit boundary, run local gate + reviewers in parallel, fix, evaluate helpers, update docs/Issue, squash, push, then cut a `minor` release by default (`make release V=stable` + `make watch-release`) unless told otherwise. |
 | `apk` | Builds the Android APK here and sends it to `@VerselesBot`. No version, no tag. |
 | `status` | Reports the next lines of the queue, local state and the latest runs, with at most one `gh` call. |
 | `prioriza #N` | Moves that line to the top of `ROADMAP.md`. |
@@ -21,6 +21,7 @@ Ask only for a product decision or a required human action, with lettered option
 ## Sources of truth
 
 - `ROADMAP.md`: the order of work and the only file the owner needs to read.
+- **Temporary active priority — Issue #527 (Roadmap UX):** while open, work through #527's prioritized UX queue before `ROADMAP.md`. Once #527 is completed, remove this note and resume `ROADMAP.md` (next major focus: Codex harness).
 - GitHub Issues: scope and acceptance of each line. Close an Issue when its line is delivered, commenting the commit.
 - `BEHAVIOR.md`: current v2 behavior only.
 - `ADR.md`: architecture decisions, updated through the `adr` skill.
@@ -39,13 +40,15 @@ Ask only for a product decision or a required human action, with lettered option
 
 ## `flow` / `avançar`, unit by unit
 
-1. Read the Issue and apply the v1 filter. Load `planner` only under its triggers: architectural impact, broad cross-module scope, consequential tradeoffs or an explicit request.
+CodeWalk's `flow` extends the global `flow` (keeping necessary pre-implementation questions via `hey`, helper evaluation with `hey`, and end-of-flow evergreen `AGENTS.md` suggestions), applying these project-specific steps and overrides:
+
+1. Read the Issue and apply the v1 filter. Load `planner` only under its triggers: architectural impact, broad cross-module scope, consequential tradeoffs or an explicit request. Before implementing, ask any necessary product/clarifying questions (lettered options + recommendation) and notify the owner via `hey`.
 2. Implement. While iterating, use the narrowest validation: focused tests and targeted `flutter analyze <paths>`.
 3. Commit the stage as the review boundary, with only intended files plus the `.task-memory/` snapshot.
 4. In parallel, run the local gate and all eligible reviewers under the `reviewer` skill.
 5. Judge the reports and apply the accepted findings in one commit. Re-review only when the fixes touch concurrency, security, interfaces, persistence or architecture; otherwise validate them with focused checks.
-6. Update `BEHAVIOR.md` and the Issue, delete the line from `ROADMAP.md`, and squash the loop under the general conditions.
-7. `git push origin main`, then `make watch-ci`, then finish with a `hey` stating the outcome and next line.
+6. Evaluate the helpers used (per global `flow`, including the `hey` summary paragraph), update `BEHAVIOR.md` and the Issue, check off the item in #527 (while active) or delete the line from `ROADMAP.md`, and squash the loop under the general conditions.
+7. `git push origin main`. For `flow`, cut a **`minor`** release by default (following `Releases on main`: commit & push `release-notes/vX.Y.Z.md`, then `make release V=stable` + `make watch-release`), unless the owner specifies `patch` or `no release`. For `avançar`, skip release and run `make watch-ci`. Finish with a `hey` stating the outcome and next line.
 
 A blocked line stays in place with its blocker noted; take the next line that does not depend on it, or report the pending owner action.
 
@@ -61,7 +64,7 @@ This overrides the general `cimonitor` and 60-second rechecks in this project. T
 
 ## `apk`: send a test build through `tdl`
 
-This host (x86_64, 20 threads) builds faster than CI. A test APK is not a release: no version bump, no tag, and the updater is not involved. `hey -f` cannot deliver it because the APK exceeds the Telegram Bot API upload limit.
+Adapt to the current machine (`uname -m`): on the owner's x86_64 PC (`neo`, 20 threads), local APK builds are faster than CI; on ARM64 cloud hosts (e.g., `mercury`), APKs do not build reliably—do not build them locally there. A test APK is not a release: no version bump, no tag, and the updater is not involved. `hey -f` cannot deliver it because the APK exceeds the Telegram Bot API upload limit.
 
 ```bash
 export PATH="$HOME/flutter/bin:$PATH"
@@ -100,9 +103,9 @@ rm -rf "$dir"
 ## Lines and platforms
 
 - `main` is CodeWalk 2 and holds only v2. The entry point is `lib/main_v2.dart` until the cutover (#319).
-- `v1` is frozen, except the final stable `v1.266.0` with Windows and macOS. Check the branch before editing, and never merge whole trees between lines.
+- `v1` is 100% frozen. Check the branch before editing, and never merge whole trees between lines.
 - v2 releases ship Android arm64, Linux x64/arm64, Windows x64 and macOS arm64. Web and iOS come later in the queue. v2 does not import v1 data.
-- #476 removed the v1-only dependencies. Each returns only with the v2 feature that uses it: voice #307, notifications and tray #309 (`tray_manager`), terminal #291 (`xterm`), Tailscale #317, and `window_manager` with the desktop window #474.
+- #476 removed the v1-only dependencies; `window_manager` (#474) and `speech_to_text` (native dictation slice of #307) have since returned. Remaining ones return only with the v2 feature that uses them: TTS/remaining voice #307, notifications and tray #309 (`tray_manager`), terminal #291 (`xterm`), and Tailscale #317.
 
 ## Web origins
 
@@ -146,7 +149,7 @@ CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Cla
 
 ## Releases on `main`
 
-- CodeWalk 2 has graduated to stable releases (`v2.0.0+`). Never cut a release without an explicit owner order.
+- CodeWalk 2 has graduated to stable releases (`v2.0.0+`). Never cut a release without an explicit owner order: `flow` authorizes a default `minor` release at completion unless the owner specifies `patch` or `no release`; plain `push` and `avançar` never cut a release.
 - A release requires curated release notes in `release-notes/vX.Y.Z.md` (led by one `> 📣` line in English of at most 300 characters, no `##` headings), a clean tree, `main == origin/main`, and a green local gate on that exact SHA. Never run a release in parallel with the gate; a published tag never moves.
 - Curate and approve release notes autonomously by default; do not pause to ask the owner to approve the release text unless explicitly asked.
 - `make release V=stable` (via `tool/release/cut_stable.py`, defaulting to `--bump minor`; invoke `python3 tool/release/cut_stable.py --bump patch` for a patch) reads the already committed and pushed `release-notes/vX.Y.Z.md`, prepends `CHANGELOG.md` automatically, bumps `pubspec.yaml`, commits both with `.task-memory`, creates the tag and pushes atomically, followed by `make watch-release`. Do not edit `CHANGELOG.md` manually before cutting; commit all code and release notes first. A plain `push` is not a release.
@@ -155,7 +158,6 @@ CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Cla
 
 ## Known pitfalls
 
-- Workmanager 0.10 may run real `systemctl` commands in Linux tests that default to Android. Use a no-op fake or select the test platform explicitly, restoring it in teardown.
 - Translations: change only the needed keys, keep ARB and generated code in sync, and inspect the diff after any regeneration for unintended removals.
 - If `/tmp` is full, export `TMPPREFIX`, `TMPDIR`, `TEMP` and `TMP` to a directory with space on the same filesystem instead of deleting other processes' files.
 - After `dart format`, inspect the hunks and revert churn outside the intended change; reformatting other code goes in its own commit, never mixed with a feature or fix.
