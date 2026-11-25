@@ -659,4 +659,130 @@ void main() {
       failsWith(OpenCodeStepUsageProjectionFailure.malformed),
     );
   });
+
+  test('first-token and streamed populate step info, resident parts, and mid-step parts (#499)', () {
+    var state = empty;
+    var seq = 0;
+    void apply(List<SessionEvent> events) {
+      for (final event in events) {
+        state = reduce(state, event).state;
+      }
+    }
+
+    Map<String, Object?> timingFrame(
+      String phase, {
+      required String id,
+      required int created,
+    }) => edit(
+      stepFrame(phase, id: id),
+      (f) => f['created'] = created,
+    );
+
+    // Start step at 1000 ms, then receive first-token at 1500 ms BEFORE any part.
+    apply(
+      projectStepUsage(
+        edit(stepFrame('started', id: 'evt_start'), (f) => dataOf(f)['started'] = 1000),
+        current: state,
+        seq: ++seq,
+      ),
+    );
+    apply(
+      projectStepUsage(
+        timingFrame('first-token', id: 'evt_ft1', created: 1500),
+        current: state,
+        seq: ++seq,
+      ),
+    );
+    expect(
+      state.currentStep?.firstTokenAt,
+      DateTime.fromMillisecondsSinceEpoch(1500, isUtc: true),
+    );
+    expect(state.currentStep?.streamedAt, isNull);
+    expect(state.currentStep?.modelId, 'model');
+    expect(state.currentStep?.agentId, 'build');
+
+    // A duplicate first-token later must not overwrite the earliest instant.
+    apply(
+      projectStepUsage(
+        timingFrame('first-token', id: 'evt_ft2', created: 1800),
+        current: state,
+        seq: ++seq,
+      ),
+    );
+    expect(
+      state.currentStep?.firstTokenAt,
+      DateTime.fromMillisecondsSinceEpoch(1500, isUtc: true),
+    );
+
+    // Part arriving mid-step inherits firstTokenAt from currentStep.
+    state = applyText(
+      textFrame('session.text.started', id: 'evt_t1', message: 'msg_step'),
+      state,
+      ++seq,
+    );
+    expect(
+      state.timeline.single.meta.message?.firstToken,
+      DateTime.fromMillisecondsSinceEpoch(1500, isUtc: true),
+    );
+
+    // streamed at 3500 ms updates both currentStep and resident parts.
+    apply(
+      projectStepUsage(
+        timingFrame('streamed', id: 'evt_str', created: 3500),
+        current: state,
+        seq: ++seq,
+      ),
+    );
+    expect(
+      state.currentStep?.streamedAt,
+      DateTime.fromMillisecondsSinceEpoch(3500, isUtc: true),
+    );
+    expect(
+      state.timeline.single.meta.message?.streamed,
+      DateTime.fromMillisecondsSinceEpoch(3500, isUtc: true),
+    );
+
+    // ended attaches tokens & completion while preserving firstToken + streamed.
+    apply(
+      projectStepUsage(
+        edit(
+          stepFrame(
+            'ended',
+            id: 'evt_end',
+            fields: {
+              'tokens': {
+                'input': 10,
+                'output': 40,
+                'reasoning': 20,
+                'cache': {'read': 0, 'write': 0},
+              },
+            },
+          ),
+          (f) => f['created'] = 4000,
+        ),
+        current: state,
+        seq: ++seq,
+      ),
+    );
+    final ctx = state.timeline.single.meta.message!;
+    expect(ctx.firstToken, DateTime.fromMillisecondsSinceEpoch(1500, isUtc: true));
+    expect(ctx.streamed, DateTime.fromMillisecondsSinceEpoch(3500, isUtc: true));
+    expect(ctx.completed, DateTime.fromMillisecondsSinceEpoch(4000, isUtc: true));
+    // (40 + 20) / ((3500 - 1500) / 1000) = 30.0 tok/s.
+    expect(computeTurnTokensPerSecond([ctx]), closeTo(30.0, 1e-9));
+
+    // A restarted step clears firstToken and streamed from the earlier attempt.
+    apply(
+      projectStepUsage(
+        edit(stepFrame('started', id: 'evt_retry'), (f) => dataOf(f)['started'] = 5000),
+        current: state,
+        seq: ++seq,
+      ),
+    );
+    final resetCtx = state.timeline.single.meta.message!;
+    expect(resetCtx.firstToken, isNull);
+    expect(resetCtx.streamed, isNull);
+    expect(state.currentStep?.firstTokenAt, isNull);
+    expect(state.currentStep?.streamedAt, isNull);
+  });
 }

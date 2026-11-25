@@ -2801,4 +2801,17 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveCompactionTriggerManual => '手动';
+
+  @override
+  String get settingsAppearanceTokensPerSecond => '每秒 Token 数';
+
+  @override
+  String msgInfoTokensPerSecondValue(String value) {
+    return '$value tok/s';
+  }
+
+  @override
+  String msgInfoTokensPerSecond(String tps) {
+    return '速度：$tps';
+  }
 }

@@ -2031,5 +2031,8 @@
   "liveCompactionInterrupted": "سیاق و سباق کمپیکٹ منقطع ہوا",
   "liveCompactionUsage": "{input} ان پٹ · {output} آؤٹ پٹ",
   "liveCompactionTriggerAuto": "خودکار",
-  "liveCompactionTriggerManual": "دستی"
+  "liveCompactionTriggerManual": "دستی",
+  "settingsAppearanceTokensPerSecond": "فی سیکنڈ ٹوکنز",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "رفتار: {tps}"
 }

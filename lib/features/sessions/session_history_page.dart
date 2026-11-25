@@ -1,10 +1,12 @@
 import 'dart:async';
 
-import 'package:codewalk_core/codewalk_core.dart' show ItemId;
+import 'package:codewalk_core/codewalk_core.dart'
+    show ItemId, resolveTurnTokensPerSecondByAnswer;
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/markdown_link_opener.dart';
 import '../../shared/sessions/session_history_source.dart';
+import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_attachment_scope.dart';
 import 'session_history_controller.dart';
@@ -61,6 +63,13 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
         _ => l10n.historyUnavailable,
       };
       final rows = _presentation.project(c.items, settled: true);
+      final turnTpsByItem = ChatAppearance.showTokensPerSecondOf(context)
+          ? resolveTurnTokensPerSecondByAnswer(
+              c.items,
+              // A later page or an omitted item may still continue it.
+              trailingTurnClosed: !c.hasMore && !c.limited,
+            )
+          : const <ItemId, double>{};
       return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -181,6 +190,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                           onTapLink: tapLink,
                           minimizeUnknownShell: true,
                           messageHeader: single.messageHeader,
+                          turnTokensPerSecond: turnTpsByItem[item.id],
                         );
                       },
                     ),

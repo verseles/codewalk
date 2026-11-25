@@ -2847,4 +2847,17 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get liveCompactionTriggerManual => '수동';
+
+  @override
+  String get settingsAppearanceTokensPerSecond => '초당 토큰 수';
+
+  @override
+  String msgInfoTokensPerSecondValue(String value) {
+    return '$value tok/s';
+  }
+
+  @override
+  String msgInfoTokensPerSecond(String tps) {
+    return '속도: $tps';
+  }
 }

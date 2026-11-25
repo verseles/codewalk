@@ -2849,4 +2849,17 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveCompactionTriggerManual => '手動';
+
+  @override
+  String get settingsAppearanceTokensPerSecond => '1秒あたりのトークン数';
+
+  @override
+  String msgInfoTokensPerSecondValue(String value) {
+    return '$value tok/s';
+  }
+
+  @override
+  String msgInfoTokensPerSecond(String tps) {
+    return '速度: $tps';
+  }
 }

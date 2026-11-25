@@ -2031,5 +2031,8 @@
   "liveCompactionInterrupted": "Kontextkomprimierung unterbrochen",
   "liveCompactionUsage": "{input} Eingabe · {output} Ausgabe",
   "liveCompactionTriggerAuto": "Automatisch",
-  "liveCompactionTriggerManual": "Manuell"
+  "liveCompactionTriggerManual": "Manuell",
+  "settingsAppearanceTokensPerSecond": "Tokens pro Sekunde",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "Geschwindigkeit: {tps}"
 }

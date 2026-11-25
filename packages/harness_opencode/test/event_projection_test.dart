@@ -338,10 +338,12 @@ void main() {
     // step and every step end clears it, so failed steps without usage still
     // emit; their error reaches the turn's outcome. The three D subagent
     // progress frames that name their child session and the five shell tool
-    // progress frames that carry shellID now upsert them.
+    // progress frames that carry shellID now upsert them. The 61
+    // `session.step.streamed` frames record their timestamp on the running
+    // step and its resident parts (#499).
     expect(categories, {
-      'routed-events': 940,
-      'routed-empty': 137,
+      'routed-events': 1001,
+      'routed-empty': 76,
       'noop:server.connected': 28,
       'noop:worktree.resolved': 2,
       'noop:project.updated': 2,

@@ -2031,5 +2031,8 @@
   "liveCompactionInterrupted": "上下文压缩已中断",
   "liveCompactionUsage": "{input} 输入 · {output} 输出",
   "liveCompactionTriggerAuto": "自动",
-  "liveCompactionTriggerManual": "手动"
+  "liveCompactionTriggerManual": "手动",
+  "settingsAppearanceTokensPerSecond": "每秒 Token 数",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "速度：{tps}"
 }

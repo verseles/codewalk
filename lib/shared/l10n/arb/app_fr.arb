@@ -2031,5 +2031,8 @@
   "liveCompactionInterrupted": "Compactage du contexte interrompu",
   "liveCompactionUsage": "{input} entrée · {output} sortie",
   "liveCompactionTriggerAuto": "Automatique",
-  "liveCompactionTriggerManual": "Manuel"
+  "liveCompactionTriggerManual": "Manuel",
+  "settingsAppearanceTokensPerSecond": "Jetons par seconde",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "Vitesse : {tps}"
 }

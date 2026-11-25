@@ -53,6 +53,7 @@ from session_turn_catalog import (
 from context_usage_catalog import NEW_KEYS as CONTEXT_USAGE_NEW_KEYS
 from session_task_list_catalog import NEW_KEYS as TASK_LIST_NEW_KEYS
 from session_compaction_catalog import NEW_KEYS as COMPACTION_NEW_KEYS
+from session_tps_catalog import NEW_KEYS as TPS_NEW_KEYS
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -193,6 +194,7 @@ KEYS |= TURN_PORT_KEYS | set(TURN_NEW_KEYS)
 KEYS |= set(CONTEXT_USAGE_NEW_KEYS)
 KEYS |= set(TASK_LIST_NEW_KEYS)
 KEYS |= set(COMPACTION_NEW_KEYS)
+KEYS |= set(TPS_NEW_KEYS)
 
 
 OUTPUT_NAMES = {"v2_localizations.dart"} | {

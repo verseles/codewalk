@@ -74,6 +74,7 @@ class SessionTimelineTile extends StatelessWidget {
     this.errorRecovery,
     this.onOpenChild,
     this.messageHeader = false,
+    this.turnTokensPerSecond,
     this.revert,
     this.minimizeUnknownShell = false,
     this.highlighted = false,
@@ -100,6 +101,10 @@ class SessionTimelineTile extends StatelessWidget {
   /// Whether this item opens its message, so its header shows the message's
   /// elapsed time and details.
   final bool messageHeader;
+
+  /// Turn-level tokens per second for the final completed [AssistantText] of a
+  /// turn when enabled in the Display menu (#499). Null for all other rows.
+  final double? turnTokensPerSecond;
 
   @override
   Widget build(BuildContext context) {
@@ -256,11 +261,20 @@ class SessionTimelineTile extends StatelessWidget {
             TimeOfDay.fromDateTime(created.toLocal()),
             alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
           );
-    // A message without a time, a duration or an action has no header at
+    final validTps =
+        turnTokensPerSecond != null &&
+        turnTokensPerSecond!.isFinite &&
+        turnTokensPerSecond! > 0;
+    final showTps =
+        item is AssistantText &&
+        validTps &&
+        item.meta.message != null &&
+        ChatAppearance.showTokensPerSecondOf(context);
+    // A message without a time, a duration, TPS or an action has no header at
     // all, so it takes no space above its body. The user's bubble names no
     // sender: its color and side already do.
     final headerShown = switch (item) {
-      AssistantText() => clock != null || message != null,
+      AssistantText() => clock != null || message != null || showTps,
       UserInput() => clock != null,
       _ => true,
     };
@@ -293,17 +307,21 @@ class SessionTimelineTile extends StatelessWidget {
               )
             else if (item is AssistantText)
               // A message's header is its time; an assistant message's
-              // duration ends the line. Selecting the message's text leaves
-              // it out.
+              // duration and optional turn speed end the line. Selecting the
+              // message's text leaves it out.
               SelectionContainer.disabled(
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        children: [
-                          if (clock != null)
-                            Flexible(
-                              child: Text(
+                child: showTps
+                    ? SizedBox(
+                        width: double.infinity,
+                        child: Wrap(
+                          alignment: clock != null
+                              ? WrapAlignment.spaceBetween
+                              : WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 8,
+                          children: [
+                            if (clock != null)
+                              Text(
                                 clock,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -312,13 +330,49 @@ class SessionTimelineTile extends StatelessWidget {
                                   fontSize: 11,
                                 ),
                               ),
+                            Wrap(
+                              alignment: WrapAlignment.end,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              children: [
+                                MessageTokensPerSecondChip(
+                                  message: item.meta.message!,
+                                  tokensPerSecond: turnTokensPerSecond!,
+                                ),
+                                if (message != null)
+                                  MessageElapsedChip(
+                                    message: message,
+                                    tokensPerSecond: turnTokensPerSecond,
+                                  ),
+                              ],
                             ),
+                          ],
+                        ),
+                      )
+                    : Row(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                if (clock != null)
+                                  Flexible(
+                                    child: Text(
+                                      clock,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: theme.textTheme.bodySmall
+                                          ?.copyWith(
+                                            color: colorScheme.onSurfaceVariant,
+                                            fontSize: 11,
+                                          ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          if (message != null)
+                            MessageElapsedChip(message: message),
                         ],
                       ),
-                    ),
-                    if (message != null) MessageElapsedChip(message: message),
-                  ],
-                ),
               )
             else
               Row(

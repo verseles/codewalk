@@ -17,6 +17,8 @@ MessageContext liveMessageContext(
       : MessageContext(
           message: message,
           created: step.startedAt,
+          firstToken: step.firstTokenAt,
+          streamed: step.streamedAt,
           modelId: step.modelId,
           modelProviderId: step.modelProviderId,
           modelVariant: step.modelVariant,

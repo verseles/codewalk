@@ -261,6 +261,8 @@ final class MessageContext {
   const MessageContext({
     required this.message,
     this.created,
+    this.firstToken,
+    this.streamed,
     this.completed,
     this.modelId,
     this.modelProviderId,
@@ -273,6 +275,12 @@ final class MessageContext {
 
   final MessageRef message;
   final DateTime? created;
+
+  /// When the model produced the first streamed token of this step, when reported.
+  final DateTime? firstToken;
+
+  /// When the model finished streaming its response body for this step, when reported.
+  final DateTime? streamed;
   final DateTime? completed;
   final String? modelId;
   final String? modelProviderId;
@@ -288,6 +296,8 @@ final class MessageContext {
   MessageContext merge(MessageContext other) => MessageContext(
     message: message,
     created: other.created ?? created,
+    firstToken: other.firstToken ?? firstToken,
+    streamed: other.streamed ?? streamed,
     completed: other.completed ?? completed,
     modelId: other.modelId ?? modelId,
     modelProviderId: other.modelProviderId ?? modelProviderId,

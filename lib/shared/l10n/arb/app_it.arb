@@ -2031,5 +2031,8 @@
   "liveCompactionInterrupted": "Compattazione del contesto interrotta",
   "liveCompactionUsage": "{input} ingresso · {output} uscita",
   "liveCompactionTriggerAuto": "Automatica",
-  "liveCompactionTriggerManual": "Manuale"
+  "liveCompactionTriggerManual": "Manuale",
+  "settingsAppearanceTokensPerSecond": "Token al secondo",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "Velocità: {tps}"
 }

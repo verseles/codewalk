@@ -859,6 +859,8 @@ MessageContext _historyMessageContext(
   return MessageContext(
     message: MessageRef(id),
     created: at(time['created']),
+    firstToken: at(time['firstToken']),
+    streamed: at(time['streamed']),
     completed: at(time['completed']),
     modelId: model is Map<String, Object?> ? label(model['id']) : null,
     modelProviderId: model is Map<String, Object?>

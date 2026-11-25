@@ -3034,4 +3034,17 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get liveCompactionTriggerManual => 'Manuel';
+
+  @override
+  String get settingsAppearanceTokensPerSecond => 'Jetons par seconde';
+
+  @override
+  String msgInfoTokensPerSecondValue(String value) {
+    return '$value tok/s';
+  }
+
+  @override
+  String msgInfoTokensPerSecond(String tps) {
+    return 'Vitesse : $tps';
+  }
 }

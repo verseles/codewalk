@@ -2985,4 +2985,17 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get liveCompactionTriggerManual => 'मैनुअल';
+
+  @override
+  String get settingsAppearanceTokensPerSecond => 'प्रति सेकंड टोकन';
+
+  @override
+  String msgInfoTokensPerSecondValue(String value) {
+    return '$value tok/s';
+  }
+
+  @override
+  String msgInfoTokensPerSecond(String tps) {
+    return 'गति: $tps';
+  }
 }

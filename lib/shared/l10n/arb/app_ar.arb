@@ -2030,5 +2030,8 @@
   "liveCompactionInterrupted": "توقّف ضغط السياق",
   "liveCompactionUsage": "{input} إدخال · {output} إخراج",
   "liveCompactionTriggerAuto": "تلقائي",
-  "liveCompactionTriggerManual": "يدوي"
+  "liveCompactionTriggerManual": "يدوي",
+  "settingsAppearanceTokensPerSecond": "الرموز في الثانية",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "السرعة: {tps}"
 }

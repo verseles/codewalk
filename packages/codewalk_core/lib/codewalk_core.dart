@@ -21,6 +21,7 @@ export 'src/work.dart';
 export 'src/plan_visibility.dart';
 export 'src/usage.dart';
 export 'src/usage_view.dart';
+export 'src/tokens_per_second.dart';
 export 'src/session.dart';
 export 'src/catalog.dart';
 export 'src/workspace.dart';

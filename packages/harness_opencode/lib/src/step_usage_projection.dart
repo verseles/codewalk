@@ -42,18 +42,21 @@ const _finishes = {
   'unknown',
 };
 
-/// Projects the four 2.0.22 step lifecycle events and the session usage event
-/// without owning a stream or clock.
+/// Projects the step lifecycle events (`started`, `first-token`, `streamed`,
+/// `ended`, `failed`) and the session usage event without owning a stream or
+/// clock.
 ///
 /// Returns an unmodifiable list to reduce in order against the latest
 /// [current] state; unrelated types and foreign sessions return an empty list.
 /// `started` names the running step ([StepChanged]: message, start, model,
 /// agent) and restarts the message context of that message's resident parts:
 /// a retry reuses the assistant message ID, so the earlier attempt's
-/// completion and usage must not survive it. `streamed` emits nothing, and
-/// execution lifecycle belongs to the execution producer, except for a retry
-/// wait, which the contract clears on the next step start: `started` while
-/// the execution is retrying emits running.
+/// completion, streaming timestamps and usage must not survive it.
+/// `first-token` and `streamed` record the frame's UTC timestamp on the
+/// matching running step and resident parts (or emit nothing when neither
+/// matches), and execution lifecycle belongs to the execution producer, except
+/// for a retry wait, which the contract clears on the next step start:
+/// `started` while the execution is retrying emits running.
 ///
 /// `ended` emits a per-step [UsageObserved] (turn scope, partial, identified
 /// and keyed by the assistant message). `failed` emits step usage only when
@@ -184,7 +187,23 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
   }
 
   final ends = type == _ended || type == _failed;
-  if (usage == null && !resumes && started == null && !ends) return const [];
+  final timing = type == _firstToken || type == _streamed;
+  final message = messageId == null ? null : MessageRef(messageId);
+  final activeStep =
+      timing && current.currentStep != null && current.currentStep!.message == message
+      ? current.currentStep
+      : null;
+  final hasResidentTarget =
+      timing &&
+      current.timeline.any((item) => item.meta.message?.message == message);
+  if (usage == null &&
+      !resumes &&
+      started == null &&
+      !ends &&
+      activeStep == null &&
+      !hasResidentTarget) {
+    return const [];
+  }
 
   final source = SourceProvenance(
     harness: ref.harnessRef,
@@ -210,17 +229,30 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
     receivedAt: receivedAt,
     source: source,
   );
-  // The ended message's parts learn when it ended and what it cost.
-  final endedAt = DateTime.fromMillisecondsSinceEpoch(
+  // The ended or timing event's parts learn the frame's UTC timestamp.
+  final eventAt = DateTime.fromMillisecondsSinceEpoch(
     created.floor(),
     isUtc: true,
   );
-  final message = messageId == null ? null : MessageRef(messageId);
+  final timingStep = activeStep == null
+      ? null
+      : StepInfo(
+          message: activeStep.message,
+          startedAt: activeStep.startedAt,
+          firstTokenAt: type == _firstToken
+              ? (activeStep.firstTokenAt ?? eventAt)
+              : activeStep.firstTokenAt,
+          streamedAt: type == _streamed ? eventAt : activeStep.streamedAt,
+          modelId: activeStep.modelId,
+          modelProviderId: activeStep.modelProviderId,
+          modelVariant: activeStep.modelVariant,
+          agentId: activeStep.agentId,
+        );
   final update = !ends
       ? null
       : MessageContext(
           message: message!,
-          completed: endedAt,
+          completed: eventAt,
           tokens: usage?.tokens,
           cost: usage == null
               ? null
@@ -249,6 +281,27 @@ List<SessionEvent> projectOpenCodeStepUsageEvent(
             ),
           ),
     ],
+    if (timingStep != null) StepChanged(meta: eventMeta, step: timingStep),
+    if (timing)
+      for (final item in current.timeline)
+        if (item.meta.message case final context?
+            when context.message == message)
+          ItemUpserted(
+            meta: eventMeta,
+            item: item.withMeta(
+              item.meta.withMessage(
+                context.merge(
+                  MessageContext(
+                    message: message!,
+                    firstToken: type == _firstToken
+                        ? (context.firstToken ?? eventAt)
+                        : null,
+                    streamed: type == _streamed ? eventAt : null,
+                  ),
+                ),
+              ),
+            ),
+          ),
     if (update != null)
       for (final item in current.timeline)
         if (item.meta.message case final context?

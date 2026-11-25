@@ -714,6 +714,13 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     // The answer row sets its context again when the list lays it out.
     _answerContext = null;
     final answerIndex = _lastAnswerIndex(rows);
+    final turnTpsByItem = (appearance?.showTokensPerSecond ?? false)
+        ? resolveTurnTokensPerSecondByAnswer(
+            items,
+            // While a turn runs, its finished steps are not the whole turn.
+            trailingTurnClosed: widget.settled,
+          )
+        : const <ItemId, double>{};
     // With no older rows above, the top block opens the center, so a list
     // that fits the screen still shows it; otherwise it tops the older rows.
     final topInCenter = widget.topBuilder != null && _olderCount == 0;
@@ -761,6 +768,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                                 rows,
                                 _olderCount - 1 - index,
                                 answerIndex,
+                                turnTpsByItem,
                               ),
                               childCount: _olderCount,
                               findChildIndexCallback: (key) {
@@ -783,6 +791,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                                   rows,
                                   _olderCount + index - lead,
                                   answerIndex,
+                                  turnTpsByItem,
                                 );
                               },
                               childCount: rows.length - _olderCount + lead,
@@ -888,7 +897,12 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   /// One row. Every row has the same shape, so a row keeps its element when
   /// the last answer moves; the answer row keeps its context, so it can be
   /// measured and aligned.
-  Widget _row(List<SessionTimelineRow> rows, int index, int? answerIndex) {
+  Widget _row(
+    List<SessionTimelineRow> rows,
+    int index,
+    int? answerIndex,
+    Map<ItemId, double> turnTpsByItem,
+  ) {
     final row = rows[index];
     final isAnswer = index == answerIndex;
     // The match's own row: a search opens a collapsed group to show it.
@@ -928,6 +942,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                 errorRecovery: widget.errorRecovery,
                 onOpenChild: widget.onOpenChild,
                 messageHeader: messageHeader,
+                turnTokensPerSecond: turnTpsByItem[item.id],
                 highlighted: found,
                 revert: item is UserInput && item.confirmed
                     ? widget.userTurnRevert?.call(

@@ -2031,5 +2031,8 @@
   "liveCompactionInterrupted": "প্রসঙ্গ সংকোচন ব্যাহত হয়েছে",
   "liveCompactionUsage": "{input} ইনপুট · {output} আউটপুট",
   "liveCompactionTriggerAuto": "স্বয়ংক্রিয়",
-  "liveCompactionTriggerManual": "ম্যানুয়াল"
+  "liveCompactionTriggerManual": "ম্যানুয়াল",
+  "settingsAppearanceTokensPerSecond": "প্রতি সেকেন্ডে টোকেন",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "গতি: {tps}"
 }

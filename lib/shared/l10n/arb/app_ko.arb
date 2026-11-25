@@ -2069,5 +2069,8 @@
   "liveCompactionInterrupted": "컨텍스트 압축 중단됨",
   "liveCompactionUsage": "{input} 입력 · {output} 출력",
   "liveCompactionTriggerAuto": "자동",
-  "liveCompactionTriggerManual": "수동"
+  "liveCompactionTriggerManual": "수동",
+  "settingsAppearanceTokensPerSecond": "초당 토큰 수",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "속도: {tps}"
 }

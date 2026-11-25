@@ -1116,9 +1116,10 @@ void main() {
     );
 
     // The same choice the Settings toggle writes, applied in place.
-    await tester.tap(
-      find.byKey(const ValueKey('display-toggle-recent-sessions')),
-    );
+    // A phone sheet may have to scroll once Tokens per second is present.
+    final recent = find.byKey(const ValueKey('display-toggle-recent-sessions'));
+    await tester.ensureVisible(recent);
+    await tester.tap(recent);
     await _settle(tester);
     expect(app.dependencies.preferences.showRecentSessions, isFalse);
     await tester.pumpWidget(const SizedBox.shrink());

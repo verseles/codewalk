@@ -2980,4 +2980,17 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get liveCompactionTriggerManual => 'دستی';
+
+  @override
+  String get settingsAppearanceTokensPerSecond => 'فی سیکنڈ ٹوکنز';
+
+  @override
+  String msgInfoTokensPerSecondValue(String value) {
+    return '$value tok/s';
+  }
+
+  @override
+  String msgInfoTokensPerSecond(String tps) {
+    return 'رفتار: $tps';
+  }
 }

@@ -3007,4 +3007,17 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get liveCompactionTriggerManual => 'Вручную';
+
+  @override
+  String get settingsAppearanceTokensPerSecond => 'Токенов в секунду';
+
+  @override
+  String msgInfoTokensPerSecondValue(String value) {
+    return '$value tok/s';
+  }
+
+  @override
+  String msgInfoTokensPerSecond(String tps) {
+    return 'Скорость: $tps';
+  }
 }

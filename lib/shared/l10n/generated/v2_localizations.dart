@@ -5227,6 +5227,24 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Manual'**
   String get liveCompactionTriggerManual;
+
+  /// Display menu toggle label for showing tokens per second on final turn responses
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens per second'**
+  String get settingsAppearanceTokensPerSecond;
+
+  /// Compact tokens per second chip value
+  ///
+  /// In en, this message translates to:
+  /// **'{value} tok/s'**
+  String msgInfoTokensPerSecondValue(String value);
+
+  /// Message info dialog row label showing token generation speed
+  ///
+  /// In en, this message translates to:
+  /// **'Speed: {tps}'**
+  String msgInfoTokensPerSecond(String tps);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

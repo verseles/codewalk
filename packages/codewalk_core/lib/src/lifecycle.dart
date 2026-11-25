@@ -49,6 +49,8 @@ final class StepInfo {
   const StepInfo({
     required this.message,
     this.startedAt,
+    this.firstTokenAt,
+    this.streamedAt,
     this.modelId,
     this.modelProviderId,
     this.modelVariant,
@@ -59,6 +61,12 @@ final class StepInfo {
 
   /// When the harness dispatched the request.
   final DateTime? startedAt;
+
+  /// When the first token of the step arrived, if reported.
+  final DateTime? firstTokenAt;
+
+  /// When the provider finished streaming this step's response, if reported.
+  final DateTime? streamedAt;
   final String? modelId;
   final String? modelProviderId;
   final String? modelVariant;

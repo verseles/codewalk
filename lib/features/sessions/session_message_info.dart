@@ -1,5 +1,6 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
@@ -56,11 +57,109 @@ int? _tokenTotal(TokenBreakdown? tokens) {
   return total.isFinite && total <= 9007199254740991 ? total.round() : null;
 }
 
-/// The elapsed time of a message's response; it opens the message details.
-class MessageElapsedChip extends StatelessWidget {
-  const MessageElapsedChip({super.key, required this.message});
+/// Formats a finite tokens-per-second rate with one localized decimal digit
+/// and the stable `tok/s` unit (#499).
+String formatTokensPerSecond(double tps, BuildContext context) {
+  final locale = Localizations.localeOf(context);
+  String value;
+  try {
+    value = NumberFormat.decimalPatternDigits(
+      locale: locale.toLanguageTag(),
+      decimalDigits: 1,
+    ).format(tps);
+  } on ArgumentError {
+    value = tps.toStringAsFixed(1);
+  }
+  return context.v2L10n.msgInfoTokensPerSecondValue(value);
+}
+
+/// Discreet clickable tokens-per-second indicator on a completed turn's final
+/// assistant response; opens the existing message details dialog (#499).
+class MessageTokensPerSecondChip extends StatelessWidget {
+  const MessageTokensPerSecondChip({
+    super.key,
+    required this.message,
+    required this.tokensPerSecond,
+  });
 
   final MessageContext message;
+  final double tokensPerSecond;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.v2L10n;
+    final label = formatTokensPerSecond(tokensPerSecond, context);
+    final scheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: l10n.msgInfoMessageInfo,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          key: ValueKey('message-tps-${message.message.value}'),
+          onTap: () => showMessageInfoDialog(
+            context,
+            message,
+            tokensPerSecond: tokensPerSecond,
+          ),
+          borderRadius: BorderRadius.circular(12),
+          child: Semantics(
+            button: true,
+            label: '${l10n.msgInfoMessageInfo}: $label',
+            excludeSemantics: true,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Symbols.speed,
+                        size: 13,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                fontSize: 11,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The elapsed time of a message's response; it opens the message details.
+class MessageElapsedChip extends StatelessWidget {
+  const MessageElapsedChip({
+    super.key,
+    required this.message,
+    this.tokensPerSecond,
+  });
+
+  final MessageContext message;
+  final double? tokensPerSecond;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +172,11 @@ class MessageElapsedChip extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           key: ValueKey('message-elapsed-${message.message.value}'),
-          onTap: () => showMessageInfoDialog(context, message),
+          onTap: () => showMessageInfoDialog(
+            context,
+            message,
+            tokensPerSecond: tokensPerSecond,
+          ),
           borderRadius: BorderRadius.circular(12),
           child: Semantics(
             button: true,
@@ -96,13 +199,16 @@ class MessageElapsedChip extends StatelessWidget {
                         color: scheme.onSurfaceVariant,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                          fontSize: 11,
+                      Flexible(
+                        child: Text(
+                          label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                                fontSize: 11,
+                              ),
                         ),
                       ),
                     ],
@@ -121,8 +227,9 @@ class MessageElapsedChip extends StatelessWidget {
 /// scrolls and closes with its button, the barrier or Escape.
 Future<void> showMessageInfoDialog(
   BuildContext context,
-  MessageContext message,
-) => showDialog<void>(
+  MessageContext message, {
+  double? tokensPerSecond,
+}) => showDialog<void>(
   context: context,
   builder: (dialogContext) {
     final l10n = dialogContext.v2L10n;
@@ -163,7 +270,10 @@ Future<void> showMessageInfoDialog(
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                child: _MessageInfoRows(message: message),
+                child: _MessageInfoRows(
+                  message: message,
+                  tokensPerSecond: tokensPerSecond,
+                ),
               ),
             ),
           ],
@@ -174,18 +284,27 @@ Future<void> showMessageInfoDialog(
 );
 
 class _MessageInfoRows extends StatelessWidget {
-  const _MessageInfoRows({required this.message});
+  const _MessageInfoRows({required this.message, this.tokensPerSecond});
 
   final MessageContext message;
+  final double? tokensPerSecond;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.v2L10n;
     final elapsed = formatMessageElapsed(message);
+    final rawTps = tokensPerSecond ?? computeTurnTokensPerSecond([message]);
+    final tps = rawTps != null && rawTps.isFinite && rawTps > 0 ? rawTps : null;
     final total = _tokenTotal(message.tokens);
     final cost = message.cost?.amount?.toStringAsFixed(6);
     final rows = [
       if (elapsed != null) _row(context, Symbols.schedule, elapsed),
+      if (tps != null)
+        _row(
+          context,
+          Symbols.speed,
+          l10n.msgInfoTokensPerSecond(formatTokensPerSecond(tps, context)),
+        ),
       if (message.modelId case final model?)
         _row(
           context,

@@ -3650,5 +3650,27 @@
   "liveCompactionTriggerManual": "Manual",
   "@liveCompactionTriggerManual": {
     "description": "Label for a manually requested context compaction trigger"
+  },
+  "settingsAppearanceTokensPerSecond": "Tokens per second",
+  "@settingsAppearanceTokensPerSecond": {
+    "description": "Display menu toggle label for showing tokens per second on final turn responses"
+  },
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "@msgInfoTokensPerSecondValue": {
+    "description": "Compact tokens per second chip value",
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "msgInfoTokensPerSecond": "Speed: {tps}",
+  "@msgInfoTokensPerSecond": {
+    "description": "Message info dialog row label showing token generation speed",
+    "placeholders": {
+      "tps": {
+        "type": "String"
+      }
+    }
   }
 }

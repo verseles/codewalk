@@ -17,6 +17,7 @@ class ChatAppearance extends InheritedWidget {
     this.renderMode = ChatRenderMode.live,
     this.showReasoning = true,
     this.showToolCalls = true,
+    this.showTokensPerSecond = false,
     this.composerSpellCheck = true,
     this.composerTips = true,
     required super.child,
@@ -29,6 +30,9 @@ class ChatAppearance extends InheritedWidget {
   /// Whether reasoning and tool-call rows show in the timeline.
   final bool showReasoning;
   final bool showToolCalls;
+
+  /// Whether final turn answers display a discreet tokens-per-second indicator.
+  final bool showTokensPerSecond;
 
   /// Whether composer fields use the platform's native spell check.
   final bool composerSpellCheck;
@@ -43,6 +47,9 @@ class ChatAppearance extends InheritedWidget {
   static bool mathRenderingOf(BuildContext context) =>
       maybeOf(context)?.mathRendering ?? true;
 
+  static bool showTokensPerSecondOf(BuildContext context) =>
+      maybeOf(context)?.showTokensPerSecond ?? false;
+
   @override
   bool updateShouldNotify(ChatAppearance oldWidget) =>
       mathRendering != oldWidget.mathRendering ||
@@ -50,6 +57,7 @@ class ChatAppearance extends InheritedWidget {
       renderMode != oldWidget.renderMode ||
       showReasoning != oldWidget.showReasoning ||
       showToolCalls != oldWidget.showToolCalls ||
+      showTokensPerSecond != oldWidget.showTokensPerSecond ||
       composerSpellCheck != oldWidget.composerSpellCheck ||
       composerTips != oldWidget.composerTips;
 }

@@ -181,11 +181,13 @@ class AppPreferencesController extends ChangeNotifier {
   bool _showToolCalls = true;
   bool _showTaskList = true;
   bool _taskListCollapsed = false;
+  bool _showTokensPerSecond = false;
   ChatRenderMode get chatRenderMode => _chatRenderMode;
   bool get showReasoning => _showReasoning;
   bool get showToolCalls => _showToolCalls;
   bool get showTaskList => _showTaskList;
   bool get taskListCollapsed => _taskListCollapsed;
+  bool get showTokensPerSecond => _showTokensPerSecond;
 
   void setChatRenderMode(ChatRenderMode value) {
     if (_disposed || _chatRenderMode == value) return;
@@ -215,6 +217,12 @@ class AppPreferencesController extends ChangeNotifier {
     if (_disposed || _taskListCollapsed == value) return;
     _taskListCollapsed = value;
     _changed('taskListCollapsed');
+  }
+
+  void setShowTokensPerSecond(bool value) {
+    if (_disposed || _showTokensPerSecond == value) return;
+    _showTokensPerSecond = value;
+    _changed('showTokensPerSecond');
   }
 
   /// Whether the composer uses the platform's native spell check,
@@ -401,6 +409,7 @@ class AppPreferencesController extends ChangeNotifier {
     'showToolCalls': _showToolCalls ? null : false,
     'showTaskList': _showTaskList ? null : false,
     'taskListCollapsed': _taskListCollapsed ? true : null,
+    'showTokensPerSecond': _showTokensPerSecond ? true : null,
     'composerSpellCheck': _composerSpellCheck ? null : false,
     'composerTips': _composerTips ? null : false,
     'composerQueue': _composerQueue ? true : null,
@@ -515,6 +524,8 @@ class AppPreferencesController extends ChangeNotifier {
       if (taskList is bool) _showTaskList = taskList;
       final taskListCollapsed = value('taskListCollapsed');
       if (taskListCollapsed is bool) _taskListCollapsed = taskListCollapsed;
+      final tps = value('showTokensPerSecond');
+      if (tps is bool) _showTokensPerSecond = tps;
       final spellCheck = value('composerSpellCheck');
       if (spellCheck is bool) _composerSpellCheck = spellCheck;
       final tips = value('composerTips');

@@ -2957,4 +2957,17 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get liveCompactionTriggerManual => 'يدوي';
+
+  @override
+  String get settingsAppearanceTokensPerSecond => 'الرموز في الثانية';
+
+  @override
+  String msgInfoTokensPerSecondValue(String value) {
+    return '$value tok/s';
+  }
+
+  @override
+  String msgInfoTokensPerSecond(String tps) {
+    return 'السرعة: $tps';
+  }
 }

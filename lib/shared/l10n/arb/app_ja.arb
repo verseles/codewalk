@@ -2031,5 +2031,8 @@
   "liveCompactionInterrupted": "コンテキストの圧縮が中断されました",
   "liveCompactionUsage": "{input} 入力 · {output} 出力",
   "liveCompactionTriggerAuto": "自動",
-  "liveCompactionTriggerManual": "手動"
+  "liveCompactionTriggerManual": "手動",
+  "settingsAppearanceTokensPerSecond": "1秒あたりのトークン数",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "速度: {tps}"
 }

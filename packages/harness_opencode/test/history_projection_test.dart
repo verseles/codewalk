@@ -1215,4 +1215,59 @@ void main() {
       expect(outcome.error?.rawMessage, 'Budget exhausted');
     },
   );
+
+  test(
+    'history forwards firstToken and streamed timestamps onto MessageContext (#499)',
+    () {
+      final items = project([
+        {
+          'id': 'msg_tps',
+          'type': 'assistant',
+          'time': {
+            'created': 1000,
+            'firstToken': 1500,
+            'streamed': 3500,
+            'completed': 4000,
+          },
+          'tokens': {
+            'input': 50,
+            'output': 80,
+            'reasoning': 20,
+            'cache': {'read': 0, 'write': 0},
+          },
+          'finish': 'stop',
+          'content': [textBlock('Answer with timing')],
+        },
+        {
+          'id': 'msg_no_stream',
+          'type': 'assistant',
+          'time': {'created': 5000, 'completed': 7000},
+          'tokens': {
+            'input': 10,
+            'output': 20,
+            'reasoning': 0,
+            'cache': {'read': 0, 'write': 0},
+          },
+          'finish': 'stop',
+          'content': [textBlock('Answer without streamed')],
+        },
+      ]);
+      final timed = items[0].meta.message!;
+      expect(
+        timed.firstToken,
+        DateTime.fromMillisecondsSinceEpoch(1500, isUtc: true),
+      );
+      expect(
+        timed.streamed,
+        DateTime.fromMillisecondsSinceEpoch(3500, isUtc: true),
+      );
+      // (80 + 20) / ((3500 - 1500) / 1000) = 50.0 tok/s.
+      expect(computeTurnTokensPerSecond([timed]), closeTo(50.0, 1e-9));
+
+      final untimed = items[1].meta.message!;
+      expect(untimed.firstToken, isNull);
+      expect(untimed.streamed, isNull);
+      expect(computeTurnTokensPerSecond([untimed]), isNull);
+    },
+  );
 }

@@ -9,18 +9,33 @@ void main() {
   final completed = DateTime.utc(2026, 10, 27, 12, 0, 3);
 
   test('merging keeps known values unless the update knows newer ones', () {
+    final firstToken = DateTime.utc(2026, 10, 27, 12, 0, 1);
+    final streamed = DateTime.utc(2026, 10, 27, 12, 0, 2);
     final started = MessageContext(
       message: message,
       created: created,
+      firstToken: firstToken,
       modelId: 'model',
       agentId: 'build',
     );
     final merged = started.merge(
-      MessageContext(message: message, completed: completed, finish: 'stop'),
+      MessageContext(
+        message: message,
+        streamed: streamed,
+        completed: completed,
+        finish: 'stop',
+      ),
     );
     expect(
-      [merged.created, merged.completed, merged.modelId, merged.agentId],
-      [created, completed, 'model', 'build'],
+      [
+        merged.created,
+        merged.firstToken,
+        merged.streamed,
+        merged.completed,
+        merged.modelId,
+        merged.agentId,
+      ],
+      [created, firstToken, streamed, completed, 'model', 'build'],
     );
     expect(merged.finish, 'stop');
     expect(merged.cost, isNull);

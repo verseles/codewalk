@@ -2031,5 +2031,8 @@
   "liveCompactionInterrupted": "Сжатие контекста прервано",
   "liveCompactionUsage": "{input} вход · {output} выход",
   "liveCompactionTriggerAuto": "Автоматически",
-  "liveCompactionTriggerManual": "Вручную"
+  "liveCompactionTriggerManual": "Вручную",
+  "settingsAppearanceTokensPerSecond": "Токенов в секунду",
+  "msgInfoTokensPerSecondValue": "{value} tok/s",
+  "msgInfoTokensPerSecond": "Скорость: {tps}"
 }
