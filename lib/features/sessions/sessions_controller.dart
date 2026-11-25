@@ -8,6 +8,7 @@ import '../../shared/sessions/session_actions.dart';
 import '../../shared/sessions/session_activity.dart';
 import '../../shared/sessions/session_catalog_changes.dart';
 import '../../shared/sessions/session_catalog_source.dart';
+import '../../shared/sessions/session_visibility.dart';
 import '../hosts/hosts_controller.dart';
 import 'project_catalog.dart';
 import 'session_activity_reader.dart';
@@ -39,7 +40,7 @@ class SessionsController extends ChangeNotifier {
   final SessionCatalogChangesFactory? changesFactory;
 
   /// The factory of the session actions of the selected profile: the
-  /// endpoint's own commands and the local hide.
+  /// endpoint's own commands.
   final SessionActionFactory? actionFactory;
 
   /// How long a burst of changes collapses before the re-read starts.
@@ -110,14 +111,13 @@ class SessionsController extends ChangeNotifier {
   int _readFailures = 0;
   int _liveEpoch = 0;
   bool _quietRefreshing = false;
-  // The session actions: the endpoint's own commands, the local hide and the
-  // commands that are in flight.
+  // The session actions: the endpoint's own commands and the commands that are
+  // in flight.
   late final _commands = SessionCommands(
     notify: _notify,
     changed: _markLiveChange,
   );
   SessionActionSource? get _actions => _commands.source;
-  SessionActionFilter _filter = SessionActionFilter.active;
 
   /// The project context whose sessions the list reads, or null before one
   /// is chosen, when the list reads every session of the server.
@@ -141,24 +141,13 @@ class SessionsController extends ChangeNotifier {
   List<SessionSummary> _sessions = const [];
   SessionSummary? _selectedSession;
   EndpointProfile? get selectedProfile => _profile;
-  List<SessionSummary> get sessions {
-    final source = _actions;
-    // Hiding a parent hides its loaded descendants too.
-    return filterSessions(
-      _sessions,
-      source == null ? const {} : effectivelyHidden(_sessions, source.isHidden),
-      source == null ? SessionActionFilter.all : _filter,
-    );
-  }
+  List<SessionSummary> get sessions => [
+    for (final row in _sessions)
+      if (isPrimarySummary(row)) row,
+  ];
 
-  /// Every loaded row, before the filter applies: the server's order.
+  /// Every loaded row, including children: the server's order.
   List<SessionSummary> get loadedSessions => _sessions;
-
-  /// The rows of [rows] hidden in effect: hidden, or under a hidden parent.
-  Set<SessionRef> hiddenIn(Iterable<SessionSummary> rows) {
-    final source = _actions;
-    return source == null ? const {} : effectivelyHidden(rows, source.isHidden);
-  }
 
   /// The project context the list reads, or null while none is chosen.
   String? get directory => _directory;
@@ -298,16 +287,6 @@ class SessionsController extends ChangeNotifier {
     return _ready() ? _source : null;
   }
 
-  /// Which sessions the catalog shows.
-  SessionActionFilter get filter => _filter;
-
-  /// Shows the active, the hidden or every session.
-  void setFilter(SessionActionFilter filter) {
-    if (_filter == filter) return;
-    _filter = filter;
-    _notify();
-  }
-
   /// The endpoint's support for the session actions.
   SessionActionSupport get actionSupport => _commands.support;
 
@@ -422,14 +401,6 @@ class SessionsController extends ChangeNotifier {
     );
   }
 
-  /// Whether the local hide can be read and written.
-  bool get hideAvailable => _actions?.hideAvailable ?? false;
-
-  /// Whether the local hide state could not be read.
-  bool get hideUnreadable => _actions?.hideUnreadable ?? false;
-
-  /// Whether the row is hidden in CodeWalk.
-  bool isHidden(SessionSummary row) => _actions?.isHidden(row) ?? false;
   SessionSummary? get selectedSession => _selectedSession;
 
   /// The project group the user chose, held as a record so the group of the
@@ -1192,10 +1163,6 @@ class SessionsController extends ChangeNotifier {
   /// count could not be read.
   Future<int?> childCount(SessionSummary row) async =>
       _actions?.childCount(row);
-
-  /// Hides the row in CodeWalk, or shows it again.
-  Future<bool> setHidden(SessionSummary row, {required bool hidden}) =>
-      _commands.setHidden(row, hidden: hidden);
 
   /// Runs one command on [row] while the profile, the credential and the
   /// rows are current and still list it; see [SessionCommands.run].

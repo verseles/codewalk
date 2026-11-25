@@ -31,10 +31,9 @@ SessionSummary _row(
 
 SessionTabCandidate _candidate(
   SessionSummary row, {
-  bool hidden = false,
   bool pinned = false,
   bool? busy = false,
-}) => SessionTabCandidate(row: row, hidden: hidden, pinned: pinned, busy: busy);
+}) => SessionTabCandidate(row: row, pinned: pinned, busy: busy);
 
 Map<SessionRef, SessionTabCandidate> _known(
   Iterable<SessionTabCandidate> candidates,
@@ -152,20 +151,15 @@ void main() {
     expect(result.state!.tabs.last.updatedAtMs, _now - 1);
   });
 
-  test('hidden and child sessions are not added; a hidden tab leaves unless '
-      'selected', () {
+  test('child sessions are not added to tabs', () {
     final state = SessionTabsState(
-      tabs: [
-        _tab('hidden', opened: _now - 1),
-        _tab('shown', opened: _now - 1),
-      ],
+      tabs: [_tab('shown', opened: _now - 1)],
       selected: {_host: _ref('shown')},
     );
     final result = _run(state, [
-      _candidate(_row('hidden', updated: _now), hidden: true),
-      _candidate(_row('shown', updated: _now), hidden: true),
+      _candidate(_row('shown', updated: _now)),
       _candidate(_row('child', updated: _now, parent: 'shown')),
-      _candidate(_row('other', updated: _now), hidden: true, pinned: true),
+      _candidate(_row('pinned_child', updated: _now, parent: 'shown'), pinned: true),
     ]);
     expect(_ids(result.state), ['shown']);
   });
@@ -299,7 +293,6 @@ void main() {
     test('gets its most recent visible session once its rows are known', () {
       final rows = [
         _candidate(_row('older', updated: 10, directory: '/p')),
-        _candidate(_row('hidden', updated: 30, directory: '/p'), hidden: true),
         _candidate(_row('child', updated: 40, directory: '/p', parent: 'x')),
         _candidate(_row('newest', updated: 20, directory: '/p')),
       ];

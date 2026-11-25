@@ -2,8 +2,8 @@ import 'package:codewalk_core/codewalk_core.dart';
 
 import '../../shared/sessions/session_actions.dart';
 
-/// The session commands of the list: the endpoint's own commands, the local
-/// hide and what they leave behind for the list to show.
+/// The session commands of the list: the endpoint's own commands and what they
+/// leave behind for the list to show.
 ///
 /// The list decides whether its rows are current, and is asked right before
 /// each send. A row is never patched: the effect of a command is observed by
@@ -105,20 +105,6 @@ class SessionCommands {
       creating = false;
       notify();
     }
-  }
-
-  /// Hides the row in CodeWalk, or shows it again.
-  Future<bool> setHidden(SessionSummary row, {required bool hidden}) async {
-    final source = this.source;
-    if (source == null) return false;
-    final written = await source.setHidden(row, hidden: hidden);
-    if (!identical(source, this.source)) {
-      // The profile changed while the local hide was in flight.
-      return written;
-    }
-    failure = written ? null : SessionActionOutcome.unavailable;
-    notify();
-    return written;
   }
 
   /// Runs one command on [row] once [current] confirms the row and the

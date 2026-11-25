@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:codewalk/platform/sessions/project_workspace_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
-import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 final class _MemoryBackend implements MetadataBackend {
@@ -131,26 +130,27 @@ void main() {
     );
   });
 
-  test('list preferences persist and unknown choices fall back', () async {
-    final backend = _MemoryBackend();
-    final store = await _open(backend);
-    const prefs = SessionListPreferences(
-      query: 'fix',
-      filter: SessionActionFilter.hidden,
-      sort: SessionListSort.title,
-    );
-    expect(await store.setListPreferences(prefs), ProjectStoreResult.saved);
-    expect(await store.setListPreferences(prefs), ProjectStoreResult.unchanged);
-    expect((await _open(backend)).listPreferences, prefs);
-    backend.values[ProjectWorkspaceStore.key] = jsonEncode({
-      'v': 1,
-      'list': {'query': 'x', 'filter': 'future', 'sort': 'future'},
-    });
-    expect(
-      (await _open(backend)).listPreferences,
-      const SessionListPreferences(query: 'x'),
-    );
-  });
+  test(
+    'list preferences persist and tolerate legacy filter and sort keys',
+    () async {
+      final backend = _MemoryBackend();
+      final store = await _open(backend);
+      const prefs = SessionListPreferences(query: 'fix');
+      expect(await store.setListPreferences(prefs), ProjectStoreResult.saved);
+      expect(
+        await store.setListPreferences(prefs),
+        ProjectStoreResult.unchanged,
+      );
+      expect((await _open(backend)).listPreferences, prefs);
+      backend.values[ProjectWorkspaceStore.key] = jsonEncode({
+        'v': 1,
+        'list': {'query': 'x', 'filter': 'hidden', 'sort': 'title'},
+      });
+      final legacy = await _open(backend);
+      expect(legacy.unreadable, isFalse);
+      expect(legacy.listPreferences, const SessionListPreferences(query: 'x'));
+    },
+  );
 
   test('an unreadable state is never overwritten', () async {
     for (final raw in [

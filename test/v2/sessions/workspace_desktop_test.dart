@@ -158,7 +158,7 @@ void main() {
       expect(_paneWidth(tester), 160);
       expect(tester.takeException(), isNull);
       expect(find.byKey(const ValueKey('sessions-search')), findsOneWidget);
-      expect(find.byKey(const ValueKey('sessions-filter')), findsOneWidget);
+      expect(find.byKey(const ValueKey('sessions-filter')), findsNothing);
       expect(find.byKey(const ValueKey('sessions-create')), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
     });

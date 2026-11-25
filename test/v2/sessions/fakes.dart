@@ -310,7 +310,7 @@ class LiveCatalogChanges implements SessionCatalogChanges {
 /// A scripted session action source for the widget tests.
 ///
 /// It answers the platform's contract without a transport: the support, the
-/// unread marker, the child count, the commands and the local hide.
+/// unread marker, the child count and the commands.
 final class FakeActionSource implements SessionActionSource {
   FakeActionSource({
     this.endpointSupport = const SessionActionSupport(
@@ -343,17 +343,6 @@ final class FakeActionSource implements SessionActionSource {
 
   /// The rows marked as viewed, with the idle transition each one carried.
   final viewed = <(String, DateTime?)>[];
-
-  /// The sessions hidden in CodeWalk, by their storage key.
-  final hidden = <String>{};
-
-  /// Whether the local hide can be read and written.
-  @override
-  bool hideAvailable = true;
-
-  /// Whether the local hide state could not be read.
-  @override
-  bool hideUnreadable = false;
 
   @override
   final HarnessRef harness = const HarnessRef(
@@ -423,23 +412,6 @@ final class FakeActionSource implements SessionActionSource {
     calls.add('markViewed');
     viewed.add((row.info.ref.storageKey, row.view?.idleAt));
     return outcomes['markViewed'] ?? SessionActionOutcome.accepted;
-  }
-
-  @override
-  bool isHidden(SessionSummary row) => hidden.contains(row.info.ref.storageKey);
-
-  @override
-  Future<bool> setHidden(
-    SessionSummary row, {
-    required bool hidden,
-  }) async {
-    calls.add(hidden ? 'hide' : 'unhide');
-    if (hidden) {
-      this.hidden.add(row.info.ref.storageKey);
-    } else {
-      this.hidden.remove(row.info.ref.storageKey);
-    }
-    return true;
   }
 
   @override

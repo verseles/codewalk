@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import '../../platform/sessions/project_workspace_store.dart';
 import '../../platform/sessions/workspace_store.dart';
 import '../../shared/sessions/server_path.dart';
-import '../../shared/sessions/session_actions.dart';
 import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_controller.dart';
@@ -64,7 +63,6 @@ class ProjectContextsController extends ChangeNotifier {
   bool _startFailed = false;
   int _startToken = 0;
   bool _busy = false;
-  bool _filterApplied = false;
   ProjectContextNotice _notice = ProjectContextNotice.none;
 
   /// The query being typed, ahead of its saved copy.
@@ -198,10 +196,9 @@ class ProjectContextsController extends ChangeNotifier {
     return _report(result);
   }
 
-  /// Saves what the list shows; the filter applies at once.
+  /// Saves what the list shows.
   Future<bool> setPreferences(SessionListPreferences next) async {
     if (_disposed) return false;
-    catalog.setFilter(next.filter);
     if (!_store.loaded || _store.unreadable) return false;
     _requested = next;
     final profile = catalog.selectedProfile?.id;
@@ -228,34 +225,12 @@ class ProjectContextsController extends ChangeNotifier {
     final value = _query;
     if (_disposed || value == null) return;
     unawaited(
-      setPreferences(
-        SessionListPreferences(
-          query: value,
-          filter: preferences.filter,
-          sort: preferences.sort,
-        ),
-      ).whenComplete(() {
+      setPreferences(SessionListPreferences(query: value)).whenComplete(() {
         // The saved copy takes over once it holds what was typed.
         if (_query == value && preferences.query == value) _query = null;
       }),
     );
   }
-
-  Future<bool> setFilter(SessionActionFilter filter) => setPreferences(
-    SessionListPreferences(
-      query: query,
-      filter: filter,
-      sort: preferences.sort,
-    ),
-  );
-
-  Future<bool> setSort(SessionListSort sort) => setPreferences(
-    SessionListPreferences(
-      query: query,
-      filter: preferences.filter,
-      sort: sort,
-    ),
-  );
 
   /// The route shows [summary]: it becomes the view of its context, and the
   /// context it belongs to becomes the shown one. A child session is visited
@@ -365,10 +340,6 @@ class ProjectContextsController extends ChangeNotifier {
       catalog.setOpenDirectories(const []);
       if (catalog.directory != null) catalog.setDirectory(null);
       return;
-    }
-    if (!_filterApplied) {
-      _filterApplied = true;
-      catalog.setFilter(_store.listPreferences.filter);
     }
     final saved = _store.workspace(profile);
     final active = saved.active;
@@ -485,14 +456,7 @@ class ProjectContextsController extends ChangeNotifier {
     final query = _query;
     if (pending && query != null && _store.loaded && !_store.unreadable) {
       // The last query typed is saved before the store closes.
-      final current = preferences;
-      _write(
-        SessionListPreferences(
-          query: query,
-          filter: current.filter,
-          sort: current.sort,
-        ),
-      ).ignore();
+      _write(SessionListPreferences(query: query)).ignore();
     }
     // Every write still in flight lands before the store closes, a refusal
     // answered at once included.

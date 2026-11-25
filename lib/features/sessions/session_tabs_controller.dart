@@ -625,8 +625,8 @@ class SessionTabsController extends ChangeNotifier {
 
   /// Checks the tabs of the server the list shows. A tab whose session is not
   /// in the loaded rows is read once; only a server that answers that the
-  /// session does not exist drops it. Rows the list did not load, hid or
-  /// could not read prove nothing.
+  /// session does not exist drops it. Rows the list did not load or could not
+  /// read prove nothing.
   void _validate() {
     final catalog = _catalog;
     if (_disposed || catalog == null || !_store.loaded || _store.unreadable) {
@@ -902,7 +902,6 @@ class SessionTabsController extends ChangeNotifier {
       final rows = catalog.contextRows(directory);
       if (rows == null) continue;
       known.add(directory);
-      final hidden = catalog.hiddenIn(rows);
       for (final row in rows) {
         final ref = row.info.ref;
         if (ref.host != host) continue;
@@ -910,7 +909,6 @@ class SessionTabsController extends ChangeNotifier {
           ref,
           () => SessionTabCandidate(
             row: row,
-            hidden: hidden.contains(ref),
             pinned: contexts.isPinned(directory, ref.storageKey),
             busy: catalog.busy(row),
           ),

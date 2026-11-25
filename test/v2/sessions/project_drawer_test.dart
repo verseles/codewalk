@@ -347,7 +347,7 @@ void main() {
     await _closeApp(tester);
   });
 
-  testWidgets('search, the filter and sort menu and pins shape the list', (
+  testWidgets('search and pins shape the list without a filter menu', (
     tester,
   ) async {
     final (dependencies, rig, l10n) = await _open(
@@ -360,6 +360,8 @@ void main() {
     );
     double top(String text) => tester.getTopLeft(find.text(text).last).dy;
     expect(top('Bravo task'), lessThan(top('Charlie task')));
+    expect(find.byKey(const ValueKey('sessions-filter')), findsNothing);
+    expect(find.byKey(const ValueKey('sessions-filter-badge')), findsNothing);
 
     // The search is an icon until used; typing filters at once.
     expect(find.byKey(const ValueKey('sessions-search-field')), findsNothing);
@@ -379,27 +381,7 @@ void main() {
     expect(find.byKey(const ValueKey('sessions-search-field')), findsNothing);
     expect(_row(rig, 'b'), findsOneWidget);
 
-    // One menu holds the filter and the sort; its badge names both.
-    expect(
-      tester
-          .widget<Text>(find.byKey(const ValueKey('sessions-filter-badge')))
-          .data,
-      'A/R',
-    );
-    await tester.tap(find.byKey(const ValueKey('sessions-filter')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('sessions-sort-title')));
-    await tester.pumpAndSettle();
-    expect(top('alpha notes'), lessThan(top('Bravo task')));
-    expect(top('Bravo task'), lessThan(top('Charlie task')));
-    expect(
-      tester
-          .widget<Text>(find.byKey(const ValueKey('sessions-filter-badge')))
-          .data,
-      'A/T',
-    );
-
-    // A pinned session leads its project whatever the sort.
+    // A pinned session leads its project.
     final charlie = rig.sources.single.row('c').info.ref.storageKey;
     await tester.tap(
       find.descendant(
@@ -410,7 +392,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(ValueKey('session-pin-$charlie')));
     await tester.pumpAndSettle();
-    expect(top('Charlie task'), lessThan(top('alpha notes')));
+    expect(top('Charlie task'), lessThan(top('Bravo task')));
     expect(find.byKey(ValueKey('session-pinned-$charlie')), findsOneWidget);
     expect(
       tester

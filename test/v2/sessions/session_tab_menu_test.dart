@@ -438,7 +438,7 @@ void main() {
 
     await _longPress(tester, app, 'other');
     expect(find.text(app.l10n.sessionPin), findsOneWidget);
-    expect(find.text(app.l10n.sessionsActionHide), findsOneWidget);
+    expect(find.text(app.l10n.sessionsActionHide), findsNothing);
     expect(find.text(app.l10n.sessionTabChangeIconAction), findsOneWidget);
     for (final command in [
       app.l10n.sessionsActionRename,

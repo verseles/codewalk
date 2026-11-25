@@ -2,35 +2,21 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import '../../shared/sessions/session_actions.dart';
 import '../storage/metadata_store.dart';
 import '../storage/storage_support.dart';
 
-/// How the session list is ordered.
-enum SessionListSort { recent, oldest, title }
-
-/// What the session list shows, across servers and projects: the search
-/// query, the hidden-session filter and the order.
+/// What the session list shows, across servers and projects: the search query.
 @immutable
 final class SessionListPreferences {
-  const SessionListPreferences({
-    this.query = '',
-    this.filter = SessionActionFilter.active,
-    this.sort = SessionListSort.recent,
-  });
+  const SessionListPreferences({this.query = ''});
   final String query;
-  final SessionActionFilter filter;
-  final SessionListSort sort;
 
   @override
   bool operator ==(Object other) =>
-      other is SessionListPreferences &&
-      other.query == query &&
-      other.filter == filter &&
-      other.sort == sort;
+      other is SessionListPreferences && other.query == query;
 
   @override
-  int get hashCode => Object.hash(query, filter, sort);
+  int get hashCode => query.hashCode;
 }
 
 /// The project contexts of one server: the open ones in their order, the
@@ -334,8 +320,6 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
       'list': {
         ...?(_raw['list'] as Map<String, Object?>?),
         'query': list.query,
-        'filter': list.filter.name,
-        'sort': list.sort.name,
       },
       'servers': {
         for (final MapEntry(key: profile, value: state) in servers.entries)
@@ -392,21 +376,8 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
     if (query is! String || query.length > maxQueryChars) {
       throw const FormatException();
     }
-    // An unknown filter or order falls back to the default: it chooses only
-    // what is shown, never what is kept.
-    return SessionListPreferences(
-      query: query,
-      filter:
-          SessionActionFilter.values
-              .where((f) => f.name == value['filter'])
-              .firstOrNull ??
-          SessionActionFilter.active,
-      sort:
-          SessionListSort.values
-              .where((s) => s.name == value['sort'])
-              .firstOrNull ??
-          SessionListSort.recent,
-    );
+    // Legacy filter/sort keys and unknown future keys are ignored.
+    return SessionListPreferences(query: query);
   }
 
   static ProjectWorkspace _workspace(Object? value) {

@@ -1,6 +1,4 @@
 import 'package:codewalk/features/sessions/session_list_projection.dart';
-import 'package:codewalk/platform/sessions/project_workspace_store.dart';
-import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,42 +36,6 @@ List<String> _ids(Iterable<SessionSummary> rows) => [
 ];
 
 void main() {
-  test('hiding a parent hides its loaded descendants, loops stay finite', () {
-    final rows = [
-      _row('root'),
-      _row('child', parent: 'root'),
-      _row('grandchild', parent: 'child'),
-      _row('other'),
-      _row('loop_a', parent: 'loop_b'),
-      _row('loop_b', parent: 'loop_a'),
-    ];
-    final hidden = effectivelyHidden(
-      rows,
-      (row) => row.info.ref == _ref('root') || row.info.ref == _ref('loop_a'),
-    );
-    expect(hidden, {
-      _ref('root'),
-      _ref('child'),
-      _ref('grandchild'),
-      _ref('loop_a'),
-      _ref('loop_b'),
-    });
-    expect(_ids(filterSessions(rows, hidden, SessionActionFilter.active)), [
-      'other',
-    ]);
-    // Only primary sessions are rows: a child is reached from its parent,
-    // never from a filter.
-    expect(_ids(filterSessions(rows, hidden, SessionActionFilter.hidden)), [
-      'root',
-    ]);
-    // The rows of the loop name a parent, so they are children: the
-    // primary rows are the root and the unrelated one.
-    expect(_ids(filterSessions(rows, hidden, SessionActionFilter.all)), [
-      'root',
-      'other',
-    ]);
-  });
-
   test('search keeps title matches and pins lead; children never appear', () {
     final rows = [
       _row('a', title: 'Fix login', updated: 3),
@@ -85,45 +47,26 @@ void main() {
     final searched = projectSessionList(
       rows,
       query: '  fix ',
-      sort: SessionListSort.recent,
       pinned: (row) => pinned.contains(row.info.ref),
     );
     expect(_ids(searched.map((e) => e.session)), ['d', 'a']);
     final all = projectSessionList(
       rows,
       query: '',
-      sort: SessionListSort.recent,
       pinned: (row) => pinned.contains(row.info.ref),
     );
     expect(_ids(all.map((e) => e.session)), ['d', 'b', 'a']);
     expect(all.any((row) => row.session.info.lineage.parent != null), isFalse);
   });
 
-  test('sorts by update, creation or title; missing times keep order', () {
+  test('sorts by most recent update; missing times keep order', () {
     final rows = [
       _row('x', title: 'beta', updated: 2, created: 20),
       _row('y', title: 'Alpha', updated: null, created: 10),
       _row('z', title: 'gamma', updated: 9, created: null),
       _row('w', title: 'alpha', updated: null, created: 30),
     ];
-    expect(_ids(sortSessions(rows, SessionListSort.recent)), [
-      'z',
-      'x',
-      'y',
-      'w',
-    ]);
-    expect(_ids(sortSessions(rows, SessionListSort.oldest)), [
-      'y',
-      'x',
-      'w',
-      'z',
-    ]);
-    expect(_ids(sortSessions(rows, SessionListSort.title)), [
-      'y',
-      'w',
-      'x',
-      'z',
-    ]);
+    expect(_ids(sortSessionsByRecent(rows)), ['z', 'x', 'y', 'w']);
   });
 
   test('recent lists at most five visible roots by update', () {
@@ -132,8 +75,8 @@ void main() {
       _row('child', parent: 'r6', updated: 99),
       _row('timeless'),
     ];
-    final recent = recentSessions(rows, {_ref('r5')});
-    expect(_ids(recent), ['r6', 'r4', 'r3', 'r2', 'r1']);
+    final recent = recentSessions(rows);
+    expect(_ids(recent), ['r6', 'r5', 'r4', 'r3', 'r2']);
   });
 
   test('roots that need attention lead Recent, each band by update', () {
@@ -157,7 +100,6 @@ void main() {
     ];
     final recent = recentSessions(
       rows,
-      const {},
       needsAttention: (row) => row.info.ref.nativeId.endsWith('waiting'),
     );
     expect(_ids(recent), [

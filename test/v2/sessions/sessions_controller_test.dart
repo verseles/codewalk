@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -33,7 +32,6 @@ void main() {
         expect(rig.sessions.sessions.map((row) => row.info.ref.nativeId), [
           'ses_root',
         ]);
-        rig.sessions.setFilter(SessionActionFilter.all);
         expect(rig.sessions.sessions, hasLength(1));
         expect(rig.sessions.loadedSessions, hasLength(2));
         expect(rig.sessions.findSession(child.info.ref), child);

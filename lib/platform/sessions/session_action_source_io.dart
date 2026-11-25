@@ -4,14 +4,12 @@ import 'package:harness_opencode/harness_opencode.dart';
 
 import '../../shared/sessions/command_ids.dart';
 import '../../shared/sessions/session_actions.dart';
-import 'hidden_session_store.dart';
 
 SessionActionSource createSessionActionSource(
   EndpointProfile profile,
   EndpointCredential credential,
-  EndpointProber prober, {
-  HiddenSessionStore? hidden,
-}) => _NativeSource(profile, credential, prober, hidden);
+  EndpointProber prober,
+) => _NativeSource(profile, credential, prober);
 
 /// The session actions of one connected OpenCode endpoint.
 ///
@@ -25,7 +23,6 @@ final class _NativeSource implements SessionActionSource {
     EndpointProfile profile,
     EndpointCredential credential,
     this._prober,
-    this._hidden,
   ) : harness = HarnessRef(HostId(profile.id), HarnessInstanceId(profile.id)) {
     _endpoint = profile.endpoint;
     _secret = credential.secret;
@@ -46,7 +43,6 @@ final class _NativeSource implements SessionActionSource {
   late final String _secret;
   late final IoEndpointHttpTransport _transport;
   late final OpenCodeSessionReader _reader;
-  final HiddenSessionStore? _hidden;
 
   /// The profile's own prober: the version is observed, never assumed.
   final EndpointProber _prober;
@@ -222,26 +218,6 @@ final class _NativeSource implements SessionActionSource {
       idle: idle.millisecondsSinceEpoch,
     );
     return _outcome(attempt.receipt);
-  }
-
-  @override
-  bool get hideAvailable => _hidden?.loaded == true && !(_hidden?.unreadable ?? true);
-
-  @override
-  bool get hideUnreadable => _hidden?.unreadable ?? false;
-
-  @override
-  bool isHidden(SessionSummary row) =>
-      _hidden?.isHidden(row.info.ref.storageKey) ?? false;
-
-  @override
-  Future<bool> setHidden(
-    SessionSummary row, {
-    required bool hidden,
-  }) async {
-    final store = _hidden;
-    if (store == null) return false;
-    return store.setHidden(row.info.ref.storageKey, hidden: hidden);
   }
 
   @override

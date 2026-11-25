@@ -17,7 +17,6 @@ import '../features/settings/update_check_controller.dart';
 import '../features/settings/update_scheduler.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/sessions/attachment_staging_store.dart';
-import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/model_preference_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
 import '../platform/sessions/session_draft_store.dart';
@@ -64,7 +63,6 @@ class AppDependencies {
     this.liveRecovery,
     this.permissionModes,
     this.unrestrictedOwnership,
-    this.hiddenSessions,
     this.sessionTabs,
     this.workspace,
     this.sessionDrafts,
@@ -130,9 +128,6 @@ class AppDependencies {
 
   /// CodeWalk's own Unrestricted insertions, loaded with the policy.
   final UnrestrictedOwnershipStore? unrestrictedOwnership;
-
-  /// The sessions hidden in CodeWalk, a local state the endpoint never sees.
-  final HiddenSessionStore? hiddenSessions;
 
   /// The open session tabs and the live views they keep open.
   final SessionTabsController? sessionTabs;
@@ -201,7 +196,6 @@ class AppDependencies {
     hosts.dispose();
     preferences.dispose();
     permissionModes?.dispose();
-    hiddenSessions?.dispose();
     modelPreferences?.dispose();
     releaseHistory?.dispose();
     releaseAnnouncements?.dispose();

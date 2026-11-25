@@ -33,7 +33,6 @@ import '../platform/releases/apk_platform_factory.dart';
 import '../platform/releases/linux_installer_factory.dart';
 import '../platform/releases/release_source_factory.dart';
 import '../platform/sessions/attachment_staging_store.dart';
-import '../platform/sessions/hidden_session_store.dart';
 import '../platform/sessions/model_preference_store.dart';
 import '../platform/sessions/permission_mode_store.dart';
 import '../platform/sessions/project_workspace_store.dart';
@@ -95,7 +94,6 @@ AppDependencies createAppDependencies({
   SessionLiveDirectory? Function()? sessionLiveDirectory,
   PermissionModeStore? permissionModeStore,
   SessionActionFactory? sessionActionFactory,
-  HiddenSessionStore? hiddenStore,
   SessionTabsStore? tabsStore,
   SessionDraftStore? draftStore,
   ModelPreferenceStore? modelPreferenceStore,
@@ -133,19 +131,12 @@ AppDependencies createAppDependencies({
       permissionModeStore ?? PermissionModeStore(store: metadata);
   // Records the Unrestricted rules CodeWalk added, so only those are removed.
   final unrestrictedOwnership = UnrestrictedOwnershipStore(store: metadata);
-  // The sessions hidden in CodeWalk: a local state the endpoint never sees.
-  final hiddenSessions = hiddenStore ?? HiddenSessionStore(store: metadata);
-  // The session actions of a profile: the endpoint's own commands and the
-  // local hide.
+  // The session actions of a profile: the endpoint's own commands.
   final prober = endpointProber ?? createEndpointProber();
   final actionFactory =
       sessionActionFactory ??
-      (profile, credential) => createSessionActionSource(
-        profile,
-        credential,
-        prober,
-        hidden: hiddenSessions,
-      );
+      (profile, credential) =>
+          createSessionActionSource(profile, credential, prober);
   locator.registerSingleton<DiagnosticsController>(
     diagnostics ?? DiagnosticsController(),
   );
@@ -369,7 +360,6 @@ AppDependencies createAppDependencies({
     liveWake: liveWake,
     liveRecovery: liveRecovery,
     permissionModes: permissionModes,
-    hiddenSessions: hiddenSessions,
     sessionTabs: sessionTabs,
     workspace: workspace,
     workspaceDrafts: workspaceDrafts,
@@ -446,7 +436,6 @@ Future<AppDependencies> loadAppDependencies({
   // defaulting to Allow all.
   await dependencies.permissionModes?.initialize();
   await dependencies.unrestrictedOwnership?.initialize();
-  await dependencies.hiddenSessions?.initialize();
   await dependencies.modelPreferences?.initialize();
   await dependencies.sessionTabs?.initialize();
   await dependencies.workspace?.initialize();

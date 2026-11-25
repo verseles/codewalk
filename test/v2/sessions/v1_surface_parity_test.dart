@@ -147,9 +147,9 @@ void sidePanelGroup() {
   testWidgets('side panel header uses the v1 Symbols glyphs', (tester) async {
     await ParitySurface.pump(tester, size: parityPhoneSize);
     // v1: chat_page_scaffold.dart:242 (search), :293 (add_comment), :272
-    // (folder_open for the project picker), :602 (filter_list).
+    // (folder_open for the project picker); filter_list was removed in #513.
     expect(find.byIcon(Symbols.search), findsOneWidget);
-    expect(find.byIcon(Symbols.filter_list), findsOneWidget);
+    expect(find.byIcon(Symbols.filter_list), findsNothing);
     expect(find.byIcon(Symbols.settings), findsOneWidget);
     expect(find.byIcon(Symbols.folder_open), findsWidgets);
     expect(

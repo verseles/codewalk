@@ -10,15 +10,11 @@ import '../../shared/sessions/session_visibility.dart';
 final class SessionTabCandidate {
   const SessionTabCandidate({
     required this.row,
-    this.hidden = false,
     this.pinned = false,
     this.busy,
   });
 
   final SessionSummary row;
-
-  /// Hidden in effect: hidden, or under a hidden parent.
-  final bool hidden;
 
   /// Pinned in its project context.
   final bool pinned;
@@ -60,8 +56,8 @@ const sessionTabWindow = Duration(hours: 3);
 /// whatever their age. A closed session is suppressed: it comes back when
 /// the user opens it, when it is pinned, or when the server reports an
 /// update strictly newer than the one known at its close; the first update
-/// seen for a closed session without one only sets it. Hidden and child
-/// sessions are never added, and a child tab never stays either: it leaves
+/// seen for a closed session without one only sets it. Child sessions are
+/// never added, and a child tab never stays either: it leaves
 /// even when selected, pinned, busy or recent, and a dropped selection moves
 /// to the next kept tab of its server, in the strip's stored order. A
 /// session absent from the rows keeps its tab unless [children] carries
@@ -119,10 +115,9 @@ SessionTabReconciliation reconcileSessionTabs({
     final recent = latest(updated, tab.lastOpenedAtMs)!;
     final keep =
         tab.ref == selected ||
-        (!candidate.hidden &&
-            (candidate.pinned ||
-                candidate.busy != false ||
-                recent > windowStart));
+        candidate.pinned ||
+        candidate.busy != false ||
+        recent > windowStart;
     if (!keep) {
       changed = true;
       continue;
@@ -147,8 +142,7 @@ SessionTabReconciliation reconcileSessionTabs({
           !open.contains(candidate.row.info.ref) &&
           !frozen.contains(candidate.row.info.ref) &&
           !children.contains(candidate.row.info.ref) &&
-          candidate.row.info.lineage.parent == null &&
-          !candidate.hidden)
+          candidate.row.info.lineage.parent == null)
         candidate,
   ]..sort(_mostRecentFirst);
 

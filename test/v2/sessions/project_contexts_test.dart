@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:codewalk/features/hosts/endpoint_health_controller.dart';
 import 'package:codewalk/features/sessions/project_contexts_controller.dart';
@@ -10,7 +11,6 @@ import 'package:codewalk/platform/sessions/workspace_draft_store.dart';
 import 'package:codewalk/platform/sessions/workspace_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
-import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -225,23 +225,20 @@ void main() {
       },
     );
 
-    test('the saved filter never chooses where a server starts', () async {
+    test('legacy saved filter and sort keys never break server start', () async {
       rig = _Rig();
-      final saved = ProjectWorkspaceStore(
-        store: V2MetadataStore(backend: rig.backend),
-      );
-      await saved.initialize();
-      await saved.setListPreferences(
-        const SessionListPreferences(filter: SessionActionFilter.hidden),
-      );
-      saved.dispose();
+      rig.backend.values[ProjectWorkspaceStore.key] = jsonEncode({
+        'v': 1,
+        'list': {'query': 'saved', 'filter': 'hidden', 'sort': 'title'},
+      });
       await rig.open(
         (source) => [
           source.row('q1', directory: '/q'),
           source.row('p1', directory: '/p'),
         ],
       );
-      expect(rig.catalog.sessions.filter, SessionActionFilter.hidden);
+      expect(rig.contexts.available, isTrue);
+      expect(rig.contexts.query, 'saved');
       expect(rig.contexts.active, '/q');
       expect(rig.source.locationReads, isEmpty);
     });
@@ -346,15 +343,18 @@ void main() {
       expect(rig.contexts.open, ['/p']);
     });
 
-    test('overlapping list changes keep each other', () async {
+    test('overlapping list changes keep the latest preference', () async {
       rig = _Rig();
       await rig.open((source) => [source.row('p1', directory: '/p')]);
-      final filtering = rig.contexts.setFilter(SessionActionFilter.all);
-      final sorting = rig.contexts.setSort(SessionListSort.title);
-      expect(await filtering, isTrue);
-      expect(await sorting, isTrue);
-      expect(rig.contexts.preferences.filter, SessionActionFilter.all);
-      expect(rig.contexts.preferences.sort, SessionListSort.title);
+      final first = rig.contexts.setPreferences(
+        const SessionListPreferences(query: 'first'),
+      );
+      final second = rig.contexts.setPreferences(
+        const SessionListPreferences(query: 'second'),
+      );
+      expect(await first, isTrue);
+      expect(await second, isTrue);
+      expect(rig.contexts.preferences.query, 'second');
     });
 
     test('a query still being typed is saved when the drawer closes', () async {
@@ -387,17 +387,19 @@ void main() {
           ..blockedKey = ProjectWorkspaceStore.key
           ..entered = Completer<void>()
           ..release = Completer<void>();
-        final filtering = rig.contexts.setFilter(SessionActionFilter.all);
+        final first = rig.contexts.setPreferences(
+          const SessionListPreferences(query: 'first'),
+        );
         await rig.backend.entered!.future;
         rig.contexts.setQuery('queued');
-        // The debounce fires; its save waits behind the held filter write.
+        // The debounce fires; its save waits behind the held preference write.
         await Future<void>.delayed(
           ProjectContextsController.queryWriteDelay +
               const Duration(milliseconds: 50),
         );
         rig.contexts.dispose();
         rig.backend.release!.complete();
-        await filtering;
+        await first;
         await settle();
         final reopened = ProjectWorkspaceStore(
           store: V2MetadataStore(backend: rig.backend),
@@ -405,7 +407,6 @@ void main() {
         addTearDown(reopened.dispose);
         await reopened.initialize();
         expect(reopened.listPreferences.query, 'queued');
-        expect(reopened.listPreferences.filter, SessionActionFilter.all);
         rig.contexts = ProjectContextsController(
           catalog: rig.catalog.sessions,
           store: ProjectWorkspaceStore(
@@ -424,9 +425,13 @@ void main() {
           ..blockedKey = ProjectWorkspaceStore.key
           ..entered = Completer<void>()
           ..release = Completer<void>();
-        final filtering = rig.contexts.setFilter(SessionActionFilter.all);
+        final first = rig.contexts.setPreferences(
+          const SessionListPreferences(query: 'first'),
+        );
         await rig.backend.entered!.future;
-        final sorting = rig.contexts.setSort(SessionListSort.title);
+        final second = rig.contexts.setPreferences(
+          const SessionListPreferences(query: 'second'),
+        );
         // Over the store's bound: refused at once, outside its queue.
         rig.contexts.setQuery('x' * 300);
         await Future<void>.delayed(
@@ -435,16 +440,15 @@ void main() {
         );
         rig.contexts.dispose();
         rig.backend.release!.complete();
-        await filtering;
-        await sorting;
+        await first;
+        await second;
         await settle();
         final reopened = ProjectWorkspaceStore(
           store: V2MetadataStore(backend: rig.backend),
         );
         addTearDown(reopened.dispose);
         await reopened.initialize();
-        expect(reopened.listPreferences.filter, SessionActionFilter.all);
-        expect(reopened.listPreferences.sort, SessionListSort.title);
+        expect(reopened.listPreferences.query, 'second');
         rig.contexts = ProjectContextsController(
           catalog: rig.catalog.sessions,
           store: ProjectWorkspaceStore(

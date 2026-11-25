@@ -17,8 +17,6 @@ enum SessionRowAction {
   markViewed,
   rename,
   fork,
-  hide,
-  unhide,
   delete,
   changeIcon,
   closeProject,
@@ -28,7 +26,7 @@ enum SessionRowAction {
 ///
 /// The native entries follow the endpoint's own support: an entry that the
 /// endpoint did not define, or that the current rows cannot answer for, is
-/// disabled with its reason. The local hide does not depend on the endpoint.
+/// disabled with its reason.
 class SessionActionsMenu extends StatefulWidget {
   const SessionActionsMenu({
     required this.controller,
@@ -97,7 +95,6 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
       listCurrent: listCurrent,
       pending: pending,
     );
-    final hidden = controller.isHidden(row);
     final unread = controller.viewState(row) == SessionViewState.unread;
     return KeyedSubtree(
       key: ValueKey('session-actions-${row.info.ref.storageKey}'),
@@ -154,19 +151,6 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
               ),
             ),
           ],
-          PopupMenuItem<SessionRowAction>(
-            value: hidden ? SessionRowAction.unhide : SessionRowAction.hide,
-            enabled: controller.hideAvailable,
-            child: _item(
-              hidden ? Symbols.visibility : Symbols.visibility_off,
-              _label(
-                hidden ? l10n.sessionsActionUnhide : l10n.sessionsActionHide,
-                controller.hideAvailable
-                    ? null
-                    : l10n.sessionsActionUnavailableStore,
-              ),
-            ),
-          ),
           if (widget.commands)
             PopupMenuItem<SessionRowAction>(
               value: SessionRowAction.delete,
@@ -283,10 +267,6 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
         await controller.rename(row, title);
       case SessionRowAction.fork:
         await controller.fork(row);
-      case SessionRowAction.hide:
-        await controller.setHidden(row, hidden: true);
-      case SessionRowAction.unhide:
-        await controller.setHidden(row, hidden: false);
       case SessionRowAction.delete:
         final tabs = context.read<SessionTabsController?>();
         final confirmed = await _confirmDelete(context);

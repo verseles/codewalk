@@ -34,18 +34,6 @@ enum SessionActionReason {
 /// The unread marker of one row.
 enum SessionViewState { unknown, unread, read }
 
-/// Which sessions the catalog shows.
-enum SessionActionFilter {
-  /// The sessions that are not hidden in CodeWalk.
-  active,
-
-  /// The sessions hidden in CodeWalk.
-  hidden,
-
-  /// Every session the endpoint returned.
-  all,
-}
-
 /// The endpoint's support for the session actions.
 ///
 /// The support is probed once per profile: a capability is never discovered by
@@ -145,20 +133,6 @@ abstract interface class SessionActionSource {
 
   /// Marks the row's idle transition as viewed.
   Future<SessionActionOutcome> markViewed(SessionSummary row);
-
-  /// Hides the session in CodeWalk, or shows it again. False when the local
-  /// state could not be written.
-  Future<bool> setHidden(SessionSummary row, {required bool hidden});
-
-  /// Whether the session is hidden in CodeWalk.
-  bool isHidden(SessionSummary row);
-
-  /// Whether the local hide state can be read and written.
-  bool get hideAvailable;
-
-  /// Whether the local hide state could not be read. Its content is unknown,
-  /// so it is never overwritten and the list says so.
-  bool get hideUnreadable;
 
   void close();
 }

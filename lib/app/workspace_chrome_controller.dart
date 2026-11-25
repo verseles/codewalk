@@ -152,12 +152,10 @@ final class WorkspaceChromeController extends ChangeNotifier {
     }
     final project = catalog.selectedProject?.project;
     final loaded = catalog.loadedSessions;
-    final hidden = catalog.hiddenIn(loaded);
     WorkspaceBadge? needsInput;
     WorkspaceBadge? unread;
     for (final row in loaded) {
-      if (hidden.contains(row.info.ref) ||
-          row.info.lineage.parent != null ||
+      if (row.info.lineage.parent != null ||
           row.info.ref == currentSession ||
           row.info.ref.host.value != catalog.selectedProfile?.id ||
           row.info.project != project) {
@@ -306,11 +304,9 @@ final class WorkspaceChromeController extends ChangeNotifier {
       }
       final project = catalog.selectedProject?.project;
       final loaded = catalog.loadedSessions;
-      final hidden = catalog.hiddenIn(loaded);
       for (final row in loaded) {
         final view = row.view;
         if (view == null ||
-            hidden.contains(row.info.ref) ||
             row.info.lineage.parent != null ||
             row.info.ref == currentSession ||
             row.info.ref.host.value != profile ||

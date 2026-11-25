@@ -71,9 +71,11 @@ void main() {
     return (source, dependencies.localizations.current, dependencies.sessions!);
   }
 
-  testWidgets('the row offers the filter and the actions', (tester) async {
+  testWidgets('the row offers the actions without filter or hide', (
+    tester,
+  ) async {
     final (source, l10n, _) = await open(tester);
-    expect(find.byKey(const ValueKey('sessions-filter')), findsOneWidget);
+    expect(find.byKey(const ValueKey('sessions-filter')), findsNothing);
     expect(find.text('First'), findsOneWidget);
     await tester.tap(
       find.byKey(
@@ -84,7 +86,8 @@ void main() {
     expect(find.text(l10n.sessionsActionRename), findsOneWidget);
     expect(find.text(l10n.sessionsActionFork), findsOneWidget);
     expect(find.text(l10n.sessionsActionDelete), findsOneWidget);
-    expect(find.text(l10n.sessionsActionHide), findsOneWidget);
+    expect(find.text(l10n.sessionsActionHide), findsNothing);
+    expect(find.text(l10n.sessionsActionUnhide), findsNothing);
   });
 
   testWidgets('the mark as viewed entry needs an unread row', (tester) async {
@@ -560,17 +563,5 @@ void main() {
       isNull,
     );
     expect(actions.calls, isNot(contains('create')));
-  });
-
-  testWidgets('the local hide hides the row', (tester) async {
-    final (source, l10n, _) = await open(tester);
-    final row = source.row('first', title: 'First');
-    await tester.tap(
-      find.byKey(ValueKey('session-actions-${row.info.ref.storageKey}')),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(l10n.sessionsActionHide));
-    await tester.pumpAndSettle();
-    expect(actions.calls, contains('hide'));
   });
 }

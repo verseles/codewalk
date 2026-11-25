@@ -140,7 +140,6 @@ class _SessionsPageState extends State<SessionsPage> {
       if (controller.behind) l10n.liveStale,
       if (controller.limited) l10n.sessionsLimit,
       if (controller.actionFailure != null) l10n.sessionsActionFailed,
-      if (controller.hideUnreadable) l10n.sessionsActionUnavailableStore,
       if (controller.actionUncertain) l10n.sessionsActionPending,
       ?createReason,
       if (notice == ProjectContextNotice.soleContext)
@@ -211,7 +210,6 @@ class _SessionsPageState extends State<SessionsPage> {
         ),
         const SizedBox(height: 8),
         SessionDrawerHeader(
-          catalog: controller,
           contexts: contexts,
           onCreate: ready && !controller.creating
               ? () => openWorkspaceDraft(context)
@@ -266,13 +264,14 @@ class _SessionsPageState extends State<SessionsPage> {
       for (final directory in contexts.open)
         ...?controller.contextRows(directory),
     ];
-    final hidden = controller.hiddenIn(everything);
-    final visible = filterSessions(everything, hidden, controller.filter);
+    final visible = [
+      for (final row in everything)
+        if (isPrimarySummary(row)) row,
+    ];
     // Attention is the header badge's own test (failed, waiting for the
     // user, or an unread reply); the shown session never needs it.
     final recent = recentSessions(
       everything,
-      hidden,
       needsAttention: (row) =>
           row.info.ref != current &&
           (row.execution?.lastOutcome?.kind.known ==
@@ -317,7 +316,10 @@ class _SessionsPageState extends State<SessionsPage> {
                 ? null
                 : controller.sessions)
           : switch (controller.contextRows(directory)) {
-              final rows? => filterSessions(rows, hidden, controller.filter),
+              final rows? => [
+                for (final row in rows)
+                  if (isPrimarySummary(row)) row,
+              ],
               null => null,
             };
       builders.add(
@@ -372,7 +374,6 @@ class _SessionsPageState extends State<SessionsPage> {
         final listed = projectSessionList(
           controller.sessions,
           query: contexts.query,
-          sort: contexts.preferences.sort,
           pinned: contexts.isPinned,
         );
         for (final item in listed) {
