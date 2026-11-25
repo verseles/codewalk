@@ -92,6 +92,9 @@ Future<_App> _launch(
     sessionCatalogFactory: rig.create,
     sessionLiveDirectory: () => directory,
     draftStore: drafts ?? _device(),
+    // The idle Send keeps its check, and its double tap, without a mic to
+    // stand in for it (#501).
+    speechDictation: FakeDictation(supported: false),
   );
   await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
   await _settle(tester);

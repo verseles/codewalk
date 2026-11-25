@@ -196,7 +196,9 @@ void main() {
       await _open(tester, outbox);
       await tester.tap(_input);
       await tester.enterText(_input, 'Hello');
+      // Send takes taps once the mic has slid back beside it (#501).
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
       expect(tester.widget<TextField>(_input).focusNode!.hasFocus, isTrue);
       await tester.tap(_send);
       await tester.pumpAndSettle();

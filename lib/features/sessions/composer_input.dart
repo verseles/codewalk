@@ -71,6 +71,9 @@ bool get composerAlwaysOpen => !const {
   TargetPlatform.fuchsia,
 }.contains(defaultTargetPlatform);
 
+/// The room between the composer's controls.
+const _gap = 4.0;
+
 /// Whether the mic may stand in for an idle Send here (#501): on a
 /// touch-first platform or a compact window (< 600 dp) that can dictate.
 bool composerVoiceMayTakeAction(BuildContext context) =>
@@ -225,7 +228,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
       ),
     );
     final chip = widget.chip;
-    const gap = SizedBox(width: 4);
+    const gap = SizedBox(width: _gap);
     final takes = widget.voiceTakesAction;
     Widget actionSlot(double t) => PositionedDirectional(
       key: const ValueKey('composer-action-slot'),
@@ -235,7 +238,9 @@ class _ComposerFrameState extends State<ComposerFrame> {
         child: ExcludeSemantics(
           excluding: takes,
           child: IgnorePointer(
-            ignoring: takes,
+            // While the mic moves, a tap at the end reaches the mic under it,
+            // never a Send still fading in or out (#501).
+            ignoring: takes || t > 0,
             child: Opacity(
               opacity: 1 - t,
               child: SizedBox.square(
@@ -249,7 +254,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
     );
     Widget voiceSlot(double t) => PositionedDirectional(
       key: const ValueKey('composer-voice-slot'),
-      end: (composerActionSize + 4) * (1 - t),
+      end: (composerActionSize + _gap) * (1 - t),
       child: voice,
     );
     // The mic and the action share one end slot, so the mic slides between
@@ -263,12 +268,12 @@ class _ComposerFrameState extends State<ComposerFrame> {
           : ComposerFrame.voiceSlide,
       curve: Curves.easeOutCubic,
       builder: (context, t, _) => SizedBox(
-        width: composerActionSize * (2 - t) + 4 * (1 - t),
+        width: composerActionSize * (2 - t) + _gap * (1 - t),
         height: composerActionSize,
         child: Stack(
           clipBehavior: Clip.none,
-          // Whichever stands at the end is on top, so a tap there reaches it
-          // even while the mic is still sliding.
+          // Whichever stands at the end once the slide ends is on top, so the
+          // order, and what focus and screen readers meet, follows it.
           children: [
             if (takes) actionSlot(t),
             voiceSlot(t),
