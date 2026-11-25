@@ -615,7 +615,7 @@ description of this code.
 
 - **Given** the refined visual style
 - **When** timeline cards render
-- **Then** the agent's text has no card: no fill, no border and no inset of its own beside it, so it sits on the page; non-subagent tools, shell runs and reasoning render as compact lightweight rows without outer cards; subagent calls, notices and non-error outcomes keep borderless cards with slightly tighter vertical padding; the user's turn keeps its tinted bubble, right-aligned, with no outline (#488); everything follows theme, density, text-size and width changes on rebuild
+- **Then** the agent's text has no card: no fill, no border and no inset of its own beside it, so it sits on the page; non-subagent tools, shell runs and reasoning render as compact lightweight rows without outer cards; subagent calls, notices and non-error outcomes keep borderless cards with slightly tighter vertical padding; the user's turn keeps its tinted bubble, right-aligned, with no outline (#488), shrinking horizontally to fit its content up to `min(640, 85% of the lane)` with no wide width floor while preserving a 48 dp hit-target height (#500); everything follows theme, density, text-size and width changes on rebuild
 - **Then** below 600 dp wide, the live and history timelines keep an 8 dp side margin instead of 16 dp, so the agent's text reaches close to the screen's edge; wider screens keep 16 dp and the 760 dp reading width
 - **Then** a search match is outlined just outside its row, so the outline never covers text that has no card
 

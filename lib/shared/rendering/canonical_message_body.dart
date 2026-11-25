@@ -76,7 +76,8 @@ class CanonicalMessageBody extends StatelessWidget {
           source.runes.take(MessageRenderBudget.richRenderMaxChars),
         );
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               '${prefixMissing ? '…' : ''}$truncated',
@@ -115,7 +116,8 @@ class CanonicalMessageBody extends StatelessWidget {
         // Ellipsis outside the parser so line-leading block constructs
         // (#, -, >, |, ```, $$) still parse.
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               '…',

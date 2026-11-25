@@ -1,2 +1,0 @@
-Em @[shot.png] Observe que algumas mensagens da linha do tempo, como o uso de shell, estão grandes e com os itens quebrados, quando poderiam ser apenas uma linha.
-Vamos transformar esse balão e outros em algo mais simples, que se compacta ao chegar à resposta final. Se necessário, olhe quais são os eventos e como o código dos aplicativos oficiais faz.

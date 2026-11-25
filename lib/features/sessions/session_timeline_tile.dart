@@ -267,10 +267,27 @@ class SessionTimelineTile extends StatelessWidget {
           ? const EdgeInsets.symmetric(vertical: 8)
           : const EdgeInsets.fromLTRB(14, 10, 14, 10),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: isUser
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.stretch,
         children: [
           if (headerShown) ...[
-            if (item is UserInput || item is AssistantText)
+            if (item is UserInput)
+              // The user's bubble names no sender and carries no elapsed chip;
+              // keeping the clock unconstrained lets short prompts shrink-wrap.
+              SelectionContainer.disabled(
+                child: Text(
+                  clock!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 11,
+                  ),
+                ),
+              )
+            else if (item is AssistantText)
               // A message's header is its time; an assistant message's
               // duration ends the line. Selecting the message's text leaves
               // it out.
@@ -295,8 +312,7 @@ class SessionTimelineTile extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (item is AssistantText && message != null)
-                      MessageElapsedChip(message: message),
+                    if (message != null) MessageElapsedChip(message: message),
                   ],
                 ),
               )
@@ -355,9 +371,7 @@ class SessionTimelineTile extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final maxW = constraints.maxWidth;
-        final candidateW = isUser
-            ? max(220.0, min(640.0, maxW * 0.85))
-            : min(760.0, maxW);
+        final candidateW = isUser ? min(640.0, maxW * 0.85) : min(760.0, maxW);
         final text = switch (item) {
           UserInput(:final text) || AssistantText(:final text) => text,
           _ => null,
@@ -369,7 +383,12 @@ class SessionTimelineTile extends StatelessWidget {
               ? Semantics(
                   container: true,
                   label: l10n.chatMessageYou,
-                  child: tile,
+                  child: Align(
+                    alignment: Alignment.center,
+                    widthFactor: 1,
+                    heightFactor: 1,
+                    child: tile,
+                  ),
                 )
               : tile,
         );
@@ -384,7 +403,10 @@ class SessionTimelineTile extends StatelessWidget {
         return Align(
           alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: candidateW),
+            constraints: BoxConstraints(
+              minHeight: isUser ? 48.0 : 0.0,
+              maxWidth: candidateW,
+            ),
             child: bubble,
           ),
         );
@@ -427,7 +449,7 @@ class SessionTimelineTile extends StatelessWidget {
         }
         return Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SessionAttachmentStrip(attachments: attachments),
             if (messageBody != null) ...[
