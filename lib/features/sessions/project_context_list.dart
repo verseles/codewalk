@@ -6,9 +6,10 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/server_path.dart';
+import '../../shared/theme/app_surface_tokens.dart';
 import 'project_icon_view.dart';
 
-/// The width of the accent that marks the selected project or session.
+/// The width of the accent that marks the selected project or highlighted row.
 const _accentWidth = 3.0;
 
 /// Below this width a project row drops its folder, so the name
@@ -333,8 +334,8 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
 }
 
 /// One quick-access row of Recent: the session title on one line and a
-/// chip with its project, a running mark while it works and the accent
-/// when it is the session shown.
+/// chip with its project, a running mark while it works and a subtle
+/// contrasted background when it is the session shown.
 class RecentSessionRow extends StatelessWidget {
   const RecentSessionRow({
     super.key,
@@ -362,65 +363,79 @@ class RecentSessionRow extends StatelessWidget {
     final title = row.info.title.trim().isEmpty
         ? l10n.sessionExportUntitled
         : row.info.title;
-    return AccentedRow(
+    const radius = BorderRadius.all(Radius.circular(8));
+    return Semantics(
       selected: current,
-      child: InkWell(
-        key: ValueKey('recent-${row.info.ref.storageKey}'),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 8, 6),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: current || emphasized ? scheme.primary : null,
-                    fontWeight: current || emphasized ? FontWeight.w600 : null,
+      child: Material(
+        key: ValueKey('recent-surface-${row.info.ref.storageKey}'),
+        color: current
+            ? theme.surfaceTokens.selectedSurface
+            : Colors.transparent,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          key: ValueKey('recent-${row.info.ref.storageKey}'),
+          borderRadius: radius,
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 8, 6),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: current || emphasized ? scheme.primary : null,
+                      fontWeight: current || emphasized
+                          ? FontWeight.w600
+                          : null,
+                    ),
                   ),
                 ),
-              ),
-              if (running)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 6),
-                  child: Icon(
-                    Symbols.sync,
-                    key: ValueKey('recent-running-${row.info.ref.storageKey}'),
-                    size: 14,
-                    color: scheme.secondary,
-                    semanticLabel: l10n.liveRunning,
-                  ),
-                ),
-              if (directory != null)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(start: 6),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 96),
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: scheme.outlineVariant),
-                        borderRadius: BorderRadius.circular(8),
+                if (running)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 6),
+                    child: Icon(
+                      Symbols.sync,
+                      key: ValueKey(
+                        'recent-running-${row.info.ref.storageKey}',
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
+                      size: 14,
+                      color: scheme.secondary,
+                      semanticLabel: l10n.liveRunning,
+                    ),
+                  ),
+                if (directory != null)
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 6),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 96),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: scheme.outlineVariant),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        child: Text(
-                          serverPathName(directory),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          child: Text(
+                            serverPathName(directory),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

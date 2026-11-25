@@ -250,13 +250,16 @@ class ProjectContextsController extends ChangeNotifier {
       if (_busy) return;
       unawaited(openContext(directory));
     }
-    if (remember) _views[directory] = summary.info.ref;
+    if (remember && _views[directory] != summary.info.ref) {
+      _views[directory] = summary.info.ref;
+      _notify();
+    }
   }
 
   /// The drawer shows the list or the draft of the active context.
   void recordHome() {
     final directory = active;
-    if (directory != null) _views.remove(directory);
+    if (directory != null && _views.remove(directory) != null) _notify();
   }
 
   /// One context transition at a time: a second waits for nothing and is

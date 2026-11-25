@@ -20,6 +20,7 @@ import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_visibility.dart';
+import '../../shared/theme/app_surface_tokens.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../hosts/server_switcher.dart';
 import 'project_context_list.dart';
@@ -738,142 +739,151 @@ class _SessionsPageState extends State<SessionsPage> {
       current: !controller.stale && !controller.behind,
     );
     void openMenu() => _menuKey(row.info.ref).currentState?.showButtonMenu();
-    final content = GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onSecondaryTapUp: (_) => openMenu(),
-      child: CallbackShortcuts(
-        bindings: {
-          const SingleActivator(LogicalKeyboardKey.contextMenu): openMenu,
-          const SingleActivator(LogicalKeyboardKey.f10, shift: true): openMenu,
-        },
-        child: Semantics(
-          selected: selected,
-          customSemanticsActions: {
-            CustomSemanticsAction(label: l10n.sessionsActionsMenu): openMenu,
+    const rowRadius = BorderRadius.all(Radius.circular(8));
+    // Selected sessions use a subtle contrasted fill (the start accent bar
+    // stays exclusive to the selected project header); an unread completed
+    // reply keeps a lighter highlight for its hour.
+    final background = selected
+        ? theme.surfaceTokens.selectedSurface
+        : emphasized
+        ? scheme.primary.withValues(alpha: 0.08)
+        : Colors.transparent;
+    return KeyedSubtree(
+      key: ValueKey<SessionRef>(row.info.ref),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onSecondaryTapUp: (_) => openMenu(),
+        child: CallbackShortcuts(
+          bindings: {
+            const SingleActivator(LogicalKeyboardKey.contextMenu): openMenu,
+            const SingleActivator(LogicalKeyboardKey.f10, shift: true):
+                openMenu,
           },
-          child: InkWell(
-            key: ValueKey('live-open-${row.info.ref.storageKey}'),
-            // A tap opens the session; without a live view it opens the
-            // read-only history instead.
-            onTap: !available
-                ? null
-                : live
-                ? () => _openLive(context, controller, row)
-                : history
-                ? () => _openHistory(context, controller, row)
-                : null,
-            onLongPress: openMenu,
-            child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(
-                12,
-                compact ? 12 : 6,
-                4,
-                compact ? 12 : 6,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
+          child: Semantics(
+            selected: selected,
+            customSemanticsActions: {
+              CustomSemanticsAction(label: l10n.sessionsActionsMenu): openMenu,
+            },
+            child: Material(
+              key: ValueKey('session-surface-${row.info.ref.storageKey}'),
+              color: background,
+              borderRadius: rowRadius,
+              clipBehavior: Clip.antiAlias,
+              child: InkWell(
+                key: ValueKey('live-open-${row.info.ref.storageKey}'),
+                borderRadius: rowRadius,
+                // A tap opens the session; without a live view it opens the
+                // read-only history instead.
+                onTap: !available
+                    ? null
+                    : live
+                    ? () => _openLive(context, controller, row)
+                    : history
+                    ? () => _openHistory(context, controller, row)
+                    : null,
+                onLongPress: openMenu,
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    12,
+                    compact ? 12 : 6,
+                    4,
+                    compact ? 12 : 6,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (pinned)
-                              Padding(
-                                padding: const EdgeInsetsDirectional.only(
-                                  end: 4,
-                                ),
-                                child: Icon(
-                                  Symbols.push_pin,
-                                  key: ValueKey(
-                                    'session-pinned-${row.info.ref.storageKey}',
+                            Row(
+                              children: [
+                                if (pinned)
+                                  Padding(
+                                    padding: const EdgeInsetsDirectional.only(
+                                      end: 4,
+                                    ),
+                                    child: Icon(
+                                      Symbols.push_pin,
+                                      key: ValueKey(
+                                        'session-pinned-${row.info.ref.storageKey}',
+                                      ),
+                                      size: 14,
+                                      color: scheme.primary,
+                                      semanticLabel: l10n.sessionsPinnedMark,
+                                    ),
                                   ),
-                                  size: 14,
-                                  color: scheme.primary,
-                                  semanticLabel: l10n.sessionsPinnedMark,
+                                Expanded(
+                                  child: Text(
+                                    row.info.title.trim().isEmpty
+                                        ? l10n.sessionExportUntitled
+                                        : row.info.title,
+                                    maxLines: compact ? 3 : 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style:
+                                        (compact
+                                                ? theme.textTheme.titleMedium
+                                                : theme.textTheme.titleSmall)
+                                            ?.copyWith(
+                                              color: selected || emphasized
+                                                  ? scheme.primary
+                                                  : null,
+                                              fontWeight: selected || emphasized
+                                                  ? FontWeight.w600
+                                                  : null,
+                                            ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            // The ownership the adapter proved, and nothing
+                            // else: an unproven, stale or expired proof, and a
+                            // list that is not the endpoint's current answer,
+                            // omit the subtitle instead of repeating unknown.
+                            if (ownership != OwnershipKind.unknown)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  sessionOwnershipLabel(l10n, ownership),
+                                  key: ValueKey(
+                                    'session-ownership-${row.info.ref.storageKey}',
+                                  ),
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: scheme.onSurfaceVariant,
+                                  ),
                                 ),
                               ),
-                            Expanded(
-                              child: Text(
-                                row.info.title.trim().isEmpty
-                                    ? l10n.sessionExportUntitled
-                                    : row.info.title,
-                                maxLines: compact ? 3 : 2,
-                                overflow: TextOverflow.ellipsis,
-                                style:
-                                    (compact
-                                            ? theme.textTheme.titleMedium
-                                            : theme.textTheme.titleSmall)
-                                        ?.copyWith(
-                                          color: selected || emphasized
-                                              ? scheme.primary
-                                              : null,
-                                          fontWeight: selected || emphasized
-                                              ? FontWeight.w600
-                                              : null,
-                                        ),
-                              ),
-                            ),
+                            if (controller.activityMarks(row) case final marks
+                                when marks.isNotEmpty)
+                              _activityMarks(context, row, marks),
                           ],
                         ),
-                        // The ownership the adapter proved, and nothing
-                        // else: an unproven, stale or expired proof, and a
-                        // list that is not the endpoint's current answer,
-                        // omit the subtitle instead of repeating unknown.
-                        if (ownership != OwnershipKind.unknown)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 4),
-                            child: Text(
-                              sessionOwnershipLabel(l10n, ownership),
-                              key: ValueKey(
-                                'session-ownership-${row.info.ref.storageKey}',
-                              ),
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        if (controller.activityMarks(row) case final marks
-                            when marks.isNotEmpty)
-                          _activityMarks(context, row, marks),
-                      ],
-                    ),
+                      ),
+                      SessionActionsMenu(
+                        controller: controller,
+                        row: row,
+                        menuKey: _menuKey(row.info.ref),
+                        pinned: pinned,
+                        onPin: onPin,
+                        historyEnabled:
+                            !_openingHistory &&
+                            !controller.loading &&
+                            available,
+                        onHistory: live && history
+                            ? () {
+                                if (controller.loading || !available) return;
+                                _openHistory(context, controller, row);
+                              }
+                            : null,
+                      ),
+                    ],
                   ),
-                  SessionActionsMenu(
-                    controller: controller,
-                    row: row,
-                    menuKey: _menuKey(row.info.ref),
-                    pinned: pinned,
-                    onPin: onPin,
-                    historyEnabled:
-                        !_openingHistory && !controller.loading && available,
-                    onHistory: live && history
-                        ? () {
-                            if (controller.loading || !available) return;
-                            _openHistory(context, controller, row);
-                          }
-                        : null,
-                  ),
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
-    );
-    // A completed reply not seen yet keeps a subtle highlight for its hour;
-    // every other row stays on the list's own surface.
-    return AccentedRow(
-      key: ValueKey<SessionRef>(row.info.ref),
-      selected: selected,
-      child: emphasized
-          ? ColoredBox(
-              key: ValueKey('session-emphasis-${row.info.ref.storageKey}'),
-              color: scheme.primary.withValues(alpha: 0.08),
-              child: content,
-            )
-          : content,
     );
   }
 

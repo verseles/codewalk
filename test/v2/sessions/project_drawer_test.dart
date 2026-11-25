@@ -1,6 +1,7 @@
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/project_context_list.dart';
 import 'package:codewalk/features/sessions/project_contexts_controller.dart';
 import 'package:codewalk/features/sessions/project_picker_dialog.dart';
 import 'package:codewalk/features/sessions/sessions_page.dart';
@@ -8,6 +9,7 @@ import 'package:codewalk/platform/sessions/project_workspace_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_actions.dart';
+import 'package:codewalk/shared/theme/app_surface_tokens.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -447,8 +449,16 @@ void main() {
     expect(find.byKey(ValueKey('recent-$done')), findsOneWidget);
     // Only roots are recent.
     expect(find.byKey(ValueKey('recent-$kid')), findsNothing);
-    expect(find.byKey(ValueKey('session-emphasis-$done')), findsOneWidget);
-    expect(find.byKey(ValueKey('session-emphasis-$kid')), findsNothing);
+    final scheme = Theme.of(
+      tester.element(find.byType(SessionsPage)),
+    ).colorScheme;
+    final doneSurface = find.byKey(ValueKey('session-surface-$done'));
+    expect(doneSurface, findsOneWidget);
+    expect(
+      tester.widget<Material>(doneSurface).color,
+      scheme.primary.withValues(alpha: 0.08),
+    );
+    expect(find.byKey(ValueKey('session-surface-$kid')), findsNothing);
     expect(tester.takeException(), isNull);
     await _closeApp(tester);
   });
@@ -495,6 +505,133 @@ void main() {
     expect(tester.takeException(), isNull);
     await _closeApp(tester);
   });
+
+  for (final mode in [ThemeMode.light, ThemeMode.dark]) {
+    testWidgets(
+      'only the selected project keeps the left accent bar; selected session uses subtle background (${mode.name}) (#523)',
+      (tester) async {
+        final (dependencies, rig, _) = await _open(
+          tester,
+          size: const Size(1280, 800),
+        );
+        dependencies.preferences.setThemeMode(mode);
+        await tester.pump();
+        final one = rig.sources.single.row('one').info.ref;
+        final three = rig.sources.single.row('three').info.ref;
+        final oneInkBefore = tester.element(
+          find.byKey(ValueKey('live-open-${one.storageKey}')),
+        );
+        final recentOneInkBefore = tester.element(
+          find.byKey(ValueKey('recent-${one.storageKey}')),
+        );
+        dependencies.router.go('/s/profile_a/${one.nativeId}');
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pump();
+
+        final theme = Theme.of(tester.element(find.byType(SessionsPage)));
+        final expectedBg = theme.surfaceTokens.selectedSurface;
+        expect(expectedBg, isNot(Colors.transparent));
+        expect(expectedBg, isNot(theme.colorScheme.surface));
+
+        // Selected project header keeps the AccentedRow left bar.
+        final projectAccent = find.descendant(
+          of: find.byKey(const ValueKey('project-row-/work/alpha')),
+          matching: find.byType(AccentedRow),
+        );
+        expect(projectAccent, findsOneWidget);
+        expect(tester.widget<AccentedRow>(projectAccent).selected, isTrue);
+
+        // Selected session row in project list has no AccentedRow, keeps its
+        // InkWell mounted across selection transitions, and uses the subtle
+        // contrasted background fill.
+        final selectedRow = find.byKey(ValueKey<SessionRef>(one));
+        expect(selectedRow, findsOneWidget);
+        expect(
+          find.descendant(of: selectedRow, matching: find.byType(AccentedRow)),
+          findsNothing,
+        );
+        expect(
+          find.ancestor(of: selectedRow, matching: find.byType(AccentedRow)),
+          findsNothing,
+        );
+        expect(
+          identical(
+            tester.element(find.byKey(ValueKey('live-open-${one.storageKey}'))),
+            oneInkBefore,
+          ),
+          isTrue,
+        );
+        final oneSurface = find.byKey(
+          ValueKey('session-surface-${one.storageKey}'),
+        );
+        final threeSurface = find.byKey(
+          ValueKey('session-surface-${three.storageKey}'),
+        );
+        expect(oneSurface, findsOneWidget);
+        expect(tester.widget<Material>(oneSurface).color, expectedBg);
+        expect(
+          tester.widget<Material>(threeSurface).color,
+          Colors.transparent,
+        );
+
+        // Selected RecentSessionRow also uses the subtle background fill
+        // without an AccentedRow left bar or InkWell remount.
+        final recentOne = find.byKey(ValueKey('recent-${one.storageKey}'));
+        expect(recentOne, findsOneWidget);
+        expect(
+          find.ancestor(of: recentOne, matching: find.byType(AccentedRow)),
+          findsNothing,
+        );
+        expect(
+          identical(tester.element(recentOne), recentOneInkBefore),
+          isTrue,
+        );
+        final recentOneSurface = find.byKey(
+          ValueKey('recent-surface-${one.storageKey}'),
+        );
+        final recentThreeSurface = find.byKey(
+          ValueKey('recent-surface-${three.storageKey}'),
+        );
+        expect(recentOneSurface, findsOneWidget);
+        expect(tester.widget<Material>(recentOneSurface).color, expectedBg);
+        expect(
+          tester.widget<Material>(recentThreeSurface).color,
+          Colors.transparent,
+        );
+
+        // Switching sessions inside the same project updates the highlight,
+        // and returning to /sessions clears it.
+        dependencies.router.go('/s/profile_a/${three.nativeId}');
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pump();
+        expect(
+          tester.widget<Material>(oneSurface).color,
+          Colors.transparent,
+        );
+        expect(tester.widget<Material>(threeSurface).color, expectedBg);
+        expect(
+          tester.widget<Material>(recentOneSurface).color,
+          Colors.transparent,
+        );
+        expect(tester.widget<Material>(recentThreeSurface).color, expectedBg);
+        dependencies.router.go('/sessions');
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        expect(
+          tester.widget<Material>(threeSurface).color,
+          Colors.transparent,
+        );
+        expect(
+          tester.widget<Material>(recentThreeSurface).color,
+          Colors.transparent,
+        );
+        expect(tester.takeException(), isNull);
+        await _closeApp(tester);
+      },
+    );
+  }
 
   testWidgets('diff-stat pseudo summaries are never rendered', (tester) async {
     await _open(

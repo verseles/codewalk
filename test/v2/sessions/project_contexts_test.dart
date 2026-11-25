@@ -558,13 +558,28 @@ void main() {
         );
 
         final z1 = rig.source.row('z1', directory: '/z');
+        final z2 = rig.source.row('z2', directory: '/z');
         rig.contexts.recordView(z1);
         await settle();
         expect(rig.contexts.active, '/z');
         expect(rig.contexts.viewOf('/z'), z1.info.ref);
         expect(rig.contexts.isPinned(p1), isTrue);
+
+        var viewNotifications = 0;
+        void onViewChanged() => viewNotifications++;
+        rig.contexts.addListener(onViewChanged);
+        addTearDown(() => rig.contexts.removeListener(onViewChanged));
+        rig.contexts.recordView(z1);
+        expect(viewNotifications, 0);
+        rig.contexts.recordView(z2);
+        expect(rig.contexts.viewOf('/z'), z2.info.ref);
+        expect(viewNotifications, 1);
+
         rig.contexts.recordHome();
         expect(rig.contexts.viewOf('/z'), isNull);
+        expect(viewNotifications, 2);
+        rig.contexts.recordHome();
+        expect(viewNotifications, 2);
       },
     );
 
