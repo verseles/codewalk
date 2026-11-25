@@ -732,6 +732,11 @@ class _SessionsPageState extends State<SessionsPage> {
     final scheme = theme.colorScheme;
     final live = context.watch<SessionLiveDirectory?>() != null;
     final history = context.watch<SessionHistoryFactory?>() != null;
+    final ownership = displayedSessionOwnership(
+      row.info.ownership,
+      now: controller.now,
+      current: !controller.stale && !controller.behind,
+    );
     void openMenu() => _menuKey(row.info.ref).currentState?.showButtonMenu();
     final content = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -815,27 +820,20 @@ class _SessionsPageState extends State<SessionsPage> {
                         // The ownership the adapter proved, and nothing
                         // else: an unproven, stale or expired proof, and a
                         // list that is not the endpoint's current answer,
-                        // show unknown.
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            sessionOwnershipLabel(
-                              l10n,
-                              displayedSessionOwnership(
-                                row.info.ownership,
-                                now: controller.now,
-                                current:
-                                    !controller.stale && !controller.behind,
+                        // omit the subtitle instead of repeating unknown.
+                        if (ownership != OwnershipKind.unknown)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              sessionOwnershipLabel(l10n, ownership),
+                              key: ValueKey(
+                                'session-ownership-${row.info.ref.storageKey}',
+                              ),
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
                               ),
                             ),
-                            key: ValueKey(
-                              'session-ownership-${row.info.ref.storageKey}',
-                            ),
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
                           ),
-                        ),
                         if (controller.activityMarks(row) case final marks
                             when marks.isNotEmpty)
                           _activityMarks(context, row, marks),

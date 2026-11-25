@@ -65,8 +65,16 @@ void main() {
           ], next: 'A');
           await tester.pumpAndSettle();
           expect(find.text(l10n.sessionExportUntitled), findsOneWidget);
-          // The ownership label is on every row, in every locale and size.
-          expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+          // Unknown ownership omits the subtitle in every locale and size (#508).
+          expect(find.text(l10n.sessionsOwnershipUnknown), findsNothing);
+          expect(
+            find.byKey(
+              ValueKey(
+                'session-ownership-${source.row('first').info.ref.storageKey}',
+              ),
+            ),
+            findsNothing,
+          );
           final more = find.byKey(const ValueKey('sessions-more'));
           // The list is built lazily, so it scrolls until the control is
           // built and shown.
@@ -261,9 +269,17 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(ValueKey(source.row('second').info.ref)), findsOneWidget);
     expect(controller.sessions, hasLength(2));
-    // The label follows the rows the server just returned.
+    // The label follows the rows the server just returned; unknown is omitted.
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
-    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsNothing);
+    expect(
+      find.byKey(
+        ValueKey(
+          'session-ownership-${source.row('first').info.ref.storageKey}',
+        ),
+      ),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();
@@ -370,16 +386,24 @@ void main() {
     expect(find.text(l10n.sessionsOwnershipHostOwned), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipSavedHistory), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipRunningElsewhere), findsOneWidget);
-    // The session the adapter did not prove shows the unknown label.
-    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    // The session the adapter did not prove omits the ownership subtitle (#508).
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsNothing);
+    expect(
+      find.byKey(
+        ValueKey(
+          'session-ownership-${source.row('plain').info.ref.storageKey}',
+        ),
+      ),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();
   });
 
-  testWidgets('a list that is not the current answer shows unknown', (
-    tester,
-  ) async {
+  testWidgets(
+    'a list that is not the current answer omits the ownership subtitle',
+    (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
@@ -422,17 +446,22 @@ void main() {
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
 
     // A refresh in flight (the shortcut's, since the toolbar has none): the
-    // rows are not the endpoint's current answer, so the label falls back to
-    // unknown.
+    // rows are not the endpoint's current answer, so the label is omitted.
     unawaited(dependencies.sessions!.refresh());
     await tester.pump();
-    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsNothing);
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
+    expect(
+      find.byKey(
+        ValueKey('session-ownership-${fresh().info.ref.storageKey}'),
+      ),
+      findsNothing,
+    );
     source.respond([fresh()]);
     await tester.pumpAndSettle();
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
 
-    // A failed re-read marks the list as behind: same fallback. The
+    // A failed re-read marks the list as behind: same omission. The
     // automatic re-read waits for its cooldown.
     clock = clock.add(const Duration(seconds: 3));
     directory.feeds.last.emit(const SessionCatalogChanged());
@@ -442,8 +471,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text(l10n.liveStale), findsOneWidget);
-    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsNothing);
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
+    expect(
+      find.byKey(
+        ValueKey('session-ownership-${fresh().info.ref.storageKey}'),
+      ),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();
@@ -487,11 +522,19 @@ void main() {
 
     // The proof leaves its freshness window. The list wakes up at the
     // deadline, without any catalog event or user interaction, and the label
-    // falls back to unknown.
+    // is omitted.
     clock = clock.add(const Duration(minutes: 6));
     await tester.pump(const Duration(minutes: 6));
-    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsNothing);
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
+    expect(
+      find.byKey(
+        ValueKey(
+          'session-ownership-${source.row('proven').info.ref.storageKey}',
+        ),
+      ),
+      findsNothing,
+    );
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();
@@ -535,16 +578,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsOneWidget);
 
-    // The exact instant the proof leaves its window. The label becomes
-    // unknown and the deadline timer drains: it must not re-arm itself at
+    // The exact instant the proof leaves its window. The label is omitted
+    // and the deadline timer drains: it must not re-arm itself at
     // the boundary, which would keep the list awake forever.
     clock = clock.add(
       sessionOwnershipProofMaxAge + const Duration(microseconds: 1),
     );
     await tester.pump(const Duration(minutes: 6));
-    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsNothing);
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
     await tester.pumpAndSettle();
-    expect(find.text(l10n.sessionsOwnershipUnknown), findsOneWidget);
+    expect(find.text(l10n.sessionsOwnershipUnknown), findsNothing);
+    expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox.shrink());
     rig.dispose();

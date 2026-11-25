@@ -247,7 +247,7 @@ description of this code.
 - **Given** the v2 session catalog shows a row
 - **When** the row carries an ownership the adapter proved
 - **Then** the row shows that ownership's label — live shared, owned by this host, saved history or running elsewhere — under the title, in every locale and layout
-- **Then** a row whose ownership is not proven, whose proof is older than the display window or already expired, and a list that is not the endpoint's current answer, show the ownership unknown label
+- **Then** a row whose ownership is not proven, whose proof is older than the display window or already expired, and a list that is not the endpoint's current answer, omit the ownership subtitle instead of showing ownership unknown
 - **Then** the list wakes up at the end of a proof's freshness window, without any server traffic, so a label never outlives the proof that showed it
 - **Then** the label follows the rows the server just returned after a live re-read
 - **Then** no ownership is inferred from the endpoint address, the port, the profile or the server's title, and the label never authorizes an action
