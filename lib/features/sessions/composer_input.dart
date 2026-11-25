@@ -238,9 +238,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
         child: ExcludeSemantics(
           excluding: takes,
           child: IgnorePointer(
-            // While the mic moves, a tap at the end reaches the mic under it,
-            // never a Send still fading in or out (#501).
-            ignoring: takes || t > 0,
+            ignoring: takes,
             child: Opacity(
               opacity: 1 - t,
               child: SizedBox.square(
@@ -272,8 +270,10 @@ class _ComposerFrameState extends State<ComposerFrame> {
         height: composerActionSize,
         child: Stack(
           clipBehavior: Clip.none,
-          // Whichever stands at the end once the slide ends is on top, so the
-          // order, and what focus and screen readers meet, follows it.
+          // The end slot belongs to whichever control is arriving there: it
+          // is on top and takes a tap at once, even while the mic still
+          // slides, so a Send the user just made available never waits on
+          // the animation (#501).
           children: [
             if (takes) actionSlot(t),
             voiceSlot(t),
