@@ -453,6 +453,49 @@ void main() {
     await _closeApp(tester);
   });
 
+  testWidgets('recent shows at most two roots per open project (#512)', (
+    tester,
+  ) async {
+    SessionSummary timed(
+      CatalogSource source,
+      String id,
+      String directory,
+      int hour,
+    ) => SessionSummary(
+      info: source.row(id, directory: directory, title: id).info,
+      updatedAt: DateTime.utc(2026, 10, 12, hour),
+    );
+    final (_, rig, _) = await _open(
+      tester,
+      rows: (source) => [
+        timed(source, 'a3', '/work/alpha', 9),
+        timed(source, 'a2', '/work/alpha', 8),
+        timed(source, 'a1', '/work/alpha', 7),
+        timed(source, 'b3', '/work/beta', 6),
+        timed(source, 'b2', '/work/beta', 5),
+        timed(source, 'b1', '/work/beta', 4),
+        timed(source, 'c3', '/work/gamma', 3),
+        timed(source, 'c2', '/work/gamma', 2),
+        timed(source, 'c1', '/work/gamma', 1),
+      ],
+    );
+    final contexts = _contexts(tester);
+    expect(await contexts.openContext('/work/beta'), isTrue);
+    expect(await contexts.openContext('/work/gamma'), isTrue);
+    await tester.pumpAndSettle();
+
+    String keyOf(String id) =>
+        'recent-${rig.sources.single.row(id).info.ref.storageKey}';
+    for (final kept in ['a3', 'a2', 'b3', 'b2', 'c3', 'c2']) {
+      expect(find.byKey(ValueKey(keyOf(kept))), findsOneWidget, reason: kept);
+    }
+    for (final omitted in ['a1', 'b1', 'c1']) {
+      expect(find.byKey(ValueKey(keyOf(omitted))), findsNothing, reason: omitted);
+    }
+    expect(tester.takeException(), isNull);
+    await _closeApp(tester);
+  });
+
   testWidgets('diff-stat pseudo summaries are never rendered', (tester) async {
     await _open(
       tester,

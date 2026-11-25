@@ -65,29 +65,41 @@ List<SessionSummary> sortSessionsByRecent(List<SessionSummary> rows) {
   return [for (final (_, row) in indexed) row];
 }
 
-/// The recent root sessions across the open contexts: the [limit] most
-/// recently updated roots. Roots that [needsAttention] names come first, each
-/// band by its last update.
+/// The recent root sessions across the open contexts: at most
+/// [perProjectLimit] root sessions per project, with no global cap. Roots that
+/// [needsAttention] names come first, each band by its last update.
 List<SessionSummary> recentSessions(
   Iterable<SessionSummary> rows, {
-  int limit = 5,
+  int perProjectLimit = 2,
   bool Function(SessionSummary row)? needsAttention,
 }) {
-  final roots = [
-    for (final row in rows)
-      if (row.info.lineage.parent == null && row.updatedAt != null) row,
-  ];
+  if (perProjectLimit <= 0) return const [];
+  final roots = <(int, SessionSummary)>[];
+  var index = 0;
+  for (final row in rows) {
+    if (row.info.lineage.parent == null && row.updatedAt != null) {
+      roots.add((index++, row));
+    }
+  }
   bool attention(SessionSummary row) => needsAttention?.call(row) ?? false;
   roots.sort((a, b) {
-    final band = (attention(b) ? 1 : 0).compareTo(attention(a) ? 1 : 0);
+    final band = (attention(b.$2) ? 1 : 0).compareTo(attention(a.$2) ? 1 : 0);
     if (band != 0) return band;
-    return b.updatedAt!.compareTo(a.updatedAt!);
+    final byTime = b.$2.updatedAt!.compareTo(a.$2.updatedAt!);
+    return byTime != 0 ? byTime : a.$1.compareTo(b.$1);
   });
   final seen = <SessionRef>{};
-  return [
-    for (final row in roots)
-      if (seen.add(row.info.ref)) row,
-  ].take(limit).toList();
+  final perProject = <(HostId, String?), int>{};
+  final result = <SessionSummary>[];
+  for (final (_, row) in roots) {
+    if (!seen.add(row.info.ref)) continue;
+    final bucket = (row.info.ref.host, row.info.project?.canonicalDirectory);
+    final count = perProject[bucket] ?? 0;
+    if (count >= perProjectLimit) continue;
+    perProject[bucket] = count + 1;
+    result.add(row);
+  }
+  return result;
 }
 
 /// Whether a root session's unread reply is emphasized now: a completed run
