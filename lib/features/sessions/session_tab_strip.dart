@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -392,7 +393,7 @@ class _SessionTabsFrameState extends State<SessionTabsFrame>
             (profile == null ? null : HostId(profile.id));
         if (host == null) return _framed(null, widget.child, column: false);
         final tab = _tab;
-        final projection = widget.tabs.projection(host, active: _shownTab);
+        final projection = widget.tabs.projection(host);
         final drafting =
             widget.current == null && drafts?.isDraftActive == true;
         final directory = drafts?.currentKey?.canonicalDirectory;
@@ -554,7 +555,38 @@ class _StripState extends State<_Strip> {
   void _reveal() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final target = _shown.currentContext;
-      if (mounted && target != null) Scrollable.ensureVisible(target);
+      if (!mounted || target == null) return;
+      final renderObject = target.findRenderObject();
+      if (renderObject == null || !renderObject.attached) return;
+      final viewport = RenderAbstractViewport.maybeOf(renderObject);
+      final scrollable = Scrollable.maybeOf(target);
+      if (viewport == null || scrollable == null) return;
+      final position = scrollable.position;
+      if (!position.hasPixels || !position.hasViewportDimension) return;
+      final startAligned = viewport.getOffsetToReveal(renderObject, 0.0).offset;
+      final endAligned = viewport.getOffsetToReveal(renderObject, 1.0).offset;
+      final current = position.pixels;
+      const tolerance = 0.5;
+      if (startAligned >= endAligned) {
+        // Target fits in the viewport: its fully-visible scroll window is
+        // [endAligned, startAligned]. Leave scroll untouched when already
+        // inside that window so clicking a visible tab never shifts it.
+        if (current >= endAligned - tolerance &&
+            current <= startAligned + tolerance) {
+          return;
+        }
+        // Use explicit alignment (0.0 start / 1.0 end) rather than
+        // ScrollPositionAlignmentPolicy.keepVisibleAt*, which Flutter flips
+        // under RTL AxisDirection.left.
+        Scrollable.ensureVisible(
+          target,
+          alignment: current > startAligned ? 0.0 : 1.0,
+        );
+      } else if (current < startAligned - tolerance ||
+          current > endAligned + tolerance) {
+        // Target is wider than the viewport and not spanning it: show its start.
+        Scrollable.ensureVisible(target, alignment: 0.0);
+      }
     });
   }
 
@@ -682,7 +714,7 @@ class _StripState extends State<_Strip> {
               var draftAdded = false;
               for (final entry in projection.groups.entries) {
                 if (regular.isNotEmpty) regular.add(const SizedBox(width: 8));
-                // The projection already leads with the shown tab.
+                // Keep each project's tabs in their stable projected order.
                 for (final tab in entry.value) {
                   regular.add(
                     _tab(

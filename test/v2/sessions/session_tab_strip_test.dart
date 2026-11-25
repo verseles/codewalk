@@ -437,9 +437,9 @@ void main() {
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_three'],
     );
-    // The next displayed tab takes its place (the shown tab leads its group);
-    // Undo never navigates.
-    expect(_location(app), '/s/profile_a/ses_one');
+    // The next displayed tab takes its place in stable order; Undo never
+    // navigates.
+    expect(_location(app), '/s/profile_a/ses_three');
     expect(find.text(app.l10n.sessionTabClosedMessage('Two')), findsOneWidget);
 
     await tester.tap(find.text(app.l10n.sessionTabUndo));
@@ -448,7 +448,7 @@ void main() {
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_two', 'ses_three'],
     );
-    expect(_location(app), '/s/profile_a/ses_one');
+    expect(_location(app), '/s/profile_a/ses_three');
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -494,17 +494,17 @@ void main() {
 
     await _middleClose(tester, app, 'two');
     await _settle(tester);
-    expect(_location(app), '/s/profile_a/ses_one');
+    expect(_location(app), '/s/profile_a/ses_three');
     // The reader moves on before using the undo.
-    await _visit(tester, app, ['three']);
+    await _visit(tester, app, ['one']);
     await tester.tap(find.text(app.l10n.sessionTabUndo));
     await _settle(tester);
     expect(
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_two', 'ses_three'],
     );
-    expect(_location(app), '/s/profile_a/ses_three');
-    expect(tabs.selectedFor(_ref(app, 'three').host), _ref(app, 'three'));
+    expect(_location(app), '/s/profile_a/ses_one');
+    expect(tabs.selectedFor(_ref(app, 'one').host), _ref(app, 'one'));
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -523,17 +523,17 @@ void main() {
 
     await _middleClose(tester, app, 'two');
     await _settle(tester);
-    expect(_location(app), '/s/profile_a/ses_one');
+    expect(_location(app), '/s/profile_a/ses_three');
     await tester.tap(find.text(app.l10n.sessionTabUndo));
     // The reader moves on before the undo is saved.
-    app.dependencies.router.go('/s/profile_a/ses_three');
+    app.dependencies.router.go('/s/profile_a/ses_one');
     await _settle(tester);
     expect(
       [for (final tab in tabs.tabs) tab.ref.nativeId],
       ['ses_one', 'ses_two', 'ses_three'],
     );
-    expect(_location(app), '/s/profile_a/ses_three');
-    expect(tabs.selectedFor(_ref(app, 'three').host), _ref(app, 'three'));
+    expect(_location(app), '/s/profile_a/ses_one');
+    expect(tabs.selectedFor(_ref(app, 'one').host), _ref(app, 'one'));
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
@@ -549,13 +549,13 @@ void main() {
 
     // Both closes start before either is saved.
     await _middleClose(tester, app, 'two');
-    await _middleClose(tester, app, 'one');
+    await _middleClose(tester, app, 'three');
     await _settle(tester);
     expect(
       [for (final tab in app.dependencies.sessionTabs!.tabs) tab.ref.nativeId],
-      ['ses_three'],
+      ['ses_one'],
     );
-    expect(_location(app), '/s/profile_a/ses_three');
+    expect(_location(app), '/s/profile_a/ses_one');
     expect(find.byType(SessionLivePage), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
@@ -989,6 +989,110 @@ void main() {
     expect(find.byKey(const ValueKey('session-tabs')), findsOneWidget);
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  for (final (label, locale, rtl) in [
+    ('LTR', null, false),
+    ('RTL', const Locale('ar'), true),
+  ]) {
+    testWidgets(
+      'clicking a visible tab keeps its order and scroll offset in $label; off-screen tabs still reveal (#498)',
+      (tester) async {
+        _useMemoryPreferences();
+        final app = await _launch(
+          tester,
+          '/s/profile_a/ses_t1',
+          size: const Size(840, 800),
+        );
+        if (locale != null) {
+          app.dependencies.preferences.setLocale(locale);
+          await _settle(tester);
+        }
+        final source = app.rig.sources.single;
+        const ids = ['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8'];
+        source.respond([
+          for (final id in ids)
+            source.row(
+              id,
+              title: 'Session Tab ${id.toUpperCase()}',
+              directory: '/work/a',
+            ),
+        ]);
+        await _settle(tester);
+        await _visit(tester, app, ids);
+
+        final stripFinder = find.byKey(const ValueKey('session-tabs-regular'));
+        ScrollPosition scrollPosition() => tester
+            .state<ScrollableState>(
+              find.descendant(
+                of: stripFinder,
+                matching: find.byType(Scrollable),
+              ),
+            )
+            .position;
+        final position = scrollPosition();
+        expect(position.maxScrollExtent, greaterThan(200));
+
+        // Navigate back to t1 so t1 is revealed at the leading edge.
+        await _visit(tester, app, ['t1']);
+        expect(identical(scrollPosition(), position), isTrue);
+        expect(position.pixels, closeTo(0, 0.5));
+
+        // Scroll so t3 and t4 are both completely inside the viewport and well
+        // away from the leading edge, then tap t4 and t3: tab order and scroll
+        // offset must stay intact in both directions.
+        await _visit(tester, app, ['t3']);
+        final viewport = tester.getRect(stripFinder);
+        final t4Initial = tester.getRect(_tab(app, 't4'));
+        final delta = rtl
+            ? (viewport.left - t4Initial.left) + 40
+            : (t4Initial.right - viewport.right) + 40;
+        final targetOffset = (position.pixels + delta).clamp(
+          0.0,
+          position.maxScrollExtent,
+        );
+        position.jumpTo(targetOffset);
+        await _settle(tester);
+        final t4RectBefore = tester.getRect(_tab(app, 't4'));
+        if (rtl) {
+          expect(t4RectBefore.right, lessThan(viewport.right - 20));
+          expect(t4RectBefore.left, greaterThanOrEqualTo(viewport.left - 0.5));
+        } else {
+          expect(t4RectBefore.left, greaterThan(viewport.left + 20));
+          expect(t4RectBefore.right, lessThanOrEqualTo(viewport.right + 0.5));
+        }
+
+        final offsetBefore = position.pixels;
+        await tester.tap(_tab(app, 't4'));
+        await _settle(tester);
+        expect(_location(app), '/s/profile_a/ses_t4');
+        expect(position.pixels, closeTo(offsetBefore, 0.5));
+
+        // Clicking back to already-visible t3 also preserves the scroll offset.
+        await tester.tap(_tab(app, 't3'));
+        await _settle(tester);
+        expect(_location(app), '/s/profile_a/ses_t3');
+        expect(position.pixels, closeTo(offsetBefore, 0.5));
+        for (var i = 0; i < ids.length - 1; i++) {
+          final currentX = tester.getTopLeft(_tab(app, ids[i])).dx;
+          final nextX = tester.getTopLeft(_tab(app, ids[i + 1])).dx;
+          expect(currentX, rtl ? greaterThan(nextX) : lessThan(nextX));
+        }
+
+        // Activating an off-screen tab on the trailing (t8) or leading (t1)
+        // side still scrolls it into view.
+        await _visit(tester, app, ['t8']);
+        final t8Rect = tester.getRect(_tab(app, 't8'));
+        expect(t8Rect.left, greaterThanOrEqualTo(viewport.left - 0.5));
+        expect(t8Rect.right, lessThanOrEqualTo(viewport.right + 0.5));
+        await _visit(tester, app, ['t1']);
+        final t1Rect = tester.getRect(_tab(app, 't1'));
+        expect(t1Rect.left, greaterThanOrEqualTo(viewport.left - 0.5));
+        expect(t1Rect.right, lessThanOrEqualTo(viewport.right + 0.5));
+        expect(tester.takeException(), isNull);
+        await tester.pumpWidget(const SizedBox.shrink());
+      },
+    );
+  }
 
   testWidgets('the chat overflow opens the display choices', (tester) async {
     _useMemoryPreferences();

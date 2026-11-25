@@ -273,14 +273,14 @@ void tabsGroup() {
       for (final id in ['one', 'two', 'three']) {
         expect(tester.getSize(_tabOf(surface, id)).height, closeTo(38.4, 0.01));
       }
-      // The shown tab, `three`, leads its project group.
+      // Selecting `three` keeps the group's stable order (`one`, `two`, `three`).
       expect(
-        tester.getTopLeft(_tabOf(surface, 'three')).dx,
-        lessThan(tester.getTopLeft(_tabOf(surface, 'one')).dx),
+        tester.getTopLeft(_tabOf(surface, 'one')).dx,
+        lessThan(tester.getTopLeft(_tabOf(surface, 'two')).dx),
       );
       expect(
-        tester.getTopLeft(_tabOf(surface, 'three')).dx,
-        lessThan(tester.getTopLeft(_tabOf(surface, 'two')).dx),
+        tester.getTopLeft(_tabOf(surface, 'two')).dx,
+        lessThan(tester.getTopLeft(_tabOf(surface, 'three')).dx),
       );
       expect(_closeOf(surface, 'three'), findsOneWidget);
       for (final id in ['one', 'two']) {

@@ -220,11 +220,11 @@ void main() {
     }
     await tabs.open(_row('a', 'ses_2', directory: '/p'));
     const host = HostId('a');
-    // The first displayed tab of the rest (the shown tab leads its group),
-    // then the next one.
-    expect((await tabs.close(tabs.selectedFor(host)!)).next?.nativeId, 'ses_1');
-    expect(tabs.selectedFor(host)?.nativeId, 'ses_1');
+    // Stable displayed order is [ses_1, ses_2, ses_3]: closing ses_2 hands over
+    // to the next tab (ses_3), then closing the last tab falls back to ses_1.
     expect((await tabs.close(tabs.selectedFor(host)!)).next?.nativeId, 'ses_3');
+    expect(tabs.selectedFor(host)?.nativeId, 'ses_3');
+    expect((await tabs.close(tabs.selectedFor(host)!)).next?.nativeId, 'ses_1');
     expect((await tabs.close(tabs.selectedFor(host)!)).next, isNull);
     expect(tabs.selectedFor(host), isNull);
     expect(tabs.tabs, isEmpty);

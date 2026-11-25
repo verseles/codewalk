@@ -486,24 +486,23 @@ void main() {
   });
 
   testWidgets(
-    'the selected tab leads its project group, the others keep order',
+    'selecting a tab keeps its position in its project group (#498)',
     (tester) async {
       _useMemoryPreferences();
       final app = await _launch(tester);
       await _visit(tester, app, ['one', 'two', 'three']);
       double left(String id) => tester.getTopLeft(_tab(app, id)).dx;
-      expect(left('three'), lessThan(left('one')));
       expect(left('one'), lessThan(left('two')));
+      expect(left('two'), lessThan(left('three')));
 
-      // Showing another tab moves it to the front; the rest keep their order.
+      // Selecting another tab never reorders the group.
       await _visit(tester, app, ['one']);
-      // _ids are session ids (ses_*); _ref takes the short id.
-      final others = _ids(app)
-          .map((id) => id.replaceFirst('ses_', ''))
-          .where((id) => id != 'one')
-          .toList();
-      expect(left('one'), lessThan(left(others.first)));
-      expect(left(others.first), lessThan(left(others.last)));
+      expect(left('one'), lessThan(left('two')));
+      expect(left('two'), lessThan(left('three')));
+
+      await _visit(tester, app, ['two']);
+      expect(left('one'), lessThan(left('two')));
+      expect(left('two'), lessThan(left('three')));
       await tester.pumpWidget(const SizedBox.shrink());
     },
   );
@@ -531,17 +530,17 @@ void main() {
   ) async {
     _useMemoryPreferences();
     final app = await _launch(tester);
-    // Opening order is one, two, three, other; the strip shows three first.
-    await _visit(tester, app, ['one', 'two', 'three', 'other']);
-    await _visit(tester, app, ['three']);
+    // Opening order is one, other, two; the strip groups one and two before other.
+    await _visit(tester, app, ['one', 'other', 'two']);
+    await _visit(tester, app, ['one']);
     final close = find.byKey(
-      ValueKey('session-tab-close-${_ref(app, 'three').storageKey}'),
+      ValueKey('session-tab-close-${_ref(app, 'one').storageKey}'),
     );
     await tester.ensureVisible(close);
     await tester.tap(close);
     await _settle(tester);
-    // The next displayed tab is one, not other (the next in opening order).
-    expect(_location(app), '/s/profile_a/ses_one');
+    // The next displayed tab is two, not other (the next in opening order).
+    expect(_location(app), '/s/profile_a/ses_two');
     await tester.pumpWidget(const SizedBox.shrink());
   });
 

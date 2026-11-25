@@ -99,13 +99,8 @@ class SessionTabsController extends ChangeNotifier {
   Future<bool> forgetIcon(SessionRef ref) async =>
       await _icons?.removeWhere((iconRef, _) => iconRef == ref) ?? true;
 
-  SessionTabProjection projection(HostId host, {SessionRef? active}) =>
-      SessionTabProjection(
-        tabs: tabs,
-        host: host,
-        isPinned: isPinned,
-        active: active,
-      );
+  SessionTabProjection projection(HostId host) =>
+      SessionTabProjection(tabs: tabs, host: host, isPinned: isPinned);
 
   bool get loaded => _store.loaded;
 
@@ -467,7 +462,6 @@ class SessionTabsController extends ChangeNotifier {
       tabs: state.tabs.where((tab) => parentOf(tab.ref) == null),
       host: ref.host,
       isPinned: pinned ?? isPinned,
-      active: ref,
     );
     return parentOf(ref) == null
         ? projection.neighbour(ref)
