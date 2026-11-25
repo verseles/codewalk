@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:codewalk/shared/sessions/prompt_outbox.dart';
+import 'package:codewalk/shared/voice/speech_dictation.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 
 /// Records every call; each answer can be scripted.
@@ -176,3 +177,49 @@ PendingInput pendingRow(
   text: text,
   delivery: OpenValue.known(delivery),
 );
+
+/// A recognizer the test drives: it reports the words, levels and end.
+class FakeDictation implements SpeechDictation {
+  FakeDictation({this.supported = true, this.startsWith});
+
+  @override
+  final bool supported;
+
+  /// When set, the next start ends at once with this reason.
+  SpeechDictationEnd? startsWith;
+
+  int starts = 0;
+  int stops = 0;
+  int cancels = 0;
+  void Function(String words, bool done)? words;
+  void Function(double level)? level;
+  void Function(SpeechDictationEnd end)? end;
+
+  @override
+  Future<bool> start({
+    required void Function(String words, bool done) onWords,
+    required void Function(double level) onLevel,
+    required void Function(SpeechDictationEnd end) onEnd,
+  }) async {
+    starts++;
+    words = onWords;
+    level = onLevel;
+    end = onEnd;
+    if (startsWith case final reason?) {
+      onEnd(reason);
+      return false;
+    }
+    return true;
+  }
+
+  @override
+  Future<void> stop() async {
+    stops++;
+  }
+
+  @override
+  Future<void> cancel() async {
+    cancels++;
+    end?.call(SpeechDictationEnd.finished);
+  }
+}

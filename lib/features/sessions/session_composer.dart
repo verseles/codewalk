@@ -402,7 +402,8 @@ class _SessionComposerState extends State<SessionComposer> {
         ComposerNotice.attachmentTooLarge => l10n.composerAttachTooLarge,
         ComposerNotice.attachmentMissing => l10n.composerAttachReadFailed,
         ComposerNotice.uploadFailed => l10n.composerAttachUploadFailed,
-        ComposerNotice.uploadUnavailable => l10n.composerAttachUploadUnavailable,
+        ComposerNotice.uploadUnavailable =>
+          l10n.composerAttachUploadUnavailable,
       };
 
   static String _preview(String text) {
@@ -651,6 +652,20 @@ class _SessionComposerState extends State<SessionComposer> {
           status?.kind == ComposerStatusKind.idle &&
           _text.text.trim().isEmpty &&
           c.live.attachments.isEmpty;
+      final voiceEnabled =
+          !(c.sending && !_continuing) && !c.live.endpointOffline;
+      // On a phone or a small window the mic stands where the idle check
+      // would be, and slides back beside Send once there is something to
+      // send or work resumes (#501). Continue and the delivery choice return
+      // with the check.
+      final voiceTakesAction =
+          done &&
+          !waitingForLive &&
+          !c.sending &&
+          !c.live.stopping &&
+          !c.live.canStop &&
+          voiceEnabled &&
+          composerVoiceMayTakeAction(context);
       final choose = preferences == null
           ? null
           : () => _chooseSend(preferences);
@@ -763,10 +778,9 @@ class _SessionComposerState extends State<SessionComposer> {
                     voice: ComposerVoiceButton(
                       key: _voice,
                       text: _text,
-                      enabled:
-                          !(c.sending && !_continuing) &&
-                          !c.live.endpointOffline,
+                      enabled: voiceEnabled,
                     ),
+                    voiceTakesAction: voiceTakesAction,
                     chip: SessionModelChip(live: c.live),
                     field: (context, open) => Focus(
                       onKeyEvent: _key,

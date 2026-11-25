@@ -4,6 +4,7 @@ import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/voice/speech_dictation.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ Future<({LiveHandle handle, SessionRef ref, AppDependencies graph})> _open(
   WidgetTester tester,
   FakeOutbox outbox, {
   void Function(AppDependencies graph)? setUp,
+  SpeechDictation? dictation,
 }) async {
   tester.view.physicalSize = const Size(1280, 800);
   tester.view.devicePixelRatio = 1;
@@ -35,6 +37,7 @@ Future<({LiveHandle handle, SessionRef ref, AppDependencies graph})> _open(
     endpointProber: FakeProber(),
     sessionCatalogFactory: rig.create,
     sessionLiveDirectory: () => directory,
+    speechDictation: dictation,
   );
   addTearDown(graph.dispose);
   setUp?.call(graph);
@@ -98,6 +101,9 @@ Future<void> _doubleTap(WidgetTester tester, Finder target) async {
 
 Iterable<String> _submits(FakeOutbox outbox) =>
     outbox.calls.where((c) => c.startsWith('submit'));
+
+/// Without dictation the idle check keeps its place on a phone (#501).
+final _noVoice = FakeDictation(supported: false);
 
 final _input = find.byKey(const ValueKey('live-composer-input'));
 final _send = find.byKey(const ValueKey('live-composer-send'));
@@ -230,11 +236,45 @@ void main() {
     expect(glyph(), Symbols.check);
   });
 
+  testWidgets('on a phone the mic stands in for the idle check (#501)', (
+    tester,
+  ) async {
+    final opened = await _open(
+      tester,
+      FakeOutbox(),
+      dictation: FakeDictation(),
+    );
+    final mic = find.byKey(const ValueKey('composer-voice-button'));
+    // Idle and empty: the mic is where Send is, and Send takes no tap.
+    expect(tester.getRect(mic).center, tester.getRect(_send).center);
+    expect(_send.hitTestable(), findsNothing);
+    expect(_continues.hitTestable(), findsNothing);
+    // Typing brings Send back and the mic slides to its side.
+    await tester.enterText(_input, 'Hi');
+    await tester.pumpAndSettle();
+    expect(_send.hitTestable(), findsOneWidget);
+    expect(tester.getRect(mic).right, lessThan(tester.getRect(_send).left));
+    // Work in flight gives the end slot back to the action.
+    await tester.enterText(_input, '');
+    await _report(tester, opened, ExecutionKind.running);
+    expect(
+      tester.getRect(mic).right,
+      lessThan(
+        tester.getRect(find.byKey(const ValueKey('composer-action-slot'))).left,
+      ),
+    );
+  });
+
+  testWidgets('a desktop window keeps the idle check (#501)', (tester) async {
+    await _open(tester, FakeOutbox(), dictation: FakeDictation());
+    expect(_send.hitTestable(), findsOneWidget);
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
+
   testWidgets('a double tap on the empty Send continues once (#82)', (
     tester,
   ) async {
     final outbox = FakeOutbox();
-    final opened = await _open(tester, outbox);
+    final opened = await _open(tester, outbox, dictation: _noVoice);
     expect(tester.widget<IconButton>(_send).onPressed, isNull);
     // A single tap on the empty Send does nothing.
     await tester.tap(_send);
@@ -276,7 +316,7 @@ void main() {
     tester,
   ) async {
     final outbox = FakeOutbox()..holdSubmit = Completer<void>();
-    await _open(tester, outbox);
+    await _open(tester, outbox, dictation: _noVoice);
     // The send's indicator never settles while the send is held.
     await tester.tap(_send);
     await tester.pump(const Duration(milliseconds: 50));
@@ -365,7 +405,7 @@ void main() {
     tester,
   ) async {
     final outbox = FakeOutbox();
-    final opened = await _open(tester, outbox);
+    final opened = await _open(tester, outbox, dictation: _noVoice);
     final preferences = opened.graph.preferences;
     expect(preferences.composerQueue, isFalse);
     Future<void> send(String text) async {
@@ -440,7 +480,7 @@ void main() {
     tester,
   ) async {
     final outbox = FakeOutbox();
-    final opened = await _open(tester, outbox);
+    final opened = await _open(tester, outbox, dictation: _noVoice);
     final l10n = opened.graph.localizations.current;
     final preferences = opened.graph.preferences;
     // Shift+F10 from the empty field, which a keyboard user is typing in.

@@ -8,9 +8,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:provider/provider.dart';
 
+import '../../shared/layout/window_size_class.dart';
 import '../../shared/theme/app_surface_tokens.dart';
 import '../../shared/theme/chat_appearance.dart';
+import '../../shared/voice/speech_dictation.dart';
 
 /// The size of the round Send and Stop buttons beside the bubble.
 const composerActionSize = 42.0;
@@ -68,6 +71,12 @@ bool get composerAlwaysOpen => !const {
   TargetPlatform.fuchsia,
 }.contains(defaultTargetPlatform);
 
+/// Whether the mic may stand in for an idle Send here (#501): on a
+/// touch-first platform or a compact window (< 600 dp) that can dictate.
+bool composerVoiceMayTakeAction(BuildContext context) =>
+    (!composerAlwaysOpen || context.windowSizeClass.isCompact) &&
+    (context.read<SpeechDictation?>()?.supported ?? false);
+
 /// The rounded bubble the field and its controls sit in, without an outline.
 class ComposerBubble extends StatelessWidget {
   const ComposerBubble({super.key, required this.child});
@@ -104,6 +113,8 @@ class ComposerBubble extends StatelessWidget {
 /// the chip, and stays open elsewhere.
 /// Attach names what is coming and stays disabled until it does; [voice] is
 /// the mic, or a disabled one with [voiceTooltip] when none is given.
+/// While [voiceTakesAction] is set, the mic slides into the action's place
+/// and the action steps aside (#501).
 class ComposerFrame extends StatefulWidget {
   const ComposerFrame({
     super.key,
@@ -115,6 +126,7 @@ class ComposerFrame extends StatefulWidget {
     this.attachmentsStrip,
     this.voice,
     this.chip,
+    this.voiceTakesAction = false,
   });
 
   /// The field, given whether the composer is open.
@@ -126,6 +138,14 @@ class ComposerFrame extends StatefulWidget {
   final Widget? attachmentsStrip;
   final Widget? voice;
   final Widget? chip;
+
+  /// Whether the mic stands where [action] is: on a phone or a small window
+  /// while Send would only show the idle check (#501). The action is then
+  /// neither shown, tapped nor focused.
+  final bool voiceTakesAction;
+
+  /// How long the mic takes to slide between its place and the action's.
+  static const voiceSlide = Duration(milliseconds: 220);
 
   @override
   State<ComposerFrame> createState() => _ComposerFrameState();
@@ -206,6 +226,57 @@ class _ComposerFrameState extends State<ComposerFrame> {
     );
     final chip = widget.chip;
     const gap = SizedBox(width: 4);
+    final takes = widget.voiceTakesAction;
+    Widget actionSlot(double t) => PositionedDirectional(
+      key: const ValueKey('composer-action-slot'),
+      end: 0,
+      child: ExcludeFocus(
+        excluding: takes,
+        child: ExcludeSemantics(
+          excluding: takes,
+          child: IgnorePointer(
+            ignoring: takes,
+            child: Opacity(
+              opacity: 1 - t,
+              child: SizedBox.square(
+                dimension: composerActionSize,
+                child: widget.action,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    Widget voiceSlot(double t) => PositionedDirectional(
+      key: const ValueKey('composer-voice-slot'),
+      end: (composerActionSize + 4) * (1 - t),
+      child: voice,
+    );
+    // The mic and the action share one end slot, so the mic slides between
+    // its place and the action's without leaving its parent: a dictation in
+    // flight keeps going while it moves (#501).
+    final trailing = TweenAnimationBuilder<double>(
+      key: const ValueKey('composer-trailing'),
+      tween: Tween(end: takes ? 1 : 0),
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : ComposerFrame.voiceSlide,
+      curve: Curves.easeOutCubic,
+      builder: (context, t, _) => SizedBox(
+        width: composerActionSize * (2 - t) + 4 * (1 - t),
+        height: composerActionSize,
+        child: Stack(
+          clipBehavior: Clip.none,
+          // Whichever stands at the end is on top, so a tap there reaches it
+          // even while the mic is still sliding.
+          children: [
+            if (takes) actionSlot(t),
+            voiceSlot(t),
+            if (!takes) actionSlot(t),
+          ],
+        ),
+      ),
+    );
     // The controls are part of the field's region, so pressing one keeps a
     // desktop field's focus (#174).
     return Focus(
@@ -217,13 +288,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               ?widget.attachmentsStrip,
-              Row(
-                children: [
-                  if (!open) attach,
-                  field,
-                  if (!open) ...[voice, gap, widget.action],
-                ],
-              ),
+              Row(children: [if (!open) attach, field, if (!open) trailing]),
               // The second row stays in the tree, hidden, while the composer
               // is closed: a pick opened from the chip moves the focus away,
               // and the chip must outlive that to apply the pick.
@@ -244,7 +309,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
                           child: chip ?? const SizedBox.shrink(),
                         ),
                       ),
-                      if (open) ...[voice, gap, widget.action],
+                      if (open) trailing,
                     ],
                   ),
                 ),

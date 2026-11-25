@@ -8,6 +8,10 @@ Widget _frame({
   FocusNode? chip,
   String chipLabel = 'Model',
   bool autofocus = false,
+  bool voiceTakesAction = false,
+  Widget? voice,
+  TextDirection direction = TextDirection.ltr,
+  bool reducedMotion = false,
 }) => MaterialApp(
   home: Scaffold(
     body: Align(
@@ -17,6 +21,8 @@ Widget _frame({
         child: ComposerFrame(
           attachTooltip: 'Attach',
           voiceTooltip: 'Voice',
+          voice: voice,
+          voiceTakesAction: voiceTakesAction,
           chip: TextButton(
             key: const ValueKey('chip'),
             focusNode: chip,
@@ -39,7 +45,28 @@ Widget _frame({
       ),
     ),
   ),
+  builder: (context, child) => MediaQuery(
+    data: MediaQuery.of(context).copyWith(disableAnimations: reducedMotion),
+    child: Directionality(textDirection: direction, child: child!),
+  ),
 );
+
+/// A mic that counts its builds' State, to prove a move keeps it.
+class _Mic extends StatefulWidget {
+  const _Mic({super.key});
+
+  @override
+  State<_Mic> createState() => _MicState();
+}
+
+class _MicState extends State<_Mic> {
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    key: const ValueKey('mic'),
+    dimension: composerActionSize,
+    child: IconButton(onPressed: () {}, icon: const Icon(Icons.mic)),
+  );
+}
 
 void main() {
   late FocusNode field;
@@ -140,5 +167,134 @@ void main() {
       tester.getRect(find.byKey(const ValueKey('send'))).right,
       closeTo(bubble.right - 4, 0.5),
     );
+  });
+
+  group('the mic takes an idle Send\'s place (#501)', () {
+    const micKey = GlobalObjectKey('test mic');
+    Rect rect(WidgetTester tester, String key) =>
+        tester.getRect(find.byKey(ValueKey(key)));
+
+    testWidgets('it slides into the end slot and back, keeping its state', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          voice: const _Mic(key: micKey),
+        ),
+      );
+      final send = rect(tester, 'send');
+      final beside = rect(tester, 'mic');
+      expect(beside.right, closeTo(send.left - 4, 0.5));
+      final state = micKey.currentState;
+      final fieldWidth = tester.getSize(find.byKey(const ValueKey('field')));
+
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          voice: const _Mic(key: micKey),
+          voiceTakesAction: true,
+        ),
+      );
+      // Halfway through, the mic is between its place and Send's.
+      await tester.pump(ComposerFrame.voiceSlide ~/ 2);
+      final moving = rect(tester, 'mic');
+      expect(moving.left, greaterThan(beside.left));
+      expect(moving.left, lessThan(send.left));
+      await tester.pumpAndSettle();
+      expect(rect(tester, 'mic'), send);
+      expect(micKey.currentState, same(state));
+      // The field takes the room the pair left.
+      expect(
+        tester.getSize(find.byKey(const ValueKey('field'))).width,
+        greaterThan(fieldWidth.width),
+      );
+      // Send is neither tapped, read nor focused while the mic stands there.
+      expect(find.byKey(const ValueKey('send')).hitTestable(), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(ExcludeSemantics),
+          matching: find.byKey(const ValueKey('send')),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        tester
+            .widget<ExcludeSemantics>(
+              find
+                  .ancestor(
+                    of: find.byKey(const ValueKey('send')),
+                    matching: find.byType(ExcludeSemantics),
+                  )
+                  .first,
+            )
+            .excluding,
+        isTrue,
+      );
+
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          voice: const _Mic(key: micKey),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(rect(tester, 'mic'), beside);
+      expect(rect(tester, 'send'), send);
+      expect(micKey.currentState, same(state));
+      expect(find.byKey(const ValueKey('send')).hitTestable(), findsOneWidget);
+    });
+
+    testWidgets('it moves at once with reduced motion', (tester) async {
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          voice: const _Mic(key: micKey),
+        ),
+      );
+      final send = rect(tester, 'send');
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          voice: const _Mic(key: micKey),
+          voiceTakesAction: true,
+          reducedMotion: true,
+        ),
+      );
+      await tester.pump();
+      expect(rect(tester, 'mic'), send);
+    });
+
+    testWidgets('it keeps to the end edge right to left', (tester) async {
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          voice: const _Mic(key: micKey),
+          voiceTakesAction: true,
+          direction: TextDirection.rtl,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final bubble = rect(tester, 'composer-bubble');
+      expect(rect(tester, 'mic').left, closeTo(bubble.left + 4, 0.5));
+    });
+
+    testWidgets('it moves with the open row and back', (tester) async {
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          chip: chip,
+          voice: const _Mic(key: micKey),
+          voiceTakesAction: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final state = micKey.currentState;
+      field.requestFocus();
+      await tester.pump();
+      final bubble = rect(tester, 'composer-bubble');
+      expect(rect(tester, 'mic').right, closeTo(bubble.right - 4, 0.5));
+      expect(micKey.currentState, same(state));
+    });
   });
 }

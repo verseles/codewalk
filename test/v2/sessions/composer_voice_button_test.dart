@@ -8,52 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
+import 'composer_fakes.dart';
+
 /// A recognizer the test speaks through.
-class FakeDictation implements SpeechDictation {
-  FakeDictation({this.supported = true, this.startsWith});
-
-  @override
-  final bool supported;
-
-  /// When set, the next start ends at once with this reason.
-  SpeechDictationEnd? startsWith;
-
-  int starts = 0;
-  int stops = 0;
-  int cancels = 0;
-  void Function(String words, bool done)? words;
-  void Function(double level)? level;
-  void Function(SpeechDictationEnd end)? end;
-
-  @override
-  Future<bool> start({
-    required void Function(String words, bool done) onWords,
-    required void Function(double level) onLevel,
-    required void Function(SpeechDictationEnd end) onEnd,
-  }) async {
-    starts++;
-    words = onWords;
-    level = onLevel;
-    end = onEnd;
-    if (startsWith case final reason?) {
-      onEnd(reason);
-      return false;
-    }
-    return true;
-  }
-
-  @override
-  Future<void> stop() async {
-    stops++;
-  }
-
-  @override
-  Future<void> cancel() async {
-    cancels++;
-    end?.call(SpeechDictationEnd.finished);
-  }
-}
-
 final _mic = find.byKey(const ValueKey('composer-voice-button'));
 final _ball = find.byKey(const ValueKey('composer-voice-ball'));
 
