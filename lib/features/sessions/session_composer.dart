@@ -29,9 +29,10 @@ import 'session_composer_status.dart';
 import 'session_input_history.dart';
 import 'session_stop_button.dart';
 
-/// The live screen's composer: pending inbox chips, entries that still need
-/// the user and the text field, whose Send button, held, chooses steer or
-/// queue (#470). It edits the
+/// The live screen's composer: this device's sends that still need the user
+/// (prompts the harness holds wait in the timeline, #502) and the text
+/// field, whose Send button, held, chooses steer or queue (#470). It edits
+/// the
 /// session's draft, so typing never rebuilds the timeline, and a reopened
 /// lease or a tab shown again keeps the text.
 class SessionComposer extends StatefulWidget {
@@ -453,7 +454,9 @@ class _SessionComposerState extends State<SessionComposer> {
               onPressed: () => c.checkAgain(entry.commandId),
               child: Text(l10n.composerCheckAgain),
             ),
-          if (idle && uncertain && !fenced)
+          // A prompt the harness lists as waiting went: sending it again
+          // would only duplicate it.
+          if (idle && uncertain && !fenced && !c.waiting(c.live.state, entry))
             TextButton(
               key: ValueKey('live-row-again-$id'),
               // Enabled only with an empty field, which gets the text back

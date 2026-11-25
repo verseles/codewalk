@@ -75,9 +75,10 @@ ComposerActivity? composerActivity(SessionState? state, V2Localizations l10n) {
   for (var index = timeline.length - 1; index >= 0; index--) {
     final item = timeline[index];
     if (item is UserInput) {
-      // A prompt still waiting for the harness is not part of the turn yet
-      // (#502); the turn in flight goes on before it.
-      if (sessionPromptWaits(item)) continue;
+      // A prompt still waiting for the harness, or cancelled before it took
+      // it, is not part of the turn (#502); the turn in flight goes on
+      // before it.
+      if (!sessionPromptInConversation(item)) continue;
       break;
     }
     if (_isShell(item)) continue;

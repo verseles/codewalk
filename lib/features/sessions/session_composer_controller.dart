@@ -279,15 +279,36 @@ class SessionComposerController extends ChangeNotifier {
     };
     return [
       for (final entry in entries)
-        if (!shown.contains(entry.commandId) &&
-            (entry.source != OutboxSource.current ||
-                entry.state == SubmissionKind.uncertain ||
-                entry.state == SubmissionKind.rejected ||
-                entry.state == SubmissionKind.sending ||
-                (entry.state == SubmissionKind.admitted &&
-                    openFence(entry.fence))))
+        if (shown.contains(entry.commandId)
+            // A waiting prompt's bubble has no actions (#502), so one not
+            // confirmed or with a cancel unsettled still offers Check again.
+            ? entry.state == SubmissionKind.uncertain || openFence(entry.fence)
+            : (entry.source != OutboxSource.current ||
+                  entry.state == SubmissionKind.uncertain ||
+                  entry.state == SubmissionKind.rejected ||
+                  entry.state == SubmissionKind.sending ||
+                  (entry.state == SubmissionKind.admitted &&
+                      openFence(entry.fence))))
           entry,
     ];
+  }
+
+  /// Whether the harness lists [entry] as waiting: it took the prompt, so
+  /// sending it again would only duplicate it.
+  bool waiting(SessionState? state, OutboxEntry entry) =>
+      chips(state).any((chip) => chip.entry?.commandId == entry.commandId);
+
+  /// This device's text and attachments of the waiting prompt [id], when
+  /// this device sent it (#502).
+  ({String text, List<AttachmentRef> attachments})? sentHere(ItemId id) {
+    final native = live.nativeMessageOf(id);
+    if (native == null) return null;
+    for (final entry in entries) {
+      if (entry.source == OutboxSource.current && entry.messageId == native) {
+        return (text: entry.shownText, attachments: entry.attachments);
+      }
+    }
+    return null;
   }
 
   /// Returns whether the field may be cleared: only once the prompt belongs

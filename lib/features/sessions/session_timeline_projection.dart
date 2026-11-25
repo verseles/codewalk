@@ -612,23 +612,39 @@ bool sessionPromptWaits(UserInput input) => switch (input.delivery.known) {
 ///
 /// A waiting prompt is pinned after everything else, oldest first, until the
 /// harness delivers it: a prompt admitted as a [UserInput] leaves its place,
-/// and one the harness only lists in [pending] (a queued prompt, or one from
-/// another client) is shown from that entry. A cancelled prompt never joined
-/// the conversation and is not shown.
+/// with what belongs to the same message, and one the harness only lists in
+/// [pending] (a queued prompt, or one from another client) is shown from that
+/// entry, with this device's own text and attachments when [sentHere] knows
+/// them. A cancelled or rejected prompt never joined the conversation and is
+/// not shown. Without anything waiting, [items] comes back as it is.
 ({List<TimelineItem> items, List<UserInput> waiting}) sessionWaitingPrompts(
   List<TimelineItem> items,
   List<PendingInput> pending, {
   required HarnessRef harness,
+  ({String text, List<AttachmentRef> attachments})? Function(ItemId id)?
+  sentHere,
 }) {
+  if (pending.isEmpty &&
+      !items.any((item) => item is UserInput && _outsideConversation(item))) {
+    return (items: items, waiting: const []);
+  }
   final resident = <ItemId, UserInput>{};
+  final anchors = <MessageAnchor>{
+    for (final entry in pending) ?entry.anchor,
+    for (final item in items)
+      if (item is UserInput && sessionPromptWaits(item)) ?item.meta.anchor,
+  };
   final kept = <TimelineItem>[];
   for (final item in items) {
     if (item is UserInput) {
-      if (item.delivery.known == DeliveryState.cancelled) continue;
-      if (sessionPromptWaits(item)) {
-        resident[item.id] = item;
+      if (_outsideConversation(item)) {
+        if (sessionPromptWaits(item)) resident[item.id] = item;
         continue;
       }
+    } else if (anchors.contains(item.meta.anchor)) {
+      // Part of a waiting prompt's message, such as its context: it joins
+      // the conversation with the prompt.
+      continue;
     }
     kept.add(item);
   }
@@ -637,27 +653,32 @@ bool sessionPromptWaits(UserInput input) => switch (input.delivery.known) {
   final settled = {for (final item in kept) item.id};
   for (final entry in pending) {
     if (settled.contains(entry.id) || !shown.add(entry.id)) continue;
+    if (resident[entry.id] case final input?) {
+      waiting.add(input);
+      continue;
+    }
+    final own = sentHere?.call(entry.id);
     waiting.add(
-      resident[entry.id] ??
-          UserInput(
-            meta: ItemMeta(
-              id: entry.id,
-              generation: 'pending',
-              status: const OpenValue.known(ItemStatus.pending),
-              source: SourceProvenance(
-                harness: harness,
-                version: 'local',
-                nativeType: 'pendingInput',
-              ),
-              anchor: entry.anchor,
-            ),
-            text: entry.text,
-            delivery: OpenValue.known(
-              entry.delivery.known == Delivery.queue
-                  ? DeliveryState.queued
-                  : DeliveryState.accepted,
-            ),
+      UserInput(
+        meta: ItemMeta(
+          id: entry.id,
+          generation: 'pending',
+          status: const OpenValue.known(ItemStatus.pending),
+          source: SourceProvenance(
+            harness: harness,
+            version: 'local',
+            nativeType: 'pendingInput',
           ),
+          anchor: entry.anchor,
+        ),
+        text: own?.text ?? entry.text,
+        attachments: own?.attachments ?? const [],
+        delivery: OpenValue.known(
+          entry.delivery.known == Delivery.queue
+              ? DeliveryState.queued
+              : DeliveryState.accepted,
+        ),
+      ),
     );
   }
   for (final input in resident.values) {
@@ -665,6 +686,20 @@ bool sessionPromptWaits(UserInput input) => switch (input.delivery.known) {
   }
   return (items: kept, waiting: waiting);
 }
+
+/// Whether [input] is not part of the conversation (yet): waiting, or
+/// cancelled or rejected before the harness took it.
+bool _outsideConversation(UserInput input) =>
+    sessionPromptWaits(input) ||
+    switch (input.delivery.known) {
+      DeliveryState.cancelled || DeliveryState.rejected => true,
+      _ => false,
+    };
+
+/// Whether [input] belongs to the conversation: a prompt the harness took,
+/// not one still waiting, cancelled or rejected (#502).
+bool sessionPromptInConversation(UserInput input) =>
+    !_outsideConversation(input);
 
 /// The items a timeline shows: a succeeded turn needs no row of its own, the
 /// header already reports it; structured plan tools are shown in the task list

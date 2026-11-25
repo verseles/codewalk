@@ -767,11 +767,23 @@ final class _Draft {
       if (_delivers(old, item)) {
         // A prompt takes its place in the conversation when the harness
         // delivers it, after everything that arrived while it waited, which
-        // is where history puts it (#502).
+        // is where history puts it (#502); what belongs to its message, such
+        // as its context, follows it.
+        final anchor = item.meta.anchor;
+        timeline.removeAt(at);
+        final message = anchor == null
+            ? const <TimelineItem>[]
+            : [
+                for (final other in timeline)
+                  if (other.meta.anchor == anchor) other,
+              ];
         timeline
-          ..removeAt(at)
-          ..add(item);
-        itemOrder[item.id] = position;
+          ..removeWhere(message.contains)
+          ..add(item)
+          ..addAll(message);
+        for (final moved in [item, ...message]) {
+          itemOrder[moved.id] = position;
+        }
       } else {
         timeline[at] = item;
       }

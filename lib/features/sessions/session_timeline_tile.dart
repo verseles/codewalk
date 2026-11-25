@@ -432,10 +432,15 @@ class SessionTimelineTile extends StatelessWidget {
             builder: card,
             // Deliberate decision (owner, #502): a waiting prompt shows no
             // Cancel, nor any other action; it simply looks sent. Should a
-            // Cancel return, this is its place, a link at the bubble's
-            // bottom end, wired to the composer's cancel of this prompt:
+            // Cancel return, it is a link at the bubble's bottom end, under
+            // the body inside `card`, shown only for this device's prompts
+            // when the harness can cancel (`PromptOutbox.cancelsPending`).
+            // It needs an `onCancelWaiting` callback on this tile, passed
+            // down from the live page and calling
+            // `SessionComposerController.cancel` (or `takeBack` to edit) for
+            // the entry `sentHere` matches:
             //
-            // footer: Align(
+            // Align(
             //   alignment: AlignmentDirectional.bottomEnd,
             //   child: TextButton(
             //     key: ValueKey('waiting-cancel-${item.id.value}'),
@@ -460,8 +465,12 @@ class SessionTimelineTile extends StatelessWidget {
           child: isUser
               ? Semantics(
                   container: true,
+                  // A waiting prompt may be another client's: its state,
+                  // not its sender (#502).
                   label: waiting
-                      ? '${l10n.chatMessageYou}, ${item.delivery.known == DeliveryState.queued ? l10n.composerQueued : l10n.composerSteering}'
+                      ? item.delivery.known == DeliveryState.queued
+                            ? l10n.composerQueued
+                            : l10n.composerSteering
                       : l10n.chatMessageYou,
                   child: Align(
                     alignment: Alignment.center,

@@ -401,16 +401,24 @@ class _SessionLivePageState extends State<SessionLivePage>
           cut == null || anchor == null || anchor.compareTo(cut) < 0;
       // Prompts the harness still holds are pinned after the conversation
       // until it takes them (#502).
+      final timeline = state?.timeline ?? const <TimelineItem>[];
+      final pending = state?.pending ?? const <PendingInput>[];
       final (:items, :waiting) = sessionWaitingPrompts(
-        [
-          for (final item in state?.timeline ?? const <TimelineItem>[])
-            if (beforeCut(item.meta.anchor)) item,
-        ],
-        [
-          for (final entry in state?.pending ?? const <PendingInput>[])
-            if (beforeCut(entry.anchor)) entry,
-        ],
+        // Without a staged revert, the state's own list keeps its identity.
+        cut == null
+            ? timeline
+            : [
+                for (final item in timeline)
+                  if (beforeCut(item.meta.anchor)) item,
+              ],
+        cut == null
+            ? pending
+            : [
+                for (final entry in pending)
+                  if (beforeCut(entry.anchor)) entry,
+              ],
         harness: c.session.harnessRef,
+        sentHere: c.composer.sentHere,
       );
       // A settled session has no turn in flight, so a finished answer can be
       // offered to the reader from its start.
@@ -444,7 +452,10 @@ class _SessionLivePageState extends State<SessionLivePage>
         settled: settled,
         renderMode: appearance?.renderMode ?? ChatRenderMode.live,
       );
-      _searchItems = timelineItems;
+      // A waiting prompt is on screen, so search finds it too (#502).
+      _searchItems = waiting.isEmpty
+          ? timelineItems
+          : [...timelineItems, ...waiting];
       _searchReasoning = reasoning;
       _searchHeld = held;
       return Scaffold(
