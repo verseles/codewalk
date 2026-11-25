@@ -138,8 +138,10 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
         : type == _ended
         ? 'completed'
         : 'failed',
+    'reason': reason,
     'summary': type == _ended ? data['text'] : '',
     if (type == _failed) 'error': data['error'],
+    if (data.containsKey('tokens')) 'tokens': data['tokens'],
   })!;
   final source = SourceProvenance(
     harness: ref.harnessRef,
@@ -180,6 +182,7 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
         ),
         kind: const OpenValue.known(NoticeKind.compaction),
         text: presentation.text,
+        compaction: presentation.compaction,
       ),
     ),
     if (input != null &&
@@ -197,13 +200,24 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
 /// Shared by hydrated history and live durable frames; null is an unknown
 /// status, not a completed compaction. Error text follows the existing bounded
 /// credential-redaction policy. All provider fields are deliberately ignored.
-({ItemStatus status, String text})? openCodeCompactionNotice(
-  Map<String, Object?> data,
-) {
+({ItemStatus status, String text, CompactionInfo? compaction})?
+openCodeCompactionNotice(Map<String, Object?> data) {
   final status = _text(data['status'], cap: 32);
+  if (status != 'running' && status != 'completed' && status != 'failed') {
+    return null;
+  }
+  final compaction = _compactionInfo(data);
   return switch (status) {
-    'running' => (status: ItemStatus.streaming, text: _text(data['summary'])),
-    'completed' => (status: ItemStatus.completed, text: _text(data['summary'])),
+    'running' => (
+      status: ItemStatus.streaming,
+      text: _text(data['summary']),
+      compaction: compaction,
+    ),
+    'completed' => (
+      status: ItemStatus.completed,
+      text: _text(data['summary']),
+      compaction: compaction,
+    ),
     'failed' => () {
       final error = _object(data['error']);
       final type = _text(error['type'], cap: 4096);
@@ -217,10 +231,56 @@ List<SessionEvent> projectOpenCodeCompactionEvent(
       } on FormatException {
         _fail(OpenCodeCompactionProjectionFailure.malformed);
       }
-      return (status: ItemStatus.failed, text: info.rawMessage);
+      return (
+        status: ItemStatus.failed,
+        text: info.rawMessage,
+        compaction: compaction,
+      );
     }(),
     _ => null,
   };
+}
+
+CompactionInfo? _compactionInfo(Map<String, Object?> data) {
+  OpenValue<CompactionTrigger>? trigger;
+  final rawReason = data['reason'];
+  if (rawReason != null) {
+    final reason = _text(rawReason, cap: 32);
+    if (reason == 'auto') {
+      trigger = const OpenValue.known(CompactionTrigger.automatic);
+    } else if (reason == 'manual') {
+      trigger = const OpenValue.known(CompactionTrigger.requested);
+    } else if (reason.trim().isNotEmpty) {
+      trigger = OpenValue.unknown(reason.trim());
+    }
+  }
+  TokenBreakdown? usage;
+  final rawTokens = data['tokens'];
+  if (rawTokens != null) {
+    final tokens = _object(rawTokens);
+    final rawCache = tokens['cache'];
+    final cache = rawCache == null ? null : _object(rawCache);
+    usage = TokenBreakdown(
+      input: _optionalAmount(tokens['input']),
+      output: _optionalAmount(tokens['output']),
+      reasoning: _optionalAmount(tokens['reasoning']),
+      cacheRead: cache == null ? null : _optionalAmount(cache['read']),
+      cacheWrite: cache == null ? null : _optionalAmount(cache['write']),
+    );
+  }
+  if (trigger == null && usage == null) return null;
+  return CompactionInfo(trigger: trigger, usage: usage);
+}
+
+num? _optionalAmount(Object? value) {
+  if (value == null) return null;
+  if (value is! num ||
+      !value.isFinite ||
+      value < 0 ||
+      value > 9007199254740991) {
+    _fail(OpenCodeCompactionProjectionFailure.malformed);
+  }
+  return value;
 }
 
 Map<String, Object?> _object(Object? value) {

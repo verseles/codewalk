@@ -2024,5 +2024,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "他に {count} 件進行中",
   "sessionTodoStatusPending": "保留中",
-  "sessionTodoProgressSemantic": "{total} 件中 {completed} 件のタスクが完了"
+  "sessionTodoProgressSemantic": "{total} 件中 {completed} 件のタスクが完了",
+  "liveCompactionRunning": "コンテキストを圧縮中…",
+  "liveCompactionCompleted": "コンテキストを圧縮しました",
+  "liveCompactionFailed": "コンテキストの圧縮に失敗しました",
+  "liveCompactionInterrupted": "コンテキストの圧縮が中断されました",
+  "liveCompactionUsage": "{input} 入力 · {output} 出力",
+  "liveCompactionTriggerAuto": "自動",
+  "liveCompactionTriggerManual": "手動"
 }

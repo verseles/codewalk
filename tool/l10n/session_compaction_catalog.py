@@ -1,0 +1,168 @@
+"""Timeline context compaction notice localization catalog."""
+
+NEW_KEYS = (
+    "liveCompactionRunning",
+    "liveCompactionCompleted",
+    "liveCompactionFailed",
+    "liveCompactionInterrupted",
+    "liveCompactionUsage",
+    "liveCompactionTriggerAuto",
+    "liveCompactionTriggerManual",
+)
+
+METADATA = {
+    "liveCompactionRunning": {
+        "description": "Centered timeline divider label while context compaction is in progress",
+    },
+    "liveCompactionCompleted": {
+        "description": "Centered timeline divider label after context compaction completes",
+    },
+    "liveCompactionFailed": {
+        "description": "Centered timeline divider label when context compaction fails",
+    },
+    "liveCompactionInterrupted": {
+        "description": "Centered timeline divider label when context compaction is interrupted",
+    },
+    "liveCompactionUsage": {
+        "description": "Compact token usage summary inside an expanded compaction notice",
+        "placeholders": {
+            "input": {"type": "String"},
+            "output": {"type": "String"},
+        },
+    },
+    "liveCompactionTriggerAuto": {
+        "description": "Label for an automatic context compaction trigger",
+    },
+    "liveCompactionTriggerManual": {
+        "description": "Label for a manually requested context compaction trigger",
+    },
+}
+
+COPY = {
+    "en": (
+        "Compacting context…",
+        "Context compacted",
+        "Context compaction failed",
+        "Context compaction interrupted",
+        "{input} in · {output} out",
+        "Automatic",
+        "Manual",
+    ),
+    "pt": (
+        "Compactando contexto…",
+        "Contexto compactado",
+        "Falha ao compactar contexto",
+        "Compactação de contexto interrompida",
+        "{input} entrada · {output} saída",
+        "Automática",
+        "Manual",
+    ),
+    "es": (
+        "Compactando contexto…",
+        "Contexto compactado",
+        "Error al compactar el contexto",
+        "Compactación de contexto interrumpida",
+        "{input} entrada · {output} salida",
+        "Automática",
+        "Manual",
+    ),
+    "fr": (
+        "Compactage du contexte…",
+        "Contexte compacté",
+        "Échec du compactage du contexte",
+        "Compactage du contexte interrompu",
+        "{input} entrée · {output} sortie",
+        "Automatique",
+        "Manuel",
+    ),
+    "de": (
+        "Kontext wird komprimiert…",
+        "Kontext komprimiert",
+        "Kontextkomprimierung fehlgeschlagen",
+        "Kontextkomprimierung unterbrochen",
+        "{input} Eingabe · {output} Ausgabe",
+        "Automatisch",
+        "Manuell",
+    ),
+    "it": (
+        "Compattazione del contesto…",
+        "Contesto compattato",
+        "Compattazione del contesto non riuscita",
+        "Compattazione del contesto interrotta",
+        "{input} ingresso · {output} uscita",
+        "Automatica",
+        "Manuale",
+    ),
+    "ru": (
+        "Сжатие контекста…",
+        "Контекст сжат",
+        "Не удалось сжать контекст",
+        "Сжатие контекста прервано",
+        "{input} вход · {output} выход",
+        "Автоматически",
+        "Вручную",
+    ),
+    "ja": (
+        "コンテキストを圧縮中…",
+        "コンテキストを圧縮しました",
+        "コンテキストの圧縮に失敗しました",
+        "コンテキストの圧縮が中断されました",
+        "{input} 入力 · {output} 出力",
+        "自動",
+        "手動",
+    ),
+    "ko": (
+        "컨텍스트 압축 중…",
+        "컨텍스트 압축됨",
+        "컨텍스트 압축 실패",
+        "컨텍스트 압축 중단됨",
+        "{input} 입력 · {output} 출력",
+        "자동",
+        "수동",
+    ),
+    "zh": (
+        "正在压缩上下文…",
+        "上下文已压缩",
+        "上下文压缩失败",
+        "上下文压缩已中断",
+        "{input} 输入 · {output} 输出",
+        "自动",
+        "手动",
+    ),
+    "hi": (
+        "संदर्भ संपीड़ित हो रहा है…",
+        "संदर्भ संपीड़ित हुआ",
+        "संदर्भ संपीड़न विफल",
+        "संदर्भ संपीड़न बाधित",
+        "{input} इनपुट · {output} आउटपुट",
+        "स्वचालित",
+        "मैनुअल",
+    ),
+    "bn": (
+        "প্রসঙ্গ সংকুচিত হচ্ছে…",
+        "প্রসঙ্গ সংকুচিত হয়েছে",
+        "প্রসঙ্গ সংকোচন ব্যর্থ হয়েছে",
+        "প্রসঙ্গ সংকোচন ব্যাহত হয়েছে",
+        "{input} ইনপুট · {output} আউটপুট",
+        "স্বয়ংক্রিয়",
+        "ম্যানুয়াল",
+    ),
+    "ar": (
+        "جارٍ ضغط السياق…",
+        "تم ضغط السياق",
+        "فشل ضغط السياق",
+        "توقّف ضغط السياق",
+        "{input} إدخال · {output} إخراج",
+        "تلقائي",
+        "يدوي",
+    ),
+    "ur": (
+        "سیاق و سباق کمپیکٹ ہو رہا ہے…",
+        "سیاق و سباق کمپیکٹ ہو گیا",
+        "سیاق و سباق کمپیکٹ ناکام ہوا",
+        "سیاق و سباق کمپیکٹ منقطع ہوا",
+        "{input} ان پٹ · {output} آؤٹ پٹ",
+        "خودکار",
+        "دستی",
+    ),
+}

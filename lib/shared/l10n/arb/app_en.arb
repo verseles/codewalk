@@ -3614,5 +3614,41 @@
         "type": "int"
       }
     }
+  },
+  "liveCompactionRunning": "Compacting context…",
+  "@liveCompactionRunning": {
+    "description": "Centered timeline divider label while context compaction is in progress"
+  },
+  "liveCompactionCompleted": "Context compacted",
+  "@liveCompactionCompleted": {
+    "description": "Centered timeline divider label after context compaction completes"
+  },
+  "liveCompactionFailed": "Context compaction failed",
+  "@liveCompactionFailed": {
+    "description": "Centered timeline divider label when context compaction fails"
+  },
+  "liveCompactionInterrupted": "Context compaction interrupted",
+  "@liveCompactionInterrupted": {
+    "description": "Centered timeline divider label when context compaction is interrupted"
+  },
+  "liveCompactionUsage": "{input} in · {output} out",
+  "@liveCompactionUsage": {
+    "description": "Compact token usage summary inside an expanded compaction notice",
+    "placeholders": {
+      "input": {
+        "type": "String"
+      },
+      "output": {
+        "type": "String"
+      }
+    }
+  },
+  "liveCompactionTriggerAuto": "Automatic",
+  "@liveCompactionTriggerAuto": {
+    "description": "Label for an automatic context compaction trigger"
+  },
+  "liveCompactionTriggerManual": "Manual",
+  "@liveCompactionTriggerManual": {
+    "description": "Label for a manually requested context compaction trigger"
   }
 }

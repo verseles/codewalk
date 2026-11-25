@@ -2062,5 +2062,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "{count}개 더 진행 중",
   "sessionTodoStatusPending": "대기 중",
-  "sessionTodoProgressSemantic": "작업 {total}개 중 {completed}개 완료"
+  "sessionTodoProgressSemantic": "작업 {total}개 중 {completed}개 완료",
+  "liveCompactionRunning": "컨텍스트 압축 중…",
+  "liveCompactionCompleted": "컨텍스트 압축됨",
+  "liveCompactionFailed": "컨텍스트 압축 실패",
+  "liveCompactionInterrupted": "컨텍스트 압축 중단됨",
+  "liveCompactionUsage": "{input} 입력 · {output} 출력",
+  "liveCompactionTriggerAuto": "자동",
+  "liveCompactionTriggerManual": "수동"
 }

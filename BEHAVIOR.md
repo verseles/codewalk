@@ -569,7 +569,8 @@ description of this code.
 
 - **Given** a verified OpenCode 2.0.22 session compacts its context, including a compaction started from another client
 - **When** history or the durable stream reports its state
-- **Then** one canonical compaction notice keeps its identity from running to completed or failed; completion shows the complete summary, and failure uses the bounded, redacted error message
+- **Then** one canonical compaction notice keeps its identity from running to completed or failed; completion shows the complete summary, and failure uses the bounded, redacted error message; optional trigger (`automatic`/`requested`) and compaction token usage are preserved on `Notice.compaction` when reported (#520)
+- **Then** every compaction notice (automatic or manual, live or history, including streaming in Block render mode) renders as a unified centered hairline divider with a 48 dp height—never a generic "Details" card: running shows a spinner (`Compacting context…`), completed shows `Context compacted` with its Markdown summary and optional trigger/usage counts collapsed until tapped, interrupted shows `Context compaction interrupted`, and failed shows an error-styled divider expanding the bounded redacted plain error text (#520)
 - **Then** partial summary deltas, opaque provider state and the recent-context copy never appear in that notice; a future status stays an explicit unknown item
 - **Then** replaying an old terminal never completes a newer notice with a known different event identity; a terminal whose target cannot be proven after hydration triggers a bounded authoritative re-read without a guessed duplicate or transient overwrite
 - **Then** an admitted compaction leaves the pending list when its matching start is observed; HTTP admission alone never proves completion
@@ -590,7 +591,7 @@ description of this code.
 - **Then** it is a light line like the agent and model switch notes: an info mark and muted small text on one line with an ellipsis, centered, with no card and no error color; a tap opens the whole note, rendered as Markdown with links, file paths and code copy working (with its leading icon collapsing the expanded rich note so links and text selection never fight the toggle), and a second tap folds a plain note
 - **Then** a text wholly inside one `<system-reminder>`, `<system-update>`, `<fork-notice>`, or background-job `<background-result>` envelope shows without the envelope; skill activations (`session.skill.activated` / history `skill`) and location moves (`session.moved` / history `location-switched` when the directory actually changed) render as quiet light lines (with `session.moved` also refreshing the session's location catalog); any other text, and anything the user typed, stays as written; the row's description and metadata are never shown
 - **Then** the reminder is never pending input: the composer shows no waiting pill for it, a cancelled reminder stays as a stopped note, and one admitted again under the same ID starts over
-- **Then** reminders never keep a finished turn's work open and stay in sight beside the folded work; a system note, a compaction that ended with a summary, and an unknown part are light lines too, while a compaction that failed, or has nothing to say yet, keeps its card
+- **Then** reminders never keep a finished turn's work open and stay in sight beside the folded work; a system note and an unknown part are light lines too, while context compaction notices always use their dedicated centered compaction divider (#520)
 
 ### V2 message gestures
 

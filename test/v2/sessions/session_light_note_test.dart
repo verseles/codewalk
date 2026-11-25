@@ -36,7 +36,11 @@ Notice _notice(
   text: text,
 );
 
-Future<void> _pump(WidgetTester tester, List<TimelineItem> items) async {
+Future<void> _pump(
+  WidgetTester tester,
+  List<TimelineItem> items, {
+  bool settle = true,
+}) async {
   await tester.pumpWidget(
     MaterialApp(
       localizationsDelegates: V2Localizations.localizationsDelegates,
@@ -53,7 +57,11 @@ Future<void> _pump(WidgetTester tester, List<TimelineItem> items) async {
       ),
     ),
   );
-  await tester.pumpAndSettle();
+  if (settle) {
+    await tester.pumpAndSettle();
+  } else {
+    await tester.pump();
+  }
 }
 
 void main() {
@@ -300,9 +308,7 @@ void main() {
     expect(tester.getSize(note).height, greaterThan(closed));
   });
 
-  testWidgets('system notes, compactions and unknown parts are light too', (
-    tester,
-  ) async {
+  testWidgets('system notes and unknown parts are light too', (tester) async {
     await _pump(tester, [
       _notice('s', NoticeKind.system, 'Instructions updated'),
       _notice('c', NoticeKind.compaction, 'Compacted'),
@@ -312,13 +318,17 @@ void main() {
         raw: CanonicalValue(const {}),
       ),
     ]);
-    for (final id in ['s', 'c', 'u']) {
+    for (final id in ['s', 'u']) {
       expect(
         find.byKey(ValueKey('timeline-note-test/$id')),
         findsOneWidget,
         reason: id,
       );
     }
+    expect(
+      find.byKey(const ValueKey('timeline-compaction-test/c')),
+      findsOneWidget,
+    );
     expect(find.byType(Card), findsNothing);
     // An unknown part never shows its raw content.
     expect(find.textContaining('future'), findsNothing);
@@ -341,14 +351,17 @@ void main() {
     );
   });
 
-  testWidgets('a compaction with nothing to say yet keeps its card', (
+  testWidgets('a streaming compaction shows its divider instead of a card', (
     tester,
   ) async {
     await _pump(tester, [
       _notice('k', NoticeKind.compaction, '', status: ItemStatus.streaming),
-    ]);
-    expect(find.byKey(const ValueKey('timeline-note-test/k')), findsNothing);
-    expect(find.byType(Card), findsOneWidget);
+    ], settle: false);
+    expect(
+      find.byKey(const ValueKey('timeline-compaction-test/k')),
+      findsOneWidget,
+    );
+    expect(find.byType(Card), findsNothing);
   });
 
   testWidgets('a note with no text takes no room', (tester) async {
@@ -358,7 +371,9 @@ void main() {
     expect(find.byType(Icon), findsNothing);
   });
 
-  testWidgets('a compaction that failed keeps its card', (tester) async {
+  testWidgets('a failed compaction shows its divider instead of a card', (
+    tester,
+  ) async {
     await _pump(tester, [
       _notice(
         'f',
@@ -367,7 +382,10 @@ void main() {
         status: ItemStatus.failed,
       ),
     ]);
-    expect(find.byKey(const ValueKey('timeline-note-test/f')), findsNothing);
-    expect(find.byType(Card), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('timeline-compaction-test/f')),
+      findsOneWidget,
+    );
+    expect(find.byType(Card), findsNothing);
   });
 }

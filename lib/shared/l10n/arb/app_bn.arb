@@ -2024,5 +2024,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "আরও {count}টি চলছে",
   "sessionTodoStatusPending": "অপেক্ষমাণ",
-  "sessionTodoProgressSemantic": "{total}টি কাজের মধ্যে {completed}টি সম্পন্ন"
+  "sessionTodoProgressSemantic": "{total}টি কাজের মধ্যে {completed}টি সম্পন্ন",
+  "liveCompactionRunning": "প্রসঙ্গ সংকুচিত হচ্ছে…",
+  "liveCompactionCompleted": "প্রসঙ্গ সংকুচিত হয়েছে",
+  "liveCompactionFailed": "প্রসঙ্গ সংকোচন ব্যর্থ হয়েছে",
+  "liveCompactionInterrupted": "প্রসঙ্গ সংকোচন ব্যাহত হয়েছে",
+  "liveCompactionUsage": "{input} ইনপুট · {output} আউটপুট",
+  "liveCompactionTriggerAuto": "স্বয়ংক্রিয়",
+  "liveCompactionTriggerManual": "ম্যানুয়াল"
 }

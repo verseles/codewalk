@@ -2934,4 +2934,27 @@ class V2LocalizationsAr extends V2Localizations {
   String sessionTodoProgressSemantic(int completed, int total) {
     return 'تم إنجاز $completed من $total مهام';
   }
+
+  @override
+  String get liveCompactionRunning => 'جارٍ ضغط السياق…';
+
+  @override
+  String get liveCompactionCompleted => 'تم ضغط السياق';
+
+  @override
+  String get liveCompactionFailed => 'فشل ضغط السياق';
+
+  @override
+  String get liveCompactionInterrupted => 'توقّف ضغط السياق';
+
+  @override
+  String liveCompactionUsage(String input, String output) {
+    return '$input إدخال · $output إخراج';
+  }
+
+  @override
+  String get liveCompactionTriggerAuto => 'تلقائي';
+
+  @override
+  String get liveCompactionTriggerManual => 'يدوي';
 }

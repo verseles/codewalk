@@ -625,7 +625,8 @@ List<TimelineItem> projectOpenCodeHistory(
           ),
         );
       case 'compaction':
-        final ({ItemStatus status, String text})? compact;
+        final ({ItemStatus status, String text, CompactionInfo? compaction})?
+        compact;
         try {
           compact = openCodeCompactionNotice(message);
         } on OpenCodeCompactionProjectionException {
@@ -644,6 +645,7 @@ List<TimelineItem> projectOpenCodeHistory(
             meta: meta('notice', 0, status: OpenValue.known(compact.status)),
             kind: const OpenValue.known(NoticeKind.compaction),
             text: text(compact.text),
+            compaction: compact.compaction,
           ),
         );
       case 'skill':

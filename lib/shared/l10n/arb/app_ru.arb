@@ -2024,5 +2024,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "ещё {count} в работе",
   "sessionTodoStatusPending": "Ожидает",
-  "sessionTodoProgressSemantic": "Выполнено {completed} из {total} задач"
+  "sessionTodoProgressSemantic": "Выполнено {completed} из {total} задач",
+  "liveCompactionRunning": "Сжатие контекста…",
+  "liveCompactionCompleted": "Контекст сжат",
+  "liveCompactionFailed": "Не удалось сжать контекст",
+  "liveCompactionInterrupted": "Сжатие контекста прервано",
+  "liveCompactionUsage": "{input} вход · {output} выход",
+  "liveCompactionTriggerAuto": "Автоматически",
+  "liveCompactionTriggerManual": "Вручную"
 }

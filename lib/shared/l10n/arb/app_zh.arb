@@ -2024,5 +2024,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "另有 {count} 项进行中",
   "sessionTodoStatusPending": "待处理",
-  "sessionTodoProgressSemantic": "已完成 {completed}/{total} 项任务"
+  "sessionTodoProgressSemantic": "已完成 {completed}/{total} 项任务",
+  "liveCompactionRunning": "正在压缩上下文…",
+  "liveCompactionCompleted": "上下文已压缩",
+  "liveCompactionFailed": "上下文压缩失败",
+  "liveCompactionInterrupted": "上下文压缩已中断",
+  "liveCompactionUsage": "{input} 输入 · {output} 输出",
+  "liveCompactionTriggerAuto": "自动",
+  "liveCompactionTriggerManual": "手动"
 }

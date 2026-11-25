@@ -2024,5 +2024,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "{count} और प्रगति पर",
   "sessionTodoStatusPending": "लंबित",
-  "sessionTodoProgressSemantic": "{total} में से {completed} कार्य पूर्ण"
+  "sessionTodoProgressSemantic": "{total} में से {completed} कार्य पूर्ण",
+  "liveCompactionRunning": "संदर्भ संपीड़ित हो रहा है…",
+  "liveCompactionCompleted": "संदर्भ संपीड़ित हुआ",
+  "liveCompactionFailed": "संदर्भ संपीड़न विफल",
+  "liveCompactionInterrupted": "संदर्भ संपीड़न बाधित",
+  "liveCompactionUsage": "{input} इनपुट · {output} आउटपुट",
+  "liveCompactionTriggerAuto": "स्वचालित",
+  "liveCompactionTriggerManual": "मैनुअल"
 }

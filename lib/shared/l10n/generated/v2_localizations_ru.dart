@@ -2984,4 +2984,27 @@ class V2LocalizationsRu extends V2Localizations {
   String sessionTodoProgressSemantic(int completed, int total) {
     return 'Выполнено $completed из $total задач';
   }
+
+  @override
+  String get liveCompactionRunning => 'Сжатие контекста…';
+
+  @override
+  String get liveCompactionCompleted => 'Контекст сжат';
+
+  @override
+  String get liveCompactionFailed => 'Не удалось сжать контекст';
+
+  @override
+  String get liveCompactionInterrupted => 'Сжатие контекста прервано';
+
+  @override
+  String liveCompactionUsage(String input, String output) {
+    return '$input вход · $output выход';
+  }
+
+  @override
+  String get liveCompactionTriggerAuto => 'Автоматически';
+
+  @override
+  String get liveCompactionTriggerManual => 'Вручную';
 }

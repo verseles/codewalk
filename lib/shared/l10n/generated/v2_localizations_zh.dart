@@ -2778,4 +2778,27 @@ class V2LocalizationsZh extends V2Localizations {
   String sessionTodoProgressSemantic(int completed, int total) {
     return '已完成 $completed/$total 项任务';
   }
+
+  @override
+  String get liveCompactionRunning => '正在压缩上下文…';
+
+  @override
+  String get liveCompactionCompleted => '上下文已压缩';
+
+  @override
+  String get liveCompactionFailed => '上下文压缩失败';
+
+  @override
+  String get liveCompactionInterrupted => '上下文压缩已中断';
+
+  @override
+  String liveCompactionUsage(String input, String output) {
+    return '$input 输入 · $output 输出';
+  }
+
+  @override
+  String get liveCompactionTriggerAuto => '自动';
+
+  @override
+  String get liveCompactionTriggerManual => '手动';
 }

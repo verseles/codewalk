@@ -2024,5 +2024,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "mais {count} em andamento",
   "sessionTodoStatusPending": "Pendente",
-  "sessionTodoProgressSemantic": "{completed} de {total} tarefas concluídas"
+  "sessionTodoProgressSemantic": "{completed} de {total} tarefas concluídas",
+  "liveCompactionRunning": "Compactando contexto…",
+  "liveCompactionCompleted": "Contexto compactado",
+  "liveCompactionFailed": "Falha ao compactar contexto",
+  "liveCompactionInterrupted": "Compactação de contexto interrompida",
+  "liveCompactionUsage": "{input} entrada · {output} saída",
+  "liveCompactionTriggerAuto": "Automática",
+  "liveCompactionTriggerManual": "Manual"
 }

@@ -2023,5 +2023,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "{count} أخرى قيد التنفيذ",
   "sessionTodoStatusPending": "قيد الانتظار",
-  "sessionTodoProgressSemantic": "تم إنجاز {completed} من {total} مهام"
+  "sessionTodoProgressSemantic": "تم إنجاز {completed} من {total} مهام",
+  "liveCompactionRunning": "جارٍ ضغط السياق…",
+  "liveCompactionCompleted": "تم ضغط السياق",
+  "liveCompactionFailed": "فشل ضغط السياق",
+  "liveCompactionInterrupted": "توقّف ضغط السياق",
+  "liveCompactionUsage": "{input} إدخال · {output} إخراج",
+  "liveCompactionTriggerAuto": "تلقائي",
+  "liveCompactionTriggerManual": "يدوي"
 }

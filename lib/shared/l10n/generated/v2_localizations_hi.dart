@@ -2962,4 +2962,27 @@ class V2LocalizationsHi extends V2Localizations {
   String sessionTodoProgressSemantic(int completed, int total) {
     return '$total में से $completed कार्य पूर्ण';
   }
+
+  @override
+  String get liveCompactionRunning => 'संदर्भ संपीड़ित हो रहा है…';
+
+  @override
+  String get liveCompactionCompleted => 'संदर्भ संपीड़ित हुआ';
+
+  @override
+  String get liveCompactionFailed => 'संदर्भ संपीड़न विफल';
+
+  @override
+  String get liveCompactionInterrupted => 'संदर्भ संपीड़न बाधित';
+
+  @override
+  String liveCompactionUsage(String input, String output) {
+    return '$input इनपुट · $output आउटपुट';
+  }
+
+  @override
+  String get liveCompactionTriggerAuto => 'स्वचालित';
+
+  @override
+  String get liveCompactionTriggerManual => 'मैनुअल';
 }

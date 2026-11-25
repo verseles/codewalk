@@ -2826,4 +2826,27 @@ class V2LocalizationsJa extends V2Localizations {
   String sessionTodoProgressSemantic(int completed, int total) {
     return '$total 件中 $completed 件のタスクが完了';
   }
+
+  @override
+  String get liveCompactionRunning => 'コンテキストを圧縮中…';
+
+  @override
+  String get liveCompactionCompleted => 'コンテキストを圧縮しました';
+
+  @override
+  String get liveCompactionFailed => 'コンテキストの圧縮に失敗しました';
+
+  @override
+  String get liveCompactionInterrupted => 'コンテキストの圧縮が中断されました';
+
+  @override
+  String liveCompactionUsage(String input, String output) {
+    return '$input 入力 · $output 出力';
+  }
+
+  @override
+  String get liveCompactionTriggerAuto => '自動';
+
+  @override
+  String get liveCompactionTriggerManual => '手動';
 }

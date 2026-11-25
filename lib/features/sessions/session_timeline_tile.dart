@@ -12,6 +12,7 @@ import '../../shared/rendering/canonical_message_body.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'session_attachment_strip.dart';
+import 'session_compaction_note.dart';
 import 'session_error_card.dart';
 import 'session_message_info.dart';
 import 'session_reasoning_body.dart';
@@ -125,21 +126,24 @@ class SessionTimelineTile extends StatelessWidget {
         rich: false,
       );
     }
-    // Reminders the harness adds, other system notes, a compaction that did
-    // not fail and unknown parts are light lines, like the switch notes, so
-    // the conversation leads (#491).
+    if (item case Notice(kind: OpenValue(known: NoticeKind.compaction))) {
+      return SessionCompactionNote(
+        key: ValueKey('timeline-compaction-${item.id.value}'),
+        item: item,
+        highlighted: highlighted,
+        onTapLink: onTapLink,
+        onTapFilePath: onTapFilePath,
+        onCopyCode: onCopyCode,
+        onCopyInlineCode: (code) => copyConversationText(context, code),
+      );
+    }
+    // Reminders the harness adds, other system notes and unknown parts are
+    // light lines, like the switch notes, so the conversation leads (#491).
     final light = switch (item) {
       Notice(
         kind: OpenValue(known: NoticeKind.system || NoticeKind.continuation),
         shellReport: null,
       ) =>
-        item.text,
-      // A compaction says nothing until it ends: its card stands till then.
-      Notice(
-        kind: OpenValue(known: NoticeKind.compaction),
-        status: OpenValue(known: final status),
-      )
-          when status != ItemStatus.failed && item.text.trim().isNotEmpty =>
         item.text,
       UnknownItem() => l10n.chatMessageMessagePartUnavailable,
       _ => null,

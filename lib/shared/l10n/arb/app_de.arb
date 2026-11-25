@@ -2024,5 +2024,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "{count} weitere in Bearbeitung",
   "sessionTodoStatusPending": "Ausstehend",
-  "sessionTodoProgressSemantic": "{completed} von {total} Aufgaben abgeschlossen"
+  "sessionTodoProgressSemantic": "{completed} von {total} Aufgaben abgeschlossen",
+  "liveCompactionRunning": "Kontext wird komprimiert…",
+  "liveCompactionCompleted": "Kontext komprimiert",
+  "liveCompactionFailed": "Kontextkomprimierung fehlgeschlagen",
+  "liveCompactionInterrupted": "Kontextkomprimierung unterbrochen",
+  "liveCompactionUsage": "{input} Eingabe · {output} Ausgabe",
+  "liveCompactionTriggerAuto": "Automatisch",
+  "liveCompactionTriggerManual": "Manuell"
 }

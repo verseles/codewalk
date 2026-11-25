@@ -2990,4 +2990,28 @@ class V2LocalizationsPt extends V2Localizations {
   String sessionTodoProgressSemantic(int completed, int total) {
     return '$completed de $total tarefas concluídas';
   }
+
+  @override
+  String get liveCompactionRunning => 'Compactando contexto…';
+
+  @override
+  String get liveCompactionCompleted => 'Contexto compactado';
+
+  @override
+  String get liveCompactionFailed => 'Falha ao compactar contexto';
+
+  @override
+  String get liveCompactionInterrupted =>
+      'Compactação de contexto interrompida';
+
+  @override
+  String liveCompactionUsage(String input, String output) {
+    return '$input entrada · $output saída';
+  }
+
+  @override
+  String get liveCompactionTriggerAuto => 'Automática';
+
+  @override
+  String get liveCompactionTriggerManual => 'Manual';
 }

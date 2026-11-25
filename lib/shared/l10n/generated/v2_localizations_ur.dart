@@ -2957,4 +2957,27 @@ class V2LocalizationsUr extends V2Localizations {
   String sessionTodoProgressSemantic(int completed, int total) {
     return '$total میں سے $completed کام مکمل';
   }
+
+  @override
+  String get liveCompactionRunning => 'سیاق و سباق کمپیکٹ ہو رہا ہے…';
+
+  @override
+  String get liveCompactionCompleted => 'سیاق و سباق کمپیکٹ ہو گیا';
+
+  @override
+  String get liveCompactionFailed => 'سیاق و سباق کمپیکٹ ناکام ہوا';
+
+  @override
+  String get liveCompactionInterrupted => 'سیاق و سباق کمپیکٹ منقطع ہوا';
+
+  @override
+  String liveCompactionUsage(String input, String output) {
+    return '$input ان پٹ · $output آؤٹ پٹ';
+  }
+
+  @override
+  String get liveCompactionTriggerAuto => 'خودکار';
+
+  @override
+  String get liveCompactionTriggerManual => 'دستی';
 }

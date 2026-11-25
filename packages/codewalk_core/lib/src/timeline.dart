@@ -419,6 +419,7 @@ sealed class TimelineItem {
       selection: item.selection,
       report: item.report,
       shellReport: item.shellReport,
+      compaction: item.compaction,
     ),
     final TurnOutcome item => TurnOutcome(
       meta: meta,
@@ -719,6 +720,20 @@ final class ShellReport {
   );
 }
 
+/// Why a context compaction ran, when reported by the harness.
+enum CompactionTrigger { automatic, requested }
+
+/// Optional harness-neutral details for a [NoticeKind.compaction] notice.
+final class CompactionInfo {
+  const CompactionInfo({this.trigger, this.usage});
+
+  /// Whether compaction was triggered automatically or requested by the user.
+  final OpenValue<CompactionTrigger>? trigger;
+
+  /// Token breakdown consumed by the compaction request itself, when reported.
+  final TokenBreakdown? usage;
+}
+
 /// A related child's notice belongs to this item's owner, not that child.
 /// It does not establish the child's own execution outcome.
 final class Notice extends TimelineItem {
@@ -730,6 +745,7 @@ final class Notice extends TimelineItem {
     this.report,
     this.shellReport,
     this.selection,
+    this.compaction,
   });
 
   final OpenValue<NoticeKind> kind;
@@ -743,6 +759,10 @@ final class Notice extends TimelineItem {
   /// with its variant. Only the switched half is set; a harness that does
   /// not report switches never makes one.
   final Selection? selection;
+
+  /// Optional trigger and token usage for a [NoticeKind.compaction] notice
+  /// (#520). Null when omitted or unsupported by the harness.
+  final CompactionInfo? compaction;
 }
 
 final class TurnOutcome extends TimelineItem {

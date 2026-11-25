@@ -405,6 +405,7 @@ final class SessionTimelinePresentation {
   /// Whether an item can be published in Block render mode.
   static bool _ended(TimelineItem item) {
     if (_isReminder(item)) return true;
+    if (item is Notice && item.kind.known == NoticeKind.compaction) return true;
     if (item is Notice && item.shellReport != null) return true;
     final message = item.meta.message;
     if (message != null) return message.completed != null;

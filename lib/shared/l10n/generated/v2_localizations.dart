@@ -5185,6 +5185,48 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'{completed} of {total} tasks completed'**
   String sessionTodoProgressSemantic(int completed, int total);
+
+  /// Centered timeline divider label while context compaction is in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Compacting context…'**
+  String get liveCompactionRunning;
+
+  /// Centered timeline divider label after context compaction completes
+  ///
+  /// In en, this message translates to:
+  /// **'Context compacted'**
+  String get liveCompactionCompleted;
+
+  /// Centered timeline divider label when context compaction fails
+  ///
+  /// In en, this message translates to:
+  /// **'Context compaction failed'**
+  String get liveCompactionFailed;
+
+  /// Centered timeline divider label when context compaction is interrupted
+  ///
+  /// In en, this message translates to:
+  /// **'Context compaction interrupted'**
+  String get liveCompactionInterrupted;
+
+  /// Compact token usage summary inside an expanded compaction notice
+  ///
+  /// In en, this message translates to:
+  /// **'{input} in · {output} out'**
+  String liveCompactionUsage(String input, String output);
+
+  /// Label for an automatic context compaction trigger
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get liveCompactionTriggerAuto;
+
+  /// Label for a manually requested context compaction trigger
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get liveCompactionTriggerManual;
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

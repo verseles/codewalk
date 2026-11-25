@@ -2956,4 +2956,27 @@ class V2LocalizationsBn extends V2Localizations {
   String sessionTodoProgressSemantic(int completed, int total) {
     return '$totalটি কাজের মধ্যে $completedটি সম্পন্ন';
   }
+
+  @override
+  String get liveCompactionRunning => 'প্রসঙ্গ সংকুচিত হচ্ছে…';
+
+  @override
+  String get liveCompactionCompleted => 'প্রসঙ্গ সংকুচিত হয়েছে';
+
+  @override
+  String get liveCompactionFailed => 'প্রসঙ্গ সংকোচন ব্যর্থ হয়েছে';
+
+  @override
+  String get liveCompactionInterrupted => 'প্রসঙ্গ সংকোচন ব্যাহত হয়েছে';
+
+  @override
+  String liveCompactionUsage(String input, String output) {
+    return '$input ইনপুট · $output আউটপুট';
+  }
+
+  @override
+  String get liveCompactionTriggerAuto => 'স্বয়ংক্রিয়';
+
+  @override
+  String get liveCompactionTriggerManual => 'ম্যানুয়াল';
 }

@@ -613,6 +613,7 @@ void main() {
         message('c', 'compaction', {
           'status': 'future-status',
           'summary': 'private context',
+          'tokens': {'input': 'future-shape'},
         }),
         message('d', 'synthetic', {
           'text': 'native notice',
@@ -639,6 +640,47 @@ void main() {
         project([assistant('a', [])]).whereType<UnknownItem>().single.raw.value,
         containsPair('reason', 'emptyAssistantContent'),
       );
+    },
+  );
+
+  test(
+    'compaction history messages preserve optional reason, tokens, and unknown reason',
+    () {
+      final items = project([
+        message('c1', 'compaction', {
+          'status': 'completed',
+          'summary': 'Kept architecture decisions',
+          'reason': 'manual',
+          'tokens': {
+            'input': 4200,
+            'output': 600,
+            'reasoning': 100,
+            'cache': {'read': 300, 'write': 0},
+          },
+        }),
+        message('c2', 'compaction', {
+          'status': 'completed',
+          'summary': 'Future trigger',
+          'reason': 'scheduled',
+        }),
+        message('c3', 'compaction', {
+          'status': 'completed',
+          'summary': 'No metadata',
+        }),
+      ]);
+      final notices = items.whereType<Notice>().toList();
+      expect(notices, hasLength(3));
+      expect(
+        notices[0].compaction?.trigger?.known,
+        CompactionTrigger.requested,
+      );
+      expect(notices[0].compaction?.usage?.input, 4200);
+      expect(notices[0].compaction?.usage?.output, 600);
+      expect(notices[0].compaction?.usage?.reasoning, 100);
+      expect(notices[0].compaction?.usage?.cacheRead, 300);
+      expect(notices[1].compaction?.trigger?.known, isNull);
+      expect(notices[1].compaction?.trigger?.value, 'scheduled');
+      expect(notices[2].compaction, isNull);
     },
   );
 

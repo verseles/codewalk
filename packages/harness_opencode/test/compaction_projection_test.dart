@@ -446,4 +446,71 @@ void main() {
     expect(utf8.encode(notice.text).length, lessThanOrEqualTo(8 * 1024));
     expect(notice.text, isNot(contains('secret987')));
   });
+
+  test('projects compaction trigger and token usage cleanly across live and history', () {
+    final start = project(
+      frame('started', id: 'evt_t1', data: {'reason': 'manual', 'recent': ''}),
+      SessionState(historyRef),
+    );
+    final running = (start.single as ItemUpserted).item as Notice;
+    expect(running.compaction?.trigger?.known, CompactionTrigger.requested);
+    expect(running.compaction?.usage, isNull);
+
+    final stateAfterStart = apply(SessionState(historyRef), start);
+    final end = project(
+      frame(
+        'ended',
+        id: 'evt_t2',
+        data: {
+          'reason': 'auto',
+          'text': 'Summary',
+          'recent': '',
+          'tokens': {
+            'input': 5000,
+            'output': 800,
+            'reasoning': 200,
+            'cache': {'read': 1000, 'write': 50},
+          },
+        },
+      ),
+      stateAfterStart,
+      seq: 2,
+    );
+    final done = (end.single as ItemUpserted).item as Notice;
+    expect(done.compaction?.trigger?.known, CompactionTrigger.automatic);
+    expect(done.compaction?.usage?.input, 5000);
+    expect(done.compaction?.usage?.output, 800);
+    expect(done.compaction?.usage?.reasoning, 200);
+    expect(done.compaction?.usage?.cacheRead, 1000);
+    expect(done.compaction?.usage?.cacheWrite, 50);
+
+    // Preserved across TimelineItem.withMeta.
+    final copied = done.withMeta(done.meta) as Notice;
+    expect(copied.compaction?.trigger?.known, CompactionTrigger.automatic);
+    expect(copied.compaction?.usage?.output, 800);
+
+    // Malformed compaction tokens fail closed.
+    expect(
+      () => project(
+        frame(
+          'ended',
+          id: 'evt_t3',
+          data: {
+            'reason': 'auto',
+            'text': 'Summary',
+            'recent': '',
+            'tokens': {'input': -5},
+          },
+        ),
+        SessionState(historyRef),
+      ),
+      throwsA(
+        isA<OpenCodeCompactionProjectionException>().having(
+          (e) => e.failure,
+          'failure',
+          OpenCodeCompactionProjectionFailure.malformed,
+        ),
+      ),
+    );
+  });
 }

@@ -2024,5 +2024,12 @@
   "sessionTodoMoreInProgress": "+{count}",
   "sessionTodoMoreInProgressSemantic": "مزید {count} جاری ہیں",
   "sessionTodoStatusPending": "زیر التوا",
-  "sessionTodoProgressSemantic": "{total} میں سے {completed} کام مکمل"
+  "sessionTodoProgressSemantic": "{total} میں سے {completed} کام مکمل",
+  "liveCompactionRunning": "سیاق و سباق کمپیکٹ ہو رہا ہے…",
+  "liveCompactionCompleted": "سیاق و سباق کمپیکٹ ہو گیا",
+  "liveCompactionFailed": "سیاق و سباق کمپیکٹ ناکام ہوا",
+  "liveCompactionInterrupted": "سیاق و سباق کمپیکٹ منقطع ہوا",
+  "liveCompactionUsage": "{input} ان پٹ · {output} آؤٹ پٹ",
+  "liveCompactionTriggerAuto": "خودکار",
+  "liveCompactionTriggerManual": "دستی"
 }

@@ -2824,4 +2824,27 @@ class V2LocalizationsKo extends V2Localizations {
   String sessionTodoProgressSemantic(int completed, int total) {
     return '작업 $total개 중 $completed개 완료';
   }
+
+  @override
+  String get liveCompactionRunning => '컨텍스트 압축 중…';
+
+  @override
+  String get liveCompactionCompleted => '컨텍스트 압축됨';
+
+  @override
+  String get liveCompactionFailed => '컨텍스트 압축 실패';
+
+  @override
+  String get liveCompactionInterrupted => '컨텍스트 압축 중단됨';
+
+  @override
+  String liveCompactionUsage(String input, String output) {
+    return '$input 입력 · $output 출력';
+  }
+
+  @override
+  String get liveCompactionTriggerAuto => '자동';
+
+  @override
+  String get liveCompactionTriggerManual => '수동';
 }
