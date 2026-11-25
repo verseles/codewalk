@@ -162,6 +162,7 @@ CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Cla
 - If `/tmp` is full, export `TMPPREFIX`, `TMPDIR`, `TEMP` and `TMP` to a directory with space on the same filesystem instead of deleting other processes' files.
 - After `dart format`, inspect the hunks and revert churn outside the intended change; reformatting other code goes in its own commit, never mixed with a feature or fix.
 - Credential redaction before truncation: when capping potentially sensitive strings in projections or UI, redact against the full source text with `redactCredentialSlice` before applying the byte cut—never slice with a fixed lookahead first, or credentials and PEM blocks crossing the cut boundary can leak.
+- On ARM64 hosts (`mercury`), do not run `dart run tool/ci/import_rules.dart` (or `make v2-architecture`) in isolation for ordinary `lib/` edits because native build hooks can hang (`Running build hooks...`); use `make check TEST_JOBS=$(nproc)` (and `make v2-native-check` only when `packages/`, architecture rules, or the CHP change).
 
 ## Keeping this file current
 
