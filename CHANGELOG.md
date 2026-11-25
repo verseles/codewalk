@@ -2,6 +2,22 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.7.0 - 2026-11-25
+
+> 📣 CodeWalk 2.7.0 polishes the sidebar and tab strip: removes the Filter menu and local hide, omits unknown ownership labels, caps Recent sessions to 2 per open project, highlights selected sessions with a subtle fill, and keeps clicked tabs in place.
+
+### Cleaner sidebar & project drawer
+
+- Removes the sidebar **Filter** button along with legacy filter, sort, and local Hide/Unhide controls and storage (`#513`), keeping session search, project pins, and tolerant parsing of legacy workspace preferences intact.
+- Omits the `"Unknown ownership"` subtitle from sidebar session rows whenever session ownership is unproven, stale, or expired (`#508`), while preserving ownership labels for future harnesses that prove ownership.
+- Replaces the fixed 5-session global cap in **Recent sessions** with a per-open-project limit of up to 2 root sessions per open project (`#512`), keeping attention-first ordering and deduplication before slot counting.
+- Reserves the start-edge accent bar exclusively for selected project headers and highlights the active session row (in both the project list and **Recent sessions**) with a subtle theme-consistent surface fill in light and dark modes (`#523`), fixing live same-project selection updates on desktop without remounting row controls or dropping keyboard focus.
+
+### Stable session tab strip
+
+- Stops clicking a tab from promoting it to the front of its project group (`#498`), keeping displayed tab order and close-neighbour handover consistent across selection changes.
+- Leaves the horizontal tab strip scroll offset untouched when clicking an already-visible tab, while still scrolling clipped or off-screen tabs minimally into view across both LTR and RTL layouts.
+
 ## v2.6.0 - 2026-11-24
 
 > 📣 CodeWalk 2.6.0 hardens large and long-lived OpenCode v2 sessions with adaptive history paging, bounded tool results and error messages, automatic repair budget recovery, and smooth viewport backfill.
