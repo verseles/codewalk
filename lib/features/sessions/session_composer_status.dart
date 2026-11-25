@@ -57,8 +57,10 @@ List<String> composerTips(V2Localizations l10n) => [
 /// Only the messages still in flight of the last turn count: the last call
 /// or reasoning in them, the reasoning by the heading it opens with. A call
 /// stays the message's activity until the message ends, so the slot does not
-/// flash between quick calls; an item outside any message, such as a shell
-/// run, counts only while it runs.
+/// flash between quick calls; an item outside any message counts only while
+/// it runs. Shell commands never count: the timeline and the sub-agents and
+/// shells capsule already show them, and a command line is noise here
+/// (#521, owner 2026-11-25), so the slot reports what came before it.
 ComposerActivity? composerActivity(SessionState? state, V2Localizations l10n) {
   final execution = state?.execution?.kind.known;
   if (execution == ExecutionKind.retrying) {
@@ -72,6 +74,7 @@ ComposerActivity? composerActivity(SessionState? state, V2Localizations l10n) {
   for (var index = timeline.length - 1; index >= 0; index--) {
     final item = timeline[index];
     if (item is UserInput) break;
+    if (_isShell(item)) continue;
     final message = item.meta.message;
     if (message?.completed != null) continue;
     if (message == null && !_runs(item)) continue;
@@ -79,7 +82,7 @@ ComposerActivity? composerActivity(SessionState? state, V2Localizations l10n) {
       case ToolCall(:final kind)
           when kind.known == ToolKind.subagent || kind.known == ToolKind.plan:
         continue;
-      case ToolCall() || ShellRun():
+      case ToolCall():
         return (
           kind: ComposerStatusKind.progress,
           label: toolCompactSummary(item, l10n),
@@ -220,9 +223,16 @@ String livePhaseLabel(V2Localizations l10n, SessionLivePhase phase) =>
       SessionLivePhase.closed => l10n.liveUnavailable,
     };
 
+/// Whether [item] is a shell command, as a run or as a shell tool call.
+bool _isShell(TimelineItem item) => switch (item) {
+  ShellRun() => true,
+  ToolCall(:final kind) => kind.known == ToolKind.shell,
+  _ => false,
+};
+
 /// Whether [item] still runs, by its own status.
 bool _runs(TimelineItem item) => switch (item) {
-  ToolCall() || ShellRun() => switch (toolProgress(item)) {
+  ToolCall() => switch (toolProgress(item)) {
     ToolProgress.queued || ToolProgress.running => true,
     _ => false,
   },

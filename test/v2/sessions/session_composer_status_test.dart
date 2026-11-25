@@ -149,46 +149,80 @@ void main() {
     );
   });
 
-  testWidgets('an item outside any message counts only while it runs', (
-    tester,
-  ) async {
+  testWidgets('shell commands never fill the slot (#521)', (tester) async {
     final l10n = await _l10n(tester);
     ShellRun shell(String id, ShellStatus status) => ShellRun(
       meta: _meta(id),
       command: 'make check',
       shellStatus: OpenValue.known(status),
     );
-    expect(
-      composerActivity(
-        _state(ExecutionKind.running, [
-          _prompt('u1'),
-          shell('s1', ShellStatus.running),
-        ]),
-        l10n,
-      ),
-      (
-        kind: ComposerStatusKind.progress,
-        label: '${l10n.toolKindShell} · make check',
-      ),
-    );
-    for (final status in [
-      ShellStatus.exited,
-      ShellStatus.timeout,
-      ShellStatus.killed,
-    ]) {
+    ComposerActivity? of(List<TimelineItem> items) =>
+        composerActivity(_state(ExecutionKind.running, items), l10n);
+    // A running shell outside any message gives way to what came before.
+    expect(of([_prompt('u1'), shell('s1', ShellStatus.running)]), (
+      kind: ComposerStatusKind.working,
+      label: l10n.chatReasoning,
+    ));
+    for (final status in ShellStatus.values) {
       expect(
-        composerActivity(
-          _state(ExecutionKind.running, [
-            _prompt('u1'),
-            _think('r1', 'm1', '**Writing the reply**'),
-            shell('s1', status),
-          ]),
-          l10n,
-        ),
+        of([
+          _prompt('u1'),
+          _think('r1', 'm1', '**Writing the reply**'),
+          shell('s1', status),
+        ]),
         (kind: ComposerStatusKind.reasoning, label: 'Writing the reply'),
         reason: '$status',
       );
     }
+    // A shell tool call in the message in flight is skipped too, for the
+    // call before it.
+    expect(
+      of([
+        _prompt('u1'),
+        _tool('t1', 'm1', name: 'grep', kind: ToolKind.search),
+        _tool('t2', 'm1', name: 'bash', kind: ToolKind.shell),
+      ]),
+      (kind: ComposerStatusKind.progress, label: l10n.toolKindSearch),
+    );
+    expect(
+      of([
+        _prompt('u1'),
+        _tool('t1', 'm1', name: 'bash', kind: ToolKind.shell),
+      ]),
+      (kind: ComposerStatusKind.working, label: l10n.chatReasoning),
+    );
+  });
+
+  testWidgets('an item outside any message counts only while it runs', (
+    tester,
+  ) async {
+    final l10n = await _l10n(tester);
+    ToolCall loose(ItemStatus status) => ToolCall(
+      meta: _meta('t9', status: status),
+      kind: const OpenValue.known(ToolKind.search),
+      rawName: 'grep',
+    );
+    expect(
+      composerActivity(
+        _state(ExecutionKind.running, [
+          _prompt('u1'),
+          loose(ItemStatus.streaming),
+        ]),
+        l10n,
+      )?.label,
+      l10n.toolKindSearch,
+    );
+    expect(
+      composerActivity(
+        _state(ExecutionKind.running, [
+          _prompt('u1'),
+          _think('r1', 'm1', '**Writing the reply**'),
+          loose(ItemStatus.completed),
+        ]),
+        l10n,
+      ),
+      (kind: ComposerStatusKind.reasoning, label: 'Writing the reply'),
+    );
     // A finished call still names its message while the message runs.
     expect(
       composerActivity(
