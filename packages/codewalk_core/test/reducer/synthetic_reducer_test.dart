@@ -132,6 +132,39 @@ SessionSnapshot history(
 
 void main() {
   group('synthetic ordering and identity cases', () {
+    test('a delivered prompt moves after what arrived while it waited', () {
+      List<String> ids(SessionState state) => [
+        for (final item in state.timeline) item.id.value,
+      ];
+      var state = upsert(initial(), text('a1', 'before'), 1);
+      state = upsert(state, user('steer'), 2);
+      state = upsert(state, text('a2', 'still answering'), 3);
+      expect(ids(state), ['a1', 'steer', 'a2']);
+      // Delivery puts it where history does (#502).
+      state = upsert(
+        state,
+        user('steer', delivery: DeliveryState.delivered),
+        4,
+      );
+      expect(ids(state), ['a1', 'a2', 'steer']);
+      expect(
+        (state.timeline.last as UserInput).delivery.known,
+        DeliveryState.delivered,
+      );
+      // Settled input stays put, also when it is seen again.
+      state = upsert(state, text('a3', 'next'), 5);
+      state = upsert(
+        state,
+        user('steer', delivery: DeliveryState.delivered),
+        6,
+      );
+      expect(ids(state), ['a1', 'a2', 'steer', 'a3']);
+      // A cancelled prompt is not delivered and does not move.
+      state = upsert(state, user('gone', delivery: DeliveryState.queued), 7);
+      state = upsert(state, text('a4', 'more'), 8);
+      state = upsert(state, user('gone', delivery: DeliveryState.cancelled), 9);
+      expect(ids(state), ['a1', 'a2', 'steer', 'a3', 'gone', 'a4']);
+    });
     test('same native IDs on another host do not enter this session', () {
       const foreign = SessionRef(
         HostId('other'),

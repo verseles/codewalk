@@ -397,15 +397,21 @@ class _SessionLivePageState extends State<SessionLivePage>
       final cut = c.turnActions?.state.staged == true
           ? c.turnActions?.state.revert?.anchor
           : null;
-      final rawItems = state?.timeline ?? const <TimelineItem>[];
-      final items = cut == null
-          ? rawItems
-          : [
-              for (final item in rawItems)
-                if (item.meta.anchor == null ||
-                    item.meta.anchor!.compareTo(cut) < 0)
-                  item,
-            ];
+      bool beforeCut(MessageAnchor? anchor) =>
+          cut == null || anchor == null || anchor.compareTo(cut) < 0;
+      // Prompts the harness still holds are pinned after the conversation
+      // until it takes them (#502).
+      final (:items, :waiting) = sessionWaitingPrompts(
+        [
+          for (final item in state?.timeline ?? const <TimelineItem>[])
+            if (beforeCut(item.meta.anchor)) item,
+        ],
+        [
+          for (final entry in state?.pending ?? const <PendingInput>[])
+            if (beforeCut(entry.anchor)) entry,
+        ],
+        harness: c.session.harnessRef,
+      );
       // A settled session has no turn in flight, so a finished answer can be
       // offered to the reader from its start.
       final settled = switch (state?.execution?.kind.known) {
@@ -505,9 +511,8 @@ class _SessionLivePageState extends State<SessionLivePage>
               // On an extreme tiny body (e.g. tiny split-screen with open
               // keyboard or large text scale), drop the pinned panel so the
               // composer never overflows.
-              final collapsedPlanHeight = SessionTaskListPanel.collapsedHeightOf(
-                context,
-              );
+              final collapsedPlanHeight =
+                  SessionTaskListPanel.collapsedHeightOf(context);
               final showPlanPanel =
                   activePlan != null &&
                   body.maxHeight >= max(140.0, collapsedPlanHeight + 64.0);
@@ -604,6 +609,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                                   ? _openRosterChild
                                   : null,
                               items: items,
+                              waiting: waiting,
                               // A turn reverts from its message menu, where
                               // the session can (#492).
                               userTurnRevert: (turnItem, isLatest) =>

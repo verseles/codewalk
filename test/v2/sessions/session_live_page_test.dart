@@ -531,6 +531,13 @@ void main() {
         tester.view.devicePixelRatio = 1;
         addTearDown(tester.view.resetPhysicalSize);
         addTearDown(tester.view.resetDevicePixelRatio);
+        // Waiting prompts breathe until delivered (#502); held still, the
+        // screen can settle.
+        tester.platformDispatcher.accessibilityFeaturesTestValue =
+            const FakeAccessibilityFeatures(disableAnimations: true);
+        addTearDown(
+          tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+        );
         final rig = CatalogRig();
         await rig.save('a');
         final directory = LiveDirectory();
@@ -624,25 +631,19 @@ void main() {
         expect(find.text(l10n.composerLiveSession), findsNothing);
         expect(find.text(l10n.liveSendUnavailable), findsNothing);
         expect(find.byKey(const ValueKey('live-composer')), findsOneWidget);
+        // Waiting messages, this device's and another client's, are pinned
+        // at the end of the timeline as bubbles with no actions; none waits
+        // above the composer (#502).
+        expect(find.byKey(const ValueKey('live-waiting')), findsNothing);
         expect(
-          find.byKey(const ValueKey('live-waiting-cancel-mine')),
+          find.textContaining('Theirs', findRichText: true),
           findsOneWidget,
         );
         expect(
-          find.byKey(const ValueKey('live-waiting-send-mine')),
+          find.textContaining('A long queued message', findRichText: true),
           findsOneWidget,
         );
-        // Another client's message names its state and origin in its
-        // tooltip, on one line (#486).
-        expect(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is Tooltip &&
-                widget.message ==
-                    '${l10n.composerSteering} · ${l10n.composerOtherClient}',
-          ),
-          findsOneWidget,
-        );
+        expect(find.byTooltip(l10n.composerCancel), findsNothing);
         expect(
           find.byKey(const ValueKey('live-row-check-lost')),
           findsOneWidget,
@@ -673,12 +674,6 @@ void main() {
           endsWith(' queue Hello'),
         );
         expect(find.text('Hello'), findsNothing);
-        final cancel = find.byKey(const ValueKey('live-waiting-cancel-mine'));
-        await tester.ensureVisible(cancel);
-        await tester.pumpAndSettle();
-        await tester.tap(cancel);
-        await tester.pumpAndSettle();
-        expect(outbox.calls, contains('cancel mine'));
         expect(tester.takeException(), isNull);
 
         // All 14 locales and three layouts exercise the v1-style Send/Stop

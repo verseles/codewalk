@@ -37,6 +37,7 @@ class SessionLiveTimeline extends StatefulWidget {
   const SessionLiveTimeline({
     super.key,
     required this.items,
+    this.waiting = const [],
     required this.headerBuilder,
     required this.scroll,
     required this.settled,
@@ -57,6 +58,10 @@ class SessionLiveTimeline extends StatefulWidget {
 
   /// The resident items, in the server's order.
   final List<TimelineItem> items;
+
+  /// Prompts the harness holds and has not delivered, pinned after [items]
+  /// in this order until they enter the conversation (#502).
+  final List<UserInput> waiting;
 
   /// The block above the items: the phase, the notices and the retry.
   final WidgetBuilder headerBuilder;
@@ -624,13 +629,17 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   List<SessionTimelineRow> _project(
     List<TimelineItem> items,
     _Display display,
-  ) => _presentation.project(
-    items,
-    settled: widget.settled,
-    showReasoning: display.reasoning,
-    showToolCalls: display.tools,
-    renderMode: display.mode,
-  );
+  ) => [
+    ..._presentation.project(
+      items,
+      settled: widget.settled,
+      showReasoning: display.reasoning,
+      showToolCalls: display.tools,
+      renderMode: display.mode,
+    ),
+    for (final prompt in widget.waiting)
+      SessionItemRow(prompt, messageHeader: false),
+  ];
 
   /// The signature of what [rows] show: a hidden call, or a response the
   /// Block render mode still holds, does not arrive. An opened work group

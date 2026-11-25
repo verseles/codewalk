@@ -600,6 +600,72 @@ class SessionTimelineScope extends InheritedWidget {
   bool updateShouldNotify(SessionTimelineScope oldWidget) => false;
 }
 
+/// Whether [input] is a prompt the harness admitted and has not delivered:
+/// it waits, pinned after the conversation, until it enters it (#502).
+bool sessionPromptWaits(UserInput input) => switch (input.delivery.known) {
+  DeliveryState.accepted || DeliveryState.queued => true,
+  _ => false,
+};
+
+/// Splits a live timeline into what the conversation holds and the prompts
+/// still waiting for the harness (#502).
+///
+/// A waiting prompt is pinned after everything else, oldest first, until the
+/// harness delivers it: a prompt admitted as a [UserInput] leaves its place,
+/// and one the harness only lists in [pending] (a queued prompt, or one from
+/// another client) is shown from that entry. A cancelled prompt never joined
+/// the conversation and is not shown.
+({List<TimelineItem> items, List<UserInput> waiting}) sessionWaitingPrompts(
+  List<TimelineItem> items,
+  List<PendingInput> pending, {
+  required HarnessRef harness,
+}) {
+  final resident = <ItemId, UserInput>{};
+  final kept = <TimelineItem>[];
+  for (final item in items) {
+    if (item is UserInput) {
+      if (item.delivery.known == DeliveryState.cancelled) continue;
+      if (sessionPromptWaits(item)) {
+        resident[item.id] = item;
+        continue;
+      }
+    }
+    kept.add(item);
+  }
+  final shown = <ItemId>{};
+  final waiting = <UserInput>[];
+  final settled = {for (final item in kept) item.id};
+  for (final entry in pending) {
+    if (settled.contains(entry.id) || !shown.add(entry.id)) continue;
+    waiting.add(
+      resident[entry.id] ??
+          UserInput(
+            meta: ItemMeta(
+              id: entry.id,
+              generation: 'pending',
+              status: const OpenValue.known(ItemStatus.pending),
+              source: SourceProvenance(
+                harness: harness,
+                version: 'local',
+                nativeType: 'pendingInput',
+              ),
+              anchor: entry.anchor,
+            ),
+            text: entry.text,
+            delivery: OpenValue.known(
+              entry.delivery.known == Delivery.queue
+                  ? DeliveryState.queued
+                  : DeliveryState.accepted,
+            ),
+          ),
+    );
+  }
+  for (final input in resident.values) {
+    if (shown.add(input.id)) waiting.add(input);
+  }
+  return (items: kept, waiting: waiting);
+}
+
 /// The items a timeline shows: a succeeded turn needs no row of its own, the
 /// header already reports it; structured plan tools are shown in the task list
 /// panel instead of timeline rows; synthetic shell completion notices that

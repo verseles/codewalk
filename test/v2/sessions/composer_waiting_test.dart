@@ -121,69 +121,30 @@ void main() {
     addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
   }
 
-  Finder line(String body) => find.ancestor(
-    of: find.textContaining(body),
-    matching: find.byType(InkWell),
-  );
-
-  testWidgets('a waiting message is one line with cancel and send now', (
+  testWidgets('waiting messages stay out of the composer (#502)', (
     tester,
   ) async {
-    final long = 'First line\n${'then a long tail ' * 20}END';
     await open(
       tester,
-      pending: [('msg_0001', long), ('msg_0002', 'theirs')],
-      entries: () => [mine('mine', 'msg_0001', long)],
+      pending: [('msg_0001', 'fix the test'), ('msg_0002', 'theirs')],
+      entries: () => [mine('mine', 'msg_0001', 'fix the test')],
     );
-    expect(find.text(l10n.composerInbox), findsNothing);
-    final shown = tester.widget<Text>(find.textContaining('First line'));
-    expect(shown.maxLines, 1);
-    expect(shown.overflow, TextOverflow.ellipsis);
-    expect(shown.data, isNot(contains('\n')));
-    expect(shown.data, endsWith('…'));
-    expect(tester.getSize(line('First line')).height, lessThan(56));
-    // Another client's message says so, with no action of this device.
-    expect(
-      find.byWidgetPredicate(
-        (widget) =>
-            widget is Tooltip &&
-            widget.message ==
-                '${l10n.composerQueued} · ${l10n.composerOtherClient}',
-      ),
-      findsOneWidget,
-    );
-    expect(find.byTooltip(l10n.composerCancel), findsOneWidget);
-    expect(find.byTooltip(l10n.composerSendNow), findsOneWidget);
-    expect(find.byTooltip(l10n.composerMoveToQueue), findsNothing);
-    await tester.tap(find.byKey(const ValueKey('live-waiting-send-mine')));
-    await tester.pumpAndSettle();
+    // The timeline pins them; nothing waits above the status bar, and no
+    // Cancel or Send now is offered anywhere (owner, #502).
+    expect(find.byKey(const ValueKey('live-waiting')), findsNothing);
+    expect(find.textContaining('fix the test'), findsNothing);
+    expect(find.textContaining('theirs'), findsNothing);
+    expect(find.byTooltip(l10n.composerCancel), findsNothing);
+    expect(find.byTooltip(l10n.composerSendNow), findsNothing);
+    // The controller keeps the paths a future Cancel would use.
+    expect(live.composer.chips(live.state), hasLength(2));
+    await live.composer.switchDelivery(const CommandId('mine'), Delivery.steer);
     expect(outbox.calls, contains('switch mine steer'));
-    await tester.tap(find.byKey(const ValueKey('live-waiting-cancel-mine')));
-    await tester.pumpAndSettle();
+    await live.composer.cancel(const CommandId('mine'));
     expect(outbox.calls, contains('cancel mine'));
   });
 
-  testWidgets('a steering message offers no send now', (tester) async {
-    await open(
-      tester,
-      pending: [('msg_0001', 'steering')],
-      entries: () => [
-        entryOf(
-          live.session,
-          'mine',
-          'msg_0001',
-          'steering',
-          Delivery.steer,
-          SubmissionKind.admitted,
-        ),
-      ],
-    );
-    expect(find.byTooltip(l10n.composerSteering), findsOneWidget);
-    expect(find.byTooltip(l10n.composerSendNow), findsNothing);
-    expect(find.byTooltip(l10n.composerCancel), findsOneWidget);
-  });
-
-  testWidgets('tapping it takes the text back only once cancelled', (
+  testWidgets('a take-back brings the text back only once cancelled', (
     tester,
   ) async {
     await open(
@@ -197,7 +158,7 @@ void main() {
     text().text = 'Typed';
     outbox.onCancel = (entry) =>
         settled(entry, SubmissionKind.cancelled, CancellationFence.cancelled);
-    await tester.tap(line('fix the test'));
+    await live.composer.takeBack(const CommandId('a'));
     await tester.pumpAndSettle();
     // The ledger records the take-back, then forgets the entry.
     expect(
@@ -210,48 +171,12 @@ void main() {
     // Delivered first: the text is not copied.
     outbox.onCancel = (entry) =>
         settled(entry, SubmissionKind.delivered, CancellationFence.settled);
-    await tester.tap(line('run it'));
+    await live.composer.takeBack(const CommandId('b'));
     await tester.pumpAndSettle();
     expect(outbox.calls, contains('cancel b takeBack'));
     expect(outbox.calls, isNot(contains('dismiss b')));
     expect(text().text, 'Typed\nfix the test');
     expect(live.composer.notice, ComposerNotice.deliveredFirst);
-  });
-
-  testWidgets('a harness that can neither steer nor cancel offers neither', (
-    tester,
-  ) async {
-    outbox
-      ..steersPending = false
-      ..cancelsPending = false;
-    await open(
-      tester,
-      pending: [('msg_0001', 'waits its turn')],
-      entries: () => [mine('mine', 'msg_0001', 'waits its turn')],
-    );
-    expect(find.byTooltip(l10n.composerQueued), findsOneWidget);
-    expect(find.byTooltip(l10n.composerSendNow), findsNothing);
-    expect(find.byTooltip(l10n.composerCancel), findsNothing);
-    await tester.tap(find.text('waits its turn'));
-    await tester.pumpAndSettle();
-    expect(outbox.calls.where((call) => call.startsWith('cancel')), isEmpty);
-    expect(text().text, isEmpty);
-  });
-
-  testWidgets('past three messages the list scrolls, oldest on top', (
-    tester,
-  ) async {
-    await open(
-      tester,
-      pending: [for (var i = 1; i <= 6; i++) ('msg_000$i', 'message $i')],
-    );
-    final box = tester.getSize(find.byKey(const ValueKey('live-waiting')));
-    expect(box.height, lessThanOrEqualTo(132));
-    expect(
-      tester.getTopLeft(find.text('message 1')).dy,
-      lessThan(tester.getTopLeft(find.text('message 2')).dy),
-    );
-    expect(find.text('message 6').hitTestable(), findsNothing);
   });
 
   testWidgets('a cancel that settles later still brings the text back once', (
@@ -264,23 +189,20 @@ void main() {
     );
     outbox.onCancel = (entry) =>
         settled(entry, SubmissionKind.admitted, CancellationFence.uncertain);
-    await tester.tap(line('fix the test'));
+    await live.composer.takeBack(const CommandId('a'));
     await tester.pumpAndSettle();
-    // Unsettled: it stays waiting, says so and offers Check again.
+    // Unsettled: it stays waiting and says so.
     expect(text().text, isEmpty);
     expect(live.composer.notice, ComposerNotice.cancelPending);
-    expect(find.byTooltip(l10n.composerCancelling), findsOneWidget);
-    final check = find.byKey(const ValueKey('live-waiting-check-a'));
-    expect(check, findsOneWidget);
     outbox.onReconcile = (entry) =>
         settled(entry, SubmissionKind.cancelled, CancellationFence.cancelled);
-    await tester.tap(check);
+    await live.composer.checkAgain(const CommandId('a'));
     await tester.pumpAndSettle();
     expect(text().text, 'fix the test');
     // The text back in the field says it.
     expect(live.composer.notice, ComposerNotice.none);
-    // Gone from the list before the harness says so.
-    expect(line('fix the test'), findsNothing);
+    // Gone from the waiting list before the harness says so.
+    expect(live.composer.chips(live.state), isEmpty);
     // Once only, whatever reads it again.
     await live.composer.reload();
     await tester.pumpAndSettle();
@@ -298,7 +220,7 @@ void main() {
     text().text = '  ';
     outbox.onCancel = (entry) =>
         settled(entry, SubmissionKind.cancelled, CancellationFence.cancelled);
-    await tester.tap(line('again'));
+    await live.composer.takeBack(const CommandId('a'));
     await tester.pumpAndSettle();
     expect(text().text, '  \nagain');
   });
@@ -315,8 +237,6 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('live-composer-send')));
     await tester.pump();
     expect(live.composer.sending, isTrue);
-    await tester.tap(line('waiting'), warnIfMissed: false);
-    await tester.pump();
     expect(await live.composer.takeBack(const CommandId('a')), isFalse);
     expect(outbox.calls.where((call) => call.startsWith('cancel')), isEmpty);
     hold.complete();
@@ -383,7 +303,7 @@ void main() {
     );
     outbox.onCancel = (entry) =>
         settled(entry, SubmissionKind.admitted, CancellationFence.uncertain);
-    await tester.tap(line('fix the test'));
+    await live.composer.takeBack(const CommandId('a'));
     await tester.pumpAndSettle();
     final hold = outbox.holdSubmit = Completer<void>();
     text().text = 'Hello';
@@ -393,7 +313,7 @@ void main() {
     expect(live.composer.sending, isTrue);
     outbox.onReconcile = (entry) =>
         settled(entry, SubmissionKind.cancelled, CancellationFence.cancelled);
-    await tester.tap(find.byKey(const ValueKey('live-waiting-check-a')));
+    unawaited(live.composer.checkAgain(const CommandId('a')));
     await tester.pump();
     // The send still holds the field.
     expect(text().text, 'Hello');
@@ -401,16 +321,6 @@ void main() {
     await tester.pumpAndSettle();
     // What was sent left; the taken-back text came back alone.
     expect(text().text, 'fix the test');
-  });
-
-  testWidgets('a line cut past 200 characters ends in an ellipsis', (
-    tester,
-  ) async {
-    final exact = 'a' * 200;
-    final over = 'b' * 201;
-    await open(tester, pending: [('msg_0001', exact), ('msg_0002', over)]);
-    expect(tester.widget<Text>(find.text(exact)).data, exact);
-    expect(find.text('${'b' * 200}…'), findsOneWidget);
   });
 
   testWidgets(
@@ -423,7 +333,7 @@ void main() {
       );
       outbox.onCancel = (entry) =>
           settled(entry, SubmissionKind.cancelled, CancellationFence.cancelled);
-      await tester.tap(line('once'));
+      await live.composer.takeBack(const CommandId('a'));
       await tester.pumpAndSettle();
       expect(text().text, 'once');
       outbox.entriesError = StateError('unreadable');

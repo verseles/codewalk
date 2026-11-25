@@ -225,12 +225,6 @@ class _SessionComposerState extends State<SessionComposer> {
     if (text != null && draft.text.isEmpty) draft.text = text;
   }
 
-  /// Takes a waiting message back into the field (#486); the session puts
-  /// its text in the draft once the cancel settles.
-  Future<void> _edit(CommandId id) async {
-    if (await widget.controller.takeBack(id) && mounted) _focus.requestFocus();
-  }
-
   void _textChanged() => setState(() {});
 
   /// A local command runs whenever no send is pending; text or staged
@@ -413,129 +407,6 @@ class _SessionComposerState extends State<SessionComposer> {
         : String.fromCharCodes(head);
   }
 
-  Widget _action(
-    String key,
-    IconData icon,
-    String tooltip,
-    VoidCallback? onPressed,
-  ) => IconButton(
-    key: ValueKey(key),
-    icon: Icon(icon),
-    tooltip: tooltip,
-    visualDensity: VisualDensity.compact,
-    onPressed: onPressed,
-  );
-
-  /// One message the harness holds but has not taken yet (#486): one line,
-  /// pinned above the status bar until it enters the conversation. Tapping it
-  /// takes it back to edit, ✕ cancels it and ↑ delivers it now; each only
-  /// when the harness can, and only for this device's own messages.
-  Widget _waiting(BuildContext context, ComposerChip chip) {
-    final l10n = context.v2L10n;
-    final c = widget.controller;
-    final entry = chip.entry;
-    final queued =
-        (entry?.delivery ?? chip.pending.delivery.known) == Delivery.queue;
-    final fenced = entry != null && openFence(entry.fence);
-    final uncertain = entry?.state == SubmissionKind.uncertain;
-    final idle =
-        !c.live.stopping &&
-        (entry == null || !c.busy.contains(entry.commandId));
-    final status = fenced
-        ? l10n.composerCancelling
-        : uncertain
-        ? l10n.composerNotConfirmed
-        : queued
-        ? l10n.composerQueued
-        : l10n.composerSteering;
-    final label = entry == null
-        ? '$status · ${l10n.composerOtherClient}'
-        : status;
-    final cancellable =
-        entry != null && idle && c.cancelsPending && canCancel(entry);
-    final steerable =
-        entry != null && idle && queued && c.steersPending && canSwitch(entry);
-    final checkable = entry != null && idle && (fenced || uncertain);
-    final icon = fenced
-        ? Symbols.hourglass_top
-        : uncertain
-        ? Symbols.help
-        : entry == null
-        ? Symbols.devices
-        : queued
-        ? Symbols.schedule
-        : Symbols.bolt;
-    return Material(
-      key: ValueKey('live-waiting-${chip.pending.id.value}'),
-      color: Theme.of(context).colorScheme.secondaryContainer,
-      borderRadius: BorderRadius.circular(12),
-      clipBehavior: Clip.antiAlias,
-      child: Semantics(
-        onTapHint: cancellable && !c.sending ? l10n.composerWaitingEdit : null,
-        child: InkWell(
-          // The field is the send's while it runs.
-          onTap: cancellable && !c.sending
-              ? () => unawaited(_edit(entry.commandId))
-              : null,
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 40),
-            child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(12, 0, 4, 0),
-              child: Row(
-                children: [
-                  Tooltip(
-                    message: label,
-                    child: Icon(icon, size: 18, semanticLabel: label),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      () {
-                        final raw = _preview(
-                          entry?.shownText ?? chip.pending.text,
-                        ).replaceAll('\n', ' ');
-                        if (entry != null && entry.attachments.isNotEmpty) {
-                          final badge = l10n.attachmentCountLabel(
-                            entry.attachments.length,
-                          );
-                          return raw.isEmpty ? badge : '$raw · $badge';
-                        }
-                        return raw;
-                      }(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (checkable)
-                    _action(
-                      'live-waiting-check-${entry.commandId.value}',
-                      Symbols.refresh,
-                      l10n.composerCheckAgain,
-                      () => c.checkAgain(entry.commandId),
-                    ),
-                  if (cancellable)
-                    _action(
-                      'live-waiting-cancel-${entry.commandId.value}',
-                      Symbols.close,
-                      l10n.composerCancel,
-                      () => c.cancel(entry.commandId),
-                    ),
-                  if (steerable)
-                    _action(
-                      'live-waiting-send-${entry.commandId.value}',
-                      Symbols.arrow_upward,
-                      l10n.composerSendNow,
-                      () => c.switchDelivery(entry.commandId, Delivery.steer),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _row(BuildContext context, OutboxEntry entry) {
     final l10n = context.v2L10n;
     final c = widget.controller;
@@ -686,27 +557,7 @@ class _SessionComposerState extends State<SessionComposer> {
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (chips.isNotEmpty)
-                        // Oldest on top, one line each; past three the
-                        // lines scroll.
-                        ConstrainedBox(
-                          key: const ValueKey('live-waiting'),
-                          constraints: const BoxConstraints(maxHeight: 132),
-                          child: ListView(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.only(bottom: 4),
-                            children: [
-                              for (final chip in chips)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 4),
-                                  child: _waiting(context, chip),
-                                ),
-                            ],
-                          ),
-                        ),
-                      for (final entry in rows) _row(context, entry),
-                    ],
+                    children: [for (final entry in rows) _row(context, entry)],
                   ),
                 ),
               ),

@@ -11,6 +11,7 @@ import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/theme/chat_appearance.dart';
 import 'session_live_controller.dart';
+import 'session_timeline_projection.dart';
 import 'session_tool_details_dialog.dart';
 
 /// What the conversation's status bar reports (#133, #468), the only place
@@ -73,7 +74,12 @@ ComposerActivity? composerActivity(SessionState? state, V2Localizations l10n) {
   final timeline = state!.timeline;
   for (var index = timeline.length - 1; index >= 0; index--) {
     final item = timeline[index];
-    if (item is UserInput) break;
+    if (item is UserInput) {
+      // A prompt still waiting for the harness is not part of the turn yet
+      // (#502); the turn in flight goes on before it.
+      if (sessionPromptWaits(item)) continue;
+      break;
+    }
     if (_isShell(item)) continue;
     final message = item.meta.message;
     if (message?.completed != null) continue;

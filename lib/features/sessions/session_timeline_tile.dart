@@ -17,6 +17,7 @@ import 'session_error_card.dart';
 import 'session_message_info.dart';
 import 'session_reasoning_body.dart';
 import 'session_switch_note.dart';
+import 'session_timeline_projection.dart';
 import 'session_tool_result.dart';
 
 /// The timeline's side margin: narrow on a phone, so the agent's text,
@@ -119,9 +120,7 @@ class SessionTimelineTile extends StatelessWidget {
         selection: selection,
       );
     }
-    if (item case Notice(
-      kind: OpenValue(known: NoticeKind.skillActivated),
-    )) {
+    if (item case Notice(kind: OpenValue(known: NoticeKind.skillActivated))) {
       final name = item.text.trim();
       if (name.isEmpty) return const SizedBox.shrink();
       return SessionLightNote(
@@ -406,25 +405,46 @@ class SessionTimelineTile extends StatelessWidget {
             : const Radius.circular(16),
       ),
     );
+    // A prompt the harness has not taken yet is still on its way: a weaker
+    // fill that slowly breathes, and no actions of its own (#502).
+    final waiting = item is UserInput && sessionPromptWaits(item);
+    Widget card(double alpha) => Card(
+      color: isUser
+          ? colorScheme.primaryContainer.withValues(alpha: alpha)
+          : null,
+      shape: shape,
+      clipBehavior: child != null ? Clip.antiAlias : Clip.none,
+      child: child != null
+          ? Semantics(
+              button: true,
+              child: InkWell(
+                key: ValueKey('subagent-open-${item.id.value}'),
+                onTap: () => child(item as ToolCall),
+                child: body,
+              ),
+            )
+          : body,
+    );
     final tile = item is AssistantText
         ? body
-        : Card(
-            color: isUser
-                ? colorScheme.primaryContainer.withValues(alpha: 0.7)
-                : null,
-            shape: shape,
-            clipBehavior: child != null ? Clip.antiAlias : Clip.none,
-            child: child != null
-                ? Semantics(
-                    button: true,
-                    child: InkWell(
-                      key: ValueKey('subagent-open-${item.id.value}'),
-                      onTap: () => child(item as ToolCall),
-                      child: body,
-                    ),
-                  )
-                : body,
-          );
+        : waiting
+        ? _WaitingFill(
+            builder: card,
+            // Deliberate decision (owner, #502): a waiting prompt shows no
+            // Cancel, nor any other action; it simply looks sent. Should a
+            // Cancel return, this is its place, a link at the bubble's
+            // bottom end, wired to the composer's cancel of this prompt:
+            //
+            // footer: Align(
+            //   alignment: AlignmentDirectional.bottomEnd,
+            //   child: TextButton(
+            //     key: ValueKey('waiting-cancel-${item.id.value}'),
+            //     onPressed: () => onCancelWaiting?.call(item),
+            //     child: Text(l10n.composerCancel),
+            //   ),
+            // ),
+          )
+        : card(0.7);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -440,7 +460,9 @@ class SessionTimelineTile extends StatelessWidget {
           child: isUser
               ? Semantics(
                   container: true,
-                  label: l10n.chatMessageYou,
+                  label: waiting
+                      ? '${l10n.chatMessageYou}, ${item.delivery.known == DeliveryState.queued ? l10n.composerQueued : l10n.composerSteering}'
+                      : l10n.chatMessageYou,
                   child: Align(
                     alignment: Alignment.center,
                     widthFactor: 1,
@@ -908,10 +930,7 @@ class _SessionLightNoteState extends State<SessionLightNote> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(8),
                 onTap: () => setState(() => _open = false),
-                child: Padding(
-                  padding: const EdgeInsets.all(2),
-                  child: icon,
-                ),
+                child: Padding(padding: const EdgeInsets.all(2), child: icon),
               ),
             )
           else
@@ -936,9 +955,7 @@ class _SessionLightNoteState extends State<SessionLightNote> {
                     _open ? text : text.replaceAll(RegExp(r'\s+'), ' '),
                     maxLines: _open ? null : 1,
                     overflow: _open ? null : TextOverflow.ellipsis,
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: muted,
-                    ),
+                    style: theme.textTheme.labelMedium?.copyWith(color: muted),
                   ),
           ),
         ],
@@ -958,4 +975,52 @@ class _SessionLightNoteState extends State<SessionLightNote> {
             ),
     );
   }
+}
+
+/// The fill of a prompt still waiting for the harness (#502): weaker than a
+/// sent prompt's and slowly breathing, held still with reduced motion.
+class _WaitingFill extends StatefulWidget {
+  const _WaitingFill({required this.builder});
+
+  /// The bubble, given its fill's opacity.
+  final Widget Function(double alpha) builder;
+
+  static const breath = Duration(milliseconds: 1600);
+
+  @override
+  State<_WaitingFill> createState() => _WaitingFillState();
+}
+
+class _WaitingFillState extends State<_WaitingFill>
+    with SingleTickerProviderStateMixin {
+  late final _breath = AnimationController(
+    vsync: this,
+    duration: _WaitingFill.breath,
+    value: 0.5,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _breath
+        ..stop()
+        ..value = 0.5;
+    } else if (!_breath.isAnimating) {
+      _breath.repeat(reverse: true);
+    }
+  }
+
+  @override
+  void dispose() {
+    _breath.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AnimatedBuilder(
+    animation: _breath,
+    builder: (context, _) =>
+        widget.builder(0.2 + 0.25 * Curves.easeInOut.transform(_breath.value)),
+  );
 }

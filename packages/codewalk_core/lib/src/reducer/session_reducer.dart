@@ -764,7 +764,17 @@ final class _Draft {
         return;
       }
       if (old.generation != item.generation) retire(old);
-      timeline[at] = item;
+      if (_delivers(old, item)) {
+        // A prompt takes its place in the conversation when the harness
+        // delivers it, after everything that arrived while it waited, which
+        // is where history puts it (#502).
+        timeline
+          ..removeAt(at)
+          ..add(item);
+        itemOrder[item.id] = position;
+      } else {
+        timeline[at] = item;
+      }
     } else {
       timeline.add(item);
       itemOrder[item.id] = position;
@@ -1306,6 +1316,17 @@ String _usageKey(UsageObservation observation) => jsonEncode([
   observation.id,
   observation.provenance?.version,
 ]);
+
+/// Whether [next] is the delivery of a prompt [previous] held as admitted
+/// and not yet delivered.
+bool _delivers(TimelineItem previous, TimelineItem next) =>
+    previous is UserInput &&
+    next is UserInput &&
+    next.delivery.known == DeliveryState.delivered &&
+    switch (previous.delivery.known) {
+      DeliveryState.accepted || DeliveryState.queued => true,
+      _ => false,
+    };
 
 (ItemId, String) _generationKey(TimelineItem item) =>
     (item.id, item.generation);

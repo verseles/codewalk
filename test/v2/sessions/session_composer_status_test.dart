@@ -149,6 +149,28 @@ void main() {
     );
   });
 
+  testWidgets('a prompt still waiting is not where the turn starts (#502)', (
+    tester,
+  ) async {
+    final l10n = await _l10n(tester);
+    final waiting = UserInput(
+      meta: _meta('u2', status: ItemStatus.pending),
+      text: 'also do this',
+      delivery: const OpenValue.known(DeliveryState.accepted),
+    );
+    expect(
+      composerActivity(
+        _state(ExecutionKind.running, [
+          _prompt('u1'),
+          _think('r1', 'm1', '**Reading the code**'),
+          waiting,
+        ]),
+        l10n,
+      ),
+      (kind: ComposerStatusKind.reasoning, label: 'Reading the code'),
+    );
+  });
+
   testWidgets('shell commands never fill the slot (#521)', (tester) async {
     final l10n = await _l10n(tester);
     ShellRun shell(String id, ShellStatus status) => ShellRun(
