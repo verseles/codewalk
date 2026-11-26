@@ -617,26 +617,33 @@ class SessionLiveController extends ChangeNotifier
   /// out, so a pick the user saw taken is never lost (#503).
   Future<void> Function()? _deferredPick;
 
+  DateTime? _pickDeadline;
+  Timer? _pickTimer;
+
   /// Takes [pick] now when the lease is live, else keeps it for when it is.
   Future<void> _pick(Future<void> Function() pick) {
     if (_liveCurrent || !resumeGrace) return pick();
     _deferredPick = pick;
+    final deadline = _graceEnd!.add(liveResumeGrace);
+    _pickDeadline = deadline;
+    _pickTimer?.cancel();
+    _pickTimer = Timer(deadline.difference(_now().toUtc()), _notify);
     _notify();
     return Future.value();
   }
 
   void _runDeferredPick() {
     final pick = _deferredPick;
-    if (pick == null || !_liveCurrent) return;
+    if (pick == null || !_foreground || !_liveCurrent) return;
     if (!(_handle?.canChangeSelection ?? false)) {
       // Kept a while for the lease to read its selection; one that still
       // cannot switch a grace after the grace drops the pick, so it never
       // holds Send for good.
-      final end = _graceEnd?.add(liveResumeGrace);
-      if (end != null && !_now().toUtc().isBefore(end)) _deferredPick = null;
+      if (!_now().toUtc().isBefore(_pickDeadline!)) _deferredPick = null;
       return;
     }
     _deferredPick = null;
+    _pickTimer?.cancel();
     unawaited(pick());
   }
 
@@ -1328,6 +1335,7 @@ class SessionLiveController extends ChangeNotifier
     _disposed = true;
     hosts.removeListener(_hostsChanged);
     health?.removeListener(_healthChanged);
+    _pickTimer?.cancel();
     _graceTimer?.cancel();
     permissionModes?.removeListener(_policyChanged);
     modelPreferences?.removeListener(_notify);

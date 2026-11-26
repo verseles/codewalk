@@ -451,20 +451,19 @@ class SessionComposerController extends ChangeNotifier {
     sending = true;
     notice = ComposerNotice.none;
     final inGrace = live.resumeGrace;
-    final visibleRevert = live.turnActions?.state.revert;
     bool stillAuthorized() {
-      if (_disposed || live.endpointOffline || !(isCurrent?.call() ?? true)) {
+      if (live.endpointOffline || !(isCurrent?.call() ?? true)) {
         return false;
       }
       if (!inGrace) return true;
       final revert = live.turnActions?.state.revert;
-      return _current &&
+      return !_disposed &&
+          _current &&
           identical(outbox, _outbox) &&
           _revertKnown &&
-          (revert?.kind.known != RevertKind.staged ||
-              (visibleRevert?.kind.known == RevertKind.staged &&
-                  visibleRevert?.anchor == revert?.anchor &&
-                  visibleRevert?.boundary == revert?.boundary));
+          // A refreshed staged revert has no stable revision. Only a live
+          // tap can authorize committing the stage the user can now see.
+          revert?.kind.known != RevertKind.staged;
     }
 
     _notify();

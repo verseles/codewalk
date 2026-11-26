@@ -230,6 +230,29 @@ void main() {
       expect(handle.selectionCalls, ['model:prov/alpha']);
     });
 
+    test('a second pause preserves the deferred pick deadline', () async {
+      final model = ModelEntry(id: 'alpha', providerId: 'prov', label: 'A');
+      handle
+        ..selectionAvailable = true
+        ..selectionState = SessionSelectionState(models: [model]);
+      show(SessionLivePhase.live);
+      await pumpEventQueue();
+      health.setForeground(false);
+      health.setForeground(true);
+      show(SessionLivePhase.reconnecting);
+      await pumpEventQueue();
+      await live.selectModel(model);
+      health.setForeground(false);
+      clock = clock.add(liveResumeGrace * 2);
+      health.setForeground(true);
+      handle.selectionAvailable = false;
+      show(SessionLivePhase.live);
+      await pumpEventQueue();
+      expect(live.selectionDeferred, isFalse);
+      expect(live.composer.canSend, isTrue);
+      expect(handle.selectionCalls, isEmpty);
+    });
+
     test('a grace send waits until the revert state is known', () async {
       final turns = _Turns(null);
       handle.turnActions = turns;
