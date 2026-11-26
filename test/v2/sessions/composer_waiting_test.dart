@@ -144,6 +144,43 @@ void main() {
     expect(outbox.calls, contains('cancel mine'));
   });
 
+  testWidgets('an unconfirmed send the harness holds keeps only Check again', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      pending: [('msg_0001', 'held')],
+      entries: () => [
+        entryOf(
+          live.session,
+          'a',
+          'msg_0001',
+          'held',
+          Delivery.steer,
+          SubmissionKind.uncertain,
+        ),
+        entryOf(
+          live.session,
+          'b',
+          'msg_0009',
+          'lost',
+          Delivery.steer,
+          SubmissionKind.uncertain,
+        ),
+      ],
+    );
+    // The waiting bubble has no actions, so its line offers Check again,
+    // but sending it again would duplicate it and forgetting it would not
+    // cancel it (#502).
+    expect(find.byKey(const ValueKey('live-row-check-a')), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-row-again-a')), findsNothing);
+    expect(find.byKey(const ValueKey('live-row-discard-a')), findsNothing);
+    // One the harness does not hold keeps every recovery.
+    expect(find.byKey(const ValueKey('live-row-check-b')), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-row-again-b')), findsOneWidget);
+    expect(find.byKey(const ValueKey('live-row-discard-b')), findsOneWidget);
+  });
+
   testWidgets('a take-back brings the text back only once cancelled', (
     tester,
   ) async {

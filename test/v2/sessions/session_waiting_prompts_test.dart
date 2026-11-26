@@ -118,6 +118,107 @@ void main() {
       expect(queued.confirmed, isFalse);
     });
 
+    test(
+      'a waiting or cancelled prompt\'s message waits or leaves with it',
+      () {
+        final anchor = MessageAnchor(
+          message: MessageRef('msg_s'),
+          orderKey: 'msg_s',
+        );
+        ItemMeta anchored(String id, ItemStatus status) => ItemMeta(
+          id: ItemId(id),
+          generation: 'live',
+          status: OpenValue.known(status),
+          source: SourceProvenance(
+            harness: _ref.harnessRef,
+            version: '2.0.22',
+            nativeType: 'live',
+          ),
+          anchor: anchor,
+        );
+        UserInput steer(DeliveryState delivery) => UserInput(
+          meta: anchored('steer', ItemStatus.pending),
+          text: 'steer',
+          delivery: OpenValue.known(delivery),
+        );
+        final context = UnknownItem(
+          meta: anchored('context', ItemStatus.completed),
+          rawType: 'context',
+          raw: CanonicalValue(<String, Object?>{}),
+        );
+        for (final delivery in [
+          DeliveryState.accepted,
+          DeliveryState.cancelled,
+          DeliveryState.rejected,
+        ]) {
+          final (:items, :waiting) = sessionWaitingPrompts(
+            [_answer('a1', 'x'), steer(delivery), context],
+            const [],
+            harness: _ref.harnessRef,
+          );
+          expect([for (final item in items) item.id.value], ['a1']);
+          expect(
+            waiting,
+            hasLength(delivery == DeliveryState.accepted ? 1 : 0),
+          );
+        }
+        // Delivered, a stale pending entry hides nothing.
+        final delivered = [steer(DeliveryState.delivered), context];
+        final (:items, :waiting) = sessionWaitingPrompts(delivered, [
+          PendingInput(
+            id: const ItemId('steer'),
+            text: 'steer',
+            delivery: const OpenValue.known(Delivery.steer),
+            anchor: anchor,
+          ),
+        ], harness: _ref.harnessRef);
+        expect(items, same(delivered));
+        expect(waiting, isEmpty);
+      },
+    );
+
+    test('a prompt sent here keeps its own text and attachments', () {
+      final file = AttachmentRef(
+        id: 'att-1',
+        mimeType: 'text/plain',
+        name: 'notes.txt',
+        content: OutputRef(id: 'media:${'a' * 64}', sizeBytes: 12),
+        kind: const OpenValue.known(AttachmentKind.file),
+      );
+      ({String text, List<AttachmentRef> attachments})? sentHere(ItemId id) =>
+          id.value == 'mine' || id.value == 'done'
+          ? (text: 'clean text', attachments: [file])
+          : null;
+      final timeline = [_prompt('done', DeliveryState.delivered)];
+      final (:items, :waiting) = sessionWaitingPrompts(
+        timeline,
+        [
+          _pending('mine', 'wire text', Delivery.queue),
+          _pending('theirs', 'their text', Delivery.queue),
+        ],
+        harness: _ref.harnessRef,
+        sentHere: sentHere,
+      );
+      expect(waiting.first.text, 'clean text');
+      expect(waiting.first.attachments, [file]);
+      expect(waiting.last.text, 'their text');
+      expect(waiting.last.attachments, isEmpty);
+      // Delivered without them, it keeps this device's attachments.
+      expect((items.single as UserInput).attachments, [file]);
+      expect((items.single as UserInput).text, 'prompt done');
+      // Nothing waiting and nothing to add: the same list comes back.
+      final plain = [_answer('a1', 'x')];
+      expect(
+        sessionWaitingPrompts(
+          plain,
+          const [],
+          harness: _ref.harnessRef,
+          sentHere: sentHere,
+        ).items,
+        same(plain),
+      );
+    });
+
     test('an admitted prompt the pending list lacks still waits', () {
       final (:items, :waiting) = sessionWaitingPrompts(
         [_prompt('steer', DeliveryState.accepted), _answer('a1', 'x')],

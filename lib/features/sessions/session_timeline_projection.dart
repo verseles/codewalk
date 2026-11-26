@@ -624,16 +624,29 @@ bool sessionPromptWaits(UserInput input) => switch (input.delivery.known) {
   ({String text, List<AttachmentRef> attachments})? Function(ItemId id)?
   sentHere,
 }) {
-  if (pending.isEmpty &&
-      !items.any((item) => item is UserInput && _outsideConversation(item))) {
-    return (items: items, waiting: const []);
+  final ids = <ItemId>{};
+  final waits = <ItemId>{};
+  for (final item in items) {
+    ids.add(item.id);
+    if (item is UserInput && sessionPromptWaits(item)) waits.add(item.id);
   }
-  final resident = <ItemId, UserInput>{};
+  // A pending entry whose prompt is already in the conversation is stale.
+  final open = [
+    for (final entry in pending)
+      if (!ids.contains(entry.id) || waits.contains(entry.id)) entry,
+  ];
+  if (open.isEmpty &&
+      !items.any((item) => item is UserInput && _outsideConversation(item))) {
+    return (items: _withOwnAttachments(items, sentHere), waiting: const []);
+  }
+  // What belongs to the message of a prompt outside the conversation, such
+  // as its context, waits or leaves with it.
   final anchors = <MessageAnchor>{
-    for (final entry in pending) ?entry.anchor,
+    for (final entry in open) ?entry.anchor,
     for (final item in items)
-      if (item is UserInput && sessionPromptWaits(item)) ?item.meta.anchor,
+      if (item is UserInput && _outsideConversation(item)) ?item.meta.anchor,
   };
+  final resident = <ItemId, UserInput>{};
   final kept = <TimelineItem>[];
   for (final item in items) {
     if (item is UserInput) {
@@ -642,23 +655,22 @@ bool sessionPromptWaits(UserInput input) => switch (input.delivery.known) {
         continue;
       }
     } else if (anchors.contains(item.meta.anchor)) {
-      // Part of a waiting prompt's message, such as its context: it joins
-      // the conversation with the prompt.
       continue;
     }
     kept.add(item);
   }
   final shown = <ItemId>{};
   final waiting = <UserInput>[];
-  final settled = {for (final item in kept) item.id};
-  for (final entry in pending) {
-    if (settled.contains(entry.id) || !shown.add(entry.id)) continue;
+  void add(UserInput input) {
+    if (shown.add(input.id)) waiting.add(_own(input, sentHere) ?? input);
+  }
+
+  for (final entry in open) {
     if (resident[entry.id] case final input?) {
-      waiting.add(input);
+      add(input);
       continue;
     }
-    final own = sentHere?.call(entry.id);
-    waiting.add(
+    add(
       UserInput(
         meta: ItemMeta(
           id: entry.id,
@@ -671,8 +683,7 @@ bool sessionPromptWaits(UserInput input) => switch (input.delivery.known) {
           ),
           anchor: entry.anchor,
         ),
-        text: own?.text ?? entry.text,
-        attachments: own?.attachments ?? const [],
+        text: entry.text,
         delivery: OpenValue.known(
           entry.delivery.known == Delivery.queue
               ? DeliveryState.queued
@@ -681,10 +692,52 @@ bool sessionPromptWaits(UserInput input) => switch (input.delivery.known) {
       ),
     );
   }
-  for (final input in resident.values) {
-    if (shown.add(input.id)) waiting.add(input);
+  resident.values.forEach(add);
+  return (items: _withOwnAttachments(kept, sentHere), waiting: waiting);
+}
+
+/// [input] with this device's text and attachments of it, when the harness
+/// row carries no attachments and this device sent it with some; null when
+/// nothing changes.
+UserInput? _own(
+  UserInput input,
+  ({String text, List<AttachmentRef> attachments})? Function(ItemId id)?
+  sentHere,
+) {
+  if (input.attachments.isNotEmpty || sentHere == null) return null;
+  final own = sentHere(input.id);
+  if (own == null ||
+      (own.attachments.isEmpty &&
+          (own.text == input.text || !sessionPromptWaits(input)))) {
+    return null;
   }
-  return (items: kept, waiting: waiting);
+  return UserInput(
+    meta: input.meta,
+    text: sessionPromptWaits(input) ? own.text : input.text,
+    attachments: own.attachments,
+    delivery: input.delivery,
+    confirmed: input.confirmed,
+  );
+}
+
+/// [items], with a prompt this device sent keeping its own attachments when
+/// the harness reported it without them, until a history read brings them;
+/// the same list when nothing changes.
+List<TimelineItem> _withOwnAttachments(
+  List<TimelineItem> items,
+  ({String text, List<AttachmentRef> attachments})? Function(ItemId id)?
+  sentHere,
+) {
+  if (sentHere == null) return items;
+  List<TimelineItem>? out;
+  for (var i = 0; i < items.length; i++) {
+    final item = items[i];
+    if (item is! UserInput) continue;
+    final own = _own(item, sentHere);
+    if (own == null) continue;
+    (out ??= List.of(items))[i] = own;
+  }
+  return out ?? items;
 }
 
 /// Whether [input] is not part of the conversation (yet): waiting, or

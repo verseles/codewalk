@@ -436,9 +436,10 @@ class SessionTimelineTile extends StatelessWidget {
             // the body inside `card`, shown only for this device's prompts
             // when the harness can cancel (`PromptOutbox.cancelsPending`).
             // It needs an `onCancelWaiting` callback on this tile, passed
-            // down from the live page and calling
-            // `SessionComposerController.cancel` (or `takeBack` to edit) for
-            // the entry `sentHere` matches:
+            // down from the live page: it finds this device's outbox entry
+            // whose `messageId` is `nativeMessageOf(item.id)`, as
+            // `SessionComposerController.chips` does, and calls `cancel` (or
+            // `takeBack` to edit) with that entry's `commandId`:
             //
             // Align(
             //   alignment: AlignmentDirectional.bottomEnd,

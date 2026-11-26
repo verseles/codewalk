@@ -132,6 +132,47 @@ SessionSnapshot history(
 
 void main() {
   group('synthetic ordering and identity cases', () {
+    test('what belongs to a delivered prompt\'s message moves with it', () {
+      List<String> ids(SessionState state) => [
+        for (final item in state.timeline) item.id.value,
+      ];
+      final anchor = MessageAnchor(
+        message: MessageRef('msg_steer'),
+        orderKey: 'msg_steer',
+      );
+      UserInput steer(DeliveryState delivery) => UserInput(
+        meta: ItemMeta(
+          id: const ItemId('steer'),
+          generation: 'generation',
+          status: const OpenValue.known(ItemStatus.pending),
+          source: source('synthetic.item'),
+          anchor: anchor,
+        ),
+        text: 'steer',
+        delivery: OpenValue.known(delivery),
+      );
+      final context = UnknownItem(
+        meta: ItemMeta(
+          id: const ItemId('context'),
+          generation: 'generation',
+          status: const OpenValue.known(ItemStatus.completed),
+          source: source('synthetic.item'),
+          anchor: anchor,
+        ),
+        rawType: 'context',
+        raw: CanonicalValue(<String, Object?>{}),
+      );
+      var state = upsert(initial(), text('a1', 'before'), 1);
+      state = upsert(state, steer(DeliveryState.accepted), 2);
+      state = upsert(state, context, 3);
+      state = upsert(state, text('a2', 'still answering'), 4);
+      expect(ids(state), ['a1', 'steer', 'context', 'a2']);
+      state = upsert(state, steer(DeliveryState.delivered), 5);
+      expect(ids(state), ['a1', 'a2', 'steer', 'context']);
+      state = upsert(state, text('a3', 'next'), 6);
+      expect(ids(state), ['a1', 'a2', 'steer', 'context', 'a3']);
+    });
+
     test('a delivered prompt moves after what arrived while it waited', () {
       List<String> ids(SessionState state) => [
         for (final item in state.timeline) item.id.value,

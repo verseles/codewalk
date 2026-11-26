@@ -487,7 +487,11 @@ class _SessionComposerState extends State<SessionComposer> {
                 ),
               ),
             ),
-          if (localIdle && entry.state != SubmissionKind.sending)
+          // Forgetting an entry the harness lists as waiting would not
+          // cancel it, only look like it.
+          if (localIdle &&
+              entry.state != SubmissionKind.sending &&
+              !c.waiting(c.live.state, entry))
             TextButton(
               key: ValueKey('live-row-discard-$id'),
               onPressed: () => c.discard(entry.commandId),

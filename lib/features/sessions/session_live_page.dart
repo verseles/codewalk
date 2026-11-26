@@ -389,6 +389,8 @@ class _SessionLivePageState extends State<SessionLivePage>
       widget.controller,
       widget.controller.turn,
       widget.controller.search,
+      // Waiting prompts read this device's sends from the ledger (#502).
+      widget.controller.composer,
     ]),
     builder: (context, child) {
       final c = widget.controller;
