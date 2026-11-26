@@ -633,7 +633,7 @@ class SessionLiveController extends ChangeNotifier
       // cannot switch a grace after the grace drops the pick, so it never
       // holds Send for good.
       final end = _graceEnd?.add(liveResumeGrace);
-      if (end == null || !_now().toUtc().isBefore(end)) _deferredPick = null;
+      if (end != null && !_now().toUtc().isBefore(end)) _deferredPick = null;
       return;
     }
     _deferredPick = null;

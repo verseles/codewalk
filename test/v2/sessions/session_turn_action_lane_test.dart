@@ -167,7 +167,6 @@ final class _Rig {
       currentBinding: () => binding,
       selectionHoldsSend: (_) => selectionPending,
       promptRefusal: (ref) => outbox.turnMutationRefusalWithinQueue(ref),
-      freshWait: const Duration(milliseconds: 200),
     );
     outbox = newOutbox();
   }
@@ -415,31 +414,6 @@ void main() {
       expect(rig.wire.mutations.last.method, 'DELETE');
     },
   );
-
-  test('a prompt waits for a current view before it goes (#503)', () async {
-    final rig = _Rig();
-    addTearDown(rig.dispose);
-    await rig.open();
-    // While the stream comes back the view may hide a revert another client
-    // staged meanwhile: the prompt waits, then goes once the view is current.
-    rig.show(stale: true);
-    final waiting = rig.lane.beforeSubmit(_ref, () => true);
-    var done = false;
-    unawaited(waiting.then((_) => done = true));
-    await Future<void>.delayed(const Duration(milliseconds: 50));
-    expect(done, isFalse);
-    rig.show();
-    expect(await waiting, isNull);
-    // A view that stays stale refuses it when the wait runs out.
-    rig.show(stale: true);
-    expect(await rig.lane.beforeSubmit(_ref, () => true), 'turnOffline');
-    // Current again, but with a revert it cannot read: never a silent
-    // commit.
-    rig.show(
-      revert: const RevertState(kind: OpenValue.known(RevertKind.unknown)),
-    );
-    expect(await rig.lane.beforeSubmit(_ref, () => true), 'turnTargetUnknown');
-  });
 
   test('none alone cannot settle uncertain clear', () async {
     final rig = _Rig();
@@ -1257,32 +1231,38 @@ void main() {
     },
   );
 
-  test('R2 cleared prompt refusal clears cached admission on lane', () async {
-    final rig = _Rig();
-    addTearDown(rig.dispose);
-    await rig.open();
-    rig.wire.answer = (_) =>
-        throw const TransportException(TransportFailure.timeout);
-    await _send(rig.outbox, 'blocking-admission');
-    rig.lane.release(_ref);
-    final port = await rig.open();
-    expect(
-      port.unavailable(SessionTurnAction.undo),
-      SessionTurnUnavailable.unconfirmed,
-    );
-    rig.wire.answer = null;
-    final entry = (await rig.outbox.entries(_ref)).single;
-    rig.wire.history.add({
-      'id': entry.messageId,
-      'type': 'user',
-      'text': 'replacement',
-      'time': {'created': 3},
-    });
-    await rig.outbox.reconcile(_ref, const CommandId('blocking-admission'));
-    final result = await port.stage(_turn('msg_2').id, id: _id);
-    expect(result.applied, isTrue);
-    expect(port.unavailable(SessionTurnAction.undo), isNull);
-  });
+  test(
+    'R2 cleared prompt refusal clears cached admission on lane',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      await rig.open();
+      rig.wire.answer = (_) =>
+          throw const TransportException(TransportFailure.timeout);
+      await _send(rig.outbox, 'blocking-admission');
+      rig.lane.release(_ref);
+      final port = await rig.open();
+      expect(
+        port.unavailable(SessionTurnAction.undo),
+        SessionTurnUnavailable.unconfirmed,
+      );
+      rig.wire.answer = null;
+      final entry = (await rig.outbox.entries(_ref)).single;
+      rig.wire.history.add({
+        'id': entry.messageId,
+        'type': 'user',
+        'text': 'replacement',
+        'time': {'created': 3},
+      });
+      await rig.outbox.reconcile(_ref, const CommandId('blocking-admission'));
+      final result = await port.stage(_turn('msg_2').id, id: _id);
+      expect(result.applied, isTrue);
+      expect(
+        port.unavailable(SessionTurnAction.undo),
+        isNull,
+      );
+    },
+  );
 }
 
 final class _JournalGateStore extends OutboxStore {

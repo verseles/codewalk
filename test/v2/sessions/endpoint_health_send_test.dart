@@ -246,6 +246,27 @@ void main() {
       expect(live.composer.canSend, isTrue);
     });
 
+    test('a newly staged revert requires a second tap', () async {
+      final turns = _Turns(
+        const RevertState(kind: OpenValue.known(RevertKind.none)),
+      );
+      handle.turnActions = turns;
+      health.setForeground(false);
+      health.setForeground(true);
+      show(SessionLivePhase.reconnecting);
+      await pumpEventQueue();
+      live.draft.text = 'keep my draft';
+      final sending = live.composer.send(live.draft.text);
+      turns.state = const SessionTurnState(
+        revert: RevertState(kind: OpenValue.known(RevertKind.staged)),
+      );
+      show(SessionLivePhase.live);
+      expect(await sending, isFalse);
+      expect(server.transport.bodies, isEmpty);
+      expect(live.draft.text, 'keep my draft');
+      expect(await live.composer.send(live.draft.text), isTrue);
+    });
+
     test('a server confirmed Offline ends it at once', () async {
       health.setForeground(false);
       health.setForeground(true);
@@ -272,7 +293,11 @@ void main() {
         health.setForeground(true);
         show(SessionLivePhase.reconnecting);
         await pumpEventQueue();
-        expect(await live.composer.send('quick one'), isTrue);
+        final sending = live.composer.send('quick one');
+        await pumpEventQueue();
+        expect(server.transport.bodies, isEmpty);
+        show(SessionLivePhase.live);
+        expect(await sending, isTrue);
         expect(server.transport.bodies, hasLength(1));
         final waiting = live.composer.unseenPrompts(live.state);
         expect(waiting.single.text, 'quick one');

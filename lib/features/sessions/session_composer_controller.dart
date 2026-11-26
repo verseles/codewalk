@@ -126,21 +126,42 @@ class SessionComposerController extends ChangeNotifier {
       !(live.turnActions?.state.holdsSend ?? false) &&
       // Back from the background, a send goes out while the stream returns
       // and shows as waiting until the conversation reports it (#503).
-      ((live.resumeGrace && _revertKnown) ||
-          (live.view?.phase == SessionLivePhase.live &&
-              !(live.view?.stale ?? true)));
+      ((_revertKnown && live.resumeGrace) || _current);
 
-  /// Whether the session's revert state is known, which a prompt needs: a
-  /// prompt over a staged revert would commit it (#503). A lease reopened
-  /// without state waits for its hydration; a harness without turn actions
-  /// has no revert to commit.
   bool get _revertKnown {
-    final turn = live.turnActions;
-    if (turn == null) return true;
-    return switch (turn.state.revert?.kind.known) {
-      null || RevertKind.unknown => false,
-      _ => true,
-    };
+    final turns = live.turnActions;
+    final kind = turns?.state.revert?.kind.known;
+    return turns == null || (kind != null && kind != RevertKind.unknown);
+  }
+
+  Completer<void>? _graceWait;
+
+  bool get _current =>
+      live.view?.phase == SessionLivePhase.live && !(live.view?.stale ?? true);
+
+  /// Waits, the field holding the text as it sends, until the view is live
+  /// and current again or the resume grace ends (#503): only a current view
+  /// shows a revert another client staged meanwhile, which a prompt would
+  /// commit, so nothing is recorded or sent before. True when it is current.
+  Future<bool> _awaitCurrent() async {
+    if (_current) return true;
+    final done = _graceWait = Completer<void>();
+    void check() {
+      if (!done.isCompleted && (_disposed || _current || !live.resumeGrace)) {
+        done.complete();
+      }
+    }
+
+    // The grace ends on a timer that notifies the live controller.
+    live.addListener(check);
+    try {
+      check();
+      await done.future;
+    } finally {
+      live.removeListener(check);
+      _graceWait = null;
+    }
+    return !_disposed && _current;
   }
 
   /// This device's prompts sent while the resume grace masked a reconnect,
@@ -430,14 +451,35 @@ class SessionComposerController extends ChangeNotifier {
     sending = true;
     notice = ComposerNotice.none;
     final inGrace = live.resumeGrace;
+    final visibleRevert = live.turnActions?.state.revert;
+    bool stillAuthorized() {
+      if (_disposed || live.endpointOffline || !(isCurrent?.call() ?? true)) {
+        return false;
+      }
+      if (!inGrace) return true;
+      final revert = live.turnActions?.state.revert;
+      return _current &&
+          identical(outbox, _outbox) &&
+          _revertKnown &&
+          (revert?.kind.known != RevertKind.staged ||
+              (visibleRevert?.kind.known == RevertKind.staged &&
+                  visibleRevert?.anchor == revert?.anchor &&
+                  visibleRevert?.boundary == revert?.boundary));
+    }
+
     _notify();
     try {
+      // Not current yet: the text stays in the field, read-only as for any
+      // send, and the status bar tells the reconnect once the grace ends.
+      if (inGrace && (!await _awaitCurrent() || !stillAuthorized())) {
+        return false;
+      }
       final result = await outbox.submit(
         session: session,
         commandId: commandId ?? _commandIds(),
         draft: PromptDraft(text: text, attachments: attachments),
         delivery: as,
-        isCurrent: () => !live.endpointOffline && (isCurrent?.call() ?? true),
+        isCurrent: stillAuthorized,
       );
       if (_disposed) {
         // The session closed meanwhile: a prompt the outbox took must not
@@ -668,6 +710,8 @@ class SessionComposerController extends ChangeNotifier {
   void dispose() {
     if (_disposed) return;
     _disposed = true;
+    final wait = _graceWait;
+    if (wait != null && !wait.isCompleted) wait.complete();
     live.removeListener(_liveChanged);
     super.dispose();
   }
