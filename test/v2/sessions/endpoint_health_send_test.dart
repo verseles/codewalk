@@ -10,6 +10,7 @@ import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
+import 'package:codewalk/shared/sessions/session_turn_actions.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,6 +35,38 @@ final class _GateStore extends OutboxStore {
     }
     return result;
   }
+}
+
+/// A turn lane whose revert state is [revert] (null: not hydrated yet).
+final class _Turns implements SessionTurnActionPort {
+  _Turns(RevertState? revert) : state = SessionTurnState(revert: revert);
+
+  @override
+  SessionTurnState state;
+
+  @override
+  SessionTurnUnavailable? unavailable(SessionTurnAction action) => null;
+
+  @override
+  Future<SessionTurnResult> compact({required CommandId id}) async =>
+      const SessionTurnResult(applied: false);
+
+  @override
+  Future<SessionTurnResult> redoAll({required CommandId id}) async =>
+      const SessionTurnResult(applied: false);
+
+  @override
+  Future<SessionTurnResult> redoNext({required CommandId id}) async =>
+      const SessionTurnResult(applied: false);
+
+  @override
+  Future<SessionTurnResult> stage(
+    ItemId boundary, {
+    required CommandId id,
+  }) async => const SessionTurnResult(applied: false);
+
+  @override
+  Future<void> refresh() async {}
 }
 
 void main() {
@@ -195,6 +228,22 @@ void main() {
       show(SessionLivePhase.live);
       await pumpEventQueue();
       expect(handle.selectionCalls, ['model:prov/alpha']);
+    });
+
+    test('a grace send waits until the revert state is known', () async {
+      final turns = _Turns(null);
+      handle.turnActions = turns;
+      health.setForeground(false);
+      health.setForeground(true);
+      show(SessionLivePhase.reconnecting);
+      await pumpEventQueue();
+      expect(live.resumeGrace, isTrue);
+      // A lease reopened without state could commit a staged revert.
+      expect(live.composer.canSend, isFalse);
+      turns.state = const SessionTurnState(
+        revert: RevertState(kind: OpenValue.known(RevertKind.none)),
+      );
+      expect(live.composer.canSend, isTrue);
     });
 
     test('a server confirmed Offline ends it at once', () async {

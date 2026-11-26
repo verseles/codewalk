@@ -627,7 +627,12 @@ class SessionLiveController extends ChangeNotifier
 
   void _runDeferredPick() {
     final pick = _deferredPick;
-    if (pick == null || !_liveCurrent) return;
+    // Kept until the lease can take it, whatever made it live again.
+    if (pick == null ||
+        !_liveCurrent ||
+        !(_handle?.canChangeSelection ?? false)) {
+      return;
+    }
     _deferredPick = null;
     unawaited(pick());
   }
@@ -1167,7 +1172,9 @@ class SessionLiveController extends ChangeNotifier
   }
 
   void _notify() {
-    if (!_disposed) notifyListeners();
+    if (_disposed) return;
+    _runDeferredPick();
+    notifyListeners();
   }
 
   void _detach() {

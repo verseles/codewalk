@@ -126,9 +126,22 @@ class SessionComposerController extends ChangeNotifier {
       !(live.turnActions?.state.holdsSend ?? false) &&
       // Back from the background, a send goes out while the stream returns
       // and shows as waiting until the conversation reports it (#503).
-      (live.resumeGrace ||
+      ((live.resumeGrace && _revertKnown) ||
           (live.view?.phase == SessionLivePhase.live &&
               !(live.view?.stale ?? true)));
+
+  /// Whether the session's revert state is known, which a prompt needs: a
+  /// prompt over a staged revert would commit it (#503). A lease reopened
+  /// without state waits for its hydration; a harness without turn actions
+  /// has no revert to commit.
+  bool get _revertKnown {
+    final turn = live.turnActions;
+    if (turn == null) return true;
+    return switch (turn.state.revert?.kind.known) {
+      null || RevertKind.unknown => false,
+      _ => true,
+    };
+  }
 
   /// This device's prompts sent while the resume grace masked a reconnect,
   /// shown as waiting until the conversation reports them (#503).
@@ -148,9 +161,8 @@ class SessionComposerController extends ChangeNotifier {
     final out = <UserInput>[];
     for (final id in _sentInGrace.toList()) {
       final entry = _entry(id);
-      // Not read back yet: kept for the next build.
-      if (entry == null) continue;
-      if (entry.state != SubmissionKind.admitted ||
+      if (entry == null ||
+          entry.state != SubmissionKind.admitted ||
           shown.contains(entry.messageId)) {
         _sentInGrace.remove(id);
         continue;
@@ -461,7 +473,10 @@ class SessionComposerController extends ChangeNotifier {
         return _sent(text, fromDraft);
       }
       await _refresh();
-      if (inGrace) _sentInGrace.add(entry.commandId);
+      // Tracked once the ledger read holds it, so the page can show it.
+      if (inGrace && _entry(entry.commandId) != null) {
+        _sentInGrace.add(entry.commandId);
+      }
       return _sent(text, fromDraft);
     } finally {
       sending = false;
