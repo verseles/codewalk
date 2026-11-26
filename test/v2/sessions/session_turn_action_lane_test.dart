@@ -415,6 +415,23 @@ void main() {
     },
   );
 
+  test(
+    'an ordinary prompt passes while the stream comes back (#503)',
+    () async {
+      final rig = _Rig();
+      addTearDown(rig.dispose);
+      final port = await rig.open();
+      // The composer gates ordinary prompts (the resume grace); the lane only
+      // keeps a staged replacement waiting for a current live view.
+      rig.show(stale: true);
+      expect(await rig.lane.beforeSubmit(_ref, () => true), isNull);
+      rig.show();
+      expect((await port.stage(_turn('msg_2').id, id: _id)).applied, isTrue);
+      rig.show(stale: true, revert: rig.views[_ref]!.state!.revert);
+      expect(await rig.lane.beforeSubmit(_ref, () => true), 'turnOffline');
+    },
+  );
+
   test('none alone cannot settle uncertain clear', () async {
     final rig = _Rig();
     addTearDown(rig.dispose);
@@ -1231,38 +1248,32 @@ void main() {
     },
   );
 
-  test(
-    'R2 cleared prompt refusal clears cached admission on lane',
-    () async {
-      final rig = _Rig();
-      addTearDown(rig.dispose);
-      await rig.open();
-      rig.wire.answer = (_) =>
-          throw const TransportException(TransportFailure.timeout);
-      await _send(rig.outbox, 'blocking-admission');
-      rig.lane.release(_ref);
-      final port = await rig.open();
-      expect(
-        port.unavailable(SessionTurnAction.undo),
-        SessionTurnUnavailable.unconfirmed,
-      );
-      rig.wire.answer = null;
-      final entry = (await rig.outbox.entries(_ref)).single;
-      rig.wire.history.add({
-        'id': entry.messageId,
-        'type': 'user',
-        'text': 'replacement',
-        'time': {'created': 3},
-      });
-      await rig.outbox.reconcile(_ref, const CommandId('blocking-admission'));
-      final result = await port.stage(_turn('msg_2').id, id: _id);
-      expect(result.applied, isTrue);
-      expect(
-        port.unavailable(SessionTurnAction.undo),
-        isNull,
-      );
-    },
-  );
+  test('R2 cleared prompt refusal clears cached admission on lane', () async {
+    final rig = _Rig();
+    addTearDown(rig.dispose);
+    await rig.open();
+    rig.wire.answer = (_) =>
+        throw const TransportException(TransportFailure.timeout);
+    await _send(rig.outbox, 'blocking-admission');
+    rig.lane.release(_ref);
+    final port = await rig.open();
+    expect(
+      port.unavailable(SessionTurnAction.undo),
+      SessionTurnUnavailable.unconfirmed,
+    );
+    rig.wire.answer = null;
+    final entry = (await rig.outbox.entries(_ref)).single;
+    rig.wire.history.add({
+      'id': entry.messageId,
+      'type': 'user',
+      'text': 'replacement',
+      'time': {'created': 3},
+    });
+    await rig.outbox.reconcile(_ref, const CommandId('blocking-admission'));
+    final result = await port.stage(_turn('msg_2').id, id: _id);
+    expect(result.applied, isTrue);
+    expect(port.unavailable(SessionTurnAction.undo), isNull);
+  });
 }
 
 final class _JournalGateStore extends OutboxStore {

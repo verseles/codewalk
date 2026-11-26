@@ -422,6 +422,10 @@ class _SessionLivePageState extends State<SessionLivePage>
         harness: c.session.harnessRef,
         sentHere: c.composer.sentHere,
       );
+      // With what this device sent while the stream was coming back, not
+      // reported yet (#503).
+      final unseen = c.composer.unseenPrompts(state);
+      final pinned = unseen.isEmpty ? waiting : [...waiting, ...unseen];
       // A settled session has no turn in flight, so a finished answer can be
       // offered to the reader from its start.
       final settled = switch (state?.execution?.kind.known) {
@@ -455,9 +459,9 @@ class _SessionLivePageState extends State<SessionLivePage>
         renderMode: appearance?.renderMode ?? ChatRenderMode.live,
       );
       // A waiting prompt is on screen, so search finds it too (#502).
-      _searchItems = waiting.isEmpty
+      _searchItems = pinned.isEmpty
           ? timelineItems
-          : [...timelineItems, ...waiting];
+          : [...timelineItems, ...pinned];
       _searchReasoning = reasoning;
       _searchHeld = held;
       return Scaffold(
@@ -622,12 +626,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                                   ? _openRosterChild
                                   : null,
                               items: items,
-                              waiting: [
-                                ...waiting,
-                                // Sent while the stream was coming back,
-                                // not reported yet (#503).
-                                ...c.composer.unseenPrompts(state),
-                              ],
+                              waiting: pinned,
                               // A turn reverts from its message menu, where
                               // the session can (#492).
                               userTurnRevert: (turnItem, isLatest) =>

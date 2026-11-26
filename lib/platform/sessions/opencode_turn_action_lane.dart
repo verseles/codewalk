@@ -622,18 +622,20 @@ final class OpenCodeTurnActionLane {
       return 'turnOffline';
     }
     if (entry.phase != SessionTurnPhase.idle) return 'turnUnconfirmed';
-    final current = view(ref);
-    if (current.phase != SessionLivePhase.live || current.stale) {
-      return 'turnOffline';
-    }
     final revert = _revert(ref);
     if (revert?.kind.known == null ||
         revert?.kind.known == RevertKind.unknown) {
       return 'turnTargetUnknown';
     }
-    // Ordinary prompts keep their verified steer/queue behavior. A staged
-    // replacement additionally needs the destructive commit preflight.
+    // Ordinary prompts keep their verified steer/queue behavior, also while
+    // the stream comes back after the app returned (#503); the composer is
+    // the gate for those. A staged replacement additionally needs a current
+    // live view and the destructive commit preflight.
     if (!_staged(ref)) return null;
+    final current = view(ref);
+    if (current.phase != SessionLivePhase.live || current.stale) {
+      return 'turnOffline';
+    }
     final refusal = _whilePending(ref, entry, SessionTurnAction.redoAll);
     if (refusal != null && refusal != entry.admission) return 'turnBusy';
     final cut = revert!.anchor;

@@ -35,14 +35,14 @@ final class EndpointHealthView {
   }
 }
 
-/// Observes every saved endpoint while the app is visible. Each probe belongs
-/// to this lane; it never borrows or cancels the Hosts page's manual task.
 /// How long a return from the background hides a connection that is still
 /// coming back: the open conversation's reconnect, the hamburger's server
 /// and sync alerts and the Offline warning wait this long (#503, owner
 /// 2026-11-25, was 5 s for the hamburger).
 const liveResumeGrace = Duration(seconds: 7);
 
+/// Observes every saved endpoint while the app is visible. Each probe belongs
+/// to this lane; it never borrows or cancels the Hosts page's manual task.
 final class EndpointHealthController extends ChangeNotifier {
   EndpointHealthController({
     required this.hosts,

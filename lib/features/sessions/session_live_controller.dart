@@ -602,7 +602,12 @@ class SessionLiveController extends ChangeNotifier
       (_liveCurrent && !isChild && (_handle?.canChangeSelection ?? false)) ||
       // Back from the background, the pick is taken now and switched on the
       // server once the stream is live again (#503).
-      (resumeGrace && !isChild && _pickedLive);
+      // One pick at a time, as with a switch waiting for its report.
+      (resumeGrace && !isChild && _pickedLive && _deferredPick == null);
+
+  /// Whether a pick taken during the resume grace still waits for the
+  /// stream: the next prompt waits for it, as for any switch (#503).
+  bool get selectionDeferred => _deferredPick != null;
 
   /// Whether this lease could change the selection when it was last live.
   bool _pickedLive = false;
@@ -664,6 +669,8 @@ class SessionLiveController extends ChangeNotifier
     if (!_now().toUtc().isBefore(end)) return false;
     if (endpointOffline || failure != null) return false;
     return switch (phase) {
+      // A view reopened by the wake starts over from probing.
+      SessionLivePhase.probing ||
       SessionLivePhase.connecting ||
       SessionLivePhase.hydrating ||
       SessionLivePhase.reconnecting ||

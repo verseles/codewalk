@@ -51,7 +51,8 @@ final class SseRecoveryPolicy {
           maxBatchFrames,
           maxQueuedUpdates,
         ].any((n) => n <= 0) ||
-        (resumeQuiet != null && resumeQuiet! <= Duration.zero)) {
+        (resumeQuiet != null &&
+            (resumeQuiet! <= Duration.zero || resumeQuiet! > watchdog))) {
       throw ArgumentError('Recovery limits must be positive and ordered.');
     }
   }

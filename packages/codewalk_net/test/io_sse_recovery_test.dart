@@ -344,6 +344,16 @@ void main() {
     await waitFor(() => transport.requests.length == 4);
   });
 
+  test('a quiet bound past the watchdog is refused', () {
+    expect(
+      () => const SseRecoveryPolicy(
+        watchdog: Duration(seconds: 10),
+        resumeQuiet: Duration(seconds: 20),
+      ).validate(),
+      throwsArgumentError,
+    );
+  });
+
   test('a resume without a quiet bound reconnects at once', () async {
     final transport = ControlledTransport();
     final recovery = connection(transport);

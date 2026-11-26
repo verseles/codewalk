@@ -390,7 +390,9 @@ final class IoSseRecovery implements RecoveringSseConnection {
         _ready &&
         !_terminal &&
         _cancellation != null) {
-      final silent = _now().difference(heard);
+      final elapsed = _now().difference(heard);
+      // A clock set back does not stretch the bound.
+      final silent = elapsed.isNegative ? Duration.zero : elapsed;
       if (silent < quiet) {
         _watchdog?.cancel();
         if (!_paused) {

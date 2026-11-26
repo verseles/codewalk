@@ -119,8 +119,10 @@ class SessionComposerController extends ChangeNotifier {
       !sending &&
       !live.endpointOffline &&
       !live.stopping &&
-      // A model or agent change settles before the next prompt goes out.
+      // A model or agent change settles before the next prompt goes out,
+      // also one taken during the resume grace (#503).
       !live.selectionState.holdsSend &&
+      !live.selectionDeferred &&
       !(live.turnActions?.state.holdsSend ?? false) &&
       // Back from the background, a send goes out while the stream returns
       // and shows as waiting until the conversation reports it (#503).
@@ -146,8 +148,9 @@ class SessionComposerController extends ChangeNotifier {
     final out = <UserInput>[];
     for (final id in _sentInGrace.toList()) {
       final entry = _entry(id);
-      if (entry == null ||
-          entry.state != SubmissionKind.admitted ||
+      // Not read back yet: kept for the next build.
+      if (entry == null) continue;
+      if (entry.state != SubmissionKind.admitted ||
           shown.contains(entry.messageId)) {
         _sentInGrace.remove(id);
         continue;
@@ -457,8 +460,8 @@ class SessionComposerController extends ChangeNotifier {
         }
         return _sent(text, fromDraft);
       }
-      if (inGrace) _sentInGrace.add(entry.commandId);
       await _refresh();
+      if (inGrace) _sentInGrace.add(entry.commandId);
       return _sent(text, fromDraft);
     } finally {
       sending = false;

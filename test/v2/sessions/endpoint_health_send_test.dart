@@ -167,9 +167,14 @@ void main() {
       expect(live.canChangeSelection, isTrue);
       await live.selectModel(model, variant: 'high');
       expect(handle.selectionCalls, isEmpty);
+      // Like any switch, it settles before the next prompt or pick.
+      expect(live.selectionDeferred, isTrue);
+      expect(live.composer.canSend, isFalse);
+      expect(live.canChangeSelection, isFalse);
       show(SessionLivePhase.live);
       await pumpEventQueue();
       expect(handle.selectionCalls, ['model:prov/alpha:high']);
+      expect(live.selectionDeferred, isFalse);
     });
 
     test('a pick still waiting when the grace runs out is not lost', () async {
