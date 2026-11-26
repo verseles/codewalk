@@ -97,7 +97,7 @@ final class _FakeSse implements RecoveringSseConnection {
   void releaseGeneration(int generation) => released = true;
 
   @override
-  void wake() {}
+  void wake({bool resumed = false}) {}
 
   @override
   Future<void> close() async {

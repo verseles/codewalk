@@ -64,6 +64,7 @@ IoSseRecovery connection(
   ControlledTransport transport, {
   SseRecoveryPolicy policy = const SseRecoveryPolicy(),
   bool Function(SseFrame)? connectedWhen,
+  DateTime Function()? now,
 }) {
   final result = IoSseRecovery(
     transport,
@@ -71,6 +72,7 @@ IoSseRecovery connection(
     policy: policy,
     connectedWhen: connectedWhen,
     random: () => .5,
+    now: now,
   );
   addTearDown(result.close);
   addTearDown(transport.close);
@@ -302,6 +304,57 @@ void main() {
     recovery.wake();
     await waitFor(() => updates.whereType<SseConnected>().isNotEmpty);
     expect(transport.requests.length, 2);
+  });
+
+  test('a resume keeps a stream heard from lately (#503)', () async {
+    var clock = DateTime.utc(2026, 11, 25, 12);
+    final transport = ControlledTransport();
+    final recovery = connection(
+      transport,
+      policy: const SseRecoveryPolicy(
+        resumeQuiet: Duration(milliseconds: 200),
+        initialBackoff: Duration(milliseconds: 20),
+      ),
+      now: () => clock,
+    );
+    final updates = <SseRecoveryUpdate>[];
+    final sub = recovery.updates.listen(updates.add);
+    addTearDown(sub.cancel);
+    await waitFor(() => updates.whereType<SseConnected>().isNotEmpty);
+    transport.bodies.single.add(utf8.encode(': heartbeat\n\n'));
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    // Heard within the bound: the stream stays.
+    clock = clock.add(const Duration(milliseconds: 100));
+    recovery.wake(resumed: true);
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    expect(transport.requests, hasLength(1));
+    expect(updates.whereType<SseDisconnected>(), isEmpty);
+    // Still silent when the bound runs out: it was dead, and reconnects.
+    await waitFor(() => updates.whereType<SseDisconnected>().isNotEmpty);
+    await waitFor(() => transport.requests.length == 2);
+    // A resume after a longer silence, or a network change, reconnects now.
+    await waitFor(() => updates.whereType<SseConnected>().length == 2);
+    clock = clock.add(const Duration(seconds: 1));
+    recovery.wake(resumed: true);
+    await waitFor(() => transport.requests.length == 3);
+    await waitFor(() => updates.whereType<SseConnected>().length == 3);
+    transport.bodies.last.add(utf8.encode(': heartbeat\n\n'));
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    recovery.wake();
+    await waitFor(() => transport.requests.length == 4);
+  });
+
+  test('a resume without a quiet bound reconnects at once', () async {
+    final transport = ControlledTransport();
+    final recovery = connection(transport);
+    final updates = <SseRecoveryUpdate>[];
+    final sub = recovery.updates.listen(updates.add);
+    addTearDown(sub.cancel);
+    await waitFor(() => updates.whereType<SseConnected>().isNotEmpty);
+    transport.bodies.single.add(utf8.encode(': heartbeat\n\n'));
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    recovery.wake(resumed: true);
+    await waitFor(() => transport.requests.length == 2);
   });
 
   test('wake skips a pending retry delay and reconnects now', () async {

@@ -17,8 +17,10 @@ final class IoSseRecovery implements RecoveringSseConnection {
     this.policy = const SseRecoveryPolicy(),
     this.connectedWhen,
     double Function()? random,
+    DateTime Function()? now,
   }) : headers = Map.unmodifiable(headers),
-       _random = random ?? Random().nextDouble {
+       _random = random ?? Random().nextDouble,
+       _now = now ?? DateTime.now {
     policy.validate();
     _controller = StreamController<SseRecoveryUpdate>(
       onListen: () => unawaited(_connect()),
@@ -72,6 +74,10 @@ final class IoSseRecovery implements RecoveringSseConnection {
   /// Its matching control frame is exposed in SseConnected, not interpreted here.
   final bool Function(SseFrame)? connectedWhen;
   final double Function() _random;
+  final DateTime Function() _now;
+
+  /// When the current generation last received bytes, a heartbeat included.
+  DateTime? _heard;
   late final StreamController<SseRecoveryUpdate> _controller;
   late final Stream<SseRecoveryUpdate> _updates;
   final _buffer = Queue<SseFrame>();
@@ -110,6 +116,7 @@ final class IoSseRecovery implements RecoveringSseConnection {
     final generation = ++_generation;
     _released = false;
     _ready = false;
+    _heard = null;
     try {
       final response = await transport.send(
         TransportRequest(
@@ -148,6 +155,7 @@ final class IoSseRecovery implements RecoveringSseConnection {
       }
       final raw = response.body.map((bytes) {
         if (bytes.isNotEmpty && generation == _generation) {
+          _heard = _now();
           _feedWatchdog(generation);
           _stableTimer ??= Timer(policy.initialBackoff, () {
             if (generation == _generation) _attempt = 0;
@@ -369,8 +377,33 @@ final class IoSseRecovery implements RecoveringSseConnection {
   }
 
   @override
-  void wake() {
+  void wake({bool resumed = false}) {
     if (_closed) return;
+    // Back from the background, a ready stream heard from lately is still
+    // up: the server writes at least that often, so it is kept, and only its
+    // watchdog shortens to the same bound in case it died meanwhile (#503).
+    final quiet = policy.resumeQuiet;
+    final heard = _heard;
+    if (resumed &&
+        quiet != null &&
+        heard != null &&
+        _ready &&
+        !_terminal &&
+        _cancellation != null) {
+      final silent = _now().difference(heard);
+      if (silent < quiet) {
+        _watchdog?.cancel();
+        if (!_paused) {
+          final generation = _generation;
+          _watchdog = Timer(quiet - silent, () {
+            if (generation == _generation) {
+              _abandon(const TransportException(TransportFailure.timeout));
+            }
+          });
+        }
+        return;
+      }
+    }
     _terminal = false;
     if (_cancellation != null) {
       _abandon(

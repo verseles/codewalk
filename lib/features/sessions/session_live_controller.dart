@@ -53,7 +53,8 @@ class SessionLiveController extends ChangeNotifier
        _commandIds = commandIds ?? mintCommandId,
        attachments = ComposerAttachmentsController(store: attachmentStaging) {
     hosts.addListener(_hostsChanged);
-    health?.addListener(_notify);
+    _foreground = health?.foreground ?? true;
+    health?.addListener(_healthChanged);
     permissionModes?.addListener(_policyChanged);
     modelPreferences?.addListener(_notify);
     draft.addListener(_draftChanged);
@@ -598,24 +599,98 @@ class SessionLiveController extends ChangeNotifier
 
   @override
   bool get canChangeSelection =>
-      _liveCurrent && !isChild && (_handle?.canChangeSelection ?? false);
+      (_liveCurrent && !isChild && (_handle?.canChangeSelection ?? false)) ||
+      // Back from the background, the pick is taken now and switched on the
+      // server once the stream is live again (#503).
+      (resumeGrace && !isChild && _pickedLive);
+
+  /// Whether this lease could change the selection when it was last live.
+  bool _pickedLive = false;
+
+  /// The pick made while the resume grace masked a reconnect: the latest one
+  /// is switched once the stream is live again, also after the grace ran
+  /// out, so a pick the user saw taken is never lost (#503).
+  Future<void> Function()? _deferredPick;
+
+  /// Takes [pick] now when the lease is live, else keeps it for when it is.
+  Future<void> _pick(Future<void> Function() pick) {
+    if (_liveCurrent || !resumeGrace) return pick();
+    _deferredPick = pick;
+    _notify();
+    return Future.value();
+  }
+
+  void _runDeferredPick() {
+    final pick = _deferredPick;
+    if (pick == null || !_liveCurrent) return;
+    _deferredPick = null;
+    unawaited(pick());
+  }
+
+  /// Whether health last said the app was in the foreground.
+  late bool _foreground;
+
+  /// Whether this view was live when the app last left the foreground.
+  bool _liveAtPause = false;
+  DateTime? _graceEnd;
+  Timer? _graceTimer;
+
+  void _healthChanged() {
+    final foreground = health?.foreground ?? true;
+    if (foreground != _foreground) {
+      _foreground = foreground;
+      _graceTimer?.cancel();
+      _graceEnd = null;
+      if (!foreground) {
+        _liveAtPause = _liveCurrent;
+      } else if (_liveAtPause) {
+        final now = _now().toUtc();
+        final end = (health?.resumedAt ?? now).add(liveResumeGrace);
+        _graceEnd = end;
+        _graceTimer = Timer(end.difference(now), _notify);
+      }
+    }
+    _notify();
+  }
+
+  /// Whether a return from the background still masks this view's reconnect
+  /// (#503): for up to [liveResumeGrace] after the app comes back, a view
+  /// that was live when it left looks live while its stream returns, so the
+  /// composer and the pickers stay usable; a server confirmed Offline, a
+  /// failure or a terminal phase ends it at once, and a cold open has none.
+  bool get resumeGrace {
+    final end = _graceEnd;
+    if (end == null || _disposed || _liveCurrent) return false;
+    if (!_now().toUtc().isBefore(end)) return false;
+    if (endpointOffline || failure != null) return false;
+    return switch (phase) {
+      SessionLivePhase.connecting ||
+      SessionLivePhase.hydrating ||
+      SessionLivePhase.reconnecting ||
+      SessionLivePhase.degraded ||
+      SessionLivePhase.live => true,
+      _ => false,
+    };
+  }
 
   /// The command id is taken with the gesture, for this lease's session.
   /// A switch the server took is remembered (recents, each agent's model),
   /// also when an unconfirmed switch is settled later.
   @override
-  Future<void> selectModel(ModelEntry model, {String? variant}) => _switch(
-    (project, before) => PendingSelectionSwitch.model(
-      model,
-      variant,
-      project: project,
-      before: before,
-    ),
-    (handle) => handle.selectModel(
-      modelId: model.id,
-      providerId: model.providerId,
-      variant: variant,
-      id: _commandIds(),
+  Future<void> selectModel(ModelEntry model, {String? variant}) => _pick(
+    () => _switch(
+      (project, before) => PendingSelectionSwitch.model(
+        model,
+        variant,
+        project: project,
+        before: before,
+      ),
+      (handle) => handle.selectModel(
+        modelId: model.id,
+        providerId: model.providerId,
+        variant: variant,
+        id: _commandIds(),
+      ),
     ),
   );
 
@@ -625,7 +700,10 @@ class SessionLiveController extends ChangeNotifier
   /// the switch began (by the server with the agent, or by another client),
   /// a refusal, another lease or a newer pick cancels it.
   @override
-  Future<void> selectAgent(CatalogEntry agent) async {
+  Future<void> selectAgent(CatalogEntry agent) =>
+      _pick(() => _selectAgent(agent));
+
+  Future<void> _selectAgent(CatalogEntry agent) async {
     final before = selectionState.selection;
     final revision = _modelRevision;
     final generation = _generation;
@@ -1177,6 +1255,10 @@ class SessionLiveController extends ChangeNotifier
         _observeExecution(next);
         view = next;
         if (next.phase == SessionLivePhase.evicted) failure = next.failure;
+        if (_liveCurrent) {
+          _pickedLive = handle.canChangeSelection;
+          _runDeferredPick();
+        }
         _observeModel(next.state?.selection);
         unawaited(_settleSwitch());
         unawaited(_restoreAgentModel());
@@ -1225,7 +1307,8 @@ class SessionLiveController extends ChangeNotifier
     if (_disposed) return;
     _disposed = true;
     hosts.removeListener(_hostsChanged);
-    health?.removeListener(_notify);
+    health?.removeListener(_healthChanged);
+    _graceTimer?.cancel();
     permissionModes?.removeListener(_policyChanged);
     modelPreferences?.removeListener(_notify);
     _detach();

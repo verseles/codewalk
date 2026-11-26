@@ -118,6 +118,9 @@ ComposerActivity? liveStatus(SessionLiveController live, V2Localizations l10n) {
     return status(ComposerStatusKind.connection, failure);
   }
   final phase = live.phase;
+  // Back from the background, a stream that is coming back is not reported
+  // for a while (#503).
+  final masked = live.resumeGrace;
   if (live.endpointOffline && phase != SessionLivePhase.authRequired) {
     final health = live.endpointHealth;
     return status(
@@ -132,10 +135,10 @@ ComposerActivity? liveStatus(SessionLiveController live, V2Localizations l10n) {
       },
     );
   }
-  if (phase != SessionLivePhase.live) {
+  if (phase != SessionLivePhase.live && !masked) {
     return status(ComposerStatusKind.connection, livePhaseLabel(l10n, phase));
   }
-  if (live.view?.stale ?? false) {
+  if ((live.view?.stale ?? false) && !masked) {
     return status(ComposerStatusKind.connection, l10n.liveStale);
   }
   final state = live.state;

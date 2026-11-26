@@ -306,10 +306,10 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
   /// waking one would restart a stream stopped for authentication or
   /// compatibility.
   @override
-  void wake() {
+  void wake({bool resumed = false}) {
     if (_closed) return;
     for (final slot in _slots.values.toList()) {
-      slot.wake();
+      slot.wake(resumed: resumed);
     }
   }
 

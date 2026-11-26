@@ -125,7 +125,7 @@ final class WorkspaceChromeController extends ChangeNotifier {
   bool get _catalogSyncing => catalog.behind || catalog.retrying;
 
   DateTime get _graceEnd =>
-      (health.resumedAt ?? health.now).add(const Duration(seconds: 5));
+      (health.resumedAt ?? health.now).add(liveResumeGrace);
   bool get _offline =>
       catalog.selectedProfile != null &&
       health.view(catalog.selectedProfile!).status ==

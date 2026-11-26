@@ -197,14 +197,15 @@ void main() {
     rig.dispose();
   });
 
-  testWidgets('warning waits five seconds of grace then five of debounce', (
+  testWidgets('warning waits seven seconds of grace then five of debounce', (
     tester,
   ) async {
     final rig = _Rig(tester);
     try {
       await rig.start(tester);
       rig.observe(EndpointStatus.unreachable);
-      await tester.pump(const Duration(seconds: 4));
+      // The resume grace is 7 s (#503).
+      await tester.pump(const Duration(seconds: 6));
       expect(rig.chrome.badge.kind, WorkspaceBadgeKind.none);
       await tester.pump(const Duration(seconds: 1));
       expect(rig.chrome.badge.kind, WorkspaceBadgeKind.serverAlert);
@@ -243,14 +244,14 @@ void main() {
     try {
       await rig.start(tester);
       rig.observe(EndpointStatus.unreachable);
-      await tester.pump(const Duration(seconds: 6));
+      await tester.pump(const Duration(seconds: 8));
       rig.health.setForeground(false);
       await tester.pump(const Duration(seconds: 30));
       expect(rig.chrome.warningRevision, 0);
       expect(rig.chrome.badge.kind, WorkspaceBadgeKind.none);
       rig.health.setForeground(true);
       expect(rig.chrome.badge.kind, WorkspaceBadgeKind.none);
-      await tester.pump(const Duration(seconds: 9));
+      await tester.pump(const Duration(seconds: 11));
       expect(rig.chrome.warningRevision, 0);
       await tester.pump(const Duration(seconds: 1));
       expect(rig.chrome.warningRevision, 1);
@@ -290,7 +291,7 @@ void main() {
         expect(rig.chrome.badge.kind, WorkspaceBadgeKind.unread);
         expect(rig.chrome.badge.session?.nativeId, 'ses_reply');
         rig.observe(EndpointStatus.unreachable);
-        await tester.pump(const Duration(seconds: 5));
+        await tester.pump(liveResumeGrace);
         expect(rig.chrome.badge.kind, WorkspaceBadgeKind.serverAlert);
         await tester.pumpWidget(
           ListenableProvider<WorkspaceChromeController?>.value(

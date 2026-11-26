@@ -620,7 +620,12 @@ class _SessionLivePageState extends State<SessionLivePage>
                                   ? _openRosterChild
                                   : null,
                               items: items,
-                              waiting: waiting,
+                              waiting: [
+                                ...waiting,
+                                // Sent while the stream was coming back,
+                                // not reported yet (#503).
+                                ...c.composer.unseenPrompts(state),
+                              ],
                               // A turn reverts from its message menu, where
                               // the session can (#492).
                               userTurnRevert: (turnItem, isLatest) =>

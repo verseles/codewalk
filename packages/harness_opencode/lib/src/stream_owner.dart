@@ -27,6 +27,12 @@ bool openCodeServerConnected(SseFrame frame) {
   }
 }
 
+/// How long the event stream may have been silent and still be kept when
+/// the app returns from the background (#503): OpenCode writes a heartbeat
+/// comment every 15 s (2.0.22 `server/src/handlers/event.ts`), and its own
+/// client keeps a stream quiet for under 20 s on a return to the foreground.
+const openCodeResumeQuiet = Duration(seconds: 20);
+
 /// Finite stream-owner failure categories; never native content.
 enum OpenCodeStreamFailure { malformedControl, hydrationExhausted, terminal }
 

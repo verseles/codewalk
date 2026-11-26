@@ -122,8 +122,60 @@ class SessionComposerController extends ChangeNotifier {
       // A model or agent change settles before the next prompt goes out.
       !live.selectionState.holdsSend &&
       !(live.turnActions?.state.holdsSend ?? false) &&
-      live.view?.phase == SessionLivePhase.live &&
-      !(live.view?.stale ?? true);
+      // Back from the background, a send goes out while the stream returns
+      // and shows as waiting until the conversation reports it (#503).
+      (live.resumeGrace ||
+          (live.view?.phase == SessionLivePhase.live &&
+              !(live.view?.stale ?? true)));
+
+  /// This device's prompts sent while the resume grace masked a reconnect,
+  /// shown as waiting until the conversation reports them (#503).
+  final _sentInGrace = <CommandId>{};
+
+  /// The prompts of [_sentInGrace] the harness took but [state] does not
+  /// show yet, as waiting prompts; the ones it shows, or that did not go,
+  /// are forgotten.
+  List<UserInput> unseenPrompts(SessionState? state) {
+    if (_sentInGrace.isEmpty) return const [];
+    final shown = <String>{
+      for (final pending in state?.pending ?? const <PendingInput>[])
+        ?live.nativeMessageOf(pending.id),
+      for (final item in state?.timeline ?? const <TimelineItem>[])
+        if (item is UserInput) ?live.nativeMessageOf(item.id),
+    };
+    final out = <UserInput>[];
+    for (final id in _sentInGrace.toList()) {
+      final entry = _entry(id);
+      if (entry == null ||
+          entry.state != SubmissionKind.admitted ||
+          shown.contains(entry.messageId)) {
+        _sentInGrace.remove(id);
+        continue;
+      }
+      out.add(
+        UserInput(
+          meta: ItemMeta(
+            id: ItemId('outbox:${id.value}'),
+            generation: 'outbox',
+            status: const OpenValue.known(ItemStatus.pending),
+            source: SourceProvenance(
+              harness: session.harnessRef,
+              version: 'local',
+              nativeType: 'outbox',
+            ),
+          ),
+          text: entry.shownText,
+          attachments: entry.attachments,
+          delivery: OpenValue.known(
+            entry.delivery == Delivery.queue
+                ? DeliveryState.queued
+                : DeliveryState.accepted,
+          ),
+        ),
+      );
+    }
+    return out;
+  }
 
   void _notify() {
     if (!_disposed) notifyListeners();
@@ -355,6 +407,7 @@ class SessionComposerController extends ChangeNotifier {
   }) async {
     sending = true;
     notice = ComposerNotice.none;
+    final inGrace = live.resumeGrace;
     _notify();
     try {
       final result = await outbox.submit(
@@ -404,6 +457,7 @@ class SessionComposerController extends ChangeNotifier {
         }
         return _sent(text, fromDraft);
       }
+      if (inGrace) _sentInGrace.add(entry.commandId);
       await _refresh();
       return _sent(text, fromDraft);
     } finally {
@@ -606,7 +660,8 @@ ComposerNotice submitRefusal(String? reason) => switch (reason) {
   'attachmentMissing' => ComposerNotice.attachmentMissing,
   'uploadFailed' => ComposerNotice.uploadFailed,
   'uploadUnavailable' => ComposerNotice.uploadUnavailable,
-  'authenticationRequired' || 'UnauthorizedError' => ComposerNotice.authRequired,
+  'authenticationRequired' ||
+  'UnauthorizedError' => ComposerNotice.authRequired,
   'rateLimited' || 'RateLimited' => ComposerNotice.rateLimited,
   _ => ComposerNotice.unavailable,
 };

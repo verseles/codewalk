@@ -26,7 +26,7 @@ final class ScriptedConnection implements RecoveringSseConnection {
   @override
   void releaseGeneration(int generation) => released.add(generation);
   @override
-  void wake() => wakes++;
+  void wake({bool resumed = false}) => wakes++;
   @override
   Future<void> close() => _controller.close();
 
@@ -1120,13 +1120,9 @@ void main() {
         await h.connect(1);
         for (var i = 0; i < 10; i++) {
           final childId = 'ses_child_$i';
-          h.reads.children = [
-            for (var j = 0; j <= i; j++) 'ses_child_$j',
-          ];
+          h.reads.children = [for (var j = 0; j <= i; j++) 'ses_child_$j'];
           h.reads.active = {
-            'data': {
-              for (var j = 0; j <= i; j++) 'ses_child_$j': running,
-            },
+            'data': {for (var j = 0; j <= i; j++) 'ses_child_$j': running},
           };
           await h.send([
             {

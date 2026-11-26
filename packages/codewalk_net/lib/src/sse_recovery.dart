@@ -15,6 +15,7 @@ final class SseRecoveryPolicy {
     this.maxBufferedFrames = 4096,
     this.maxBatchFrames = 64,
     this.maxQueuedUpdates = 256,
+    this.resumeQuiet,
   });
 
   final Duration watchdog;
@@ -27,6 +28,12 @@ final class SseRecoveryPolicy {
   final int maxBufferedFrames;
   final int maxBatchFrames;
   final int maxQueuedUpdates;
+
+  /// How long a ready stream may have been silent and still be kept when the
+  /// app returns from the background (`wake(resumed: true)`): the adapter
+  /// sets it above the server's heartbeat interval. Null reconnects on every
+  /// resume.
+  final Duration? resumeQuiet;
 
   void validate() {
     if ([
@@ -43,7 +50,8 @@ final class SseRecoveryPolicy {
           maxBufferedFrames,
           maxBatchFrames,
           maxQueuedUpdates,
-        ].any((n) => n <= 0)) {
+        ].any((n) => n <= 0) ||
+        (resumeQuiet != null && resumeQuiet! <= Duration.zero)) {
       throw ArgumentError('Recovery limits must be positive and ordered.');
     }
   }
@@ -97,6 +105,10 @@ abstract interface class RecoveringSseConnection {
   Stream<SseRecoveryUpdate> get updates;
   int get generation;
   void releaseGeneration(int generation);
-  void wake();
+
+  /// Reconnects now instead of waiting for a retry delay or the watchdog. A
+  /// [resumed] wake (the app back from the background) keeps a ready stream
+  /// heard from within [SseRecoveryPolicy.resumeQuiet].
+  void wake({bool resumed = false});
   Future<void> close();
 }

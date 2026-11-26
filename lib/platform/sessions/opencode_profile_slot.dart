@@ -235,6 +235,7 @@ final class OpenCodeProfileSlot {
       _transport,
       'api/event',
       connectedWhen: openCodeServerConnected,
+      policy: const SseRecoveryPolicy(resumeQuiet: openCodeResumeQuiet),
     );
     final owner = OpenCodeStreamOwner(
       connection: connection,
@@ -273,13 +274,13 @@ final class OpenCodeProfileSlot {
 
   /// Reconnects the stream now; one still probing has nothing to wake, and a
   /// terminal stream stays stopped until the user retries.
-  void wake() {
+  void wake({bool resumed = false}) {
     if (!_activeBinding ||
         _phase == SessionLivePhase.authRequired ||
         _phase == SessionLivePhase.incompatible) {
       return;
     }
-    _connection?.wake();
+    _connection?.wake(resumed: resumed);
   }
 
   /// A feed of the session lifecycle of every session of this profile.

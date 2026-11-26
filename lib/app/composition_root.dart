@@ -210,8 +210,8 @@ AppDependencies createAppDependencies({
   // gave up (#467).
   LiveRecovery? liveRecovery;
   final liveWake = LiveWakeCoordinator(
-    wake: () {
-      liveDirectory?.wake();
+    wake: (resumed) {
+      liveDirectory?.wake(resumed: resumed);
       liveRecovery?.retry();
     },
     network: networkChanges,

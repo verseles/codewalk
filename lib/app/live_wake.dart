@@ -76,10 +76,12 @@ final class LiveRecovery {
 ///
 /// Only a real background arms the resume: `inactive` also covers a
 /// notification shade or a desktop focus change, while the stream kept
-/// running.
+/// running. [wake] learns whether only a resume asked for it: a stream heard
+/// from lately may then stay up (#503), while a new network route always
+/// reconnects.
 final class LiveWakeCoordinator {
   LiveWakeCoordinator({
-    required void Function() wake,
+    required void Function(bool resumed) wake,
     Stream<Object?>? network,
     this.onNetworkChanged,
     this.window = const Duration(milliseconds: 300),
@@ -92,7 +94,7 @@ final class LiveWakeCoordinator {
     );
   }
 
-  final void Function() _wake;
+  final void Function(bool resumed) _wake;
   final void Function(bool routeChanged)? onNetworkChanged;
 
   /// Triggers inside one window become a single wake.
@@ -102,6 +104,9 @@ final class LiveWakeCoordinator {
   Timer? _networkPending;
   bool _networkRouteChanged = false;
   bool _armed = false;
+
+  /// Whether a new route asked for the pending wake too.
+  bool _routeWake = false;
   bool _baseline = false;
   Object? _route;
   bool _disposed = false;
@@ -139,13 +144,16 @@ final class LiveWakeCoordinator {
         if (!_disposed) onNetworkChanged?.call(routeChanged && _route != null);
       });
     }
-    if (changed) _schedule();
+    if (changed) _schedule(route: true);
   }
 
-  void _schedule() {
+  void _schedule({bool route = false}) {
+    _routeWake = _routeWake || route;
     _pending ??= Timer(window, () {
       _pending = null;
-      if (!_disposed) _wake();
+      final resumed = !_routeWake;
+      _routeWake = false;
+      if (!_disposed) _wake(resumed);
     });
   }
 

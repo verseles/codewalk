@@ -24,7 +24,7 @@ void main() {
   group('LiveWakeCoordinator', () {
     testWidgets('only a return from the background wakes', (tester) async {
       var wakes = 0;
-      final wake = LiveWakeCoordinator(wake: () => wakes++);
+      final wake = LiveWakeCoordinator(wake: (_) => wakes++);
       addTearDown(wake.dispose);
       wake.lifecycle(AppLifecycleState.resumed);
       await tester.pump(_window);
@@ -52,6 +52,40 @@ void main() {
       expect(wakes, 3, reason: 'one background, one wake');
     });
 
+    testWidgets('a resume says so; a new route within it does not (#503)', (
+      tester,
+    ) async {
+      final wakes = <bool>[];
+      final network = StreamController<Object?>();
+      addTearDown(network.close);
+      final wake = LiveWakeCoordinator(
+        wake: wakes.add,
+        network: network.stream,
+      );
+      addTearDown(wake.dispose);
+      network.add('wifi');
+      await tester.pump();
+      wake
+        ..lifecycle(AppLifecycleState.paused)
+        ..lifecycle(AppLifecycleState.resumed);
+      await tester.pump(_window);
+      expect(wakes, [true]);
+      // A route change in the same window makes it a network wake.
+      wake
+        ..lifecycle(AppLifecycleState.paused)
+        ..lifecycle(AppLifecycleState.resumed);
+      network.add('cellular');
+      await tester.pump();
+      await tester.pump(_window);
+      expect(wakes, [true, false]);
+      // The next resume alone is a resume again.
+      wake
+        ..lifecycle(AppLifecycleState.paused)
+        ..lifecycle(AppLifecycleState.resumed);
+      await tester.pump(_window);
+      expect(wakes, [true, false, true]);
+    });
+
     testWidgets('a network change wakes; the same route or offline does not', (
       tester,
     ) async {
@@ -59,7 +93,7 @@ void main() {
       final network = StreamController<Object?>();
       addTearDown(network.close);
       final wake = LiveWakeCoordinator(
-        wake: () => wakes++,
+        wake: (_) => wakes++,
         network: network.stream,
       );
       addTearDown(wake.dispose);
@@ -87,7 +121,7 @@ void main() {
       final network = StreamController<Object?>();
       addTearDown(network.close);
       final wake = LiveWakeCoordinator(
-        wake: () => wakes++,
+        wake: (_) => wakes++,
         network: network.stream,
       );
       addTearDown(wake.dispose);
@@ -117,7 +151,7 @@ void main() {
       final network = StreamController<Object?>();
       addTearDown(network.close);
       final wake = LiveWakeCoordinator(
-        wake: () => wakes++,
+        wake: (_) => wakes++,
         network: network.stream,
         onNetworkChanged: (changed) {
           checks++;
@@ -158,7 +192,7 @@ void main() {
       final network = StreamController<Object?>();
       addTearDown(network.close);
       final wake = LiveWakeCoordinator(
-        wake: () => wakes++,
+        wake: (_) => wakes++,
         network: network.stream,
       );
       addTearDown(wake.dispose);
@@ -177,7 +211,7 @@ void main() {
       final network = StreamController<Object?>();
       addTearDown(network.close);
       final wake = LiveWakeCoordinator(
-        wake: () => wakes++,
+        wake: (_) => wakes++,
         network: network.stream,
       );
       wake

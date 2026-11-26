@@ -1,12 +1,17 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:codewalk/features/hosts/endpoint_health_controller.dart';
+import 'package:codewalk/features/sessions/session_composer_status.dart';
 import 'package:codewalk/features/sessions/session_live_controller.dart';
 import 'package:codewalk/platform/sessions/prompt_outbox_store.dart';
 import 'package:codewalk/platform/storage/payload_store.dart';
+import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:harness_opencode/harness_opencode.dart';
 
@@ -37,12 +42,15 @@ void main() {
   late SessionLiveController live;
   late OutboxServer server;
   late _GateStore store;
+  late LiveHandle handle;
+  var clock = DateTime.utc(2026, 11, 25, 12);
 
   setUp(() async {
     rig = CatalogRig();
     await rig.save('a');
     await rig.sessions.initialize();
-    health = EndpointHealthController(hosts: rig.hosts);
+    clock = DateTime.utc(2026, 11, 25, 12);
+    health = EndpointHealthController(hosts: rig.hosts, now: () => clock);
     health.start(foreground: true);
     await pumpEventQueue();
     final directory = LiveDirectory();
@@ -53,6 +61,7 @@ void main() {
       profile: profile('a'),
       summary: summary,
       directory: directory,
+      now: () => clock,
     );
     server = OutboxServer();
     server.transport.endpoint = live.profile.endpoint;
@@ -74,7 +83,7 @@ void main() {
       wait: (_) async {},
     );
     final opening = live.start();
-    final handle = directory.grant(live.session, outbox: outbox);
+    handle = directory.grant(live.session, outbox: outbox);
     await opening;
     handle.emit(
       SessionLiveView(
@@ -98,6 +107,154 @@ void main() {
     rig.hosts.credentialFor(live.profile)!,
     EndpointAssessment(status),
   );
+
+  /// The live view of [live] as [phase], keeping its state.
+  void show(SessionLivePhase phase) => handle.emit(
+    SessionLiveView(
+      session: live.session,
+      phase: phase,
+      lastSyncedAt: DateTime.utc(2026, 10, 25),
+      state: live.state ?? liveState(live.session),
+    ),
+  );
+
+  group('the resume grace (#503)', () {
+    test('a view live before the background looks live while it '
+        'reconnects, then tells the truth', () async {
+      // A cold reconnect is not masked.
+      show(SessionLivePhase.reconnecting);
+      await pumpEventQueue();
+      expect(live.resumeGrace, isFalse);
+      expect(live.composer.canSend, isFalse);
+      show(SessionLivePhase.live);
+      await pumpEventQueue();
+      health.setForeground(false);
+      health.setForeground(true);
+      show(SessionLivePhase.reconnecting);
+      await pumpEventQueue();
+      expect(live.resumeGrace, isTrue);
+      expect(live.composer.canSend, isTrue);
+      // The status bar does not report the reconnect meanwhile.
+      final l10n = lookupV2Localizations(const Locale('en'));
+      expect(liveStatus(live, l10n), isNull);
+      // Live again: nothing left to mask.
+      show(SessionLivePhase.live);
+      await pumpEventQueue();
+      expect(live.resumeGrace, isFalse);
+      // A drop within the window is masked again, until it runs out.
+      show(SessionLivePhase.hydrating);
+      await pumpEventQueue();
+      clock = clock.add(liveResumeGrace - const Duration(milliseconds: 1));
+      expect(live.resumeGrace, isTrue);
+      clock = clock.add(const Duration(milliseconds: 1));
+      expect(live.resumeGrace, isFalse);
+      expect(live.composer.canSend, isFalse);
+      expect(liveStatus(live, l10n)?.label, l10n.liveHydrating);
+    });
+
+    test('a pick is taken and switched once the stream is back', () async {
+      final model = ModelEntry(id: 'alpha', providerId: 'prov', label: 'A');
+      handle
+        ..selectionAvailable = true
+        ..selectionState = SessionSelectionState(models: [model]);
+      show(SessionLivePhase.live);
+      await pumpEventQueue();
+      health.setForeground(false);
+      health.setForeground(true);
+      show(SessionLivePhase.reconnecting);
+      await pumpEventQueue();
+      // The picker stays open to the user while the stream comes back.
+      expect(live.canChangeSelection, isTrue);
+      await live.selectModel(model, variant: 'high');
+      expect(handle.selectionCalls, isEmpty);
+      show(SessionLivePhase.live);
+      await pumpEventQueue();
+      expect(handle.selectionCalls, ['model:prov/alpha:high']);
+    });
+
+    test('a pick still waiting when the grace runs out is not lost', () async {
+      final model = ModelEntry(id: 'alpha', providerId: 'prov', label: 'A');
+      handle
+        ..selectionAvailable = true
+        ..selectionState = SessionSelectionState(models: [model]);
+      show(SessionLivePhase.live);
+      await pumpEventQueue();
+      health.setForeground(false);
+      health.setForeground(true);
+      show(SessionLivePhase.reconnecting);
+      await pumpEventQueue();
+      await live.selectModel(model);
+      clock = clock.add(liveResumeGrace);
+      // The truth shows, and no new pick is taken meanwhile.
+      expect(live.canChangeSelection, isFalse);
+      show(SessionLivePhase.live);
+      await pumpEventQueue();
+      expect(handle.selectionCalls, ['model:prov/alpha']);
+    });
+
+    test('a server confirmed Offline ends it at once', () async {
+      health.setForeground(false);
+      health.setForeground(true);
+      show(SessionLivePhase.reconnecting);
+      await pumpEventQueue();
+      expect(live.resumeGrace, isTrue);
+      observe(EndpointStatus.unreachable);
+      expect(live.resumeGrace, isFalse);
+      expect(live.composer.canSend, isFalse);
+    });
+
+    test('a view not live when the app left gets no grace', () async {
+      show(SessionLivePhase.reconnecting);
+      await pumpEventQueue();
+      health.setForeground(false);
+      health.setForeground(true);
+      expect(live.resumeGrace, isFalse);
+    });
+
+    test(
+      'a send goes out and waits pinned until the session shows it',
+      () async {
+        health.setForeground(false);
+        health.setForeground(true);
+        show(SessionLivePhase.reconnecting);
+        await pumpEventQueue();
+        expect(await live.composer.send('quick one'), isTrue);
+        expect(server.transport.bodies, hasLength(1));
+        final waiting = live.composer.unseenPrompts(live.state);
+        expect(waiting.single.text, 'quick one');
+        expect(waiting.single.delivery.known, DeliveryState.accepted);
+        // Once the session reports it, the pin gives way to its own row.
+        final entry = live.composer.entries.single;
+        final reportedId = ItemId(
+          jsonEncode([live.session.storageKey, entry.messageId, 'user', 0]),
+        );
+        final reported = UserInput(
+          meta: ItemMeta(
+            id: reportedId,
+            generation: 'live',
+            status: const OpenValue.known(ItemStatus.pending),
+            source: SourceProvenance(
+              harness: live.session.harnessRef,
+              version: '2.0.22',
+              nativeType: 'live',
+            ),
+          ),
+          text: 'quick one',
+          delivery: const OpenValue.known(DeliveryState.accepted),
+        );
+        handle.emit(
+          SessionLiveView(
+            session: live.session,
+            phase: SessionLivePhase.live,
+            lastSyncedAt: DateTime.utc(2026, 10, 25),
+            state: liveState(live.session, items: [reported]),
+          ),
+        );
+        await pumpEventQueue();
+        expect(live.composer.unseenPrompts(live.state), isEmpty);
+      },
+    );
+  });
 
   test(
     'confirmed offline blocks sends despite a current live stream',

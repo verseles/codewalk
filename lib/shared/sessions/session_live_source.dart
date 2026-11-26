@@ -204,8 +204,10 @@ abstract interface class SessionLiveDirectory {
   /// retry delay or stall watchdog: the app came back from the background or
   /// the network changed. The new stream hydrates from authoritative reads;
   /// the wake itself sends, replays or creates nothing, and the reconnected
-  /// stream keeps the policies of any other reconnect.
-  void wake();
+  /// stream keeps the policies of any other reconnect. A [resumed] wake (only
+  /// the app back from the background) keeps a stream the harness heard from
+  /// lately (#503).
+  void wake({bool resumed = false});
 
   Future<void> close();
 }
