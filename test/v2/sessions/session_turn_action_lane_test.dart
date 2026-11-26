@@ -167,6 +167,7 @@ final class _Rig {
       currentBinding: () => binding,
       selectionHoldsSend: (_) => selectionPending,
       promptRefusal: (ref) => outbox.turnMutationRefusalWithinQueue(ref),
+      freshWait: const Duration(milliseconds: 200),
     );
     outbox = newOutbox();
   }
@@ -415,22 +416,30 @@ void main() {
     },
   );
 
-  test(
-    'an ordinary prompt passes while the stream comes back (#503)',
-    () async {
-      final rig = _Rig();
-      addTearDown(rig.dispose);
-      final port = await rig.open();
-      // The composer gates ordinary prompts (the resume grace); the lane only
-      // keeps a staged replacement waiting for a current live view.
-      rig.show(stale: true);
-      expect(await rig.lane.beforeSubmit(_ref, () => true), isNull);
-      rig.show();
-      expect((await port.stage(_turn('msg_2').id, id: _id)).applied, isTrue);
-      rig.show(stale: true, revert: rig.views[_ref]!.state!.revert);
-      expect(await rig.lane.beforeSubmit(_ref, () => true), 'turnOffline');
-    },
-  );
+  test('a prompt waits for a current view before it goes (#503)', () async {
+    final rig = _Rig();
+    addTearDown(rig.dispose);
+    await rig.open();
+    // While the stream comes back the view may hide a revert another client
+    // staged meanwhile: the prompt waits, then goes once the view is current.
+    rig.show(stale: true);
+    final waiting = rig.lane.beforeSubmit(_ref, () => true);
+    var done = false;
+    unawaited(waiting.then((_) => done = true));
+    await Future<void>.delayed(const Duration(milliseconds: 50));
+    expect(done, isFalse);
+    rig.show();
+    expect(await waiting, isNull);
+    // A view that stays stale refuses it when the wait runs out.
+    rig.show(stale: true);
+    expect(await rig.lane.beforeSubmit(_ref, () => true), 'turnOffline');
+    // Current again, but with a revert it cannot read: never a silent
+    // commit.
+    rig.show(
+      revert: const RevertState(kind: OpenValue.known(RevertKind.unknown)),
+    );
+    expect(await rig.lane.beforeSubmit(_ref, () => true), 'turnTargetUnknown');
+  });
 
   test('none alone cannot settle uncertain clear', () async {
     final rig = _Rig();

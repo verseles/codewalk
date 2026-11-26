@@ -27,7 +27,36 @@ final class OpenCodeTurnActionLane {
     required this.currentBinding,
     required this.selectionHoldsSend,
     required this.promptRefusal,
+    this.freshWait = const Duration(seconds: 7),
   });
+
+  /// How long a prompt waits for a current live view before it is refused:
+  /// the composer's resume grace (#503).
+  final Duration freshWait;
+
+  /// Prompts waiting for a current live view of their session.
+  final _fresh = <SessionRef, List<Completer<void>>>{};
+
+  bool _isFresh(SessionRef ref) {
+    final current = view(ref);
+    return current.phase == SessionLivePhase.live && !current.stale;
+  }
+
+  /// Whether [ref] has a current live view, waiting up to [freshWait].
+  Future<bool> _awaitFresh(SessionRef ref) async {
+    if (_isFresh(ref)) return true;
+    if (_closed) return false;
+    final waiter = Completer<void>();
+    (_fresh[ref] ??= []).add(waiter);
+    try {
+      await waiter.future.timeout(freshWait);
+    } on TimeoutException {
+      // Still not current: refused below.
+    } finally {
+      _fresh[ref]?.remove(waiter);
+    }
+    return !_closed && _isFresh(ref);
+  }
 
   final KeySerialExecutor queue;
   final TurnActionJournal journal;
@@ -622,15 +651,24 @@ final class OpenCodeTurnActionLane {
       return 'turnOffline';
     }
     if (entry.phase != SessionTurnPhase.idle) return 'turnUnconfirmed';
+    // Back from the background the composer takes a prompt while the stream
+    // comes back (#503). It waits here, its text still in the field and its
+    // record not sent, for a current view: a revert another client staged
+    // meanwhile shows only there, and a prompt would commit it.
+    if (!_isFresh(ref)) {
+      if (!await _awaitFresh(ref) ||
+          !_current(ref, entry) ||
+          !callerCurrent()) {
+        return 'turnOffline';
+      }
+    }
     final revert = _revert(ref);
     if (revert?.kind.known == null ||
         revert?.kind.known == RevertKind.unknown) {
       return 'turnTargetUnknown';
     }
-    // Ordinary prompts keep their verified steer/queue behavior, also while
-    // the stream comes back after the app returned (#503); the composer is
-    // the gate for those. A staged replacement additionally needs a current
-    // live view and the destructive commit preflight.
+    // Ordinary prompts keep their verified steer/queue behavior. A staged
+    // replacement additionally needs the destructive commit preflight.
     if (!_staged(ref)) return null;
     final current = view(ref);
     if (current.phase != SessionLivePhase.live || current.stale) {
@@ -712,6 +750,11 @@ final class OpenCodeTurnActionLane {
   /// Called on canonical publications only. A later remote boundary wins
   /// over a late local HTTP reply. No publication replaces the local draft.
   void consider(SessionRef ref, SessionLiveView current) {
+    if (current.phase == SessionLivePhase.live && !current.stale) {
+      for (final waiter in _fresh.remove(ref) ?? const <Completer<void>>[]) {
+        if (!waiter.isCompleted) waiter.complete();
+      }
+    }
     final entry = _entries[ref];
     if (entry == null ||
         !_current(ref, entry) ||
@@ -1017,6 +1060,12 @@ final class OpenCodeTurnActionLane {
   void release(SessionRef ref) => _entries.remove(ref)?.cancellation.cancel();
   void close() {
     _closed = true;
+    for (final waiters in _fresh.values) {
+      for (final waiter in waiters) {
+        if (!waiter.isCompleted) waiter.complete();
+      }
+    }
+    _fresh.clear();
     for (final entry in _entries.values) {
       entry.cancellation.cancel();
     }

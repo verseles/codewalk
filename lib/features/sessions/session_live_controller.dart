@@ -627,10 +627,13 @@ class SessionLiveController extends ChangeNotifier
 
   void _runDeferredPick() {
     final pick = _deferredPick;
-    // Kept until the lease can take it, whatever made it live again.
-    if (pick == null ||
-        !_liveCurrent ||
-        !(_handle?.canChangeSelection ?? false)) {
+    if (pick == null || !_liveCurrent) return;
+    if (!(_handle?.canChangeSelection ?? false)) {
+      // Kept a while for the lease to read its selection; one that still
+      // cannot switch a grace after the grace drops the pick, so it never
+      // holds Send for good.
+      final end = _graceEnd?.add(liveResumeGrace);
+      if (end == null || !_now().toUtc().isBefore(end)) _deferredPick = null;
       return;
     }
     _deferredPick = null;
@@ -1223,6 +1226,9 @@ class SessionLiveController extends ChangeNotifier
       _detach();
       view = null;
       failure = _missingCredential();
+      _notify();
+    } else if (_deferredPick != null) {
+      // The credential checked again: a pick that waited may run now.
       _notify();
     }
   }

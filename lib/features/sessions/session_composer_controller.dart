@@ -147,6 +147,10 @@ class SessionComposerController extends ChangeNotifier {
   /// shown as waiting until the conversation reports them (#503).
   final _sentInGrace = <CommandId>{};
 
+  /// Whether [entries] were read from the current outbox: until then a
+  /// missing entry proves nothing.
+  bool _ledgerRead = false;
+
   /// The prompts of [_sentInGrace] the harness took but [state] does not
   /// show yet, as waiting prompts; the ones it shows, or that did not go,
   /// are forgotten.
@@ -161,6 +165,7 @@ class SessionComposerController extends ChangeNotifier {
     final out = <UserInput>[];
     for (final id in _sentInGrace.toList()) {
       final entry = _entry(id);
+      if (entry == null && !_ledgerRead) continue;
       if (entry == null ||
           entry.state != SubmissionKind.admitted ||
           shown.contains(entry.messageId)) {
@@ -206,6 +211,7 @@ class SessionComposerController extends ChangeNotifier {
     }
     _outbox = outbox;
     entries = const [];
+    _ledgerRead = false;
     unreadable = false;
     busy.clear();
     unawaited(_refresh());
@@ -218,6 +224,7 @@ class SessionComposerController extends ChangeNotifier {
       final next = await outbox.entries(session);
       if (_disposed || !identical(outbox, _outbox)) return;
       entries = next;
+      _ledgerRead = true;
       if (unreadable) {
         unreadable = false;
         if (notice == ComposerNotice.unreadable) notice = ComposerNotice.none;
