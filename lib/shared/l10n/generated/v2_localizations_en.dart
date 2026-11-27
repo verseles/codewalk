@@ -2329,6 +2329,12 @@ class V2LocalizationsEn extends V2Localizations {
   String get liveModelFavoriteRemove => 'Remove from favorites';
 
   @override
+  String get liveModelFavoriteAdded => 'Added to favorites';
+
+  @override
+  String get liveModelFavoriteRemoved => 'Removed from favorites';
+
+  @override
   String get liveModelPreferencesUnsaved =>
       'Favorites and recent models cannot be saved on this device right now.';
 

@@ -1753,6 +1753,14 @@
   "@liveModelFavoriteRemove": {
     "description": "V2 live session model and agent selection"
   },
+  "liveModelFavoriteAdded": "즐겨찾기에 추가됨",
+  "@liveModelFavoriteAdded": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemoved": "즐겨찾기에서 제거됨",
+  "@liveModelFavoriteRemoved": {
+    "description": "V2 live session model and agent selection"
+  },
   "liveModelPreferencesUnsaved": "지금은 이 기기에 즐겨찾기와 최근 모델을 저장할 수 없습니다.",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"

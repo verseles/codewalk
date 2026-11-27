@@ -1742,6 +1742,14 @@
   "@liveModelFavoriteRemove": {
     "description": "V2 live session model and agent selection"
   },
+  "liveModelFavoriteAdded": "पसंदीदा में जोड़ा गया",
+  "@liveModelFavoriteAdded": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemoved": "पसंदीदा से हटाया गया",
+  "@liveModelFavoriteRemoved": {
+    "description": "V2 live session model and agent selection"
+  },
   "liveModelPreferencesUnsaved": "अभी इस डिवाइस पर पसंदीदा और हालिया मॉडल सहेजे नहीं जा सकते।",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"

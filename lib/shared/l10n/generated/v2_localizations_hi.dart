@@ -2330,6 +2330,12 @@ class V2LocalizationsHi extends V2Localizations {
   String get liveModelFavoriteRemove => 'पसंदीदा से हटाएँ';
 
   @override
+  String get liveModelFavoriteAdded => 'पसंदीदा में जोड़ा गया';
+
+  @override
+  String get liveModelFavoriteRemoved => 'पसंदीदा से हटाया गया';
+
+  @override
   String get liveModelPreferencesUnsaved =>
       'अभी इस डिवाइस पर पसंदीदा और हालिया मॉडल सहेजे नहीं जा सकते।';
 

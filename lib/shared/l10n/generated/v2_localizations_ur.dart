@@ -2323,6 +2323,12 @@ class V2LocalizationsUr extends V2Localizations {
   String get liveModelFavoriteRemove => 'پسندیدہ سے ہٹائیں';
 
   @override
+  String get liveModelFavoriteAdded => 'پسندیدہ میں شامل کر دیا گیا';
+
+  @override
+  String get liveModelFavoriteRemoved => 'پسندیدہ سے ہٹا دیا گیا';
+
+  @override
   String get liveModelPreferencesUnsaved =>
       'ابھی اس آلے پر پسندیدہ اور حالیہ ماڈلز محفوظ نہیں کیے جا سکتے۔';
 

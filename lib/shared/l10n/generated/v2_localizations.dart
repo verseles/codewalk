@@ -4205,6 +4205,18 @@ abstract class V2Localizations {
   /// V2 live session model and agent selection
   ///
   /// In en, this message translates to:
+  /// **'Added to favorites'**
+  String get liveModelFavoriteAdded;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from favorites'**
+  String get liveModelFavoriteRemoved;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
   /// **'Favorites and recent models cannot be saved on this device right now.'**
   String get liveModelPreferencesUnsaved;
 

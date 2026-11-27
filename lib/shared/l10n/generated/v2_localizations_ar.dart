@@ -2306,6 +2306,12 @@ class V2LocalizationsAr extends V2Localizations {
   String get liveModelFavoriteRemove => 'إزالة من المفضلة';
 
   @override
+  String get liveModelFavoriteAdded => 'أُضيف إلى المفضلة';
+
+  @override
+  String get liveModelFavoriteRemoved => 'أُزيل من المفضلة';
+
+  @override
   String get liveModelPreferencesUnsaved =>
       'يتعذّر حفظ المفضلة والنماذج الأخيرة على هذا الجهاز الآن.';
 

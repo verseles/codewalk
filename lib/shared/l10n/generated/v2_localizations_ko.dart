@@ -2225,6 +2225,12 @@ class V2LocalizationsKo extends V2Localizations {
   String get liveModelFavoriteRemove => '즐겨찾기에서 제거';
 
   @override
+  String get liveModelFavoriteAdded => '즐겨찾기에 추가됨';
+
+  @override
+  String get liveModelFavoriteRemoved => '즐겨찾기에서 제거됨';
+
+  @override
   String get liveModelPreferencesUnsaved =>
       '지금은 이 기기에 즐겨찾기와 최근 모델을 저장할 수 없습니다.';
 

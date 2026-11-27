@@ -2346,6 +2346,12 @@ class V2LocalizationsRu extends V2Localizations {
   String get liveModelFavoriteRemove => 'Удалить из избранного';
 
   @override
+  String get liveModelFavoriteAdded => 'Добавлено в избранное';
+
+  @override
+  String get liveModelFavoriteRemoved => 'Удалено из избранного';
+
+  @override
   String get liveModelPreferencesUnsaved =>
       'Сейчас не удаётся сохранить избранные и недавние модели на этом устройстве.';
 

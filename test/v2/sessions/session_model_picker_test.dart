@@ -13,6 +13,7 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -252,6 +253,89 @@ void main() {
     expect(row('favorite-prov/beta'), findsNothing);
     expect(row('model-prov/beta'), findsOneWidget);
     expect(switches(handle), isEmpty);
+  });
+
+  group('on a compact screen (#516)', () {
+    const phone = Size(390, 844);
+
+    testWidgets('a long press toggles a favorite and the sheet says so', (
+      tester,
+    ) async {
+      final (_, handle) = await open(tester, size: phone);
+      await openPicker(tester);
+      expect(find.byType(BottomSheet), findsOneWidget);
+      // No star takes the row's room.
+      expect(
+        find.byKey(const ValueKey('live-selection-star-model-prov/beta')),
+        findsNothing,
+      );
+      await tester.longPress(row('model-prov/beta'));
+      await tester.pumpAndSettle();
+      expect(preferences.favorites(_server), ['prov/beta']);
+      expect(switches(handle), isEmpty);
+      // The toast shows inside the sheet, which stays open.
+      expect(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text(l10n.liveModelFavoriteAdded),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(
+          const ValueKey('live-selection-favorite-favorite-prov/beta'),
+        ),
+        findsOneWidget,
+      );
+      final bar = tester.widget<DecoratedBox>(
+        find.byKey(
+          const ValueKey('live-selection-favorite-favorite-prov/beta'),
+        ),
+      );
+      final border =
+          (bar.decoration as BoxDecoration).border! as BorderDirectional;
+      expect(border.start.width, 4);
+      expect(border.end, BorderSide.none);
+      // A plain row carries no bar.
+      expect(
+        find.byKey(const ValueKey('live-selection-favorite-model-prov/alpha')),
+        findsNothing,
+      );
+      await tester.longPress(row('favorite-prov/beta'));
+      await tester.pumpAndSettle();
+      expect(preferences.favorites(_server), isEmpty);
+      expect(find.text(l10n.liveModelFavoriteRemoved), findsOneWidget);
+      expect(row('model-prov/beta'), findsOneWidget);
+      // A tap still picks the model.
+      await tester.tap(row('model-prov/beta'));
+      await tester.pumpAndSettle();
+      expect(switches(handle), ['model:prov/beta']);
+    });
+
+    testWidgets('a favorite that cannot be saved says nothing new', (
+      tester,
+    ) async {
+      backend.values[ModelPreferenceStore.key] = 'not json';
+      await open(tester, size: phone);
+      await openPicker(tester);
+      await tester.longPress(row('model-prov/beta'));
+      await tester.pumpAndSettle();
+      expect(find.text(l10n.liveModelFavoriteAdded), findsNothing);
+      expect(backend.values[ModelPreferenceStore.key], 'not json');
+    });
+
+    testWidgets('a screen reader can toggle the favorite', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await open(tester, size: phone);
+      await openPicker(tester);
+      tester.semantics.customAction(
+        find.semantics.byLabel(RegExp('Beta')),
+        CustomSemanticsAction(label: l10n.liveModelFavoriteAdd),
+      );
+      await tester.pumpAndSettle();
+      expect(preferences.favorites(_server), ['prov/beta']);
+      semantics.dispose();
+    });
   });
 
   testWidgets('providers by name, and the model a default session runs', (

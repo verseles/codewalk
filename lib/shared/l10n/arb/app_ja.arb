@@ -1742,6 +1742,14 @@
   "@liveModelFavoriteRemove": {
     "description": "V2 live session model and agent selection"
   },
+  "liveModelFavoriteAdded": "お気に入りに追加しました",
+  "@liveModelFavoriteAdded": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemoved": "お気に入りから削除しました",
+  "@liveModelFavoriteRemoved": {
+    "description": "V2 live session model and agent selection"
+  },
   "liveModelPreferencesUnsaved": "現在、このデバイスにお気に入りと最近のモデルを保存できません。",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"

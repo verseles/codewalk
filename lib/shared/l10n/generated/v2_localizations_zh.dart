@@ -2184,6 +2184,12 @@ class V2LocalizationsZh extends V2Localizations {
   String get liveModelFavoriteRemove => '从收藏夹移除';
 
   @override
+  String get liveModelFavoriteAdded => '已添加到收藏夹';
+
+  @override
+  String get liveModelFavoriteRemoved => '已从收藏夹移除';
+
+  @override
   String get liveModelPreferencesUnsaved => '目前无法在此设备上保存收藏和最近使用的模型。';
 
   @override

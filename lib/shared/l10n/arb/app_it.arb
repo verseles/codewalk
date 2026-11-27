@@ -1742,6 +1742,14 @@
   "@liveModelFavoriteRemove": {
     "description": "V2 live session model and agent selection"
   },
+  "liveModelFavoriteAdded": "Aggiunto ai preferiti",
+  "@liveModelFavoriteAdded": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemoved": "Rimosso dai preferiti",
+  "@liveModelFavoriteRemoved": {
+    "description": "V2 live session model and agent selection"
+  },
   "liveModelPreferencesUnsaved": "Al momento non è possibile salvare preferiti e modelli recenti su questo dispositivo.",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"

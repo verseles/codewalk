@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
@@ -323,6 +324,13 @@ class _SelectionPanelState extends State<_SelectionPanel> {
   final _search = TextEditingController();
   late final _shown = _SelectionShown(widget.live);
 
+  /// The sheet's own messenger, so a favorite's toast shows above the sheet
+  /// instead of under it, on the page (#516).
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
+
+  /// Models whose favorite is being saved; a second press waits for it.
+  final _favoriting = <String>{};
+
   /// The last permission write failed. It is said beside the switch, since a
   /// snack bar would sit under the sheet (#485).
   bool _permissionFailed = false;
@@ -366,6 +374,32 @@ class _SelectionPanelState extends State<_SelectionPanel> {
       setState(() => _permissionFailed = !applied);
     } else if (!applied) {
       showAppSnackBar(messenger, failed);
+    }
+  }
+
+  /// A long press on a compact row adds or removes a favorite (#516); the
+  /// toast says so once the record saved it.
+  Future<void> _toggleFavorite(
+    ModelEntry model, {
+    required bool favorite,
+  }) async {
+    final key = SessionLiveController.modelKey(model);
+    if (!_favoriting.add(key)) return;
+    final l10n = context.v2L10n;
+    try {
+      final saved = await widget.live.setFavoriteModel(
+        model,
+        favorite: !favorite,
+      );
+      if (!saved || !mounted) return;
+      _messenger.currentState?.hideCurrentSnackBar();
+      showAppSnackBar(
+        _messenger.currentState,
+        favorite ? l10n.liveModelFavoriteRemoved : l10n.liveModelFavoriteAdded,
+        duration: const Duration(seconds: 2),
+      );
+    } finally {
+      _favoriting.remove(key);
     }
   }
 
@@ -447,7 +481,11 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         // A tap on the row keeps the session's variant for its own model and
         // takes the server's default (Auto) for any other.
         final variant = selected ? currentVariant : null;
-        return ListTile(
+        // The sheet (below 600 dp) has no room for the star: a long press
+        // toggles the favorite and a bar on the start edge marks it (#516).
+        final compact = widget.fill;
+        final canFavorite = live.canFavoriteModels;
+        final tile = ListTile(
           key: ValueKey(
             section == null
                 ? 'live-selection-model-$key'
@@ -492,24 +530,60 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                   child: Icon(Symbols.check),
                 ),
               // Starring never picks the model.
-              IconButton(
-                key: ValueKey('live-selection-star-${section ?? 'model'}-$key'),
-                tooltip: favorite
-                    ? l10n.liveModelFavoriteRemove
-                    : l10n.liveModelFavoriteAdd,
-                isSelected: favorite,
-                icon: const Icon(Symbols.star_border),
-                // A Material Symbols glyph is outlined unless it is filled.
-                selectedIcon: const Icon(Symbols.star, fill: 1),
-                onPressed: live.canFavoriteModels
-                    ? () => unawaited(
-                        live.setFavoriteModel(model, favorite: !favorite),
-                      )
-                    : null,
-              ),
+              if (!compact)
+                IconButton(
+                  key: ValueKey(
+                    'live-selection-star-${section ?? 'model'}-$key',
+                  ),
+                  tooltip: favorite
+                      ? l10n.liveModelFavoriteRemove
+                      : l10n.liveModelFavoriteAdd,
+                  isSelected: favorite,
+                  icon: const Icon(Symbols.star_border),
+                  // A Material Symbols glyph is outlined unless it is filled.
+                  selectedIcon: const Icon(Symbols.star, fill: 1),
+                  onPressed: live.canFavoriteModels
+                      ? () => unawaited(
+                          live.setFavoriteModel(model, favorite: !favorite),
+                        )
+                      : null,
+                ),
             ],
           ),
           onTap: () => pickModel(model, variant),
+          onLongPress: compact && canFavorite
+              ? () => unawaited(_toggleFavorite(model, favorite: favorite))
+              : null,
+        );
+        if (!compact) return tile;
+        return Semantics(
+          customSemanticsActions: canFavorite
+              ? {
+                  CustomSemanticsAction(
+                    label: favorite
+                        ? l10n.liveModelFavoriteRemove
+                        : l10n.liveModelFavoriteAdd,
+                  ): () =>
+                      unawaited(_toggleFavorite(model, favorite: favorite)),
+                }
+              : null,
+          child: DecoratedBox(
+            key: favorite
+                ? ValueKey('live-selection-favorite-${section ?? 'model'}-$key')
+                : null,
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(
+              border: favorite
+                  ? BorderDirectional(
+                      start: BorderSide(
+                        color: _favoriteMark(theme.colorScheme),
+                        width: 4,
+                      ),
+                    )
+                  : null,
+            ),
+            child: tile,
+          ),
         );
       }
 
@@ -725,7 +799,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
       ];
       // The title is gone (beta.21); the panel still names its route for a
       // screen reader.
-      return Semantics(
+      final panel = Semantics(
         namesRoute: true,
         explicitChildNodes: true,
         label: l10n.liveSelection,
@@ -762,9 +836,29 @@ class _SelectionPanelState extends State<_SelectionPanel> {
           ),
         ),
       );
+      if (!widget.fill) return panel;
+      return ScaffoldMessenger(
+        key: _messenger,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          // The route already keeps the sheet above the keyboard.
+          resizeToAvoidBottomInset: false,
+          body: panel,
+        ),
+      );
     },
   );
 }
+
+/// The favorite bar's color: yellow, darker on a light theme so it keeps its
+/// contrast, and a step toward the theme's primary so it belongs to it.
+Color _favoriteMark(ColorScheme scheme) => Color.lerp(
+  scheme.brightness == Brightness.dark
+      ? const Color(0xFFFFD54F)
+      : const Color(0xFFC49000),
+  scheme.primary,
+  0.12,
+)!;
 
 /// Notifies only when something the pick shows changed, so live events that
 /// touch none of it never rebuild its long list (#431).

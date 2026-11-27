@@ -1741,6 +1741,14 @@
   "@liveModelFavoriteRemove": {
     "description": "V2 live session model and agent selection"
   },
+  "liveModelFavoriteAdded": "أُضيف إلى المفضلة",
+  "@liveModelFavoriteAdded": {
+    "description": "V2 live session model and agent selection"
+  },
+  "liveModelFavoriteRemoved": "أُزيل من المفضلة",
+  "@liveModelFavoriteRemoved": {
+    "description": "V2 live session model and agent selection"
+  },
   "liveModelPreferencesUnsaved": "يتعذّر حفظ المفضلة والنماذج الأخيرة على هذا الجهاز الآن.",
   "@liveModelPreferencesUnsaved": {
     "description": "V2 live session model and agent selection"
