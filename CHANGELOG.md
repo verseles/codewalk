@@ -2,6 +2,15 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.13.0 - 2026-11-27
+
+> 📣 CodeWalk 2.13.0 puts Version and updates and the release history on one Settings screen: your version and update controls first, the history right below, and the Changelog shortcuts land straight on it.
+
+### Settings
+
+- Settings > Help has one Version and updates entry instead of two: the installed version and update controls come first, and the release history follows below them in the same scroll. Searching Settings for "history" or "changelog" finds it (`#519`).
+- What's new Changelog and About's Release history open this screen at the history, which stays in view while it loads or an update appears above it, until you scroll. Choosing Version and updates itself always opens at the top (`#519`).
+
 ## v2.12.1 - 2026-11-27
 
 > 📣 CodeWalk 2.12.1 publishes everything from 2.12.0, which never shipped because GitHub had no macOS runner for its release build: servers are added from one screen, healthy servers read Online on every OpenCode 2 version, and the server list is tidier.

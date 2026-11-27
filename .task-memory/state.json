@@ -85,9 +85,9 @@
       ],
       "id": "S4",
       "label": "Gate and reviewer loop, apply accepted fixes",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "Review converged (3 rounds), gate green on 55450f33, pushed, #519 closed, #527 group 7 checked",
+      "status": "done",
+      "validation": "make check rc=0 on 55450f33"
     },
     {
       "depends": [
@@ -96,7 +96,7 @@
       "id": "S5",
       "label": "Evaluate helpers, docs, #519/#527, squash, push and minor release",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     }
   ],
@@ -110,7 +110,7 @@
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "rc=0, log /tmp/opencode/g7/gate-final.log",
         "id": "C2",
         "text": "gate green on release SHA",
         "waived": false
@@ -181,8 +181,8 @@
       "text": "R3 judgment (#519): 7/8 approve. ACCEPT H1 (Sol-F warn, haiku sugg): outside scroll during the 250 ms reveal animation started no ScrollStart -> reveal is now an immediate jump (Sol-F's first option); test asserts the jump lands in one frame; mutation M7 (250 ms animation) fails it. REJECT H2 (haiku sugg) desktop Page Down with Back focused: pre-existing (desktop never inherits PrimaryScrollController; the old ListView page behaved the same), out of #519 scope. No -F position rejected. Fix commit (jump). Re-review skipped: one-line change exactly as Sol-F suggested, mutation-tested; gate reruns on the final SHA."
     }
   ],
-  "generation": 28,
-  "next_action": "Run make check on the final SHA, then push and cut v2.13.0",
+  "generation": 32,
+  "next_action": "Cut v2.13.0 with make release V=stable and start make watch-release",
   "pending_operation": null,
   "queued_followups": [
     {
@@ -224,6 +224,14 @@
     {
       "at": "2026-11-27T20:47:34Z",
       "request": "[Grupo 8, item 9] Ainda sobre o botão de microfone, enquanto o usuário tá falando, o texto vai aparecendo. O problema é que a caixa não vai crescendo junto com a frase, então o usuário só vê o começo da frase enquanto ele tá falando. A forma mais rápida e eficiente de corrigir isso é mudar para o modo expandido, aquele que quando a caixa do composer tem foco, mostra o chip do modelo, o botão de anexos, etc., mas sem dar foco no teclado, para ele não aparecer, pois nesse momento o usuário tá usando só o microfone. Ou seja, temos duas coisas a fazer: ao clicar no microfone, transformar a caixa do composer no modo expandido e verificar se, quando o texto cresce, a caixa do composer cresce um pouco mais, parecendo um text area, digamos até três linhas, antes de começar a não crescer mais."
+    },
+    {
+      "at": "2026-11-27T20:48:58Z",
+      "request": "[Grupo 8, item 10] No menu lateral, a linha que mostra o servidor e o botão de configurações está um pouco deslocada do topo. Claro que não é para ficar super colado, mas está um pouco deslocado demais. Eu acredito que seja por aquelas mensagens transitórias, como quando está sincronizando as conversas, etc. Vamos corrigir esse espaçamento e aproveitar e colocar essas mensagens abaixo dessa linha de servidores e botão de configuração."
+    },
+    {
+      "at": "2026-11-27T20:53:59Z",
+      "request": "[Grupo 8, item 11] Vamos fazer um revamp na barra lateral. Isso significa deixar de existir sessões recentes. Como colocamos o limite de dois itens por projeto, não faz mais sentido elas serem chamadas de recentes. Então, as sessões recentes devem sumir e os projetos devem funcionar da seguinte maneira, mais ou menos como já é hoje. O projeto em aberto no momento deve ser o mais alto no topo e deve listar até cinco sessões mais recentes, enquanto os outros projetos, mais embaixo, devem mostrar até três de forma compactada, como é hoje. A cada item daquela sessão é uma linha fina. Enquanto o projeto principal que está aberto no momento é o que deve ficar mais no topo com as linhas um pouco mais expandidas. Inclusive, essa linha talvez tenha que reduzir um pouco, pois ela está com um espaço muito grande para um texto que nem sempre aparece, o subtítulo. Então, recapitulando, sessões recentes deixam de existir tanto na sidebar como opção no display. O projeto ativo é o primeiro do topo, com até cinco sessões recentes, podendo expandir para ver mais. E os outros projetos abertos ficam no modo semicolapsado, mostrando, como já é hoje, até três sessões recentes de forma bem compactada. Porém, a ordem que os projetos aparecem depois do primeiro, que é o principal, deve ser pela ordem de recente, o que respondeu recente ou o que foi aberto recente."
     }
   ],
   "request": {
@@ -237,7 +245,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T193607Z_a313a05a",
   "title": "#527 group 7: one Settings screen for version, updates and release history (#519)",
-  "updated_at": "2026-11-27T20:48:50Z",
+  "updated_at": "2026-11-27T20:56:12Z",
   "validations": [
     {
       "at": "2026-11-27T20:21:36Z",
@@ -251,6 +259,13 @@
       "check": "make check TEST_JOBS=$(nproc) on 63007b20 (+ uncommitted docs and release-notes/v2.13.0.md)",
       "criterion": null,
       "evidence": "rc=0, log /tmp/opencode/g7/gate-r3.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T20:55:55Z",
+      "check": "make check TEST_JOBS=$(nproc) on final SHA 55450f33",
+      "criterion": "C2",
+      "evidence": "rc=0, log /tmp/opencode/g7/gate-final.log",
       "outcome": "pass"
     }
   ]
