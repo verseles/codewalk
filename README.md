@@ -104,9 +104,9 @@ On Linux, binaries install to `${XDG_DATA_HOME:-$HOME/.local/share}/codewalk-app
 
 ### Connect to Your Server
 
-1. Launch CodeWalk and open **Settings → Servers** (or tap **Add server** on first launch).
-2. Scan your server's QR code, open a pairing link, or enter your server URL (default `http://127.0.0.1:4096`).
-3. Add Basic Auth credentials if your server requires them, save, and start chatting.
+1. Launch CodeWalk and open **Settings → Servers**, then tap **Add server** (also offered on first launch).
+2. Keep the harness on OpenCode, then scan your server's QR code or paste a pairing link, or switch to **Manual** and enter your server URL (default `http://127.0.0.1:4096`) and password.
+3. Save: CodeWalk checks the server first. If the check fails, it shows why and offers **Save anyway**, which keeps the server as Offline until it answers.
 
 ---
 
