@@ -202,6 +202,19 @@ void main() {
       ),
       findsNothing,
     );
+    // The empty slot keeps Auto's name in line with the others.
+    double start(String item, String text) => tester
+        .getTopLeft(
+          find.descendant(
+            of: find.byKey(ValueKey(item)),
+            matching: find.text(text),
+          ),
+        )
+        .dx;
+    expect(
+      start('live-selection-auto-prov/alpha', 'Auto'),
+      start('live-selection-variant-prov/alpha#low', 'low'),
+    );
     await tester.tap(
       find.byKey(const ValueKey('live-selection-variant-prov/alpha#low')),
     );

@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 3,
+  "artifact_seq": 4,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -48,6 +48,22 @@
       "stage": "S2",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS round 1 (#515 a4325752)"
+    },
+    "A0004": {
+      "active": true,
+      "bytes": 272,
+      "created_at": "2026-11-27T04:05:54Z",
+      "evidence": "/tmp/opencode/g4/rev/r517-*.out",
+      "id": "A0004",
+      "impact": "Ajustes pequenos de doc/teste",
+      "origin": "9 helpers, job g4-model-picker-review-20261127T033231Z-4b13",
+      "path": "artifacts/tm_20261127T025825Z_6ddaec3e/A0004.md",
+      "purpose": "Review #517+#526",
+      "rerun_when": "session_variant_icon.dart muda",
+      "sha256": "27429875188481d3eb84eb543a930315516764772df9c325be29b84a2ace9ad0",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS #517+#526 (25b2d573..ff186bb6)"
     }
   },
   "checklist": [
@@ -261,18 +277,15 @@
     {
       "at": "2026-11-27T03:54:31Z",
       "text": "Follow-up TM instalado em ~/MEGA/CONFIG/opencode/skills/task-memory (backup em /tmp/opencode/g4/tm/orig): --quiet, state.json indentado, raiz descoberta no worktree. Teste ao vivo rodado de lib/."
+    },
+    {
+      "at": "2026-11-27T04:06:18Z",
+      "text": "ART-REVIEW-JUDGMENT #517+#526: 9/9 approve; aceitas as 2 sugestões do Haiku (§17 registra o mapa de ícone por id como apresentação; teste de alinhamento dx Auto/low). Sem re-review (teste + doc). High-value: Haiku; Useful: Sol-F, Grok-F, Ernie, GLM, Gemini, Hungerg, Kimi, Luna."
     }
   ],
-  "generation": 35,
+  "generation": 37,
   "next_action": "#518: título curto do switch, remover subtítulo do servidor, Text.rich",
-  "pending_operation": {
-    "expected_bytes": 40000,
-    "expected_seconds": 900,
-    "id": "op_8d4bb901e311",
-    "kind": "subagent",
-    "prepared_at": "2026-11-27T03:58:49Z",
-    "purpose": "Review round #517+#526 (25b2d573..ff186bb6) pelos 9 helpers"
-  },
+  "pending_operation": null,
   "queued_followups": [
     {
       "at": "2026-11-27T03:22:09Z",
@@ -290,7 +303,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T025825Z_6ddaec3e",
   "title": "Grupo 4 da #527 — seletor de modelos (flow)",
-  "updated_at": "2026-11-27T04:05:36Z",
+  "updated_at": "2026-11-27T04:06:18Z",
   "validations": [
     {
       "at": "2026-11-27T03:32:10Z",
