@@ -75,9 +75,9 @@
       ],
       "id": "S3",
       "label": "Implement the unified Version and history screen with tests and smoke",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "Stage squashed to 851747a3 (tree equal), docs and v2.13.0 notes committed",
+      "status": "done",
+      "validation": "3 review rounds converged; mutations M1-M7 fail as expected; gate green on 63007b20"
     },
     {
       "depends": [
@@ -86,7 +86,7 @@
       "id": "S4",
       "label": "Gate and reviewer loop, apply accepted fixes",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -175,10 +175,14 @@
     {
       "at": "2026-11-27T20:37:54Z",
       "text": "R2 judgment (#519): ACCEPT G1 (haiku, Opus-F, Sol-F, Hungerg warn; DeepSeek, Gemini sugg) anchor kept after keyboard/Tab/scrollbar moves -> clear on any depth-0 ScrollStartNotification not made by the page (_revealing flag around ensureVisible). ACCEPT G2 (Sol-F warn) explicit ScrollController broke PrimaryScrollController paging on compact -> controller removed, top reset via Scrollable.maybeOf(heading).position. Tests added: outside programmatic move releases anchor; update card appearing above keeps history in view; page keeps route primary scroll. Mutations M4 (UserScroll-only), M5 (explicit controller), M6 (no _revealing guard) each fail a test. No -F position rejected. Fix commit 63007b20. Focused suites 205 pass, analyze clean. R3 re-review: fixes again touch async scroll anchoring."
+    },
+    {
+      "at": "2026-11-27T20:48:31Z",
+      "text": "R3 judgment (#519): 7/8 approve. ACCEPT H1 (Sol-F warn, haiku sugg): outside scroll during the 250 ms reveal animation started no ScrollStart -> reveal is now an immediate jump (Sol-F's first option); test asserts the jump lands in one frame; mutation M7 (250 ms animation) fails it. REJECT H2 (haiku sugg) desktop Page Down with Back focused: pre-existing (desktop never inherits PrimaryScrollController; the old ListView page behaved the same), out of #519 scope. No -F position rejected. Fix commit (jump). Re-review skipped: one-line change exactly as Sol-F suggested, mutation-tested; gate reruns on the final SHA."
     }
   ],
-  "generation": 26,
-  "next_action": "Record R2 metrics, hey, dispatch R3 and run make check in parallel",
+  "generation": 28,
+  "next_action": "Run make check on the final SHA, then push and cut v2.13.0",
   "pending_operation": null,
   "queued_followups": [
     {
@@ -233,7 +237,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T193607Z_a313a05a",
   "title": "#527 group 7: one Settings screen for version, updates and release history (#519)",
-  "updated_at": "2026-11-27T20:47:34Z",
+  "updated_at": "2026-11-27T20:48:50Z",
   "validations": [
     {
       "at": "2026-11-27T20:21:36Z",
