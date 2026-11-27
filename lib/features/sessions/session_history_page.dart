@@ -71,6 +71,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
               trailingTurnClosed: !c.hasMore && !c.limited,
             )
           : const <ItemId, double>{};
+      final inlineStats = inlineTurnStatsMessages(c.items, turnTpsByItem);
       return Scaffold(
         appBar: AppBar(
           title: Text(
@@ -94,108 +95,122 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                     child: PageStorage(
                       bucket: _rowState,
                       child: ListView.builder(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: timelineSideInset(context),
-                        vertical: 16,
-                      ),
-                      itemCount: rows.length + 2,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text(
-                                l10n.historyReadOnly,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Text(
-                                c.profile.label,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              Text(l10n.historyUnverified),
-                              if (failure != null) Text(failure),
-                              if (c.stale) Text(l10n.sessionsPreviousResults),
-                              if (c.limited) Text(l10n.historyLimit),
-                              if (c.loaded &&
-                                  c.items.isEmpty &&
-                                  failure == null)
-                                Text(l10n.historyEmpty),
-                              Align(
-                                alignment: AlignmentDirectional.centerStart,
-                                child: TextButton(
-                                  key: const ValueKey('history-refresh'),
-                                  onPressed: c.loading ? null : c.refresh,
-                                  child: Text(l10n.chatRefresh),
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                        if (index == rows.length + 1) {
-                          return Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: timelineSideInset(context),
+                          vertical: 16,
+                        ),
+                        itemCount: rows.length + 2,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
+                                Text(
+                                  l10n.historyReadOnly,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                                Text(
+                                  c.profile.label,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(l10n.historyUnverified),
+                                if (failure != null) Text(failure),
+                                if (c.stale) Text(l10n.sessionsPreviousResults),
                                 if (c.limited) Text(l10n.historyLimit),
-                                TextButton(
-                                  key: const ValueKey('history-more'),
-                                  onPressed: c.hasMore && !c.loading
-                                      ? c.loadMore
-                                      : null,
-                                  child: Text(l10n.chatLoadMore),
+                                if (c.loaded &&
+                                    c.items.isEmpty &&
+                                    failure == null)
+                                  Text(l10n.historyEmpty),
+                                Align(
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: TextButton(
+                                    key: const ValueKey('history-refresh'),
+                                    onPressed: c.loading ? null : c.refresh,
+                                    child: Text(l10n.chatRefresh),
+                                  ),
                                 ),
                               ],
+                            );
+                          }
+                          if (index == rows.length + 1) {
+                            return Align(
+                              alignment: AlignmentDirectional.centerStart,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (c.limited) Text(l10n.historyLimit),
+                                  TextButton(
+                                    key: const ValueKey('history-more'),
+                                    onPressed: c.hasMore && !c.loading
+                                        ? c.loadMore
+                                        : null,
+                                    child: Text(l10n.chatLoadMore),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          final row = rows[index - 1];
+                          void tapLink(
+                            String text,
+                            String href,
+                            String? title,
+                          ) {
+                            final handler = widget.onTapLink;
+                            if (handler != null) {
+                              handler(text, href, title);
+                            } else {
+                              unawaited(
+                                openExternalMarkdownLink(context, href),
+                              );
+                            }
+                          }
+
+                          if (row is SessionSubagentCallsRow) {
+                            return SessionSubagentCalls(
+                              key: row.key,
+                              row: row,
+                              expandedAnchors: _expandedSubagentCalls,
+                              onTapLink: tapLink,
+                            );
+                          }
+                          if (row is SessionReportRow) {
+                            return SessionReportGroup(
+                              key: row.key,
+                              reports: row.reports,
+                              onTapLink: tapLink,
+                            );
+                          }
+                          if (row is SessionActivityStretchRow) {
+                            return SessionActivityStretchHeader(
+                              key: row.key,
+                              row: row,
+                              onToggle: () =>
+                                  setState(() => _presentation.toggle(row.id)),
+                              showOpeningElapsed: !inlineStats.contains(
+                                row.openingMessage?.message,
+                              ),
+                            );
+                          }
+                          final single = row as SessionItemRow;
+                          final item = single.item;
+                          return SessionTimelineTile(
+                            key: ValueKey(item.id),
+                            item: item,
+                            onTapLink: tapLink,
+                            minimizeUnknownShell: true,
+                            messageHeader: single.messageHeader,
+                            turnTokensPerSecond: turnTpsByItem[item.id],
+                            showElapsed: !inlineStats.contains(
+                              item.meta.message?.message,
                             ),
                           );
-                        }
-                        final row = rows[index - 1];
-                        void tapLink(String text, String href, String? title) {
-                          final handler = widget.onTapLink;
-                          if (handler != null) {
-                            handler(text, href, title);
-                          } else {
-                            unawaited(openExternalMarkdownLink(context, href));
-                          }
-                        }
-
-                        if (row is SessionSubagentCallsRow) {
-                          return SessionSubagentCalls(
-                            key: row.key,
-                            row: row,
-                            expandedAnchors: _expandedSubagentCalls,
-                            onTapLink: tapLink,
-                          );
-                        }
-                        if (row is SessionReportRow) {
-                          return SessionReportGroup(
-                            key: row.key,
-                            reports: row.reports,
-                            onTapLink: tapLink,
-                          );
-                        }
-                        if (row is SessionActivityStretchRow) {
-                          return SessionActivityStretchHeader(
-                            key: row.key,
-                            row: row,
-                            onToggle: () =>
-                                setState(() => _presentation.toggle(row.id)),
-                          );
-                        }
-                        final single = row as SessionItemRow;
-                        final item = single.item;
-                        return SessionTimelineTile(
-                          key: ValueKey(item.id),
-                          item: item,
-                          onTapLink: tapLink,
-                          minimizeUnknownShell: true,
-                          messageHeader: single.messageHeader,
-                          turnTokensPerSecond: turnTpsByItem[item.id],
-                        );
-                      },
+                        },
+                      ),
                     ),
-                  ),
                   ),
                 ),
                 SafeArea(

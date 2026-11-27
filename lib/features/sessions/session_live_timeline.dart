@@ -733,6 +733,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
             trailingTurnClosed: widget.settled,
           )
         : const <ItemId, double>{};
+    final inlineStats = inlineTurnStatsMessages(items, turnTpsByItem);
     // With no older rows above, the top block opens the center, so a list
     // that fits the screen still shows it; otherwise it tops the older rows.
     final topInCenter = widget.topBuilder != null && _olderCount == 0;
@@ -781,6 +782,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                                 _olderCount - 1 - index,
                                 answerIndex,
                                 turnTpsByItem,
+                                inlineStats,
                               ),
                               childCount: _olderCount,
                               findChildIndexCallback: (key) {
@@ -804,6 +806,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                                   _olderCount + index - lead,
                                   answerIndex,
                                   turnTpsByItem,
+                                  inlineStats,
                                 );
                               },
                               childCount: rows.length - _olderCount + lead,
@@ -914,6 +917,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     int index,
     int? answerIndex,
     Map<ItemId, double> turnTpsByItem,
+    Set<MessageRef> inlineStats,
   ) {
     final row = rows[index];
     final isAnswer = index == answerIndex;
@@ -955,6 +959,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                 onOpenChild: widget.onOpenChild,
                 messageHeader: messageHeader,
                 turnTokensPerSecond: turnTpsByItem[item.id],
+                showElapsed: !inlineStats.contains(item.meta.message?.message),
                 highlighted: found,
                 revert: item is UserInput && item.confirmed
                     ? widget.userTurnRevert?.call(
@@ -983,6 +988,9 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
             SessionActivityStretchRow() => SessionActivityStretchHeader(
               row: row,
               onToggle: () => _toggle(row.id),
+              showOpeningElapsed: !inlineStats.contains(
+                row.openingMessage?.message,
+              ),
             ),
             SessionPendingRow() => const SessionGenerationPlaceholder(),
           },

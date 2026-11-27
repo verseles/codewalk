@@ -45,6 +45,7 @@ class MarkdownContent extends StatefulWidget {
     this.trailingText,
     this.trailingStyle,
     this.onTapTrailing,
+    this.trailingSemanticsLabel,
   });
 
   final String source;
@@ -67,12 +68,17 @@ class MarkdownContent extends StatefulWidget {
   final ValueChanged<String>? onCopyInlineCode;
 
   /// A short text right after the last word, in [trailingStyle], that runs
-  /// [onTapTrailing] when tapped: the turn's speed and time (#538). After a
-  /// last block that is not running text (code, a table, math) it takes a
-  /// line of its own.
+  /// [onTapTrailing] when tapped or activated from the keyboard: the turn's
+  /// speed and time (#538). It joins the last paragraph only when the parsed
+  /// source ends in running text; after anything else (code, a table, a
+  /// rule, a setext heading, math, HTML) it takes a line of its own below,
+  /// and the source is never changed.
   final String? trailingText;
   final TextStyle? trailingStyle;
   final VoidCallback? onTapTrailing;
+
+  /// What a screen reader announces for [trailingText].
+  final String? trailingSemanticsLabel;
 
   @override
   State<MarkdownContent> createState() => _MarkdownContentState();
@@ -129,15 +135,15 @@ class _MarkdownContentState extends State<MarkdownContent> {
     _codesInUse.clear();
   }
 
-  /// The tap on [MarkdownContent.trailingText], kept across rebuilds.
-  TapGestureRecognizer? _trailingTap;
+  /// The latest [MarkdownContent.onTapTrailing]: the trailing button built
+  /// with an earlier parse still runs it.
+  VoidCallback? _onTrailing;
 
   @override
   void dispose() {
     for (final recognizer in _codeTaps.values) {
       recognizer.dispose();
     }
-    _trailingTap?.dispose();
     super.dispose();
   }
 
@@ -226,23 +232,31 @@ class _MarkdownContentState extends State<MarkdownContent> {
       );
     }
 
-    final trailing = widget.trailingText;
-    if (trailing != null) {
-      inlineSyntaxes.insert(0, _TrailingSyntax());
-      builders[_TrailingSyntax.tag] = _TrailingBuilder(
-        text: trailing,
-        style: widget.trailingStyle,
-        recognizer: widget.onTapTrailing == null
-            ? null
-            : ((_trailingTap ??= TapGestureRecognizer())
-                ..onTap = widget.onTapTrailing),
-      );
-    }
-
-    final extensionSet = md.ExtensionSet(
+    var extensionSet = md.ExtensionSet(
       [...blockSyntaxes, ...md.ExtensionSet.gitHubFlavored.blockSyntaxes],
       [...inlineSyntaxes, ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes],
     );
+    final trailing = widget.trailingText;
+    _onTrailing = widget.onTapTrailing;
+    Widget? trailingButton() => trailing == null
+        ? null
+        : _TrailingButton(
+            text: trailing,
+            style: widget.trailingStyle,
+            semanticsLabel: widget.trailingSemanticsLabel,
+            onTap: widget.onTapTrailing == null
+                ? null
+                : () => _onTrailing?.call(),
+          );
+    final inline =
+        trailing != null && trailingFitsInline(widget.source, extensionSet);
+    if (inline) {
+      builders[_TrailingSyntax.tag] = _TrailingBuilder(trailingButton()!);
+      extensionSet = md.ExtensionSet(extensionSet.blockSyntaxes, [
+        _TrailingSyntax(),
+        ...extensionSet.inlineSyntaxes,
+      ]);
+    }
     if (widget.onCopyInlineCode != null) {
       builders['code'] = InlineCodeCopyBuilder(
         recognizerFor: _codeTap,
@@ -250,8 +264,13 @@ class _MarkdownContentState extends State<MarkdownContent> {
       );
     }
 
-    return MarkdownBody(
-      data: trailing == null ? widget.source : withTrailingMark(widget.source),
+    final markdown = MarkdownBody(
+      // A new trailing text parses again: the body keeps its spans until
+      // its data changes.
+      key: trailing == null ? null : ValueKey((trailing, inline)),
+      data: inline
+          ? '${widget.source.trimRight()} $_trailingMark'
+          : widget.source,
       extensionSet: extensionSet,
       styleSheet: styleSheet,
       builders: builders,
@@ -264,6 +283,37 @@ class _MarkdownContentState extends State<MarkdownContent> {
       imageBuilder: (uri, title, alt) =>
           Text('![${alt ?? ''}]($uri${title == null ? '' : ' "$title"'})'),
     );
+    if (trailing == null) return markdown;
+    if (inline) {
+      // A paragraph reads as its own text, leaving out what flows in it, so
+      // a screen reader gets the trailing button as a node of its own.
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          markdown,
+          Semantics(
+            button: widget.onTapTrailing != null,
+            label: widget.trailingSemanticsLabel ?? trailing,
+            onTap: widget.onTapTrailing == null
+                ? null
+                : () => _onTrailing?.call(),
+            child: const SizedBox(height: 1),
+          ),
+        ],
+      );
+    }
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        markdown,
+        Align(
+          alignment: AlignmentDirectional.centerStart,
+          child: trailingButton(),
+        ),
+      ],
+    );
   }
 }
 
@@ -271,35 +321,49 @@ class _MarkdownContentState extends State<MarkdownContent> {
 /// goes; a model's answer has no business using it.
 const _trailingMark = '\uE000';
 
-/// [source] with the trailing mark after its last word, or on a line of its
-/// own when the last block is not running text: a fence, a table, indented
-/// code, display math or HTML, which would swallow or break on it.
-@visibleForTesting
-String withTrailingMark(String source) {
-  final trimmed = source.trimRight();
-  if (trimmed.isEmpty) return _trailingMark;
-  final last = trimmed.split('\n').last;
-  final lead = last.trimLeft();
-  final block =
-      last.startsWith('    ') ||
-      last.startsWith('\t') ||
-      lead.startsWith('```') ||
-      lead.startsWith('~~~') ||
-      lead.startsWith('|') ||
-      lead.startsWith(r'$$') ||
-      lead.startsWith('<') ||
-      _openFence(trimmed);
-  return block ? '$trimmed\n\n$_trailingMark' : '$trimmed $_trailingMark';
-}
+/// A link reference definition, which the parse keeps out of the document.
+final _linkReference = RegExp(r'^ {0,3}\[[^\]]+\]:');
 
-/// Whether [source] ends inside a fenced code block that never closed.
-bool _openFence(String source) {
-  var open = false;
-  for (final line in source.split('\n')) {
-    final lead = line.trimLeft();
-    if (lead.startsWith('```') || lead.startsWith('~~~')) open = !open;
+/// The block elements a trailing text never joins.
+const _blockTags = {
+  'pre', 'table', 'hr', 'blockquote', 'ul', 'ol', 'li', 'p', //
+  'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockMath', 'details',
+};
+
+/// Whether [source] ends in running text that a trailing text can follow
+/// on the same line (#538): its parsed last block is a paragraph or an ATX
+/// heading, directly or as the end of a list item or a quote, its last line
+/// is that text (not a link reference definition), and it does not use the
+/// private marker itself.
+@visibleForTesting
+bool trailingFitsInline(String source, md.ExtensionSet extensionSet) {
+  final trimmed = source.trimRight();
+  if (trimmed.isEmpty || trimmed.contains(_trailingMark)) return false;
+  final lines = trimmed.split('\n');
+  if (_linkReference.hasMatch(lines.last)) return false;
+  final nodes = md.Document(
+    extensionSet: extensionSet,
+    encodeHtml: false,
+  ).parseLines(lines);
+  var node = nodes.lastOrNull;
+  var top = true;
+  while (node is md.Element) {
+    switch (node.tag) {
+      case 'p':
+        return true;
+      case 'h1' || 'h2' || 'h3' || 'h4' || 'h5' || 'h6':
+        // A setext heading ends in its underline.
+        return lines.last.trimLeft().startsWith('#');
+      case 'ul' || 'ol' || 'li' || 'blockquote':
+        top = false;
+        node = node.children?.lastOrNull;
+      default:
+        // Inside a tight list item, an inline element ends the text.
+        return !top && !_blockTags.contains(node.tag);
+    }
   }
-  return open;
+  // Raw HTML at the top is a block; text inside a tight list item is not.
+  return !top && node is md.Text;
 }
 
 class _TrailingSyntax extends md.InlineSyntax {
@@ -314,14 +378,12 @@ class _TrailingSyntax extends md.InlineSyntax {
   }
 }
 
-/// The trailing text as a span of the paragraph it ends, so it flows right
-/// after the last word.
+/// The trailing button as a span of the paragraph it ends, so it flows right
+/// after the last word, on the text's baseline.
 class _TrailingBuilder extends MarkdownElementBuilder {
-  _TrailingBuilder({required this.text, this.style, this.recognizer});
+  _TrailingBuilder(this.button);
 
-  final String text;
-  final TextStyle? style;
-  final GestureRecognizer? recognizer;
+  final Widget button;
 
   @override
   Widget? visitElementAfterWithContext(
@@ -331,9 +393,49 @@ class _TrailingBuilder extends MarkdownElementBuilder {
     TextStyle? parentStyle,
   ) => Text.rich(
     TextSpan(
-      text: text,
-      style: (parentStyle ?? preferredStyle)?.merge(style) ?? style,
-      recognizer: recognizer,
+      children: [
+        WidgetSpan(
+          alignment: PlaceholderAlignment.baseline,
+          baseline: TextBaseline.alphabetic,
+          child: button,
+        ),
+      ],
     ),
   );
+}
+
+/// The trailing text as a quiet button: a tap, Enter or Space runs it, and a
+/// screen reader names it. It stays out of a text selection.
+class _TrailingButton extends StatelessWidget {
+  const _TrailingButton({
+    required this.text,
+    this.style,
+    this.semanticsLabel,
+    this.onTap,
+  });
+
+  final String text;
+  final TextStyle? style;
+  final String? semanticsLabel;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final label = Text(text, style: style, semanticsLabel: semanticsLabel);
+    if (onTap == null) return SelectionContainer.disabled(child: label);
+    return SelectionContainer.disabled(
+      child: Semantics(
+        button: true,
+        label: semanticsLabel ?? text,
+        excludeSemantics: true,
+        onTap: onTap,
+        child: InkWell(
+          key: const ValueKey('message-trailing-stats'),
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(4),
+          child: label,
+        ),
+      ),
+    );
+  }
 }

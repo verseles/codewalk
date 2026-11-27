@@ -438,6 +438,19 @@ void main() {
       ];
       // x1 is held (not visible yet), so r1/t1/t2 do NOT collapse in Block mode!
       expect(block(inFlight), ['u1', 'r1', 't1', 't2', 't3', 'pending(u1)']);
+      // Without expanded tools, the published work and a call that ended
+      // early are summaries too (#537).
+      expect(
+        _shape(
+          SessionTimelinePresentation().project(
+            inFlight,
+            settled: false,
+            renderMode: ChatRenderMode.block,
+            expandTools: false,
+          ),
+        ),
+        ['u1', 'stretch(r1,t1,t2)', 'stretch(t3)', 'pending(u1)'],
+      );
       expect(
         SessionTimelinePresentation.heldText(
           inFlight,

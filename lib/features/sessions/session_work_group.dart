@@ -82,10 +82,15 @@ class SessionActivityStretchHeader extends StatelessWidget {
     super.key,
     required this.row,
     required this.onToggle,
+    this.showOpeningElapsed = true,
   });
 
   final SessionActivityStretchRow row;
   final VoidCallback onToggle;
+
+  /// Whether the collapsed header shows its opening message's elapsed chip;
+  /// off when that message's final answer ends with its time (#538).
+  final bool showOpeningElapsed;
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +111,9 @@ class SessionActivityStretchHeader extends StatelessWidget {
         ? l10n.activityFailed(row.failedCount)
         : null;
     final fullLabel = [base, ?runningText, ?failedText].join(' · ');
-    final opening = row.expanded ? null : row.openingMessage;
+    final opening = row.expanded || !showOpeningElapsed
+        ? null
+        : row.openingMessage;
 
     final body = LayoutBuilder(
       builder: (context, constraints) {

@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 8,
+  "artifact_seq": 9,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -128,6 +128,22 @@
       "stage": "S4",
       "supersedes": null,
       "title": "u3 r3 haiku resume"
+    },
+    "A0009": {
+      "active": true,
+      "bytes": 768,
+      "created_at": "2026-11-27T23:47:27Z",
+      "evidence": "/tmp/opencode/g8/rev/u4/r1_*.out, r1_native-*.note",
+      "id": "A0009",
+      "impact": "#538 trailing mechanism reworked",
+      "origin": "6 helpers + native Plan haiku/opus stand-ins",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0009.md",
+      "purpose": "Review 5d2bc856, 538c0b0a, 6843825b",
+      "rerun_when": "markdown_content.dart or timeline tiles change",
+      "sha256": "c5feccbe8b4ab81315750a7f1e56caeafe3337640c1b6ee559f925085160fa03",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u4 review r1 (#536-#538)"
     }
   },
   "checklist": [
@@ -499,9 +515,21 @@
     {
       "at": "2026-11-27T23:26:01Z",
       "text": "#534 review converged after 3 rounds (r3: 7 approve, haiku failed twice SESSION_CLAUDE_ERROR). Docs committed. Squash skipped: #536 5d2bc856 and #537 538c0b0a sit between the #534 commits. Push held until #536-#538 are reviewed (no unreviewed code on main); #534 issue closes after that push."
+    },
+    {
+      "at": "2026-11-27T23:35:12Z",
+      "text": "#537 committed 538c0b0a, #538 committed 6843825b. Review u4 (#536+#537+#538: 5d2bc856, 538c0b0a, 6843825b): WORK ITEM codewalk-536-538-timeline-display, key codewalk-536-538-timeline-display-20261127T233512Z-ab74, metrics rvw_20261127T233512Z_c7ca9aa8, helpers (9) incl. Grok."
+    },
+    {
+      "at": "2026-11-27T23:36:40Z",
+      "text": "u4 handshakes READY: luna, sol-F, deepseek, ernie, gemini, hungerg. Failed twice: helperClaude-haiku-5-max and helperClaude-opus-5-xhigh-F (SESSION_CLAUDE_ERROR process exited unsuccessfully), helperGrok-47-high-F (credits) -> failed for the job."
+    },
+    {
+      "at": "2026-11-27T23:38:27Z",
+      "text": "Owner (verbatim: 'é cota mesmo, tenta substituir subagentes nativos aqui mesmo'): Claude helpers are out of quota; replace helperClaude-haiku-5-max and helperClaude-opus-5-xhigh-F with native Claude Code subagents (Agent tool, subagent_type Plan = read-only, model haiku / opus) given the same canonical payload file, from u4 onward, until the helpers work again. Native results join the same prepared batch."
     }
   ],
-  "generation": 46,
+  "generation": 52,
   "next_action": "#536 committed 5d2bc856; #537 538c0b0a; finish #538 then review #536-#538 together",
   "pending_operation": null,
   "queued_followups": [],
@@ -525,7 +553,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-27T23:26:07Z",
+  "updated_at": "2026-11-27T23:47:27Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -539,6 +567,13 @@
       "check": "make check TEST_JOBS=4 on 4a0e9904 (#534)",
       "criterion": null,
       "evidence": "/tmp/opencode/g8/gate-u3.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T23:44:09Z",
+      "check": "flutter test --no-pub -j 4 (full) on 6843825b",
+      "criterion": null,
+      "evidence": "only stale goldens fail: 8 live timeline mobile + 3 subagent capsule (#536 margin); /tmp/opencode/g8/gate-u4-tests.log",
       "outcome": "pass"
     }
   ]

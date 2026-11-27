@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/canonical_message_body.dart';
+import '../../shared/rendering/message_render_budget.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'session_attachment_strip.dart';
@@ -20,6 +21,28 @@ import 'session_reasoning_body.dart';
 import 'session_switch_note.dart';
 import 'session_timeline_projection.dart';
 import 'session_tool_result.dart';
+
+/// Whether [item] ends with its turn's speed and time (#538): a final
+/// answer with a valid rate, in a message, rendered rich. An answer over the
+/// rich budget keeps its elapsed chip in the header instead.
+bool showsInlineTurnStats(TimelineItem item, double? tokensPerSecond) =>
+    item is AssistantText &&
+    tokensPerSecond != null &&
+    tokensPerSecond.isFinite &&
+    tokensPerSecond > 0 &&
+    item.meta.message != null &&
+    MessageRenderBudget.decide(item.text).kind == RenderDecisionKind.rich;
+
+/// The messages whose final answer ends with its speed and time, so no
+/// other row of them repeats the elapsed time (#538).
+Set<MessageRef> inlineTurnStatsMessages(
+  Iterable<TimelineItem> items,
+  Map<ItemId, double> tokensPerSecond,
+) => {
+  for (final item in items)
+    if (showsInlineTurnStats(item, tokensPerSecond[item.id]))
+      item.meta.message!.message,
+};
 
 /// The timeline's side margin: narrower on a phone, so the agent's text,
 /// which has no card, uses the screen, yet not glued to its edge (#536).
@@ -77,6 +100,7 @@ class SessionTimelineTile extends StatelessWidget {
     this.onOpenChild,
     this.messageHeader = false,
     this.turnTokensPerSecond,
+    this.showElapsed = true,
     this.revert,
     this.minimizeUnknownShell = false,
     this.highlighted = false,
@@ -107,6 +131,10 @@ class SessionTimelineTile extends StatelessWidget {
   /// Turn-level tokens per second for the final completed [AssistantText] of a
   /// turn when enabled in the Display menu (#499). Null for all other rows.
   final double? turnTokensPerSecond;
+
+  /// Whether a message header shows its elapsed chip; off for a message
+  /// whose final answer already ends with its time (#538).
+  final bool showElapsed;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +229,10 @@ class SessionTimelineTile extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 760),
           child: ConversationTextScale(
-            child: SessionToolResult(item: item, messageHeader: message),
+            child: SessionToolResult(
+              item: item,
+              messageHeader: showElapsed ? message : null,
+            ),
           ),
         ),
       );
@@ -216,7 +247,7 @@ class SessionTimelineTile extends StatelessWidget {
               text: item.text,
               complete: item.complete,
               duration: item.duration,
-              messageHeader: message,
+              messageHeader: showElapsed ? message : null,
               autoExpand: highlighted,
               storageKey: 'reasoning-${item.id.value}',
               child: SelectionArea(
@@ -261,22 +292,19 @@ class SessionTimelineTile extends StatelessWidget {
             TimeOfDay.fromDateTime(created.toLocal()),
             alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
           );
-    final validTps =
-        turnTokensPerSecond != null &&
-        turnTokensPerSecond!.isFinite &&
-        turnTokensPerSecond! > 0;
     final showTps =
-        item is AssistantText &&
-        validTps &&
-        item.meta.message != null &&
+        showsInlineTurnStats(item, turnTokensPerSecond) &&
         ChatAppearance.showTokensPerSecondOf(context);
+    // A message whose final answer ends with its speed and time shows no
+    // elapsed chip on its other rows either (#538).
+    final elapsed = message != null && showElapsed;
     // A message without a time, a duration, TPS or an action has no header at
     // all, so it takes no space above its body. The user's bubble names no
     // sender: its color and side already do.
     // With the speed on, the final answer's speed and time follow its last
     // word instead of heading it (#538).
     final headerShown = switch (item) {
-      AssistantText() => clock != null || (message != null && !showTps),
+      AssistantText() => clock != null || (elapsed && !showTps),
       UserInput() => clock != null,
       _ => true,
     };
@@ -343,8 +371,7 @@ class SessionTimelineTile extends StatelessWidget {
                               ],
                             ),
                           ),
-                          if (message != null)
-                            MessageElapsedChip(message: message),
+                          if (elapsed) MessageElapsedChip(message: message),
                         ],
                       ),
               )
@@ -359,7 +386,7 @@ class SessionTimelineTile extends StatelessWidget {
                       child: Text(label, style: theme.textTheme.titleSmall),
                     ),
                   ),
-                  if (message != null) MessageElapsedChip(message: message),
+                  if (elapsed) MessageElapsedChip(message: message),
                 ],
               ),
             const SizedBox(height: 8),
@@ -557,6 +584,14 @@ class SessionTimelineTile extends StatelessWidget {
                   item.meta.message!,
                   tokensPerSecond: turnTokensPerSecond,
                 ),
+          // Read whole, with the precise localized speed.
+          trailingSemanticsLabel: trailing == null
+              ? null
+              : [
+                  context.v2L10n.msgInfoMessageInfo,
+                  formatTokensPerSecond(turnTokensPerSecond!, context),
+                  ?formatMessageElapsed(item.meta.message!),
+                ].join(', '),
         );
       case Reasoning():
         return const SizedBox.shrink();

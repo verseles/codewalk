@@ -11,7 +11,6 @@ import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/theme/app_theme.dart';
 import 'package:codewalk/shared/theme/chat_appearance.dart';
 import 'package:codewalk_core/codewalk_core.dart';
-import 'package:flutter/gestures.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -174,33 +173,11 @@ List<TimelineItem> _multiTurnItems() {
   ];
 }
 
-/// The run of text after an answer's last word that reads [text] (#538).
-TextSpan? _stats(WidgetTester tester, String text) {
-  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
-    TextSpan? hit;
-    rich.text.visitChildren((span) {
-      if (span is TextSpan && span.text == text) {
-        hit = span;
-        return false;
-      }
-      return true;
-    });
-    if (hit != null) return hit;
-  }
-  return null;
-}
+/// The speed and time after an answer's last word (#538).
+Finder _stats(String text) => find.text(text);
 
 /// How many answers end with their speed.
-int _statsCount(WidgetTester tester) {
-  var count = 0;
-  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
-    rich.text.visitChildren((span) {
-      if (span is TextSpan && (span.text?.contains('tps') ?? false)) count++;
-      return true;
-    });
-  }
-  return count;
-}
+int _statsCount() => find.textContaining('tps').evaluate().length;
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -279,7 +256,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(_statsCount(tester), 0);
+      expect(_statsCount(), 0);
       // Off, the time keeps its chip above the answer.
       expect(
         find.byKey(const ValueKey('message-elapsed-msg_2')),
@@ -305,14 +282,16 @@ void main() {
 
       // On, each final answer ends with its speed and time, with no icons;
       // the time leaves the header (#538). Turn 3 has no streamed time.
-      expect(_stats(tester, '50tps 3s'), isNotNull);
-      expect(_stats(tester, '43tps 3s'), isNotNull);
-      expect(_statsCount(tester), 2);
+      expect(_stats('50tps 3s'), findsOneWidget);
+      expect(_stats('43tps 3s'), findsOneWidget);
+      expect(_statsCount(), 2);
       expect(find.byKey(const ValueKey('message-elapsed-msg_2')), findsNothing);
+      // Turn 1 opens with reasoning and a tool: their summary repeats no
+      // time either.
+      expect(find.byKey(const ValueKey('message-elapsed-msg_1')), findsNothing);
 
       // A tap opens Message Info with the precise speed.
-      (_stats(tester, '43tps 3s')!.recognizer! as TapGestureRecognizer)
-          .onTap!();
+      await tester.tap(_stats('43tps 3s'));
       await tester.pumpAndSettle();
       expect(find.text('Message Info'), findsOneWidget);
       expect(find.text('Speed: 42.5 tok/s'), findsOneWidget);
@@ -335,8 +314,8 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(_stats(tester, '50tps 3s'), isNotNull);
-      expect(_stats(tester, '43tps 3s'), isNull);
+      expect(_stats('50tps 3s'), findsOneWidget);
+      expect(_stats('43tps 3s'), findsNothing);
     },
   );
 
@@ -425,7 +404,7 @@ void main() {
     ]);
     await tester.pumpAndSettle();
 
-    expect(_stats(tester, '60tps 3s'), isNotNull);
+    expect(_stats('60tps 3s'), findsOneWidget);
   });
 
   testWidgets(
@@ -469,7 +448,7 @@ void main() {
         expect(tester.takeException(), isNull, reason: 'locale=$locale');
         // The inline run reads the same in every locale; the dialog
         // formats the precise speed.
-        expect(_stats(tester, '43tps 4s'), isNotNull, reason: 'locale=$locale');
+        expect(_stats('43tps 4s'), findsOneWidget, reason: 'locale=$locale');
       }
     },
   );

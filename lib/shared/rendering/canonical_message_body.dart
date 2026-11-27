@@ -32,6 +32,7 @@ class CanonicalMessageBody extends StatelessWidget {
     this.trailingText,
     this.trailingStyle,
     this.onTapTrailing,
+    this.trailingSemanticsLabel,
   });
 
   final String source;
@@ -53,6 +54,7 @@ class CanonicalMessageBody extends StatelessWidget {
   final String? trailingText;
   final TextStyle? trailingStyle;
   final VoidCallback? onTapTrailing;
+  final String? trailingSemanticsLabel;
 
   Widget _rich(BuildContext context, String verbatimSource) {
     return MarkdownContent(
@@ -74,6 +76,7 @@ class CanonicalMessageBody extends StatelessWidget {
       trailingText: trailingText,
       trailingStyle: trailingStyle,
       onTapTrailing: onTapTrailing,
+      trailingSemanticsLabel: trailingSemanticsLabel,
     );
   }
 

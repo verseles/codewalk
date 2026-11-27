@@ -367,11 +367,21 @@ final class SessionTimelinePresentation {
     if (published > start) {
       _emitTurn(items.sublist(start, published), out, latched, settled: false);
     }
-    for (var index = published; index < end; index++) {
-      final item = items[index];
-      if (_callEnded(item) && out._shows(item)) {
-        out.emitSingle(item);
-      }
+    final early = [
+      for (var index = published; index < end; index++)
+        if (_callEnded(items[index]) && out._shows(items[index])) items[index],
+    ];
+    if (_expandTools) {
+      early.forEach(out.emitSingle);
+    } else if (early.isNotEmpty) {
+      // Without expanded tools, calls that ended early are a summary too
+      // (#537).
+      out.stretch(
+        'work-${early.first.id.value}',
+        early,
+        runningCount: 0,
+        failedCount: early.where(_isFailedItem).length,
+      );
     }
     out.rows.add(
       SessionPendingRow(start > 0 ? items[start - 1].id : items[start].id),
