@@ -210,16 +210,16 @@
       "depends": [],
       "id": "CONT3",
       "label": "Subir JDK dos workflows Android e validar build release Android",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "Fix commitado 57cd96c9 (base 09039135): AGP 9.3.1->9.3.3; JDK 17 mantido nos workflows",
+      "status": "done",
+      "validation": "Diff 1 linha conferido; build Android local inviável em aarch64 (validado no Release)"
     },
     {
       "depends": [],
       "id": "CONT4",
       "label": "Revisar a correção e commitar",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -375,11 +375,26 @@
     {
       "at": "2026-11-27T08:50:46Z",
       "text": "Causa v2.11.0 build-android: bug AGP 9.3.0/9.3.1 lint (intellij-core JavaDocParser usa List.removeLast, API Java 21) crasha em JDK 17 -> Google #522845800, corrigido em AGP 9.3.2 (release notes oficiais). Origem: achado CRITICAL aceito no review #509 (01b1a492) subiu AGP 8.11.1->9.3.1 sem build release Android local (host ARM sem JDK). Correção escolhida: AGP 9.3.1->9.3.3 (patch mais recente, mantém JDK 17 mínimo oficial); validar via dry-run workflow_dispatch do release.yml em main antes do tag."
+    },
+    {
+      "at": "2026-11-27T08:52:03Z",
+      "text": "Review R1 iniciado: work_item=agp-933-release-lint-fix boundary 09039135..57cd96c9 (AGP 9.3.1->9.3.3), review_id=rvw_20261127T085155Z_e5231412, job_key=agp-933-release-lint-fix-20261127T085155Z-902b, dir=/home/ubuntu/MEGA/WORK/codewalk. Pool elegível (10): helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high. helperDeepSeek-41-flash-high excluído (pico Sex 08:51 UTC). Saída esperada: YAML de review por helper."
+    },
+    {
+      "at": "2026-11-27T08:53:19Z",
+      "text": "Handshakes R1 agp-933-release-lint-fix dir=/home/ubuntu/MEGA/WORK/codewalk job_key=agp-933-release-lint-fix-20261127T085155Z-902b: READY (10/10): helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high."
     }
   ],
-  "generation": 64,
-  "next_action": "Ler AGENTS.md do projeto (release/Android/gate) e rodar gate local aplicável",
-  "pending_operation": null,
+  "generation": 68,
+  "next_action": "tm prepare e despachar payload canônico R1 aos 10 helpers com --resume",
+  "pending_operation": {
+    "expected_bytes": 40000,
+    "expected_seconds": 900,
+    "id": "op_aee3490a147c",
+    "kind": "subagent",
+    "prepared_at": "2026-11-27T08:53:54Z",
+    "purpose": "Review R1 agp-933-release-lint-fix: 10 helpers sobre 09039135..57cd96c9"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 104,
@@ -392,7 +407,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T08:51:38Z",
+  "updated_at": "2026-11-27T08:53:54Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
