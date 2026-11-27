@@ -86,7 +86,21 @@ void main() {
       expect(label.text, text, reason: name);
       expect(label.free, isTrue, reason: name);
     }
-    for (final name in ['Freezer 2', 'Carefree 1', 'Opus 5.5']) {
+    // A leading Free leaves the start to the anchored rules.
+    expect(short('Free GPT-6.2 Sol'), '6.2 Sol');
+    expect(short('(free) Claude Opus 5.5'), 'Opus 5.5');
+    // A separator it leaves behind goes too.
+    expect(short('Big Pickle - Free'), 'Big Pickle');
+    expect(short('qwen/qwen3:free'), 'qwen/qwen3');
+    expect(short('Model - (latest)'), 'Model');
+    for (final name in [
+      'Freezer 2',
+      'Carefree 1',
+      'Opus 5.5',
+      'Model (Free Preview)',
+      'fledge-alpha-free',
+      'gpt-free-eval',
+    ]) {
       expect(modelChipLabel(name).free, isFalse, reason: name);
       expect(short(name), name);
     }
@@ -111,6 +125,11 @@ void main() {
       'Opus 5.5 #2#low',
     );
     expect(defaultModelChipLabel('Claude Opus 5.5').text, 'Opus 5.5');
+    // A # that is part of the name is not a variant.
+    expect(defaultModelChipLabel('Model #2').text, 'Model #2');
+    expect(defaultModelChipLabel('DeepSeek V4 #2 Free').text, 'DS V4 #2');
+    expect(defaultModelChipLabel('DeepSeek V4 #2 Free').free, isTrue);
+    expect(defaultModelChipLabel('Model#').text, 'Model#');
     expect(defaultModelChipLabel('DeepSeek V4 Free#high').free, isTrue);
   });
 }

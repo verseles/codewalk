@@ -221,7 +221,7 @@ void main() {
     final text = tester.widget<Text>(
       find.descendant(of: chip, matching: find.byType(Text)).first,
     );
-    expect(text.textSpan!.toPlainText(), startsWith('Opus 5.5'));
+    expect(text.textSpan!.toPlainText(), contains('Opus 5.5 high'));
     expect(text.textSpan!.toPlainText(), endsWith(' high'));
     expect(text.textSpan!.toPlainText(), isNot(contains('Claude')));
     // The name said Free: the chip draws the icon instead (#524).
@@ -236,6 +236,8 @@ void main() {
       find.ancestor(of: chip, matching: find.byType(Tooltip)).first,
     );
     expect(tooltip.message, contains('Claude Opus 5.5 Free'));
+    // The button itself is announced by the full name.
+    expect(text.semanticsLabel, 'Claude Opus 5.5 Free high');
     // The pick keeps the full name.
     await openPicker(tester);
     expect(

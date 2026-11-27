@@ -3,7 +3,8 @@
 /// tooltip, the screen reader, the search and the pick keep the full name.
 ///
 /// The table is meant to be reviewed as model names change: each rule runs
-/// once, in order, on the result of the one before.
+/// once, in order, on the result of the one before; the Free word (16) is
+/// read before them all.
 final class ModelChipLabel {
   const ModelChipLabel(this.text, {this.free = false});
 
@@ -48,19 +49,24 @@ final _rules = <(RegExp, String)>[
 ];
 
 /// 16. "Free" or "(free)" leaves the text and becomes the chip's icon. It is
-/// read first, so a rule anchored at the end still sees the name's end, and
-/// only as a whole word ("Freezer" stays).
-final _free = RegExp(r'\s*\(?\b[Ff]ree\b\)?');
+/// read first, so the other rules still see the name's start and end, and
+/// only as a word of its own: not "Freezer", not "(Free Preview)", not a
+/// hyphenated id such as "fledge-alpha-free".
+final _free = RegExp(r'\s*\(\s*[Ff]ree\s*\)|(?<![\w(-])[Ff]ree(?![\w)-])');
 
 final _group = RegExp(r'\$(\d)');
 final _spaces = RegExp(r'\s{2,}');
+
+/// What a removed part can leave at an edge: "Big Pickle - Free" →
+/// "Big Pickle".
+final _edges = RegExp(r'^[\s\-–—·|/:,]+|[\s\-–—·|/:,]+$');
 
 /// [name] as the chip shows it; the original when the rules would leave
 /// nothing.
 ModelChipLabel modelChipLabel(String name) {
   var text = name;
   final free = _free.hasMatch(text);
-  text = text.replaceAll(_free, '');
+  text = text.replaceAll(_free, '').replaceAll(_edges, '');
   for (final (pattern, replacement) in _rules) {
     text = text.replaceFirstMapped(
       pattern,
@@ -70,16 +76,22 @@ ModelChipLabel modelChipLabel(String name) {
       ),
     );
   }
-  text = text.replaceAll(_spaces, ' ').trim();
+  text = text.replaceAll(_spaces, ' ').replaceAll(_edges, '');
   return text.isEmpty ? ModelChipLabel(name) : ModelChipLabel(text, free: free);
 }
 
 /// A `name#variant` the server names a default by: only the name before the
-/// last `#` is shortened, the variant is kept as it is.
+/// last `#` is shortened, the variant is kept as it is. A variant id is one
+/// word, so a `#` followed by spaces (or by nothing) belongs to the name.
 ModelChipLabel defaultModelChipLabel(String value) {
   final hash = value.lastIndexOf('#');
-  if (hash <= 0) return modelChipLabel(value);
-  final head = modelChipLabel(value.substring(0, hash));
+  final variant = hash < 0 ? '' : value.substring(hash + 1);
+  if (hash <= 0 || variant.isEmpty || variant.contains(RegExp(r'\s'))) {
+    return modelChipLabel(value);
+  }
+  final name = value.substring(0, hash);
+  if (name.trimRight() != name) return modelChipLabel(value);
+  final head = modelChipLabel(name);
   return ModelChipLabel(
     '${head.text}${value.substring(hash)}',
     free: head.free,

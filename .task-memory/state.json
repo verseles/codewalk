@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 5,
+  "artifact_seq": 6,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -80,6 +80,22 @@
       "stage": "S7",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS #516+#518 (ff186bb6..bf8fc28b)"
+    },
+    "A0006": {
+      "active": true,
+      "bytes": 673,
+      "created_at": "2026-11-27T04:24:06Z",
+      "evidence": "/tmp/opencode/g4/rev/r524-*.out",
+      "id": "A0006",
+      "impact": "Fix round #524",
+      "origin": "10 helpers, job g4-model-picker-review-20261127T033231Z-4b13",
+      "path": "artifacts/tm_20261127T025825Z_6ddaec3e/A0006.md",
+      "purpose": "Review #524",
+      "rerun_when": "session_model_chip_label.dart muda",
+      "sha256": "ce88e54fe1c8f40cfb2222b754f8433eff269b88012d30955ffb8d36cb4393dd",
+      "stage": "S7",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS #524 (85d5f49e)"
     }
   },
   "checklist": [
@@ -305,9 +321,13 @@
     {
       "at": "2026-11-27T04:16:52Z",
       "text": "ART-REVIEW-JUDGMENT #516+#518: aceitos F1 long press fora do ListTile (GestureDetector + Feedback.forLongPress; 7 helpers), F2 clearSnackBars (Sol-F), F3 MediaQuery da folha repassado ao body do Scaffold (DeepSeek). Rejeitados: F4 perf de closures semânticas (DeepSeek; custo baixo, a lista já reconstrói por tecla), F5 teclado sem ponteiro <600dp (GLM; decisão do owner + ação semântica). Nenhuma posição frontier rejeitada → sem dissent. Re-review dispensado: gesto/insets de UI locais, sem concorrência/segurança/interface/persistência/arquitetura; teste de regressão com seleção travada. #518 sem achados. High-value: Sol-F, Haiku, Hungerg, Kimi, DeepSeek; Useful: Grok-F, GLM, Ernie, Gemini, Luna."
+    },
+    {
+      "at": "2026-11-27T04:26:54Z",
+      "text": "ART-REVIEW-JUDGMENT #524: aceitos F1 Free inicial (trim antes das regras; Haiku, Sol-F), F2 Free só como palavra própria + limpeza de separadores de borda (Haiku, GLM), F3 semanticsLabel completo no chip (Sol-F), F5 '#' seguido de espaço é do nome (Haiku, Sol-F), F6 comentário do Free global (DeepSeek). F4 (Sol-F, ícone cortado por reticências): rejeição proposta, dissent → Sol discordou com objeção credível (ícone cortado mesmo com nome curto, ex. LongCat 2.5 Preview Free); resolvido aceitando: ícone antes do nome. Re-review dispensado: regras de texto e rótulo local, sem concorrência/segurança/interface/persistência/arquitetura. High-value: Haiku, Sol-F; Useful: GLM, DeepSeek; approve sem achados: Grok-F, Luna, Ernie, Gemini, Hungerg, Kimi."
     }
   ],
-  "generation": 43,
+  "generation": 47,
   "next_action": "#524: tabela de regras no chip do composer",
   "pending_operation": null,
   "queued_followups": [
@@ -327,7 +347,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T025825Z_6ddaec3e",
   "title": "Grupo 4 da #527 — seletor de modelos (flow)",
-  "updated_at": "2026-11-27T04:16:52Z",
+  "updated_at": "2026-11-27T04:26:54Z",
   "validations": [
     {
       "at": "2026-11-27T03:32:10Z",
@@ -377,6 +397,13 @@
       "criterion": null,
       "evidence": "session_model_chip_label_test (todas as regras + exemplos do owner), picker (chip curto, tooltip completo, ícone, default name#variant), composer_controls, fixture_flow (Fledge Alpha + ícone), draft: passam, só os 3 goldens; analyze limpo",
       "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T04:24:23Z",
+      "check": "Suíte completa flutter test -j nproc (HEAD 39a1e8a0/b7c3160c)",
+      "criterion": null,
+      "evidence": "2541 pass, 4 skip, 3 fail = só goldens model_picker_{desktop_light,mobile_ar_rtl,mobile_light} (x86 pendente). Log /tmp/opencode/g4/fullsuite.log",
+      "outcome": "info"
     }
   ]
 }

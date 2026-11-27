@@ -47,16 +47,18 @@ class SessionModelChip extends StatelessWidget {
       ].join(': ');
       // The chip shortens long model names; its tooltip and the screen
       // reader keep the full one (#524).
+      final full = switch (selection?.modelId) {
+        final modelId? => catalogLabel(model?.label, modelId),
+        null =>
+          selection == null
+              ? l10n.chatChooseModel
+              : state.defaultModel ?? l10n.liveSelectionDefault,
+      };
       final shown = switch (selection?.modelId) {
-        final modelId? => modelChipLabel(catalogLabel(model?.label, modelId)),
-        null => switch (selection == null ? null : state.defaultModel) {
-          final named? => defaultModelChipLabel(named),
-          null => ModelChipLabel(
-            selection == null
-                ? l10n.chatChooseModel
-                : l10n.liveSelectionDefault,
-          ),
-        },
+        _? => modelChipLabel(full),
+        null when selection != null && state.defaultModel != null =>
+          defaultModelChipLabel(full),
+        null => ModelChipLabel(full),
       };
       final background = sessionAgentWash(
         sessionAgentColor(state.agents, selection?.agentId),
@@ -89,15 +91,13 @@ class SessionModelChip extends StatelessWidget {
             label: Text.rich(
               TextSpan(
                 children: [
-                  TextSpan(
-                    text: shown.text,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
+                  // Before the name, so an ellipsis never cuts the only sign
+                  // that the model is free (#524).
                   if (shown.free)
                     WidgetSpan(
                       alignment: PlaceholderAlignment.middle,
                       child: Padding(
-                        padding: const EdgeInsetsDirectional.only(start: 4),
+                        padding: const EdgeInsetsDirectional.only(end: 4),
                         child: Icon(
                           Symbols.money_off,
                           key: const ValueKey('live-model-chip-free'),
@@ -106,12 +106,18 @@ class SessionModelChip extends StatelessWidget {
                         ),
                       ),
                     ),
+                  TextSpan(
+                    text: shown.text,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   if (variant != null)
                     // Same color as the model, so it keeps the contrast;
                     // the lighter weight sets it apart.
                     TextSpan(text: ' $variant'),
                 ],
               ),
+              // The button itself is announced by the full name.
+              semanticsLabel: [full, ?variant].join(' '),
               style: style,
               maxLines: 1,
               softWrap: false,

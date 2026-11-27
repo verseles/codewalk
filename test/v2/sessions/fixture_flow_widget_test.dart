@@ -996,7 +996,7 @@ void main() {
           .isNotEmpty;
       await pumpSpin(
         tester,
-        () => chipShows('live-model-chip', RegExp(r'^Fledge Alpha\W* high$')),
+        () => chipShows('live-model-chip', RegExp(r'^\W*Fledge Alpha high$')),
         reason: 'selection chips updated to Fledge Alpha (free), high',
       );
       expect(
