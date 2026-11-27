@@ -872,11 +872,17 @@ class SessionLiveController extends ChangeNotifier
     final next = _cycle.next(
       SelectionCycleDomain.model,
       current: current,
+      // A retired model is not offered, as in the pick (#515), unless the
+      // session runs it.
       candidates: [
-        ...favoriteModels,
-        ...recentModels,
-        for (final m in own) modelPreferenceKey(m.providerId, m.id),
-      ].where(offered.containsKey).toList(),
+        for (final key in [
+          ...favoriteModels,
+          ...recentModels,
+          for (final m in own) modelPreferenceKey(m.providerId, m.id),
+        ])
+          if (offered[key] case final m? when !m.deprecated || key == current)
+            key,
+      ],
       history: recentModels,
     );
     final model = offered[next];

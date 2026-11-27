@@ -23,7 +23,8 @@ final class ModelPickOptions {
 
 /// Builds the pick's lists from the offered [models]. [favoriteKeys] and
 /// [recentKeys] are saved keys in their saved order; [current] is the
-/// session's model, which stays in reach whatever thins the list.
+/// session's model, matched by key, which stays in reach whatever thins the
+/// list.
 ModelPickOptions modelPickOptions({
   required List<ModelEntry> models,
   required String Function(ModelEntry model) keyOf,
@@ -33,7 +34,14 @@ ModelPickOptions modelPickOptions({
   required String query,
   ModelEntry? current,
 }) {
-  final byKey = {for (final model in models) keyOf(model): model};
+  final currentKey = current == null ? null : keyOf(current);
+  bool isCurrent(ModelEntry model) => keyOf(model) == currentKey;
+  // A retired model is not offered unless the session runs it.
+  bool retired(ModelEntry model) => model.deprecated && !isCurrent(model);
+  final byKey = {
+    for (final model in models)
+      if (!retired(model)) keyOf(model): model,
+  };
   final favoriteSet = favoriteKeys.toSet();
   // Saved names the location does not offer are not shown.
   final favorites = [for (final key in favoriteKeys) ?byKey[key]];
@@ -52,7 +60,7 @@ ModelPickOptions modelPickOptions({
         search,
         providerNames,
         favorite: (model) => favoriteSet.contains(keyOf(model)),
-        current: current,
+        retired: retired,
       ),
     );
   }
@@ -63,8 +71,7 @@ ModelPickOptions modelPickOptions({
     if (listed.contains(keyOf(model))) continue;
     // A retired model, or a release a newer one of its line replaced, is
     // only found by a search; the session's own model always shows.
-    if (!identical(model, current) &&
-        (model.deprecated || older.contains(model))) {
+    if (!isCurrent(model) && (model.deprecated || older.contains(model))) {
       continue;
     }
     (byProvider[model.providerId] ??= []).add(model);
@@ -97,22 +104,26 @@ ModelPickOptions modelPickOptions({
 const _unranked = 1 << 30;
 
 /// Every dated release that a newer one of the same provider, family and
-/// price replaced. Undated models and models without a family stay.
+/// price replaced. Releases of the same instant (one model in several
+/// regions) all stay, as do undated models and models without a family.
 Set<ModelEntry> _olderReleases(List<ModelEntry> models) {
-  final newest = <(String, String, bool), ModelEntry>{};
+  (String, String, bool)? line(ModelEntry model) =>
+      model.family == null || model.released == null || model.deprecated
+      ? null
+      : (model.providerId, model.family!, model.free);
+  final newest = <(String, String, bool), DateTime>{};
   for (final model in models) {
-    final (family, released) = (model.family, model.released);
-    if (family == null || released == null || model.deprecated) continue;
-    final line = (model.providerId, family, model.free);
-    final best = newest[line];
-    if (best == null || released.isAfter(best.released!)) newest[line] = model;
+    final key = line(model);
+    if (key == null) continue;
+    final best = newest[key];
+    if (best == null || model.released!.isAfter(best)) {
+      newest[key] = model.released!;
+    }
   }
   return {
     for (final model in models)
-      if (model.family case final family?
-          when model.released != null &&
-              !model.deprecated &&
-              !identical(newest[(model.providerId, family, model.free)], model))
+      if (line(model) case final key?
+          when model.released!.isBefore(newest[key]!))
         model,
   };
 }
@@ -148,11 +159,11 @@ List<ModelEntry> _ranked(
   String search,
   Map<String, String> providerNames, {
   required bool Function(ModelEntry model) favorite,
-  ModelEntry? current,
+  required bool Function(ModelEntry model) retired,
 }) {
   final scored = <(int, int, int, ModelEntry)>[];
   for (final (index, model) in models.indexed) {
-    if (model.deprecated && !identical(model, current)) continue;
+    if (retired(model)) continue;
     final score = _score(model, search, providerNames);
     if (score == null) continue;
     scored.add((score, favorite(model) ? 0 : 1, index, model));
@@ -194,12 +205,21 @@ int? _score(
       squeezed.any((name) => name.contains(compact))) {
     return 3;
   }
-  final everything = [
-    ...names,
+  final providers = [
     _normalize(model.providerId),
     _normalize(providerNames[model.providerId] ?? ''),
+  ];
+  // Each term may also be written without its spaces or hyphens, as
+  // "githubcopilot" for GitHub Copilot or "gpt6" for GPT-6.2.
+  final spaced = [...names, ...providers].join(' ');
+  final joined = [
+    ...squeezed,
+    for (final provider in providers) provider.replaceAll(' ', ''),
   ].join(' ');
-  if (terms.every(everything.contains)) return 4;
+  if (terms.every((term) => spaced.contains(term) || joined.contains(term)) ||
+      joined.contains(compact)) {
+    return 4;
+  }
   if (compact.length > 1 && squeezed.any((name) => _inOrder(compact, name))) {
     return 5;
   }

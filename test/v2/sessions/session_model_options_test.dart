@@ -152,6 +152,15 @@ void main() {
       ]);
     });
 
+    test('releases of the same instant all stay, one per region', () {
+      final options = _options([
+        _model('us.opus', family: 'opus', released: day),
+        _model('eu.opus', family: 'opus', released: day),
+        _model('opus-old', family: 'opus', released: DateTime.utc(2025)),
+      ]);
+      expect(_groups(options)['prov'], ['us.opus', 'eu.opus']);
+    });
+
     test('an old line keeps its newest release', () {
       final options = _options([
         _model('v1', family: 'old', released: DateTime.utc(2020)),
@@ -173,6 +182,25 @@ void main() {
         _ids(_options([retired], query: 'retired', current: retired).matches!),
         ['retired'],
       );
+    });
+
+    test('a retired favorite or recent is gone unless the session runs it', () {
+      final retired = _model('retired', deprecated: true);
+      final kept = _model('kept');
+      final options = _options(
+        [retired, kept],
+        favorites: ['prov/retired'],
+        recents: ['prov/retired', 'prov/kept'],
+      );
+      expect(options.favorites, isEmpty);
+      expect(_ids(options.recents), ['kept']);
+      // The session's model is matched by key, not by instance.
+      final running = _options(
+        [retired, kept],
+        favorites: ['prov/retired'],
+        current: _model('retired', deprecated: true),
+      );
+      expect(_ids(running.favorites), ['retired']);
     });
 
     test('a replaced release the session runs still shows', () {
@@ -238,6 +266,21 @@ void main() {
       );
       expect(_ids(options.matches!), ['alpha']);
       expect(_ids(_options([alpha], query: 'aph').matches!), ['alpha']);
+      // A provider written without its spaces or hyphens still matches.
+      final copilot = _model('gpt-6', provider: 'github-copilot');
+      for (final query in ['githubcopilot', 'github copilot gpt6']) {
+        expect(
+          _ids(
+            _options(
+              [copilot],
+              providers: const {'github-copilot': 'GitHub Copilot'},
+              query: query,
+            ).matches!,
+          ),
+          ['gpt-6'],
+          reason: query,
+        );
+      }
       // A single letter is not read as letters in order.
       expect(_options([alpha], query: 'q').matches, isEmpty);
     });

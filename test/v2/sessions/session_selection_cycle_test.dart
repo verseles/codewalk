@@ -285,6 +285,23 @@ void main() {
       expect(switches(handle).last, 'model:other/gamma');
     });
 
+    test('mod+m skips a retired model the pick no longer offers', () async {
+      final retired = ModelEntry(
+        id: 'old',
+        providerId: 'prov',
+        label: 'Old',
+        deprecated: true,
+      );
+      final (live, handle) = await open(models: [_alpha, retired, _beta]);
+      await preferences.setFavorite(_server, 'prov/old', favorite: true);
+      for (var i = 0; i < 3; i++) {
+        await live.cycleModel();
+        now = now.add(const Duration(seconds: 1));
+      }
+      expect(switches(handle), isNot(contains('model:prov/old')));
+      expect(switches(handle), contains('model:prov/beta'));
+    });
+
     test('mod+t cycles the variants, Auto among them', () async {
       final (live, handle) = await open();
       await live.cycleVariant();
