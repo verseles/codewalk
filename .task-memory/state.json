@@ -2,7 +2,7 @@
   "artifact_seq": 7,
   "artifacts": {
     "A0001": {
-      "active": true,
+      "active": false,
       "bytes": 5978,
       "created_at": "2026-11-27T06:07:47Z",
       "evidence": "issues 511/510/509/525; app_indeterminate_progress.dart; ADR.md:3718; flutter/flutter#191171 #191234 PR #191379; git merge-base em ~/flutter 3.47.9; compare 3.50.x",
@@ -12,6 +12,7 @@
       "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0001.md",
       "purpose": "Permitir iniciar o flow do grupo 5 numa nova conversa só com 'flow'",
       "rerun_when": "Flutter pin mudar, ADR-056 mudar ou issues do grupo 5 forem editadas",
+      "retired": true,
       "sha256": "014bd6ae2bdbf9a94466f74662de2055ceb3c5f36017dcace29a438a75c0d795",
       "stage": "S1",
       "supersedes": null,
@@ -185,12 +186,26 @@
       ],
       "id": "S7",
       "label": "Goldens x86, gate final, release notes, push e release minor",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "6 goldens x86_64 atualizados (52625c04), release-notes/v2.11.0.md (839f0077), gate local verde em 839f0077, release minor v2.11.0 cortado (cd22fdd6) e watch-release iniciado",
+      "status": "done",
+      "validation": "make check TEST_JOBS=4 exit 0 em 839f0077; cut_stable.py cortou e publicou v2.11.0 atomicamente"
+    },
+    {
+      "depends": [],
+      "id": "CONT1",
+      "label": "Atualizar Known pitfalls no AGENTS.md e fechar #460 se build-android verde",
+      "outcome": "Adicionados os 2 pitfalls aprovados em Known pitfalls do AGENTS.md; #460 aguarda confirmação verde do build-android no release v2.11.0 (45964510426)",
+      "status": "done",
+      "validation": "docs-only (isento de gate e revisão); git diff conferido"
     }
   ],
-  "completion": null,
+  "completion": {
+    "at": "2026-11-27T08:24:38Z",
+    "by": "agent",
+    "delivered": "2 regras evergreen adicionadas em Known pitfalls no AGENTS.md (material.dart ignore no Flutter 3.50.1 e timing de make check vs startup paralelo de helpers no ARM64) e enviadas para origin/main; aprovação registrada para fechar #460 assim que build-android do v2.11.0 concluir.",
+    "residual_risk": "Issue #460 segue aberta até a confirmação verde do job build-android no workflow Release 45964510426 (v2.11.0).",
+    "validation": "git diff AGENTS.md conferido; docs-only isento de gate/revisão; todas as etapas e critérios C1-C5 validados."
+  },
   "contract": {
     "complete_when": [
       {
@@ -212,13 +227,13 @@
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "make release V=stable cut v2.11.0 at cd22fdd6 (atomic push main+tag); make watch-release started detached",
         "id": "C4",
         "text": "release minor cortado",
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "Evaluated all helpers across 3 batches / 4 rounds (Top 2: Codex-6.2-sol-F, Gemini-4-hydrogen; Bottom 2: Claude-opus-5-low, Ernie-55-flash; mentions: Haiku-5, Grok-47-F, Kimi-K31, Hungerg, GLM-53) and sent full paragraph via hey",
         "id": "C5",
         "text": "relatório com melhores/piores helpers",
         "waived": false
@@ -306,10 +321,18 @@
     {
       "at": "2026-11-27T08:02:35Z",
       "text": "ART-REVIEW-JUDGMENT Batch 3 (#525) R1 (rvw_20261127T074838Z_7d4dee0d, boundary 2ca07aa2): 8/11 aprovam por unanimidade (overall_risk=low, confidence=high, findings=[]); helperGLM-53-high (invalid-delivery, outcome=recovered, attempts=2, relay_bytes=3472) recuperado rung 1 com approve/findings=[]; 3 Claude failed no handshake (quota 5h resets 08:50 UTC). Zero achados aceitos, zero dissenso Frontier, make check verde -> #525 aprovado sem R2."
+    },
+    {
+      "at": "2026-11-27T08:23:52Z",
+      "text": "Completed milestone preserved at 2026-11-27T08:17:21Z by agent: delivered=Grupo 5 da #527 concluído e publicado em v2.11.0 (cd22fdd6): #511 (4a0f313f), #510/ADR-062 (32a2b9d5), #509 Flutter 3.50.1 + Android Gradle 9.5.0/AGP 9.3.1/KGP 2.4.20 (01b1a492), #525 borda SweepGradient na cápsula (2ca07aa2), BEHAVIOR.md (d434b85a), 6 goldens x86_64 (52625c04) e release-notes/v2.11.0.md (839f0077). Issues #511/#510/#509/#525 fechadas e marcadas na #527; avaliação de helpers enviada via hey. | validation=C1-C5 validados; gate local make check TEST_JOBS=$(nproc) verde no SHA exato pré-release 839f0077; 3 batches / 4 rodadas de revisão convergidos com métricas registradas; watch-release ativo em background. | residual_risk=Validação visual em tela real do #509 (MSAA Linux 5K), #510 (CPU/GPU desktop) e #525 (efeito visual) e build Android do workflow de release (ARM64 local sem Android SDK/Java) ficam para confirmação após publicação do v2.11.0."
+    },
+    {
+      "at": "2026-11-27T08:23:52Z",
+      "text": "Continuation request: a (adicionar sugestões 1 e 2 em Known pitfalls do AGENTS.md e fechar #460 se build-android do v2.11.0 já tiver concluído) | reason: Follow-up direto do encerramento do flow do Grupo 5"
     }
   ],
-  "generation": 52,
-  "next_action": "Commitar 6 goldens x86_64 + docs e release-notes/v2.11.0.md, push origin main, rodar gate final nesse SHA exato e cortar release minor v2.11.0",
+  "generation": 60,
+  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -320,10 +343,10 @@
   "risks": [],
   "schema": 1,
   "started_at": "2026-11-27T06:05:09Z",
-  "status": "in_progress",
+  "status": "completed",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T08:16:45Z",
+  "updated_at": "2026-11-27T08:24:38Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
@@ -407,6 +430,20 @@
       "check": "Final local gate green on pre-release SHA 839f0077",
       "criterion": "C3",
       "evidence": "make check TEST_JOBS=$(nproc) exit 0 on 839f0077 (analyze 4<=4, python CI/release tests ok, full flutter test suite incl. refreshed x86_64 goldens green, /tmp/opencode/make_check_final_839f0077.log)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:17:20Z",
+      "check": "Minor release v2.11.0 cut and pushed",
+      "criterion": "C4",
+      "evidence": "make release V=stable cut v2.11.0 at cd22fdd6 (atomic push main+tag); make watch-release started detached",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:17:20Z",
+      "check": "Helper evaluation report compiled and sent via hey",
+      "criterion": "C5",
+      "evidence": "Evaluated all helpers across 3 batches / 4 rounds (Top 2: Codex-6.2-sol-F, Gemini-4-hydrogen; Bottom 2: Claude-opus-5-low, Ernie-55-flash; mentions: Haiku-5, Grok-47-F, Kimi-K31, Hungerg, GLM-53) and sent full paragraph via hey",
       "outcome": "pass"
     }
   ]

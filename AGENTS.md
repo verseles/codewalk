@@ -166,6 +166,8 @@ CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Cla
 - After `dart format`, inspect the hunks and revert churn outside the intended change; reformatting other code goes in its own commit, never mixed with a feature or fix.
 - Credential redaction before truncation: when capping potentially sensitive strings in projections or UI, redact against the full source text with `redactCredentialSlice` before applying the byte cut—never slice with a fixed lookahead first, or credentials and PEM blocks crossing the cut boundary can leak.
 - On ARM64 hosts (`mercury`), do not run `dart run tool/ci/import_rules.dart` (or `make v2-architecture`) in isolation for ordinary `lib/` edits because native build hooks can hang (`Running build hooks...`); use `make check TEST_JOBS=$(nproc)` (and `make v2-native-check` only when `packages/`, architecture rules, or the CHP change).
+- Flutter 3.50.1 deprecates `package:flutter/material.dart` in favor of `package:material_ui/material_ui.dart`, which currently conflicts with third-party UI dependencies; add `// ignore: deprecated_member_use` immediately above every `import 'package:flutter/material.dart';` line in new Dart files (and keep `deprecated_member_use` enabled in `analysis_options.yaml`).
+- On ARM64 hosts (`mercury`), avoid starting `make check` during the initial parallel startup spike of multiple review helpers because `test_v2_linux_preview.py` can hit the 15 s `tesseract` OCR timeout under CPU contention; start the gate after helper handshakes finish.
 
 ## Keeping this file current
 
