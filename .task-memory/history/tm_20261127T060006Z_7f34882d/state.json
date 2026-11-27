@@ -1,0 +1,74 @@
+{
+  "artifact_seq": 0,
+  "artifacts": {},
+  "checklist": [
+    {
+      "depends": [],
+      "id": "S1",
+      "label": "Copiar app_icon.png para favicon.png e verificar igualdade",
+      "outcome": "favicon.png criado na raiz",
+      "status": "done",
+      "validation": "cmp -s passou; SHA-256 idêntico; 277209 bytes"
+    }
+  ],
+  "completion": {
+    "at": "2026-11-27T06:00:16Z",
+    "by": "agent",
+    "delivered": "favicon.png criado na raiz a partir de linux/runner/resources/app_icon.png",
+    "residual_risk": "Nenhum",
+    "validation": "cmp -s passou e SHA-256 idêntico (be1c6d9083479d7e295bc53484cf327088ec113bed54c2d3e38c2904d83d1585); 277209 bytes"
+  },
+  "contract": {
+    "complete_when": [
+      {
+        "evidence": "favicon.png e linux/runner/resources/app_icon.png têm SHA-256 be1c6d9083479d7e295bc53484cf327088ec113bed54c2d3e38c2904d83d1585; 277209 bytes",
+        "id": "C1",
+        "text": "favicon.png existe na raiz e seu conteúdo é idêntico ao arquivo de origem",
+        "waived": false
+      }
+    ],
+    "constraints": [
+      "Não modificar o arquivo de origem",
+      "Preservar alterações não relacionadas"
+    ],
+    "delivery_boundary": "Arquivo local na raiz do projeto, sem commit",
+    "expected_results": [
+      "favicon.png na raiz idêntico a linux/runner/resources/app_icon.png"
+    ],
+    "objective": "Criar ou atualizar favicon.png na raiz do projeto com o conteúdo de linux/runner/resources/app_icon.png",
+    "scope_in": [
+      "Copiar o arquivo solicitado para favicon.png na raiz",
+      "Verificar que origem e destino são idênticos"
+    ],
+    "scope_out": [
+      "Alterar outros ícones ou configuração de favicon",
+      "Commit, push ou release"
+    ]
+  },
+  "decisions": [],
+  "generation": 4,
+  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
+  "pending_operation": null,
+  "queued_followups": [],
+  "request": {
+    "bytes": 70,
+    "path": "requests/tm_20261127T060006Z_7f34882d.txt",
+    "sha256": "bc6893a76265da1e8b590ec113a96fea0eb307bd6bd789b9fb495c51497bf905"
+  },
+  "risks": [],
+  "schema": 1,
+  "started_at": "2026-11-27T06:00:06Z",
+  "status": "completed",
+  "task_id": "tm_20261127T060006Z_7f34882d",
+  "title": "Copiar ícone Linux como favicon.png",
+  "updated_at": "2026-11-27T06:00:16Z",
+  "validations": [
+    {
+      "at": "2026-11-27T06:00:11Z",
+      "check": "cmp e SHA-256 entre origem e destino",
+      "criterion": "C1",
+      "evidence": "favicon.png e linux/runner/resources/app_icon.png têm SHA-256 be1c6d9083479d7e295bc53484cf327088ec113bed54c2d3e38c2904d83d1585; 277209 bytes",
+      "outcome": "pass"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+copia linux/runner/resources/app_icon.png para a raiz como favicon.png

@@ -366,6 +366,7 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
                           _buildHeaderIcon(
                             scheme,
                             progress,
+                            l10n,
                             collapsed: collapsed,
                           ),
                           const SizedBox(width: 8),
@@ -481,17 +482,19 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
 
   Widget _buildHeaderIcon(
     ColorScheme scheme,
-    PlanProgress progress, {
+    PlanProgress progress,
+    V2Localizations l10n, {
     required bool collapsed,
   }) {
     if (!collapsed) {
       return Icon(Symbols.checklist, size: 16, color: scheme.primary);
     }
     if (progress.inProgress > 0) {
-      return AppIndeterminateRing(
+      return Icon(
+        Symbols.double_arrow,
         size: 16,
-        strokeWidth: 1.8,
         color: scheme.primary,
+        semanticLabel: l10n.chatMessageToolStatusInProgress,
       );
     }
     if (progress.allCompleted) {
@@ -554,10 +557,11 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
         size: 16,
         color: scheme.primary,
       ),
-      PlanStatus.inProgress => AppIndeterminateRing(
+      PlanStatus.inProgress => Icon(
+        Symbols.double_arrow,
         size: 16,
-        strokeWidth: 1.6,
         color: scheme.primary,
+        semanticLabel: l10n.chatMessageToolStatusInProgress,
       ),
       PlanStatus.cancelled => Icon(
         Symbols.cancel,

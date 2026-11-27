@@ -1,1 +1,0 @@
-Agora que o beta saiu, remove do AGENTS.md FLOW BETA e adapta apenas para ser FLOW, atualiza qualquer documentacao que mencione beta

@@ -15,9 +15,11 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_plan.dart';
 import 'package:codewalk/shared/theme/app_theme.dart';
 import 'package:codewalk/shared/theme/chat_appearance.dart';
+import 'package:codewalk/shared/widgets/app_indeterminate_progress.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
 import '../storage/storage_fakes.dart';
@@ -196,6 +198,12 @@ void main() {
 
         // Compact collapsed summary: count-first + active task + `+1` parallel badge.
         expect(find.text('2/5 Active primary step'), findsOneWidget);
+        expect(find.byType(AppIndeterminateRing), findsNothing);
+        final collapsedIcon = tester.widget<Icon>(
+          find.byIcon(Symbols.double_arrow),
+        );
+        expect(collapsedIcon.size, 16);
+        expect(collapsedIcon.semanticLabel, 'In progress');
         expect(
           find.byKey(const ValueKey('session-todo-more-in-progress')),
           findsOneWidget,
@@ -217,6 +225,18 @@ void main() {
         expect(find.text('1 cancelled'), findsOneWidget);
         expect(find.text('+1'), findsOneWidget);
         expect(find.byKey(const ValueKey('session-todo-list')), findsOneWidget);
+        expect(find.byType(AppIndeterminateRing), findsNothing);
+        expect(find.byIcon(Symbols.double_arrow), findsNWidgets(2));
+        for (final rowId in ['1', '2']) {
+          final rowIcon = tester.widget<Icon>(
+            find.descendant(
+              of: find.byKey(ValueKey('session-todo-item-$rowId')),
+              matching: find.byIcon(Symbols.double_arrow),
+            ),
+          );
+          expect(rowIcon.size, 16);
+          expect(rowIcon.semanticLabel, 'In progress');
+        }
         expect(find.text('Finished step'), findsOneWidget);
         expect(find.text('Skipped step'), findsOneWidget);
         expect(find.text('Future step'), findsOneWidget);
@@ -366,12 +386,29 @@ void main() {
         expect(tester.takeException(), isNull);
         expect(find.text('Active deep task'), findsOneWidget);
         expect(find.text('Unknown state task'), findsOneWidget);
+        expect(find.byType(AppIndeterminateRing), findsNothing);
+        expect(Symbols.double_arrow.matchTextDirection, isTrue);
+        final rtlExpandedFlip = tester.widget<Transform>(
+          find.descendant(
+            of: find.byIcon(Symbols.double_arrow),
+            matching: find.byType(Transform),
+          ),
+        );
+        expect(rtlExpandedFlip.transform.storage[0], -1.0);
 
         // Collapse with animations active.
         await tester.tap(find.byKey(const ValueKey('session-todo-header')));
         await tester.pump(const Duration(milliseconds: 300));
         expect(tester.takeException(), isNull);
         expect(find.byKey(const ValueKey('session-todo-list')), findsNothing);
+        expect(find.byType(AppIndeterminateRing), findsNothing);
+        final rtlCollapsedFlip = tester.widget<Transform>(
+          find.descendant(
+            of: find.byIcon(Symbols.double_arrow),
+            matching: find.byType(Transform),
+          ),
+        );
+        expect(rtlCollapsedFlip.transform.storage[0], -1.0);
 
         // All-cancelled header icon path & empty entries no-op path.
         await tester.pumpWidget(
