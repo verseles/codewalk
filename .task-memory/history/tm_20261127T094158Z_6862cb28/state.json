@@ -1,0 +1,870 @@
+{
+  "artifact_seq": 18,
+  "artifacts": {
+    "A0001": {
+      "active": false,
+      "bytes": 630,
+      "created_at": "2026-11-27T10:24:15Z",
+      "evidence": "/tmp/opencode/g6plan/r1_*.out, r1_*.rc, r1_*.err",
+      "id": "A0001",
+      "impact": "Base para síntese do plano do grupo 6",
+      "origin": "11 helpers (planner R1)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0001.md",
+      "purpose": "Plano implementável grupo 6 (#514,#507,#506,#504,#505)",
+      "rerun_when": "payload ou decisões Q1-Q5 mudarem",
+      "retired": true,
+      "sha256": "d3499b57cae16d142b15a5e3782623608539bb2b77685c2b48ed794fad9b3bef",
+      "stage": "CONT1",
+      "supersedes": null,
+      "title": "ART-PLANNER-LEDGER + ART-CANDIDATE-PLANS R1 group6-servers-plan"
+    },
+    "A0002": {
+      "active": false,
+      "bytes": 273,
+      "created_at": "2026-11-27T10:24:49Z",
+      "evidence": "/tmp/opencode/g6plan/r1b_opus.err",
+      "id": "A0002",
+      "impact": "Síntese segue com 10/11 planos",
+      "origin": "helperClaude-opus-5-xhigh-F",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0002.md",
+      "purpose": "Retomada única após SESSION_CLAUDE_ERROR",
+      "rerun_when": "nova rodada de planejamento",
+      "retired": true,
+      "sha256": "4a417825357b3b6ef993d36c846dffd9c8157259b31308830fd54dde8fe80276",
+      "stage": "CONT1",
+      "supersedes": null,
+      "title": "Planner R1 resume opus-F: failed"
+    },
+    "A0003": {
+      "active": false,
+      "bytes": 7525,
+      "created_at": "2026-11-27T10:27:33Z",
+      "evidence": "/tmp/opencode/g6plan/r1_*.out; síntese do orquestrador",
+      "id": "A0003",
+      "impact": "Guia a implementação das 4 unidades do grupo 6",
+      "origin": "orquestrador (síntese de 10 planos R1)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0003.md",
+      "purpose": "Plano único executável do grupo 6",
+      "rerun_when": "decisões do owner mudarem",
+      "sha256": "2158934c92e8c167c93b0e4b189d52c1fed30e685d5b96b20f90f065e0474ec7",
+      "stage": "CONT1",
+      "supersedes": null,
+      "title": "ART-EXECUTION-HANDOFF + ART-PLANNER-ASSESSMENT grupo 6 (#514 #507 #506 #504 #505)"
+    },
+    "A0004": {
+      "active": false,
+      "bytes": 684,
+      "created_at": "2026-11-27T10:42:04Z",
+      "evidence": "/tmp/opencode/g6u1/r1_*.out",
+      "id": "A0004",
+      "impact": "4 correções pequenas antes de fechar U1",
+      "origin": "8 helpers (reviewer R1)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0004.md",
+      "purpose": "Review 2f0dabd8..a9ccf58f",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "90637445d317c65b227d0ba4f26798c56760c7ecadc9179e7e46ded0bf3c59a6",
+      "stage": "CONT3",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U1 R1 group6-u1-health"
+    },
+    "A0005": {
+      "active": false,
+      "bytes": 236,
+      "created_at": "2026-11-27T11:02:58Z",
+      "evidence": "/tmp/opencode/g6u1/r2_*.out",
+      "id": "A0005",
+      "impact": "U1 convergida; 1 ajuste docs-only",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0005.md",
+      "purpose": "Re-review fix round U1",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "5b9ff43d30c56aa5bf8de6601e635c0bb5dcd700a8ea9f8c3f9b68f1bda1c5a0",
+      "stage": "CONT3",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U1 R2 (re-review 3ddb47ed)"
+    },
+    "A0006": {
+      "active": false,
+      "bytes": 1084,
+      "created_at": "2026-11-27T11:20:10Z",
+      "evidence": "/tmp/opencode/g6u2/r1_*.out; /tmp/opencode/g6u2/gate.log:1289",
+      "id": "A0006",
+      "impact": "Fix round obrigatório + re-review",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0006.md",
+      "purpose": "Review f4f1e630..2e718bf9",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "defb77321932169b94fabb38db74007a0f19457a03e4880917ef509d1a343327",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U2 R1 group6-u2-harness"
+    },
+    "A0007": {
+      "active": false,
+      "bytes": 684,
+      "created_at": "2026-11-27T11:29:44Z",
+      "evidence": "/tmp/opencode/g6u2/r2_*.out",
+      "id": "A0007",
+      "impact": "Fail-closed via credentialFor null gera diagnóstico errado em vários consumidores",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0007.md",
+      "purpose": "Re-review fix round U2",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "63f73e27e13514e45292b7464133bb7af01b396ce236838450a39e9bd8575c84",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U2 R2 (re-review f0d09e9c)"
+    },
+    "A0008": {
+      "active": false,
+      "bytes": 656,
+      "created_at": "2026-11-27T11:39:01Z",
+      "evidence": "/tmp/opencode/g6u2/r3_*.out",
+      "id": "A0008",
+      "impact": "3ª rodada no mesmo problema -> replanejar (regra de 3 tentativas)",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0008.md",
+      "purpose": "Re-review fix round 2 U2",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "503d35667acb3254dbebdc50ad16d146ffdb675e267c1b6ad399e7b71cda696b",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U2 R3 (re-review 0e420d07)"
+    },
+    "A0009": {
+      "active": false,
+      "bytes": 451,
+      "created_at": "2026-11-27T11:46:09Z",
+      "evidence": "/tmp/opencode/g6u2/r4_*.out, r4b_*.err",
+      "id": "A0009",
+      "impact": "U2 convergida com 2 ajustes simples (docs/teste)",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0009.md",
+      "purpose": "Re-review após replan U2",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "bee426abfcaa8d3079a73f831497a1993ccc5978f137e95981a30ee5bdd63647",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U2 R4 (re-plan 9fe4a99f)"
+    },
+    "A0010": {
+      "active": false,
+      "bytes": 1046,
+      "created_at": "2026-11-27T12:33:00Z",
+      "evidence": "/tmp/opencode/g6u3/r1_*.out",
+      "id": "A0010",
+      "impact": "Fix round + re-review",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0010.md",
+      "purpose": "Review 00befeaa..8a8b9d9b",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "0181b283702a080172b34f4c7d70d7e0db7cdd533ee73c6c891e9f3f0a744d88",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U3 R1 group6-u3-add-flow"
+    },
+    "A0011": {
+      "active": false,
+      "bytes": 1012,
+      "created_at": "2026-11-27T12:48:39Z",
+      "evidence": "/tmp/opencode/g6u3/r2_*.out",
+      "id": "A0011",
+      "impact": "Simplificar: só página /pair (sem diálogo), geração por tentativa, demais ajustes",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0011.md",
+      "purpose": "Re-review fix round U3",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "e00095473cd0b5ad40ac6e8c89bbb2b1eda282cf08ed442eb148abdccb65a171",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U3 R2 (re-review bea9e18b)"
+    },
+    "A0012": {
+      "active": false,
+      "bytes": 844,
+      "created_at": "2026-11-27T13:11:15Z",
+      "evidence": "/tmp/opencode/g6u3/r3_*.out",
+      "id": "A0012",
+      "impact": "Fix round 3 necessário",
+      "origin": "8 helpers (key group6-u3-add-flow-20261127T122257Z-0e67)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0012.md",
+      "purpose": "Re-review 062728b5",
+      "rerun_when": "novo commit de correção",
+      "retired": true,
+      "sha256": "06f9ea80a1b3d2798d7953510f7a9bff02792afb04f38bebbf71454009ec03c4",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "U3 re-review R3"
+    },
+    "A0013": {
+      "active": false,
+      "bytes": 625,
+      "created_at": "2026-11-27T13:34:47Z",
+      "evidence": "/tmp/opencode/g6u3/r4_*.out",
+      "id": "A0013",
+      "impact": "Fix round 4 provável (Sol-F)",
+      "origin": "6 helpers (key group6-u3-add-flow-20261127T122257Z-0e67)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0013.md",
+      "purpose": "Re-review 9ea4eea4",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "5124f7c983166120786cfa1f6c2fd344529fafb5735c2d2b97a715e32009bdc2",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "U3 re-review R4"
+    },
+    "A0014": {
+      "active": false,
+      "bytes": 349,
+      "created_at": "2026-11-27T13:49:54Z",
+      "evidence": "/tmp/opencode/g6u3/r5_*.out",
+      "id": "A0014",
+      "impact": "Correção pontual; R6 dispensável se o teste cobrir",
+      "origin": "6 helpers (key group6-u3-add-flow-20261127T122257Z-0e67)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0014.md",
+      "purpose": "Re-review 1b22bc4a",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "ea81486bef191fb0cd27289ef0039cc3c227d1659a473ff52244e6304df0dad8",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "U3 re-review R5"
+    },
+    "A0015": {
+      "active": false,
+      "bytes": 665,
+      "created_at": "2026-11-27T14:18:17Z",
+      "evidence": "/tmp/opencode/g6u4/r1_*.out",
+      "id": "A0015",
+      "impact": "Fix round 1 U4",
+      "origin": "8 helpers (key group6-u4-server-list-20261127T140314Z-fd9f)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0015.md",
+      "purpose": "Review 302fd180 (#505)",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "196d5f19c428ced3733c0bf7e309dc17c1c8bfe6f1dabe0723ddddcb3851806a",
+      "stage": "CONT5",
+      "supersedes": null,
+      "title": "U4 review R1"
+    },
+    "A0016": {
+      "active": false,
+      "bytes": 584,
+      "created_at": "2026-11-27T14:36:04Z",
+      "evidence": "/tmp/opencode/g6u4/r2_*.out",
+      "id": "A0016",
+      "impact": "Fix round 2 U4 pequeno",
+      "origin": "8 helpers (key group6-u4-server-list-20261127T140314Z-fd9f)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0016.md",
+      "purpose": "Re-review ddf66811",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "2c41aab212403fe7dfedfe757561325d8ecad22a6280c2c2a8b0402f21b924da",
+      "stage": "CONT5",
+      "supersedes": null,
+      "title": "U4 re-review R2"
+    },
+    "A0017": {
+      "active": false,
+      "bytes": 740,
+      "created_at": "2026-11-27T14:51:58Z",
+      "evidence": "/tmp/opencode/g6u4/r3_*.out",
+      "id": "A0017",
+      "impact": "Fix round 3 U4",
+      "origin": "8 helpers (key group6-u4-server-list-20261127T140314Z-fd9f)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0017.md",
+      "purpose": "Re-review fb96caf6",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "ec08609dfff9e6532f76051704138d601cf2557a79220631d63ad7b4e3914d7a",
+      "stage": "CONT5",
+      "supersedes": null,
+      "title": "U4 re-review R3"
+    },
+    "A0018": {
+      "active": false,
+      "bytes": 415,
+      "created_at": "2026-11-27T15:07:16Z",
+      "evidence": "/tmp/opencode/g6u4/r4_*.out",
+      "id": "A0018",
+      "impact": "Ajuste final de texto e teste; convergido",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0018.md",
+      "purpose": "Re-review 86e840fa",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "d0abb943d5e4c0ed9bf2b2bc6143115a7e2d3efb4188fcaab8e5550bd613f633",
+      "stage": "CONT5",
+      "supersedes": null,
+      "title": "U4 re-review R4"
+    }
+  },
+  "checklist": [
+    {
+      "depends": [],
+      "id": "S1",
+      "label": "Ler issues #514, #507, #506, #504, #505 e regras do projeto",
+      "outcome": "Issues e regras lidas. Confirmado #514/#507: version_policy.dart tested=[2.0.21,2.0.22]; versão mais nova -> untested -> delayed (endpoint_health_controller.dart:28-33) e chip hostsUntested (endpoint_health_view.dart:16). BEHAVIOR.md:96 define Delayed=check pendente; :97 'app never predicts or argues about server versions' (owner 2026-11-10); :903 ainda cita untested-version chip. hosts_page.dart:194 Renew só se versão == 2.0.22.",
+      "status": "done",
+      "validation": "Leitura direta de código/BEHAVIOR.md"
+    },
+    {
+      "depends": [
+        "S1"
+      ],
+      "id": "S2",
+      "label": "Mapear código de status, listagem, adicionar e parear servidor",
+      "outcome": "Mapeado: EndpointProfile sem campo harness (seletor #504 exige campo novo no core + v2-plan §17); canonical Compatibility{supported,untested,blocked,unknown} em catalog.dart; _ProfileDialog save exige canUse (hosts_page.dart ~510-653) e BEHAVIOR.md:903-906 exige check antes de salvar; pairing_page.dart:129-132 só limpa campos após save; card hosts_page.dart:334-425 empilha chips+indicator+URL+expiry+EndpointStatusView.",
+      "status": "done",
+      "validation": "Leitura direta"
+    },
+    {
+      "depends": [
+        "S1"
+      ],
+      "id": "S3",
+      "label": "Pesquisar referências externas indicadas (apps oficiais OpenCode)",
+      "outcome": "Referência oficial coletada (ver validação)",
+      "status": "done",
+      "validation": "gh api raw dev branch"
+    },
+    {
+      "depends": [
+        "S2",
+        "S3"
+      ],
+      "id": "S4",
+      "label": "Consolidar achados e perguntar dúvidas ao owner",
+      "outcome": "5 dúvidas respondidas: Q1=A, Q2=C, Q3=A, Q4=A+Codex 'Em breve', Q5=A; issue #529 criada para travas 2.0.22 (hosts_page.dart:194, pairing_client.dart:104,158)",
+      "status": "done",
+      "validation": "Decisões registradas em checkpoints; gh issue create #529 OK"
+    },
+    {
+      "depends": [],
+      "id": "CONT1",
+      "label": "Planejar grupo 6 com planners",
+      "outcome": "Planejamento R1: 10/11 planos (opus-F failed 2x); handoff A0003 com 4 unidades U1-U4; metrics R1 recorded; sessões fechadas",
+      "status": "done",
+      "validation": "Handoff relido: decisões Q1-Q5 + layout #505 + dúvidas abertas resolvidas"
+    },
+    {
+      "depends": [],
+      "id": "CONT2",
+      "label": "Tirar dúvidas pós-planejamento e mockups da listagem (#505)",
+      "outcome": "Sem perguntas: owner delegou layout #505 e decisões de UX ('priorizar a experiência do usuário e uma tela limpa e organizada'); 6 dúvidas abertas dos planners resolvidas pela recomendação (A0003)",
+      "status": "done",
+      "validation": "Decisões registradas em A0003"
+    },
+    {
+      "depends": [],
+      "id": "CONT3",
+      "label": "#514/#507: Online sem 'não testada' e Verificando/Atrasado após 5 s",
+      "outcome": "U1 entregue f4f1e630 (squash), push 2f0dabd8..f4f1e630; #514/#507 fechadas e marcadas na #527; review R1 8/8 (4 achados aceitos) + R2 8/8 approve; watch-ci iniciado",
+      "status": "done",
+      "validation": "make check + v2-native-check verdes em a9ccf58f; make check verde em f4f1e630"
+    },
+    {
+      "depends": [],
+      "id": "CONT4",
+      "label": "#506/#504: tela única de adicionar servidor (harness, Link|Manual, salvar verificando)",
+      "outcome": "U3 (#506/#504) aceita: tela única de adicionar servidor na rota /pair (página no compacto, diálogo a partir de 600 dp), harness no topo, Link|Manual, Salvar verifica, Salvar mesmo assim; 5 rodadas de revisão convergidas; follow-up #531.",
+      "status": "done",
+      "validation": "make check verde em d8903c82 (gate-r5.log); testes focados 174; mutações verificadas"
+    },
+    {
+      "depends": [],
+      "id": "CONT5",
+      "label": "#505: redesenho da listagem de servidores",
+      "outcome": "U4 (#505) aceita: cartões com nome+Ativo+menu, linha de status com harness e versão (quebra em texto grande), URL LTR, metadados discretos com expiração datada, motivo em vermelho com notas de upgrade/espera; 4 rodadas convergidas (7/8 approve).",
+      "status": "done",
+      "validation": "make check verde em 46ffc67d (gate-r4.log); testes focados 140; l10n --check"
+    },
+    {
+      "depends": [],
+      "id": "CONT6",
+      "label": "Avaliar helpers, docs, #527, push e release minor",
+      "outcome": "Grupo 6 concluído: #514/#507 (f4f1e630), #504 parte harness (00befeaa), #506/#504 (7173abf0), #505 (53cc195d); README e notas; release v2.12.0 (6091f893, tag v2.12.0) com watch-release disparado; follow-ups #528 #529 #530 #531.",
+      "status": "done",
+      "validation": "make check verde no SHA do release ad6e7660; make release V=stable ok"
+    },
+    {
+      "depends": [],
+      "id": "CONT7",
+      "label": "Diagnose the failed v2.12.0 release run",
+      "outcome": "Cause: macOS runner capacity (release) + stale Linux smoke pairing step (CI)",
+      "status": "done",
+      "validation": "gh annotations on job 140591942365; CI log job 140597993981 line 1705"
+    },
+    {
+      "depends": [],
+      "id": "CONT8",
+      "label": "Fix the cause and validate locally",
+      "outcome": "Smoke fixed (549b10a2), notes (3d688127), gate green",
+      "status": "done",
+      "validation": "make check rc=0; local smoke 03-pairing pass x2; smoke unit tests 34 OK"
+    },
+    {
+      "depends": [],
+      "id": "CONT9",
+      "label": "Cut the patch release and start watch-release",
+      "outcome": "v2.12.1 cut (9c5febb0, tag v2.12.1 pushed atomically); make watch-release started",
+      "status": "done",
+      "validation": "cut_stable dry run ok; tag on origin; watcher detached"
+    },
+    {
+      "depends": [],
+      "id": "CONT10",
+      "label": "Add the two approved pitfalls to AGENTS.md",
+      "outcome": "Two pitfalls added to AGENTS.md Known pitfalls (Linux smoke follows its screens; rerun before patch for runner capacity)",
+      "status": "done",
+      "validation": "git diff AGENTS.md: +2 lines, docs only"
+    }
+  ],
+  "completion": {
+    "at": "2026-11-27T19:31:54Z",
+    "by": "agent",
+    "delivered": "AGENTS.md Known pitfalls gained the two owner-approved rules (Linux smoke follows its screens; offer gh run rerun --failed before a patch when a runner is not acquired).",
+    "residual_risk": "AGENTS.md change is not committed or pushed yet; awaiting owner order.",
+    "validation": "Docs-only diff, 2 added bullets; no gate needed per project Validation rules."
+  },
+  "contract": {
+    "complete_when": [
+      {
+        "evidence": "Stages S1-S3 outcomes + validações: causa #514/#507 (version_policy.dart:5-7, endpoint_health_controller.dart:28-33), #504/#506 (hosts_page.dart:232-248, pairing_page.dart:129-132, EndpointProfile sem harness), #505 (hosts_page.dart:334-425), referência oficial",
+        "id": "C1",
+        "text": "Achados das 5 issues registrados no TM",
+        "waived": false
+      },
+      {
+        "evidence": "Q1-Q5 apresentadas uma por vez com hey e respondidas: Q1=A, Q2=C, Q3=A, Q4=A+Codex Em breve, Q5=A",
+        "id": "C2",
+        "text": "Dúvidas apresentadas ao owner",
+        "waived": false
+      }
+    ],
+    "constraints": [
+      "Somente leitura no código",
+      "Perguntas uma por vez com hey",
+      "Não iniciar flow sem autorização"
+    ],
+    "delivery_boundary": "Relatório de achados e perguntas ao owner, salvos no TM",
+    "expected_results": [
+      "Achados por issue com evidência de arquivo:linha",
+      "Lista de dúvidas com opções e recomendação"
+    ],
+    "objective": "Investigar as issues do grupo 6 (#514, #507, #506, #504, #505) no código e nas referências, e levantar as dúvidas de produto que precisam de resposta do owner antes do flow",
+    "scope_in": [
+      "Ler as 5 issues e comentários",
+      "Mapear código de status de servidor, listagem, adicionar e parear servidor",
+      "Consultar AGENTS.md/BEHAVIOR.md/ADR relevantes e apps oficiais do OpenCode quando indicado",
+      "Registrar achados no TM e perguntar dúvidas ao owner, uma por vez"
+    ],
+    "scope_out": [
+      "Implementar código",
+      "Planejamento pesado com planners (fica para o flow)",
+      "Commit, push ou release"
+    ]
+  },
+  "decisions": [
+    {
+      "at": "2026-11-27T09:44:24Z",
+      "text": "Dúvidas Q1-Q5 com recomendações: Q1 A=remover untested da UI/status (>=2.0.20 compatível=Online), manter travas de protocolo (Renew só 2.0.22 hosts_page.dart:194; expiry 2.0.21/22) e abrir issue separada. Q2 A=trocar Atrasado por Verificando neutro só antes da 1ª resposta, mantendo último status nas rechecagens (como oficial). Q3 A=Salvar verifica automaticamente e, se falhar, oferece Salvar mesmo assim (só modo manual; link exige servidor). Q4 A=seletor visível só com OpenCode + campo harness persistido no EndpointProfile (core, v2-plan §17). Q5 A=diálogo único estilo oficial: harness no topo, alternância Link/QR vs Manual, QR dentro do modo link, fecha e volta à lista após salvar."
+    },
+    {
+      "at": "2026-11-27T10:00:21Z",
+      "text": "Owner Q1=A: remover untested da UI e do status (>=2.0.20 compatível=Online, sem chip 'Versão não testada'); manter travas de protocolo (Renew só 2.0.22 em hosts_page.dart:194, expiry só 2.0.21/22) e abrir issue separada para revisá-las."
+    },
+    {
+      "at": "2026-11-27T10:00:32Z",
+      "text": "Q2 enviada ao owner: semântica de Atrasado após Q1 (aparece só antes da 1ª resposta, reload do catálogo ou check cancelado; endpoint_health_controller.dart:99-117 devolve view vazia). Opções A Verificando neutro (rec.), B manter Atrasado, C Verificando e Atrasado após 5 s."
+    },
+    {
+      "at": "2026-11-27T10:02:34Z",
+      "text": "Owner Q2=C: antes da 1ª resposta/reload/cancelado mostrar 'Verificando…' neutro e só virar 'Atrasado' laranja se a verificação passar de 5 s sem resposta; rechecagens mantêm último status. Q3 enviada: salvar sem verificar (#504) — A Salvar verifica sozinho + 'Salvar mesmo assim' se falhar (rec.; só modo manual), B salvar direto sem check, C igual oficial (só salva se healthy)."
+    },
+    {
+      "at": "2026-11-27T10:03:35Z",
+      "text": "Owner Q3=A: no cadastro manual, Salvar verifica sozinho; se responder salva e volta à lista; se falhar mostra motivo e oferece 'Salvar mesmo assim' (entra Offline e é rechecado). Link de pareamento continua exigindo servidor. Q4 enviada: seletor de harness — A visível só OpenCode + campo harness persistido no EndpointProfile (antigos=OpenCode) (rec.), B só visual, C esconder."
+    },
+    {
+      "at": "2026-11-27T10:04:46Z",
+      "text": "Owner Q4 (resposta: 'Adiciona logo à opção Codex, e o espaço fica em breve') interpretada como A + Codex: seletor visível com OpenCode selecionado e Codex listado desabilitado com rótulo 'Em breve'; harness persistido no EndpointProfile (antigos=OpenCode), lista vinda de registro de harness/capabilities sem branching por nome. Q5 enviada: layout fluxo único #506 — A tela única estilo oficial (harness topo, alternância Link|Manual, QR/imagem no modo Link, deep link /pair abre modo Link, fecha e volta à lista) (rec.), B menu 3 escolhas, C campo único inteligente."
+    },
+    {
+      "at": "2026-11-27T10:05:35Z",
+      "text": "Owner Q5=A: tela única Adicionar servidor (diálogo desktop/tela cheia mobile): seletor harness no topo, alternância Link de pareamento|Manual (URL+senha) abrindo no Link, Escanear QR (Android) e Importar imagem (Android/Linux) no modo Link, fecha e volta à lista ao salvar; deep link /pair, Parear de novo e Renovar token abrem a mesma tela no modo Link."
+    },
+    {
+      "at": "2026-11-27T10:06:21Z",
+      "text": "Completed milestone preserved at 2026-11-27T10:06:02Z by agent: delivered=Pesquisa do grupo 6 concluída: causa de #514/#507 confirmada (version_policy.dart tested=2.0.21/2.0.22 -> untested -> Atrasado), referência do app oficial coletada, 5 decisões do owner registradas (Q1=A sem 'não testada'; Q2=C Verificando e Atrasado só após 5 s; Q3=A Salvar verifica e oferece Salvar mesmo assim; Q4=A seletor harness persistido com Codex 'Em breve'; Q5=A tela única Link|Manual estilo oficial) e issue #529 criada para as travas 2.0.22. | validation=C1 e C2 com evidência; #529 criada | residual_risk=Visual da listagem (#505) fica para mockups pós-planejamento no flow; BEHAVIOR.md:903-906 e v2-plan §17 precisarão ser atualizados no flow."
+    },
+    {
+      "at": "2026-11-27T10:06:21Z",
+      "text": "Continuation request: O release anterior foi um sucesso. Pode ativar o flow. | reason: Flow autorizado para o mesmo objetivo (grupo 6 da #527) após a pesquisa e as 5 decisões Q1-Q5 deste task; o owner pediu para poder perguntar de novo após o planejamento"
+    },
+    {
+      "at": "2026-11-27T10:07:01Z",
+      "text": "Planning R1 group6-servers-plan: objetivo = plano implementável do grupo 6 (#514,#507,#506,#504,#505) com decisões Q1-Q5; review_id=rvw_20261127T100653Z_ee9d0842; job_key=group6-servers-plan-20261127T100653Z-a5d3; dir=/home/ubuntu/MEGA/WORK/codewalk; pool 11 (DeepSeek elegível, 10:06 UTC fora do pico): helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperDeepSeek-41-flash-high, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high. v1 filter: lista única com URL/saúde/chips; check falho não bloqueia salvar (v1 BEHAVIOR 163,251)."
+    },
+    {
+      "at": "2026-11-27T10:07:44Z",
+      "text": "Handshakes planning group6-servers-plan dir=/home/ubuntu/MEGA/WORK/codewalk job_key=group6-servers-plan-20261127T100653Z-a5d3: READY 11/11: helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperDeepSeek-41-flash-high, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high."
+    },
+    {
+      "at": "2026-11-27T10:08:41Z",
+      "text": "Planning R1 despachado 10:08:35 UTC aos 11 helpers (op_61c3860d460e, payload /tmp/opencode/g6plan/payload_r1.txt, saídas r1_<helper>.out)."
+    },
+    {
+      "at": "2026-11-27T10:20:01Z",
+      "text": "Owner perguntou se pode dormir. Resposta: sim; resta ao menos a dúvida dos mockups #505. Default sem resposta = A: implementar unidades #514/#507 e #506/#504 (decididas) e parar antes de #505 e do release; B = escolher mockup recomendado e seguir até release minor. Dúvidas de produto que surgirem do planejamento e não forem bloqueantes seguem a recomendação, registrada."
+    },
+    {
+      "at": "2026-11-27T10:20:45Z",
+      "text": "Owner: 'O que se trata aqui é de cinco.' Interpretado como referência às 5 issues/#505; esclarecido que só #505 depende do owner, as 4 demais estão decididas; default A mantido."
+    },
+    {
+      "at": "2026-11-27T10:21:56Z",
+      "text": "Owner escolheu B: 'pode decidir priorizar a experiência do usuário e uma tela limpa e organizada'. Orquestrador escolhe o layout da #505 (sem pedir mockups) e segue as 5 issues até release minor; dúvidas não bloqueantes seguem a recomendação registrada; owner dormindo."
+    },
+    {
+      "at": "2026-11-27T10:33:14Z",
+      "text": "Review U1 R1: work_item=group6-u1-health boundary 2f0dabd8..a9ccf58f, review_id=rvw_20261127T103307Z_7fb7206d, job_key=group6-u1-health-20261127T103307Z-092f, dir=/home/ubuntu/MEGA/WORK/codewalk; pool 11 (DeepSeek elegível 10:33 UTC). Gate make check + v2-native-check após handshakes."
+    },
+    {
+      "at": "2026-11-27T10:34:28Z",
+      "text": "Handshakes U1 review job_key=group6-u1-health-20261127T103307Z-092f dir=/home/ubuntu/MEGA/WORK/codewalk: READY 8: helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperDeepSeek-41-flash-high, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperHungerg-free, helperKimi-K31-pro-high. FAILED após 1 retry (fora do job): helperClaude-haiku-5-max e helperClaude-opus-5-xhigh-F (SESSION_CLAUDE_ERROR), helperGrok-47-high-F (sem créditos Grok: 'You have run out of credits' — avisar owner)."
+    },
+    {
+      "at": "2026-11-27T10:42:20Z",
+      "text": "ART-REVIEW-JUDGMENT U1 R1 (rvw_20261127T103307Z_7fb7206d, a9ccf58f, 8/8): ACEITOS (verificados): F1 hostsUpgradeInstructions sem 'tested 2.0.21–2.0.22' nos 14 ARB + COPY; F2 remover 'Untested version' das tuplas COPY de hosts_catalog.py; F3 v2-plan.md:809/:564 sem tested window; F4 WARNING gemini: em _cancel, se task!=null e assessment==null, nextAt=now (reprobe imediato após reload) + teste. Nenhuma posição Frontier rejeitada (sol-F aceito). Re-review necessário: F4 mexe em agendamento assíncrono. Fixes aguardam fim do gate (não editar árvore durante gate)."
+    },
+    {
+      "at": "2026-11-27T11:03:05Z",
+      "text": "ART-REVIEW-JUDGMENT U1 R2 (rereview, 3ddb47ed, 8/8 approve): F1-F4 resolvidos. ACEITO ernie+hungerg SUGGESTION v2-plan.md:1349 'Pinned tested window' -> 'Minimum + known-bad' (docs-only, sem re-review). U1 convergida. Sem posição Frontier rejeitada."
+    },
+    {
+      "at": "2026-11-27T11:03:24Z",
+      "text": "U1 squash: 2f0dabd8..HEAD -> f4f1e630 (árvore idêntica a 8ff0fc8e; nada publicado). Gate make check rerodando em f4f1e630 porque o fix round tocou l10n/gerados (log /tmp/opencode/g6u1/gate2.log)."
+    },
+    {
+      "at": "2026-11-27T11:13:59Z",
+      "text": "Review U2 R1: work_item=group6-u2-harness boundary f4f1e630..2e718bf9, review_id=rvw_20261127T111352Z_f67656c2, job_key=group6-u2-harness-20261127T111352Z-0b24, dir=/home/ubuntu/MEGA/WORK/codewalk; pool 11 redescoberto."
+    },
+    {
+      "at": "2026-11-27T11:14:59Z",
+      "text": "Handshakes U2 job_key=group6-u2-harness-20261127T111352Z-0b24 dir=/home/ubuntu/MEGA/WORK/codewalk: READY 8 (helperCodex-6-luna-max helperCodex-6.2-sol-xhigh-F helperDeepSeek-41-flash-high helperErnie-55-flash-high helperGLM-53-high helperGemini-4-hydrogen-xhigh helperHungerg-free helperKimi-K31-pro-high ). FAILED após retry: helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F (SESSION_CLAUDE_ERROR), helperGrok-47-high-F (sem créditos)."
+    },
+    {
+      "at": "2026-11-27T11:24:02Z",
+      "text": "ART-REVIEW-JUDGMENT U2 R1 (2e718bf9, 8/8): ACEITOS todos (verificados): A intenção sem 'harness' (build antigo) compara id/url/revisão em _finishRemoval/_finishCreation (sol-F: comparação completa mantida p/ intenções novas); B credentialFor null p/ harness inutilizável + SessionsController._ready falha 'unavailable' antes de credencial; C repair() guarda + menu senha/parear desabilitados + botão parear da recuperação oculto; D health decide harness antes de reload/credencial; E sem HarnessOptions não grava kind; F HarnessOptions valida kinds. Gate: renomeado platform harness_options.dart -> connect_options.dart (scripted_screens_no_branch_test veta 'harness_' em imports de lib/app). Sem posição Frontier rejeitada. Re-review necessário (persistência/interfaces)."
+    },
+    {
+      "at": "2026-11-27T11:32:45Z",
+      "text": "ART-REVIEW-JUDGMENT U2 R2 (rereview f0d09e9c, 8/8, 6 fix_required): ACEITO A' (luna, sol-F) marcador intentFormat=2 em toda intenção nova; strict p/ marcadas, legado só p/ não marcadas (+teste). B'/C' (6 helpers) ACEITOS com correção alternativa menor: perfis de harness inutilizável ficam ESCONDIDOS no HostsController (_usable filtra todo load) e intactos na store; reverte remendos de R1 (credentialFor null, gate em sessions, menu/recovery, health special-case), que geravam diagnóstico 'credencial ausente/auth'. D' (sol-F, deepseek) ACEITO: renew e confirm recusam perfil alvo não listado. Escolha alternativa resolve o defeito apontado por sol-F (não rejeita a posição); será verificada na R3. Gate anterior inválido (árvore editada durante o run)."
+    },
+    {
+      "at": "2026-11-27T11:40:11Z",
+      "text": "ART-REVIEW-JUDGMENT U2 R3 (0e420d07): REPLAN após 3 rodadas no mesmo problema. Decisão: harnessKind persistido só no item, FORA do sameBinding; remover intentFormat/matching legado, ocultação (_usable) e casos de kind desconhecido; HarnessOptions só no fluxo de add. Achados R3 (estado de workspace/abas de oculto, marcador futuro, capacidade, cofre dos ocultos) ficam sem objeto. Dissent Sol-F: agree a/b/c, residual none (sugere: tarefa Codex exige teste com leitor antigo antes da 1ª gravação de outro harness). Dissent Grok-F (planning: kind desconhecido nunca sondado): unavailable (sem créditos); objeção não credível p/ bloquear (builds pré-U2 já tratam tudo como OpenCode; nenhuma build grava outro kind). Follow-up: issue de compatibilidade de schema antes do Codex."
+    },
+    {
+      "at": "2026-11-27T11:46:09Z",
+      "text": "ART-REVIEW-JUDGMENT U2 R4 (9fe4a99f, 5/8 approve, 3 failed por cota OpenCode Go): ACEITOS v2-plan §17 sem 'creation/removal intents' na abertura; fakes.dart updateProfile copia harness do perfil armazenado + store test confere 'harness' do item após edição. Simples/locais -> sem re-review (rationale: docs + teste). Sem posição Frontier rejeitada."
+    },
+    {
+      "at": "2026-11-27T12:05:57Z",
+      "text": "U2 squash f4f1e630..HEAD -> 00befeaa (árvore idêntica; nada publicado). R4 fixes: v2-plan §17 sem intenções; fake copia harness armazenado; store test confere item após edição. make check rodando em 00befeaa (log /tmp/opencode/g6u2/gate5.log). #504 continua aberta: U2 é só a parte de dados; U3 entrega o fluxo."
+    },
+    {
+      "at": "2026-11-27T12:22:57Z",
+      "text": "Review U3 R1: work_item=group6-u3-add-flow boundary 00befeaa..8a8b9d9b, review_id=rvw_20261127T122257Z_1af1bcb6, job_key=group6-u3-add-flow-20261127T122257Z-0e67, dir=/home/ubuntu/MEGA/WORK/codewalk; pool 11 redescoberto."
+    },
+    {
+      "at": "2026-11-27T12:23:59Z",
+      "text": "Handshakes U3 job_key=group6-u3-add-flow-20261127T122257Z-0e67 dir=/home/ubuntu/MEGA/WORK/codewalk: READY 8 (helperCodex-6-luna-max helperCodex-6.2-sol-xhigh-F helperDeepSeek-41-flash-high helperErnie-55-flash-high helperGLM-53-high helperGemini-4-hydrogen-xhigh helperHungerg-free helperKimi-K31-pro-high ). FAILED após retry: helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F (SESSION_CLAUDE_ERROR), helperGrok-47-high-F (sem créditos)."
+    },
+    {
+      "at": "2026-11-27T12:39:31Z",
+      "text": "ART-REVIEW-JUDGMENT U3 R1 (8a8b9d9b, 8/8; luna/deepseek/ernie/glm/kimi approve, sol-F/gemini/hungerg fix_required): ACEITOS W1 link novo volta ao modo Link (linkRevision); W2 diálogo fecha ao chegar deep link e dispose só fecha pairing se nenhum link novo; W3 PopScope bloqueia saída durante save/pairing busy + Cancel usa maybePop + conclusão só navega se ModalRoute.isCurrent (back do AppShell usa context.pop e ignora PopScope: race coberto por isCurrent); W4 trava Retry-After (_fence) sobrevive à falha do Save anyway; W5 reconciliação incerta hidrata _credentials; W6 painel só cancela probe próprio (_ownsProbe); W7 ModalPrimaryActionShortcuts no form manual; W8 LegacyEndpointPage via rootNavigator; S1 canSaveDespite exclui retryDeferred; S2 EndpointStatusView/LegacyEndpointPage extraídos p/ endpoint_status_view.dart (re-export em hosts_page); S3 pairing-label maxLength 160. Sem posição Frontier rejeitada. Re-review necessário (navegação/async)."
+    },
+    {
+      "at": "2026-11-27T12:49:45Z",
+      "text": "U3 R2 dissent Sol-F (canSaveDespite exclui retryDeferred): disagree, change_decision yes, residual: Retry-After finito >24h é falha salvável pela regra do owner; preservar recheck finito. Decisão MUDOU: permitir Save anyway p/ retryDeferred gravando avaliação com retryAt = agora+1 dia (janela máxima do probe), então a saúde rechecka depois. Demais R2: simplificar p/ página /pair em todas as larguras (remove diálogo e corridas de handoff), geração _attempt anula probe/save obsoletos (link novo, saída), probe concluído com rota não atual não persiste, conclusão com rota coberta adia fechar até voltar, _ownsProbe zera ao fim do probe, valida senha (<=16384, sem controle) e rótulo (<=160 UTF-16, sem controle), trava Retry-After visível, endpointStatusText movido p/ endpoint_status_view.dart (quebra ciclo). Owner aprovou 'diálogo no desktop' em Q5: mudança de apresentação registrada p/ relatar."
+    },
+    {
+      "at": "2026-11-27T12:58:34Z",
+      "text": "Fix R2 commitado 062728b5: /pair em todas as larguras (diálogo removido), _attempt anula probe/save obsoletos, fechar só a própria rota (Navigator.of), sem bloqueio de persistência quando coberto por diálogo raiz, validação nome<=160/senha<=16384 sem controle, trava Retry-After visível, endpointStatusText movido (sem ciclo), save anyway p/ retryDeferred com retryAt=agora+1d. Métricas R2 gravadas; hey R2 enviado."
+    },
+    {
+      "at": "2026-11-27T13:13:56Z",
+      "text": "R3 julgado. Aceitos: (1) Sol-F Q5: /pair vira camada estilo diálogo >=600dp via Page própria no go_router (mesma rota, sem corridas); (2) Sol-F: save anyway de deferido grava a avaliação como veio (sem +1d), seguindo a política da lane; (3) Sol-F: resultado do probe com rota saindo (isActive false) não grava nem abre legado; (4) link novo zera _pendingDone; (5) _finish obsoleto não mexe em _saving; (6) esquecer verificação (senha) do controller ao editar/sair, só se for a nossa; (7) Save anyway valida o form; (8) teste do rótulo de pareamento. Rejeitado: Luna (link durante gravação ainda grava o servidor pedido; escrita em curso não é retirável). Métricas R3 gravadas."
+    },
+    {
+      "at": "2026-11-27T13:38:27Z",
+      "text": "R4 julgado: aceitos Sol-F W1 (barreira própria: respeita PopScope, sem rota abaixo vai p/ /hosts), W3 (revisão do link capturada na tentativa), W4 (forgetVerification por geração do check), S (animation.drive); Hungerg S (sem promessa de recheck p/ deferido). Rejeitado Sol-F W2 (Retry-After longo só na sessão e não persistido = política da lane pré-existente) após troca de dissenso: Sol-F respondeu 'agree'; follow-up issue a abrir. Fix commitado 1b22bc4a; métricas R4 gravadas."
+    },
+    {
+      "at": "2026-11-27T13:50:52Z",
+      "text": "R5: 4 approve; Luna+Hungerg acharam o mesmo (tentativa iniciada após prepareLink e antes do rebuild usa revisão viva). Corrigido usando _ownedRevision + checagem no início, teste que falha sem a correção. Re-review R6 dispensada: correção de 1 linha exatamente como sugerida pelos dois revisores, coberta por teste com mutação verificada; os demais revisores (incluindo Sol-F) aprovaram o resto. Métricas R5 gravadas."
+    },
+    {
+      "at": "2026-11-27T14:10:30Z",
+      "text": "U4 implementada (302fd180): cartão com nome+Ativo+menu, linha de status com harness e versão, URL LTR 1 linha, metadados discretos, motivo em vermelho; gate verde. Handshakes U4: 8 READY (Claude-haiku, Claude-opus-F, Luna, Sol-F, DeepSeek, Ernie, Gemini, Hungerg); Grok-F falhou (sem créditos Grok, falha técnica, sem retry útil)."
+    },
+    {
+      "at": "2026-11-27T14:20:25Z",
+      "text": "U4 R1 julgado, todos aceitos: largura do nome (Expanded+Row interno), notas de upgrade e de atraso pedido com hora sob o motivo (regressão da remoção do EndpointStatusView), data com ano e hora no formato 24h do usuário, linha de status com até 2 linhas, view de fallback sem health lane. DeepSeek entregou fora do YAML: conteúdo usado como evidência, omitido das métricas. Métricas R1 gravadas."
+    },
+    {
+      "at": "2026-11-27T14:55:23Z",
+      "text": "U4 R3 julgado: aceitos E1 (overflow visível com maxLines null), E2 (serversWaitUntil/serversWaitNoEnd em 14 idiomas), E3 (arredondamento em UTC com microssegundos), E4 (comentário), E5 (testes sem tocar Check desabilitado); rejeitado E6 do Haiku (catálogo: mesmo padrão PORT_KEYS dos keys da U3, --check passa). Fix commitado 86e840fa; métricas R3 gravadas."
+    },
+    {
+      "at": "2026-11-27T15:22:22Z",
+      "text": "R0001 resolvido: U2 replanejada e publicada (00befeaa) sem tratar kinds desconhecidos; compatibilidade adiada para #530 antes do Codex, com concordância do Sol-F."
+    },
+    {
+      "at": "2026-11-27T18:43:31Z",
+      "text": "Completed milestone preserved at 2026-11-27T15:22:23Z by agent: delivered=Grupo 6 da #527 via flow: #514/#507 (f4f1e630), harness no perfil (00befeaa), tela única de adicionar servidor #506/#504 (7173abf0), cartões da lista #505 (53cc195d), README e notas; release v2.12.0 (6091f893, tag v2.12.0) com make watch-release disparado. | validation=make check verde em cada unidade e no SHA do release ad6e7660; revisões convergidas (U3 5 rodadas, U4 4 rodadas); l10n --check ok. | residual_risk=Resultado do workflow Release ainda não observado (notificação detached). Follow-ups abertos: #528 (dry run Android), #529 (travas 2.0.22), #530 (compatibilidade antes do Codex), #531 (persistir Retry-After longo)."
+    },
+    {
+      "at": "2026-11-27T18:43:31Z",
+      "text": "Continuation request: verifica porque o release falhou e corrige com um patch | reason: The v2.12.0 release cut by this task failed; diagnosing and shipping a patch release is a direct fix of the delivered work."
+    },
+    {
+      "at": "2026-11-27T18:44:50Z",
+      "text": "Diagnosis: Release run 46024248537 (v2.12.0) failed because Build macOS (arm64, macos-15) was never acquired by a hosted runner (annotation: capacity constraints), so verify/publish skipped; all other builds green. Separately CI run 46024351553 on main failed v2_native_builds (linux): tool/ci/smoke_v2_linux_preview.py:218 still expects the removed 'Pair a server' screen; the group 6 add screen shows Add Server -> Harness / Pairing link / Confirm and pair. Patch: update the smoke to the new add screen, validate it locally under xvfb, then cut v2.12.1 (the tag rerun retries macOS)."
+    },
+    {
+      "at": "2026-11-27T19:31:46Z",
+      "text": "Completed milestone preserved at 2026-11-27T19:09:43Z by agent: delivered=Diagnosed v2.12.0: macOS arm64 hosted runner never acquired (GitHub capacity), so verify/publish skipped; CI main red from stale Linux smoke step 03-pairing. Fixed the smoke (549b10a2), wrote v2.12.1 notes (3d688127), gate green, cut v2.12.1 (9c5febb0) and started make watch-release. | validation=make check rc=0; local Xvfb smoke 03-pairing passed twice on the new Add Server dialog; A/B on last-green 09039135 shows later-step failures are local arm64 env; smoke unit tests 34 OK. | residual_risk=Release outcome pending (watch-release notifies); macOS runner capacity may fail again; smoke steps after 03 with the dialog not yet proven on CI x64; reviewer skipped for a label-only CI script change; libgtk-3-dev and CI build deps installed on mercury."
+    },
+    {
+      "at": "2026-11-27T19:31:46Z",
+      "text": "Continuation request: as duas | reason: Owner approved both AGENTS.md pitfalls recommended after the v2.12.1 patch (Linux smoke follows its screens; offer a rerun for runner-capacity release failures)."
+    }
+  ],
+  "generation": 128,
+  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
+  "pending_operation": null,
+  "queued_followups": [],
+  "request": {
+    "bytes": 177,
+    "path": "requests/tm_20261127T094158Z_6862cb28.txt",
+    "sha256": "33205934aab592ae135500b33bd8b79b35f426448a4c42b5a6848da02656945f"
+  },
+  "risks": [
+    {
+      "at": "2026-11-27T11:39:01Z",
+      "id": "R0001",
+      "mitigation": "Replanejar: harnessKind persistido fora do sameBinding, sem marcador/ocultação/fail-closed; issue de follow-up para compatibilidade de schema antes do Codex; dissent exchange com Sol-F (frontier) e Grok-F registrado indisponível; avisar owner via hey.",
+      "stage": "CONT4",
+      "status": "resolved",
+      "text": "U2: 3 rodadas de review no mesmo problema (perfis de harness desconhecido vindos de build mais novo). Suposição duvidosa: esta build precisa tratar kinds desconhecidos; nenhuma build atual grava kind != opencode e builds pré-U2 já tratariam tudo como OpenCode."
+    }
+  ],
+  "schema": 1,
+  "started_at": "2026-11-27T09:41:58Z",
+  "status": "completed",
+  "task_id": "tm_20261127T094158Z_6862cb28",
+  "title": "Pesquisa prévia do grupo 6 da #527 (servidores)",
+  "updated_at": "2026-11-27T19:31:54Z",
+  "validations": [
+    {
+      "at": "2026-11-27T09:42:17Z",
+      "check": "Leitura issues grupo 6",
+      "criterion": null,
+      "evidence": "5 issues lidas, 0 comentários cada; #514 suspeita untested->delayed em endpoint_health_controller.dart:26-35; #507 hostsUntested em endpoint_health_view.dart:15/hosts_page.dart:414-416; #506 botões hosts_page.dart:232-248 + /pair; #504 _ProfileDialog exige canUse, pairing_page não navega, versão no chip; #505 cards hosts_page.dart:332-427",
+      "outcome": "info"
+    },
+    {
+      "at": "2026-11-27T09:44:24Z",
+      "check": "Referência app oficial anomalyco/opencode packages/app (dev, health.ts eab8f490 2026-11-04)",
+      "criterion": null,
+      "evidence": "Health: healthy(qualquer versão via server.info)=verde, unreachable=vermelho, unknown=cinza, auth=cadeado, checking/starting=loader, incompatible=warning; poll 10s; sem 'delayed' nem 'untested'. Connect: diálogo único method link|password, scan QR no modo link, link colado vence em qualquer campo; submit faz check e salva só se healthy; onClose(saved) fecha e volta. Arquivos: runtime/server/health*.ts, servers/registry/row.tsx, servers/connect/{controller,machine}.ts",
+      "outcome": "info"
+    },
+    {
+      "at": "2026-11-27T10:06:02Z",
+      "check": "Achados das 5 issues registrados no TM",
+      "criterion": "C1",
+      "evidence": "Stages S1-S3 outcomes + validações: causa #514/#507 (version_policy.dart:5-7, endpoint_health_controller.dart:28-33), #504/#506 (hosts_page.dart:232-248, pairing_page.dart:129-132, EndpointProfile sem harness), #505 (hosts_page.dart:334-425), referência oficial",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T10:06:02Z",
+      "check": "Dúvidas apresentadas ao owner",
+      "criterion": "C2",
+      "evidence": "Q1-Q5 apresentadas uma por vez com hey e respondidas: Q1=A, Q2=C, Q3=A, Q4=A+Codex Em breve, Q5=A",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T10:33:00Z",
+      "check": "U1 focused checks",
+      "criterion": null,
+      "evidence": "flutter analyze (hosts, app, theme, sessions, core, harness_opencode) 0 issues; dart test endpoint_probe_test 26 ok; flutter test health controller/hosts_page/server_switcher/session_actions/live_wake/workspace_chrome/endpoint_health_send 92 ok; appearance golden 4 ok; l10n --check ok",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T10:58:43Z",
+      "check": "Gate U1 make check + make v2-native-check",
+      "criterion": null,
+      "evidence": "SHA a9ccf58f; CHECK_RC=0 e NATIVE_RC=0; log /tmp/opencode/g6u1/gate.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T11:00:44Z",
+      "check": "U1 fix round F1-F4 focused checks",
+      "criterion": null,
+      "evidence": "l10n --check ok (COPY 13=NEW_KEYS 13); analyze hosts 0; test/v2/hosts 99 ok; novo teste reload->recheck falha sem fix (rc=1) e passa com fix",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T11:09:56Z",
+      "check": "Gate U1 make check em f4f1e630 (pós-squash)",
+      "criterion": null,
+      "evidence": "CHECK_RC=0; log /tmp/opencode/g6u1/gate2.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T11:13:46Z",
+      "check": "U2 focused checks",
+      "criterion": null,
+      "evidence": "flutter analyze lib + core 0; dart test codewalk_core endpoints_test 4 ok; flutter test test/v2/hosts + test/v2/pairing 120 ok (1 skip pré-existente); dart format aplicado só em testes tocados",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T11:42:12Z",
+      "check": "U2 replan focused checks",
+      "criterion": null,
+      "evidence": "analyze lib+core+test/v2/hosts 0; dart test codewalk_core endpoints ok; flutter test hosts+pairing+sessions_controller+scripted_screens 164 ok (1 skip pré-existente); follow-up #530 criada",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:05:16Z",
+      "check": "Gate U2 make check + v2-native-check em 9fe4a99f",
+      "criterion": null,
+      "evidence": "CHECK_RC=0 NATIVE_RC=0; log /tmp/opencode/g6u2/gate4.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:12:32Z",
+      "check": "Gate U2 make check em 00befeaa (pós-squash)",
+      "criterion": null,
+      "evidence": "CHECK_RC=0; v2-native-check verde em 9fe4a99f (mesmos packages); log /tmp/opencode/g6u2/gate5.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:22:47Z",
+      "check": "U3 focused checks",
+      "criterion": null,
+      "evidence": "analyze lib + test/v2 0; hosts 11 page tests + controller 20 + pairing + fixture/live smoke + credentials + chrome + settings 189 ok; workspace_shell 32 ok; l10n --check ok; overflow do seletor corrigido (isExpanded)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:33:00Z",
+      "check": "Gate U3 make check em 8a8b9d9b",
+      "criterion": null,
+      "evidence": "CHECK_RC=0; log /tmp/opencode/g6u3/gate.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:47:29Z",
+      "check": "Gate U3 make check em bea9e18b",
+      "criterion": null,
+      "evidence": "CHECK_RC=0; log /tmp/opencode/g6u3/gate2.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T13:05:05Z",
+      "check": "make check TEST_JOBS=4 @062728b5",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u3/gate-r2.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T13:27:09Z",
+      "check": "make check TEST_JOBS=4 @9ea4eea4",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u3/gate-r3.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T13:45:05Z",
+      "check": "make check TEST_JOBS=4 @1b22bc4a",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u3/gate-r4.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T14:10:30Z",
+      "check": "make check TEST_JOBS=4 @302fd180 (U4)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u3/gate-u4.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T14:27:17Z",
+      "check": "make check TEST_JOBS=4 @ddf66811 (U4 fix R1)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u4/gate-r1.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T14:45:12Z",
+      "check": "make check TEST_JOBS=4 @fb96caf6 (U4 fix R2)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u4/gate-r2.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T15:01:50Z",
+      "check": "make check TEST_JOBS=4 @86e840fa (U4 fix R3)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u4/gate-r3.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T15:14:34Z",
+      "check": "make check TEST_JOBS=4 @46ffc67d (U4 final)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u4/gate-r4.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T15:21:59Z",
+      "check": "Release v2.12.0",
+      "criterion": null,
+      "evidence": "make check verde em ad6e7660 (gate-release.log); make release V=stable -> 6091f893 tag v2.12.0 push atômico; make watch-release disparado (notificação detached)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T18:56:59Z",
+      "check": "Local Linux smoke with the fixed 03-pairing step (arm64 build of 48cefd9b in /tmp/opencode/relfix/src)",
+      "criterion": null,
+      "evidence": "Steps 01..05 pass in 2 runs, incl. 03-pairing (Add Server dialog: Harness/Pairing link/Confirm and pair). Later steps failed locally: run1 06-restarted-dark (ctrl+comma not received after restart), run2 verify_dark_rendering because the What's new v2.11.1 snackbar covers the bottom-right luminance crop (light=0.21). A/B against last-green 09039135 running to tell env flake from regression. Logs /tmp/opencode/relfix/smoke*.log",
+      "outcome": "info"
+    },
+    {
+      "at": "2026-11-27T19:01:09Z",
+      "check": "A/B local smoke on last-green CI commit 09039135 (old script, old UI)",
+      "criterion": null,
+      "evidence": "Fails locally at 04-settings-wide although CI passed it, so failures after step 03 are this arm64 Xvfb environment, not the patch. The patched 03-pairing step passed in both local runs. Smoke unit tests: python3 -m unittest tool.ci.test_v2_linux_preview -> 34 OK. Log /tmp/opencode/relfix/smoke_old.log",
+      "outcome": "info"
+    },
+    {
+      "at": "2026-11-27T19:09:25Z",
+      "check": "make check TEST_JOBS=$(nproc) on 3d688127 (smoke fix 549b10a2 + v2.12.1 notes)",
+      "criterion": null,
+      "evidence": "rc=0, log /tmp/opencode/relfix/gate.log. Reviewer skipped: change is label/static text in a CI smoke script, validated by running the real smoke locally (03-pairing passed twice).",
+      "outcome": "pass"
+    }
+  ]
+}

@@ -16,15 +16,28 @@ import '../../shared/widgets/app_snack_bar.dart';
 import 'apk_update_controller.dart';
 import 'linux_update_controller.dart';
 import 'linux_update_panel.dart';
+import 'release_history_section.dart';
 import 'update_check_controller.dart';
 import 'update_failure_text.dart';
 import 'update_scheduler.dart';
 
-/// Native update controls: Android verifies an in-app APK download before
-/// installer handoff; managed Linux bundles install in-app, with an exact-tag
-/// command available for older or unmanaged installations.
+/// Version and updates (#519): the installed version and native update
+/// controls first, then the release history in the same scroll. Android
+/// verifies an in-app APK download before installer handoff; managed Linux
+/// bundles install in-app, with an exact-tag command available for older or
+/// unmanaged installations.
 class UpdatesSettingsPage extends StatefulWidget {
-  const UpdatesSettingsPage({super.key});
+  const UpdatesSettingsPage({
+    super.key,
+    this.request = 0,
+    this.history = false,
+  });
+
+  /// Each new value is one opening of this section: at the release history
+  /// when [history] is set (What's new Changelog, About's Release history),
+  /// otherwise at the top.
+  final int request;
+  final bool history;
 
   @override
   State<UpdatesSettingsPage> createState() => _UpdatesSettingsPageState();
@@ -32,6 +45,79 @@ class UpdatesSettingsPage extends StatefulWidget {
 
 class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
   UpdateCheckController? _controller;
+  final _history = GlobalKey();
+  // Holds the history heading at the top while content loads or appears
+  // above it, until any scroll the page did not start (drag, wheel, keys,
+  // focus, scrollbar) or the section reopens at the top.
+  bool _anchored = false;
+  bool _revealing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.history) _revealHistory();
+  }
+
+  @override
+  void didUpdateWidget(UpdatesSettingsPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.request == oldWidget.request) return;
+    if (widget.history) {
+      _revealHistory();
+    } else {
+      _anchored = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final target = _history.currentContext;
+        // The page's own Scrollable: no explicit controller, so the compact
+        // detail keeps the route's primary scroll for keyboard paging.
+        final position = target == null || !target.mounted
+            ? null
+            : Scrollable.maybeOf(target)?.position;
+        if (!mounted || position == null || position.pixels == 0) return;
+        unawaited(
+          position.animateTo(
+            0,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOut,
+          ),
+        );
+      });
+    }
+  }
+
+  void _revealHistory() {
+    _anchored = true;
+    _showHistory();
+  }
+
+  // An immediate jump: an animated reveal would let a key or drag take over
+  // mid-animation without a new scroll start, leaving the anchor on.
+  void _showHistory() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final target = _history.currentContext;
+      if (!mounted || !_anchored || target == null || !target.mounted) {
+        return;
+      }
+      // The scroll start this dispatches synchronously is the page's own.
+      _revealing = true;
+      try {
+        unawaited(Scrollable.ensureVisible(target));
+      } finally {
+        _revealing = false;
+      }
+    });
+  }
+
+  bool _onNotification(Notification notification) {
+    if (notification is ScrollStartNotification &&
+        notification.depth == 0 &&
+        !_revealing) {
+      _anchored = false;
+    } else if (notification is SizeChangedLayoutNotification && _anchored) {
+      _showHistory();
+    }
+    return false;
+  }
 
   @override
   void didChangeDependencies() {
@@ -171,10 +257,24 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
           ),
       ]);
     }
-    return ListView(
-      key: const ValueKey('settings_updates_page'),
-      padding: const EdgeInsets.all(24),
-      children: children,
+    children.addAll([
+      const SizedBox(height: 32),
+      // A const child skips rebuilds from update progress above it.
+      KeyedSubtree(key: _history, child: const ReleaseHistorySection()),
+    ]);
+    // One eager scroll: the history heading must exist to be scrolled to.
+    return NotificationListener<Notification>(
+      onNotification: _onNotification,
+      child: SingleChildScrollView(
+        key: const ValueKey('settings_updates_page'),
+        padding: const EdgeInsets.all(24),
+        child: SizeChangedLayoutNotifier(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: children,
+          ),
+        ),
+      ),
     );
   }
 }

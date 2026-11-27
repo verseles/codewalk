@@ -1,1 +1,0 @@
-Vamos começar devolvendo o knob de contexto e limites da sessao, e os detalhes. Depois veremos detalhes de cotas de servicos. porém, dessa vez, o knob será um botão similar ao nova conversa que fica ao lado do menu de 3 pontos. Ele deve vir visivel por padrao, a esquerda do nova conversa, e pode ser desafixado igual aos outros. Duvidas?

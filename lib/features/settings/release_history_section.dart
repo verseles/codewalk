@@ -11,16 +11,16 @@ import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'release_history_controller.dart';
 import 'update_check_controller.dart';
 
-class ReleaseHistorySettingsPage extends StatefulWidget {
-  const ReleaseHistorySettingsPage({super.key});
+/// The release history under Version and updates (#519): it lays out inside
+/// that page's single scroll and loads when the page opens.
+class ReleaseHistorySection extends StatefulWidget {
+  const ReleaseHistorySection({super.key});
 
   @override
-  State<ReleaseHistorySettingsPage> createState() =>
-      _ReleaseHistorySettingsPageState();
+  State<ReleaseHistorySection> createState() => _ReleaseHistorySectionState();
 }
 
-class _ReleaseHistorySettingsPageState
-    extends State<ReleaseHistorySettingsPage> {
+class _ReleaseHistorySectionState extends State<ReleaseHistorySection> {
   ReleaseHistoryController? _controller;
   int _visible = 20;
 
@@ -64,15 +64,15 @@ class _ReleaseHistorySettingsPageState
             announcement: entry.announcement,
           ),
     ]..sort((a, b) => b.version.compareTo(a.version));
-    return ListView(
-      key: const ValueKey('settings_release_history_page'),
-      padding: const EdgeInsets.all(24),
+    return Column(
+      key: const ValueKey('settings_release_history'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           l.releaseHistoryTitle,
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.titleLarge,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Text(l.releaseHistoryDescription),
         Align(
           alignment: AlignmentDirectional.centerStart,

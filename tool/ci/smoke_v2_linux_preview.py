@@ -193,6 +193,18 @@ def smoke(archive_path, evidence):
                     run(["xdotool", "click", "--clearmodifiers", "5"])
                 time.sleep(0.3)
 
+        def scroll_detail(window, labels):
+            # The release history sits below the updates controls in the
+            # same detail pane (#519); it scrolls one notch at a time so the
+            # heading cannot pass out of view unseen. The pointer moves once:
+            # a synced move to where it already is never returns.
+            run(["xdotool", "mousemove", "--sync", "--window", window, "800", "500"])
+            for _ in range(12):
+                if ui_state_matches(capture(window, snapshot), labels):
+                    return
+                run(["xdotool", "click", "--clearmodifiers", "5"])
+                time.sleep(0.3)
+
         def luminance(window):
             run(["import", "-silent", "-window", window, str(snapshot)])
             return float(run(["convert", str(snapshot), "-gravity", "southeast", "-crop", "32x32+24+24",
@@ -272,10 +284,9 @@ def smoke(archive_path, evidence):
             # The button label renders on screen but the OCR passes cannot read it under the
             # default renderer; "Update channel" is a control unique to this page.
             expect(window, ["Update channel"], "08b-updates")
-            reveal(window, "Release history")
-            click(window, "Release history")
-            expect(window, ["Refresh"], "09-history")
-            report["public_changelog_read"] = "page activated; fixed public read-only source; loaded notes not claimed"
+            scroll_detail(window, ["Release history", "Refresh"])
+            expect(window, ["Release history", "Refresh"], "09-history")
+            report["public_changelog_read"] = "section shown under Version and updates; fixed public read-only source; loaded notes not claimed"
             run(["xdotool", "windowsize", window, "480", "800"])
             deadline = time.monotonic() + 10
             while not compact_geometry(run(["xdotool", "getwindowgeometry", "--shell", window])):

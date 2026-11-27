@@ -19,22 +19,13 @@ import 'apk_update_controller.dart';
 import 'appearance_settings_page.dart';
 import 'behavior_settings_page.dart';
 import 'diagnostics_settings_page.dart';
-import 'release_history_settings_page.dart';
 import 'release_news_card.dart';
 import 'shortcuts_settings_page.dart';
 import 'update_check_controller.dart';
 import 'update_scheduler.dart';
 import 'updates_settings_page.dart';
 
-enum SettingsSection {
-  appearance,
-  behavior,
-  shortcuts,
-  logs,
-  updates,
-  releaseHistory,
-  about,
-}
+enum SettingsSection { appearance, behavior, shortcuts, logs, updates, about }
 
 class SettingsShellPage extends StatefulWidget {
   const SettingsShellPage({super.key});
@@ -52,6 +43,10 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     for (final section in SettingsSection.values) section: FocusNode(),
   };
   SettingsSection? _selected;
+  // Each selection is a new request; Version and updates opens at its
+  // history only when a history shortcut made it.
+  int _request = 0;
+  bool _history = false;
   bool _wasWide = false;
   bool _opened = false;
 
@@ -85,11 +80,18 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     super.dispose();
   }
 
-  void _select(SettingsSection section) {
+  void _select(SettingsSection section, {bool history = false}) {
     _searchFocus.unfocus();
-    setState(() => _selected = section);
+    setState(() {
+      _selected = section;
+      _request++;
+      _history = history;
+    });
     _focusDetail(section);
   }
+
+  /// The release history lives under Version and updates (#519).
+  void _showHistory() => _select(SettingsSection.updates, history: true);
 
   void _focusDetail(SettingsSection section) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -140,11 +142,11 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
         SettingsSection.behavior => const BehaviorSettingsPage(),
         SettingsSection.shortcuts => const ShortcutsSettingsPage(),
         SettingsSection.logs => const DiagnosticsSettingsPage(),
-        SettingsSection.updates => const UpdatesSettingsPage(),
-        SettingsSection.releaseHistory => const ReleaseHistorySettingsPage(),
-        SettingsSection.about => AboutSettingsPage(
-          onHistory: () => _select(SettingsSection.releaseHistory),
+        SettingsSection.updates => UpdatesSettingsPage(
+          request: _request,
+          history: _history,
         ),
+        SettingsSection.about => AboutSettingsPage(onHistory: _showHistory),
         _ => const AppearanceSettingsPage(),
       },
     );
@@ -243,13 +245,8 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       l.settingsGroupHelp,
     );
     final updates = matches(
-      l.settingsGroupVersionUpdates,
-      l.updatesDescription,
-      l.settingsGroupHelp,
-    );
-    final history = matches(
-      l.releaseHistoryTitle,
-      l.releaseHistoryDescription,
+      '${l.settingsGroupVersionUpdates} ${l.releaseHistoryTitle}',
+      '${l.updatesDescription} ${l.releaseHistoryDescription}',
       l.settingsGroupHelp,
     );
     final about = matches(
@@ -278,10 +275,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
               }
             },
           ),
-        if (update == null)
-          ReleaseNewsCard(
-            onHistory: () => _select(SettingsSection.releaseHistory),
-          ),
+        if (update == null) ReleaseNewsCard(onHistory: _showHistory),
         TextField(
           key: const ValueKey('settings_navigation_search'),
           controller: _search,
@@ -305,7 +299,6 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             !shortcuts &&
             !logs &&
             !updates &&
-            !history &&
             !about)
           Padding(
             padding: const EdgeInsets.all(16),
@@ -349,8 +342,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             Symbols.keyboard,
           ),
         ],
-        if (logs || updates || history || about)
-          _group(context, l.settingsGroupHelp),
+        if (logs || updates || about) _group(context, l.settingsGroupHelp),
         if (logs)
           _destination(
             SettingsSection.logs,
@@ -364,13 +356,6 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             l.settingsGroupVersionUpdates,
             l.updatesDescription,
             Symbols.system_update_alt,
-          ),
-        if (history)
-          _destination(
-            SettingsSection.releaseHistory,
-            l.releaseHistoryTitle,
-            l.releaseHistoryDescription,
-            Symbols.history,
           ),
         if (about)
           _destination(
