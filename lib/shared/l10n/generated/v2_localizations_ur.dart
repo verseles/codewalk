@@ -482,6 +482,22 @@ class V2LocalizationsUr extends V2Localizations {
   String get serversAddServer => 'سرور شامل کریں۔';
 
   @override
+  String get serversHarness => 'Harness';
+
+  @override
+  String get serversComingSoon => 'جلد آرہا ہے';
+
+  @override
+  String get serversMethodManual => 'دستی';
+
+  @override
+  String get hostsSaveAnyway => 'پھر بھی محفوظ کریں';
+
+  @override
+  String get hostsSaveAnywayHint =>
+      'سرور آف لائن کے طور پر محفوظ ہوتا ہے اور خودبخود دوبارہ جانچا جاتا ہے۔';
+
+  @override
   String get serversNoServersFound => 'کوئی سرور نہیں ملا';
 
   @override

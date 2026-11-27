@@ -487,6 +487,22 @@ class V2LocalizationsRu extends V2Localizations {
   String get serversAddServer => 'Добавить сервер';
 
   @override
+  String get serversHarness => 'Harness';
+
+  @override
+  String get serversComingSoon => 'Скоро';
+
+  @override
+  String get serversMethodManual => 'Вручную';
+
+  @override
+  String get hostsSaveAnyway => 'Всё равно сохранить';
+
+  @override
+  String get hostsSaveAnywayHint =>
+      'Сервер сохраняется как офлайн и автоматически проверяется снова.';
+
+  @override
   String get serversNoServersFound => 'Серверы не найдены';
 
   @override

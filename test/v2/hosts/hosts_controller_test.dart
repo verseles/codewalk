@@ -127,6 +127,130 @@ void main() {
     },
   );
 
+  test('save anyway needs the failed check of that same input', () async {
+    final repository = MemoryProfiles();
+    final prober = FakeProber()
+      ..assessment = const EndpointAssessment(EndpointStatus.unreachable);
+    final hosts = HostsController(repository: repository, prober: prober);
+    addTearDown(hosts.dispose);
+    await hosts.load();
+    final url = Uri.parse('http://127.0.0.1:4096/');
+    final failed = (await hosts.probe(url, 'secret'))!;
+    expect(await hosts.add(url, 'X', 'secret', failed), isFalse);
+    expect(
+      await hosts.add(url, 'X', 'other', failed, acceptFailure: true),
+      isFalse,
+    );
+    expect(
+      await hosts.add(
+        url,
+        'X',
+        'secret',
+        // An equal result from another check is not that check.
+        // ignore: prefer_const_constructors
+        EndpointAssessment(EndpointStatus.unreachable),
+        acceptFailure: true,
+      ),
+      isFalse,
+    );
+    expect(repository.profiles, isEmpty);
+    final again = (await hosts.probe(url, 'secret'))!;
+    expect(
+      await hosts.add(url, 'X', 'secret', again, acceptFailure: true),
+      isTrue,
+    );
+    expect(repository.profiles, hasLength(1));
+    expect(hosts.assessments[repository.profiles.single.id], same(again));
+    prober.assessment = const EndpointAssessment(EndpointStatus.legacyServer);
+    final legacy = (await hosts.probe(url, 'secret'))!;
+    expect(
+      await hosts.add(url, 'Y', 'secret', legacy, acceptFailure: true),
+      isFalse,
+    );
+    expect(repository.profiles, hasLength(1));
+  });
+
+  test(
+    'an indefinitely deferred failure saves and keeps its deferral',
+    () async {
+      final repository = MemoryProfiles();
+      final hosts = HostsController(
+        repository: repository,
+        prober: FakeProber()
+          ..assessment = const EndpointAssessment(
+            EndpointStatus.serviceUnavailable,
+            retryDeferred: true,
+          ),
+      );
+      addTearDown(hosts.dispose);
+      await hosts.load();
+      final url = Uri.parse('http://127.0.0.1:4096/');
+      final deferred = (await hosts.probe(url, 'secret'))!;
+      expect(HostsController.canSaveDespite(deferred), isTrue);
+      expect(
+        await hosts.add(url, 'X', 'secret', deferred, acceptFailure: true),
+        isTrue,
+      );
+      // No check is made earlier than the server asked.
+      expect(hosts.assessments[repository.profiles.single.id], same(deferred));
+    },
+  );
+
+  test('forgetting a check withdraws only its own authorization', () async {
+    final repository = MemoryProfiles();
+    final hosts = HostsController(
+      repository: repository,
+      prober: FakeProber()
+        ..assessment = const EndpointAssessment(
+          EndpointStatus.authenticationRequired,
+        ),
+    );
+    addTearDown(hosts.dispose);
+    await hosts.load();
+    final url = Uri.parse('http://127.0.0.1:4096/');
+    final failed = (await hosts.probe(url, 'secret'))!;
+    final first = hosts.checkGeneration;
+    hosts.forgetVerification(first);
+    expect(
+      await hosts.add(url, 'X', 'secret', failed, acceptFailure: true),
+      isFalse,
+    );
+    expect(repository.profiles, isEmpty);
+    // The next check returns the very same constant result.
+    final again = (await hosts.probe(url, 'secret'))!;
+    expect(again, same(failed));
+    hosts.forgetVerification(first);
+    expect(
+      await hosts.add(url, 'X', 'secret', again, acceptFailure: true),
+      isTrue,
+    );
+  });
+
+  test('a reconciled uncertain save keeps its credential', () async {
+    final repository = _CommitThenThrowProfiles();
+    final hosts = HostsController(
+      repository: repository,
+      prober: FakeProber()
+        ..assessment = const EndpointAssessment(EndpointStatus.unreachable),
+    );
+    addTearDown(hosts.dispose);
+    await hosts.load();
+    final url = Uri.parse('http://127.0.0.1:4096/');
+    var failed = (await hosts.probe(url, 'secret'))!;
+    expect(
+      await hosts.add(url, 'X', 'secret', failed, acceptFailure: true),
+      isFalse,
+    );
+    expect(repository.profiles, hasLength(1));
+    failed = (await hosts.probe(url, 'secret'))!;
+    expect(
+      await hosts.add(url, 'X', 'secret', failed, acceptFailure: true),
+      isTrue,
+    );
+    expect(repository.profiles, hasLength(1));
+    expect(hosts.credentialFor(hosts.profiles.single)?.secret, 'secret');
+  });
+
   test('without harness options no kind is recorded', () async {
     final repository = MemoryProfiles();
     final hosts = HostsController(
@@ -738,5 +862,19 @@ void main() {
         expect(repo.saves, 1);
       },
     );
+  }
+}
+
+/// Commits the first save and then reports a failure, like a backend whose
+/// write landed before the error.
+final class _CommitThenThrowProfiles extends MemoryProfiles {
+  var _thrown = false;
+  @override
+  Future<void> save(EndpointProfile profile, String secret) async {
+    await super.save(profile, secret);
+    if (!_thrown) {
+      _thrown = true;
+      throw StateError('controlled uncertain save');
+    }
   }
 }

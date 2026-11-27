@@ -482,6 +482,22 @@ class V2LocalizationsAr extends V2Localizations {
   String get serversAddServer => 'إضافة خادم';
 
   @override
+  String get serversHarness => 'Harness';
+
+  @override
+  String get serversComingSoon => 'قريبًا';
+
+  @override
+  String get serversMethodManual => 'يدوي';
+
+  @override
+  String get hostsSaveAnyway => 'احفظ على أي حال';
+
+  @override
+  String get hostsSaveAnywayHint =>
+      'يُحفظ الخادم غير متصل ويُفحص مجددًا تلقائيًا.';
+
+  @override
   String get serversNoServersFound => 'لم يتم العثور على خوادم';
 
   @override

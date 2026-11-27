@@ -173,6 +173,11 @@
   "onboardingStarting": "시작 중",
   "onboardingStopping": "중지 중",
   "serversAddServer": "서버 추가",
+  "serversHarness": "Harness",
+  "serversComingSoon": "출시 예정",
+  "serversMethodManual": "수동",
+  "hostsSaveAnyway": "그래도 저장",
+  "hostsSaveAnywayHint": "서버가 오프라인으로 저장되고 자동으로 다시 확인됩니다.",
   "serversNoServersFound": "서버를 찾을 수 없음",
   "hostsLegacyExplanation": "이 서버는 OpenCode 1을 실행합니다. CodeWalk 2에는 OpenCode 2가 필요합니다.",
   "@hostsLegacyExplanation": {

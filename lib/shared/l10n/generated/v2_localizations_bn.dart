@@ -482,6 +482,22 @@ class V2LocalizationsBn extends V2Localizations {
   String get serversAddServer => 'সার্ভার যোগ করুন';
 
   @override
+  String get serversHarness => 'Harness';
+
+  @override
+  String get serversComingSoon => 'শীঘ্রই আসছে';
+
+  @override
+  String get serversMethodManual => 'ম্যানুয়াল';
+
+  @override
+  String get hostsSaveAnyway => 'তবুও সংরক্ষণ করুন';
+
+  @override
+  String get hostsSaveAnywayHint =>
+      'সার্ভারটি অফলাইন হিসেবে সংরক্ষিত হয় এবং স্বয়ংক্রিয়ভাবে আবার যাচাই হয়।';
+
+  @override
   String get serversNoServersFound => 'কোনো সার্ভার পাওয়া যায়নি';
 
   @override

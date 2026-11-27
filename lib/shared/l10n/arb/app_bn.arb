@@ -173,6 +173,11 @@
   "onboardingStarting": "শুরু হচ্ছে",
   "onboardingStopping": "বন্ধ হচ্ছে",
   "serversAddServer": "সার্ভার যোগ করুন",
+  "serversHarness": "Harness",
+  "serversComingSoon": "শীঘ্রই আসছে",
+  "serversMethodManual": "ম্যানুয়াল",
+  "hostsSaveAnyway": "তবুও সংরক্ষণ করুন",
+  "hostsSaveAnywayHint": "সার্ভারটি অফলাইন হিসেবে সংরক্ষিত হয় এবং স্বয়ংক্রিয়ভাবে আবার যাচাই হয়।",
   "serversNoServersFound": "কোনো সার্ভার পাওয়া যায়নি",
   "hostsLegacyExplanation": "এই সার্ভার OpenCode 1 চালায়। CodeWalk 2-এর জন্য OpenCode 2 দরকার।",
   "@hostsLegacyExplanation": {

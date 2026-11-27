@@ -173,6 +173,11 @@
   "onboardingStarting": "شروع ہو رہا ہے",
   "onboardingStopping": "روک رہا ہے",
   "serversAddServer": "سرور شامل کریں۔",
+  "serversHarness": "Harness",
+  "serversComingSoon": "جلد آرہا ہے",
+  "serversMethodManual": "دستی",
+  "hostsSaveAnyway": "پھر بھی محفوظ کریں",
+  "hostsSaveAnywayHint": "سرور آف لائن کے طور پر محفوظ ہوتا ہے اور خودبخود دوبارہ جانچا جاتا ہے۔",
   "serversNoServersFound": "کوئی سرور نہیں ملا",
   "hostsLegacyExplanation": "یہ سرور OpenCode 1 چلاتا ہے۔ CodeWalk 2 کو OpenCode 2 درکار ہے۔",
   "@hostsLegacyExplanation": {

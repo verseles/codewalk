@@ -9,23 +9,9 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/theme/app_surface_tokens.dart';
 import '../pairing/pairing_controller.dart';
+import 'add_server_panel.dart';
 import 'endpoint_health_controller.dart';
-
-String endpointStatusText(V2Localizations l, EndpointStatus status) =>
-    switch (status) {
-      EndpointStatus.compatible => l.onboardingReady,
-      EndpointStatus.belowMinimum => l.hostsUpgradeRequired,
-      EndpointStatus.legacyServer => l.hostsLegacyExplanation,
-      EndpointStatus.authenticationRequired => l.hostsAuthRequired,
-      EndpointStatus.serviceStarting => l.onboardingStarting,
-      EndpointStatus.serviceStopping => l.onboardingStopping,
-      EndpointStatus.serviceFailed => l.onboardingFailed,
-      EndpointStatus.serviceUnavailable => l.onboardingNotAvailable,
-      EndpointStatus.unrecognized => l.onboardingCouldNotVerify,
-      EndpointStatus.unreachable => l.hostsTransportHelp,
-      EndpointStatus.cancelled => l.commonCancel,
-      EndpointStatus.unsupportedPlatform => l.hostsNativeOnly,
-    };
+import 'endpoint_status_view.dart';
 
 String healthStatusText(V2Localizations l, EndpointHealthStatus status) =>
     switch (status) {
@@ -128,10 +114,10 @@ class EndpointHealthRecovery extends StatelessWidget {
                           EndpointStatus.authenticationRequired))
                 TextButton(
                   key: const ValueKey('endpoint-health-pair'),
-                  onPressed: () {
-                    pairing.empty(profile: profile);
-                    context.push('/pair');
-                  },
+                  onPressed: () => showAddServer(
+                    context,
+                    prepare: (pairing) => pairing.empty(profile: profile),
+                  ),
                   child: Text(l.pairingAgain),
                 ),
             ],

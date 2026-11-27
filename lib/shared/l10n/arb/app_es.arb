@@ -173,6 +173,11 @@
   "onboardingStarting": "Iniciando",
   "onboardingStopping": "Deteniendo",
   "serversAddServer": "Añadir Servidor",
+  "serversHarness": "Harness",
+  "serversComingSoon": "Próximamente",
+  "serversMethodManual": "Manual",
+  "hostsSaveAnyway": "Guardar de todos modos",
+  "hostsSaveAnywayHint": "El servidor se guarda como Offline y se vuelve a comprobar automáticamente.",
   "serversNoServersFound": "No se encontraron servidores",
   "hostsLegacyExplanation": "Este servidor ejecuta OpenCode 1. CodeWalk 2 necesita OpenCode 2.",
   "@hostsLegacyExplanation": {

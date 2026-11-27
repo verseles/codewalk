@@ -489,6 +489,22 @@ class V2LocalizationsIt extends V2Localizations {
   String get serversAddServer => 'Aggiungi server';
 
   @override
+  String get serversHarness => 'Harness';
+
+  @override
+  String get serversComingSoon => 'Prossimamente';
+
+  @override
+  String get serversMethodManual => 'Manuale';
+
+  @override
+  String get hostsSaveAnyway => 'Salva comunque';
+
+  @override
+  String get hostsSaveAnywayHint =>
+      'Il server viene salvato offline e ricontrollato automaticamente.';
+
+  @override
   String get serversNoServersFound => 'Nessun server trovato';
 
   @override

@@ -3,26 +3,25 @@ import 'dart:async';
 import 'package:codewalk_core/codewalk_core.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/workspace_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/modal_primary_action_shortcuts.dart';
-import '../pairing/pairing_controller.dart';
 import '../sessions/sessions_controller.dart';
+import 'add_server_panel.dart';
 import 'endpoint_health_controller.dart';
 import 'endpoint_health_view.dart';
+import 'endpoint_status_view.dart';
 import 'hosts_controller.dart';
 import 'profile_edit_dialog.dart';
 import 'server_switcher.dart';
 
-const legacyDownloadUrl =
-    'https://github.com/verseles/codewalk/releases/tag/v1.265.1';
+export 'endpoint_status_view.dart'
+    show EndpointStatusView, LegacyEndpointPage, legacyDownloadUrl;
 
 enum _ServerAction {
   check,
@@ -116,12 +115,19 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
           case _ServerAction.remove:
             unawaited(hosts.remove(profile));
           case _ServerAction.pair:
-            context.read<PairingController>().empty(profile: profile);
-            unawaited(context.push('/pair'));
+            unawaited(
+              showAddServer(
+                context,
+                prepare: (pairing) => pairing.empty(profile: profile),
+              ),
+            );
           case _ServerAction.renew:
-            final pairing = context.read<PairingController>();
-            unawaited(context.push('/pair'));
-            unawaited(pairing.renew(profile));
+            unawaited(
+              showAddServer(
+                context,
+                prepare: (pairing) => unawaited(pairing.renew(profile)),
+              ),
+            );
           case _ServerAction.password:
             unawaited(
               showDialog<void>(
@@ -232,20 +238,9 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
                 ),
                 FilledButton.icon(
                   key: const ValueKey('add-endpoint'),
-                  onPressed: () => showDialog<void>(
-                    context: context,
-                    builder: (_) => _ProfileDialog(hosts: hosts),
-                  ),
+                  onPressed: () => showAddServer(context),
                   icon: const Icon(Symbols.add),
                   label: Text(l.serversAddServer),
-                ),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    context.read<PairingController>().empty();
-                    context.push('/pair');
-                  },
-                  icon: const Icon(Symbols.qr_code),
-                  label: Text(l.pairingTitle),
                 ),
               ],
             ),
@@ -433,10 +428,11 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
   }
 }
 
+/// Password repair of a saved server; adding one uses [AddServerPanel].
 class _ProfileDialog extends StatefulWidget {
-  const _ProfileDialog({required this.hosts, this.repair});
+  const _ProfileDialog({required this.hosts, required this.repair});
   final HostsController hosts;
-  final EndpointProfile? repair;
+  final EndpointProfile repair;
   @override
   State<_ProfileDialog> createState() => _ProfileDialogState();
 }
@@ -456,11 +452,8 @@ class _ProfileDialogState extends State<_ProfileDialog> {
   @override
   void initState() {
     super.initState();
-    final profile = widget.repair;
-    if (profile != null) {
-      _url.text = profile.endpoint.toString();
-      _label.text = profile.label;
-    }
+    _url.text = widget.repair.endpoint.toString();
+    _label.text = widget.repair.label;
   }
 
   void _invalidate() {
@@ -476,7 +469,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
 
   Future<void> _check() async {
     if (!_form.currentState!.validate()) return;
-    final url = widget.repair?.endpoint.toString() ?? _url.text.trim();
+    final url = widget.repair.endpoint.toString();
     final secret = _secret.text;
     setState(() {
       _checking = true;
@@ -514,8 +507,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
         !result.canUse ||
         _testedUrl != _url.text.trim() ||
         _testedSecret != _secret.text ||
-        (widget.repair != null &&
-            _testedUrl != widget.repair!.endpoint.toString()) ||
+        _testedUrl != widget.repair.endpoint.toString() ||
         _saving) {
       return;
     }
@@ -523,20 +515,10 @@ class _ProfileDialogState extends State<_ProfileDialog> {
       _saving = true;
       _saveFailed = false;
     });
-    final saved = widget.repair != null
-        ? await widget.hosts.repair(
-            widget.repair!,
-            EndpointCredential(
-              kind: EndpointAuthKind.password,
-              secret: _secret.text,
-            ),
-          )
-        : await widget.hosts.add(
-            Uri.parse(_testedUrl!),
-            _label.text,
-            _secret.text,
-            result,
-          );
+    final saved = await widget.hosts.repair(
+      widget.repair,
+      EndpointCredential(kind: EndpointAuthKind.password, secret: _secret.text),
+    );
     if (!mounted) return;
     if (saved) {
       Navigator.of(context).pop();
@@ -570,7 +552,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
       enabled: !_saving && _assessment?.canUse == true,
       onPrimaryAction: _save,
       child: AlertDialog(
-        title: Text(l.serversAddServer),
+        title: Text(l.onboardingPassword),
         scrollable: true,
         content: SizedBox(
           width: 480,
@@ -585,7 +567,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                   controller: _url,
                   keyboardType: TextInputType.url,
                   autocorrect: false,
-                  enabled: !_saving && widget.repair == null,
+                  enabled: false,
                   decoration: InputDecoration(labelText: l.onboardingServerUrl),
                   onChanged: (_) => _invalidate(),
                   validator: (text) {
@@ -601,7 +583,7 @@ class _ProfileDialogState extends State<_ProfileDialog> {
                 TextFormField(
                   key: const ValueKey('endpoint-label'),
                   controller: _label,
-                  enabled: !_saving && widget.repair == null,
+                  enabled: false,
                   maxLength: 160,
                   decoration: InputDecoration(labelText: l.onboardingLabel),
                 ),
@@ -653,97 +635,6 @@ class _ProfileDialogState extends State<_ProfileDialog> {
             child: Text(l.commonSave),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class EndpointStatusView extends StatelessWidget {
-  const EndpointStatusView({super.key, required this.assessment});
-  final EndpointAssessment assessment;
-  @override
-  Widget build(BuildContext context) {
-    final l = context.v2L10n;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Chip(
-            label: Text(
-              '${endpointStatusText(l, assessment.status)}${assessment.version == null ? '' : ' · ${assessment.version}'}',
-            ),
-          ),
-          if (assessment.status == EndpointStatus.belowMinimum)
-            Text(l.hostsUpgradeInstructions),
-          if (assessment.retryDeferred || assessment.retryAt != null) ...[
-            Text(l.hostsRetryLater),
-            if (assessment.retryAt != null)
-              Text(assessment.retryAt!.toLocal().toString()),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class LegacyEndpointPage extends StatefulWidget {
-  const LegacyEndpointPage({super.key});
-  @override
-  State<LegacyEndpointPage> createState() => _LegacyEndpointPageState();
-}
-
-class _LegacyEndpointPageState extends State<LegacyEndpointPage> {
-  bool _instructions = false;
-  Future<void> _download() async {
-    try {
-      await launchUrl(
-        Uri.parse(legacyDownloadUrl),
-        mode: LaunchMode.externalApplication,
-      );
-    } on Object {
-      // The selectable URL remains available when no external app opens it.
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.v2L10n;
-    return Scaffold(
-      appBar: AppBar(title: const Text('OpenCode 1')),
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 640),
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(24),
-            children: [
-              Text(
-                l.hostsLegacyExplanation,
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: () => setState(() {
-                  _instructions = !_instructions;
-                }),
-                child: Text(l.hostsUpgradeRequired),
-              ),
-              if (_instructions)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  child: SelectableText(l.hostsUpgradeInstructions),
-                ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                key: const ValueKey('legacy-download'),
-                onPressed: _download,
-                child: Text(l.hostsLegacyDownload),
-              ),
-              const SelectableText(legacyDownloadUrl),
-            ],
-          ),
-        ),
       ),
     );
   }

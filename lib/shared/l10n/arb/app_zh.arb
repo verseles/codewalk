@@ -173,6 +173,11 @@
   "onboardingStarting": "正在启动",
   "onboardingStopping": "正在停止",
   "serversAddServer": "添加服务器",
+  "serversHarness": "Harness",
+  "serversComingSoon": "即将推出",
+  "serversMethodManual": "手动",
+  "hostsSaveAnyway": "仍然保存",
+  "hostsSaveAnywayHint": "服务器将以离线状态保存，并会自动重新检查。",
   "serversNoServersFound": "未找到服务器",
   "hostsLegacyExplanation": "此服务器运行 OpenCode 1。CodeWalk 2 需要 OpenCode 2。",
   "@hostsLegacyExplanation": {

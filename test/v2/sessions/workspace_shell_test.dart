@@ -11,7 +11,6 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
 import '../hosts/fakes.dart';
 import 'fakes.dart';
@@ -388,8 +387,9 @@ void main() {
       await showSessionList(tester);
       await _toolbarItem(tester, 'Servers');
       expect(path(), '/hosts');
-      // A page opened from a secondary page returns to it.
-      await tester.tap(find.byIcon(Symbols.qr_code).first);
+      // Adding a server opens the /pair page on every width; Back returns to
+      // the server list.
+      await tester.tap(find.byKey(const ValueKey('add-endpoint')));
       await tester.pumpAndSettle();
       expect(path(), '/pair');
       expect(await tester.binding.handlePopRoute(), isTrue);

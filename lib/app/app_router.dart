@@ -59,7 +59,8 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: '/pair',
-            builder: (context, state) => const PairingPage(),
+            pageBuilder: (context, state) =>
+                PairingRoutePage(key: state.pageKey),
           ),
           GoRoute(
             path: '/s/:host/:session',

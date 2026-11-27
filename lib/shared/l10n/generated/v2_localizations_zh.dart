@@ -460,6 +460,21 @@ class V2LocalizationsZh extends V2Localizations {
   String get serversAddServer => '添加服务器';
 
   @override
+  String get serversHarness => 'Harness';
+
+  @override
+  String get serversComingSoon => '即将推出';
+
+  @override
+  String get serversMethodManual => '手动';
+
+  @override
+  String get hostsSaveAnyway => '仍然保存';
+
+  @override
+  String get hostsSaveAnywayHint => '服务器将以离线状态保存，并会自动重新检查。';
+
+  @override
   String get serversNoServersFound => '未找到服务器';
 
   @override

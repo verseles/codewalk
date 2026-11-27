@@ -145,7 +145,7 @@ class PairingController extends ChangeNotifier {
     }
   }
 
-  Future<bool> save(String label) async {
+  Future<bool> save(String label, {String? harnessKind}) async {
     final credential = receipt?.credential;
     final endpoint = target?.endpoint ?? candidate?.endpoint;
     if (_disposed || busy || credential == null || endpoint == null) {
@@ -174,6 +174,7 @@ class PairingController extends ChangeNotifier {
             label,
             credential,
             assessment!,
+            harnessKind: harnessKind,
           );
         }
       }

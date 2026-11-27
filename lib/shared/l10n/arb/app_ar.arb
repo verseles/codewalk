@@ -172,6 +172,11 @@
   "onboardingStarting": "بدء التشغيل",
   "onboardingStopping": "إيقاف",
   "serversAddServer": "إضافة خادم",
+  "serversHarness": "Harness",
+  "serversComingSoon": "قريبًا",
+  "serversMethodManual": "يدوي",
+  "hostsSaveAnyway": "احفظ على أي حال",
+  "hostsSaveAnywayHint": "يُحفظ الخادم غير متصل ويُفحص مجددًا تلقائيًا.",
   "serversNoServersFound": "لم يتم العثور على خوادم",
   "hostsLegacyExplanation": "يعمل هذا الخادم باستخدام OpenCode 1. يحتاج CodeWalk 2 إلى OpenCode 2.",
   "@hostsLegacyExplanation": {

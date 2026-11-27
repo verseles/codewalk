@@ -240,6 +240,20 @@ class HostsController extends ChangeNotifier {
 
   void cancelProbe() => _cancelProbe(clearChecking: true);
 
+  /// Identifies the latest check; read right after a check returns, it lets
+  /// [forgetVerification] tell that check from any later one.
+  int get checkGeneration => _generation;
+
+  /// Drops the save authorization, and its password, that the check of
+  /// [generation] left, without cancelling a check in flight. A later check
+  /// has its own generation and keeps its authorization.
+  void forgetVerification(int generation) {
+    if (generation != _generation) return;
+    _verifiedEndpoint = null;
+    _verifiedSecret = null;
+    _verifiedAssessment = null;
+  }
+
   void _cancelProbe({required bool clearChecking}) {
     _generation++;
     _task?.cancel();
@@ -307,13 +321,27 @@ class HostsController extends ChangeNotifier {
     String secret,
     EndpointAssessment assessment, {
     String? harnessKind,
+    bool acceptFailure = false,
   }) => addCredential(
     endpoint,
     label,
     EndpointCredential(kind: EndpointAuthKind.password, secret: secret),
     assessment,
     harnessKind: harnessKind,
+    acceptFailure: acceptFailure,
   );
+
+  /// Whether a completed manual check that failed may still be saved
+  /// ("Save anyway", #504): never an OpenCode 1 server, which has its own
+  /// upgrade explainer, nor a check that never reached a server. A server
+  /// that asked to wait longer than a day keeps that request once saved.
+  static bool canSaveDespite(EndpointAssessment assessment) =>
+      !assessment.canUse &&
+      !{
+        EndpointStatus.legacyServer,
+        EndpointStatus.unsupportedPlatform,
+        EndpointStatus.cancelled,
+      }.contains(assessment.status);
 
   Future<bool> addCredential(
     Uri endpoint,
@@ -321,13 +349,17 @@ class HostsController extends ChangeNotifier {
     EndpointCredential credential,
     EndpointAssessment assessment, {
     String? harnessKind,
+    bool acceptFailure = false,
   }) async {
     final secret = credential.secret;
     // Only a build that offers harnesses records one.
     final kind = harnesses == null
         ? null
         : harnessKind ?? harnesses!.defaultKind;
-    if (_disposed || _adding || loading || !assessment.canUse) return false;
+    // A failed check may be saved only on purpose, from that same check.
+    final usable =
+        assessment.canUse || (acceptFailure && canSaveDespite(assessment));
+    if (_disposed || _adding || loading || !usable) return false;
     if (harnesses != null && !(harnesses!.resolve(kind)?.selectable ?? false)) {
       return false;
     }
@@ -368,6 +400,8 @@ class HostsController extends ChangeNotifier {
             if (!_disposed && revision == _catalogRevision) {
               _profiles = loaded;
               _assessments[pending.id] = assessment;
+              // The reconciled save holds this verified credential too.
+              _credentials[pending.id] = credential;
             }
             _notify();
             if (!_disposed && revision == _catalogRevision) {

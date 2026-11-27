@@ -173,6 +173,11 @@
   "onboardingStarting": "起動中",
   "onboardingStopping": "停止中",
   "serversAddServer": "サーバーを追加",
+  "serversHarness": "Harness",
+  "serversComingSoon": "近日公開",
+  "serversMethodManual": "手動",
+  "hostsSaveAnyway": "このまま保存",
+  "hostsSaveAnywayHint": "サーバーはオフラインとして保存され、自動的に再確認されます。",
   "serversNoServersFound": "サーバーが見つかりません",
   "hostsLegacyExplanation": "このサーバーは OpenCode 1 を実行しています。CodeWalk 2 には OpenCode 2 が必要です。",
   "@hostsLegacyExplanation": {

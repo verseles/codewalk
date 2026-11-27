@@ -3,6 +3,8 @@
 PORT_KEYS = {
     "serversActive", "serversDefault", "serversSetDefault", "serversClearDefault", "serversEdit",
     "serversAddServer", "serversNoServersFound", "commonDelete", "commonSave",
+    "serversHarness", "serversComingSoon", "serversMethodManual",
+    "hostsSaveAnyway", "hostsSaveAnywayHint",
     "onboardingServerUrl", "onboardingLabel", "onboardingPassword",
     "onboardingPasswordRequired", "onboardingInvalidUrl", "onboardingReady",
     "onboardingStarting", "onboardingStopping", "onboardingFailed",

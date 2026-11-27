@@ -493,7 +493,7 @@ description of this code.
 - **Then** every v2 message goes through one snackbar path, so the same event is never shown twice as a toast and a box
 - **Then** on a compact window it is a floating toast without a close icon; on a wide window it floats beside the end edge (at most 420 dp wide, 24 dp from the edge, on the left in right-to-left languages) with a close icon
 - **Then** a message without an action closes as soon as it is tapped; a message with an action (Undo, Check again, Servers) keeps that action, and its text, duration and placement are unchanged
-- **Given** the server edit or add-server dialog is open with a physical keyboard
+- **Given** the server edit dialog or the add-server screen is open with a physical keyboard
 - **When** the user presses `Enter` or `NumpadEnter`
 - **Then** a focused control that activates itself (Cancel, Check connection, a row) does so; otherwise the dialog's Save runs, only when Save itself is enabled
 - **Then** delete confirmations, shortcut capture, pickers and selectors never map Enter to their action; renaming a session already confirms with Enter in its field
@@ -889,15 +889,18 @@ description of this code.
 - **When** native profile storage is available
 - **Then** saved servers retain their labels, authored URLs, proxy paths and ports across restarts; passwords remain in the origin/profile-scoped credential vault, never in profile metadata
 - **Then** each saved server keeps the harness chosen when it was added (OpenCode today); servers saved before that choice read as OpenCode, the kind is fixed when the server is added and never changes its binding (#504)
-- **Then** compact and wide layouts expose localized add, check and delete actions; an in-flight saved-server check shows progress and disables repeated checks
+- **Then** one Add server action opens a single add screen, the `/pair` route on every width (a full page on compact windows, a dialog over the server list from 600 dp, where a tap beside it closes it, to the server list when a link opened it), which Pair again and Renew also open (#506): a harness picker on top (OpenCode selected; Codex listed but disabled as Coming soon), then a Pairing link | Manual switch that opens on the pairing link; the add screen never shows the server version, and a successful save closes it and returns to where it opened, or to the server list when a link opened it directly, even under a dialog over the app (#504); a pairing link arriving while the Manual form checks drops that check, whose late answer neither saves nor closes the screen, and shows the link mode
+- **Then** each saved server keeps localized check and delete actions; an in-flight saved-server check shows progress and disables repeated checks
 - **Then** a catalog read failure displays a retry action rather than claiming there are no saved servers; malformed records and future schemas are preserved
 
-- **Given** the user enters an HTTP(S) endpoint and password
-- **When** Check connection runs on an IO platform
+- **Given** the user enters an HTTP(S) endpoint and password in the Manual form
+- **When** Save runs on an IO platform, which first checks the server (#504)
 - **Then** a bounded, authenticated, read-only `/api/info` probe verifies OpenCode 2 without adopting response URLs or rewriting the authored port
 - **Then** credentials, HTML responses, unrecognized data, unreachable servers and service starting/stopping/failure states have distinct localized outcomes
 - **Then** only a restricted fallback to healthy OpenCode 1 JSON at `/global/health` opens a full-screen upgrade explainer with server upgrade guidance and the stable CodeWalk 1 download link
-- **Then** versions below `2.0.20` cannot be saved; every valid stable OpenCode 2 version from `2.0.20` on is compatible and shows no tested or untested marker (#507)
+- **Then** a usable answer saves the server at once; every valid stable OpenCode 2 version from `2.0.20` on is compatible and shows no tested or untested marker (#507)
+- **Then** a check that fails (wrong password, unreachable, starting, below `2.0.20` and the like) shows its reason and offers Save anyway, which saves that exact URL and password as an Offline server the health lane keeps checking; editing either field withdraws the offer, and an OpenCode 1 server or a check that never reached a server is never saved; a server that asks to wait more than a day is saved with that request kept, so the app does not check it before a restart and the screen promises no automatic check, and a Retry-After that holds Save stays on screen with its reason; leaving the screen during a check saves nothing (#504)
+- **Then** the Manual form refuses, before any check, a name over 160 characters or with control characters and a password over 16384 characters or with control characters
 - **Then** retry hints delay manual checks without automatic HTTP replay, and changed input or a superseding probe invalidates the previous save authorization
 
 - **Given** a checked, usable endpoint is saved or deleted
@@ -909,7 +912,7 @@ description of this code.
 
 ### V2 pairing and credential recovery
 
-- **Given** the user opens pairing from Hosts, a private deep link, or a native launch argument
+- **Given** the user opens the add screen's pairing link mode from Hosts, a private deep link, or a native launch argument
 - **When** a pairing link is pasted or obtained from a QR
 - **Then** Android offers camera capture and Android/Linux offer PNG/JPEG image import; the user confirms the validated destination before any server request
 - **Then** code, token and password values remain out of routes, status messages and diagnostics; input containing pairing material is masked
@@ -918,6 +921,7 @@ description of this code.
 
 - **Given** a saved paired profile needs a new credential
 - **When** the user selects Pair again, Renew token, or password repair
+- **Then** Pair again and Renew token open the add screen in pairing link mode for that server, without the harness picker or the Manual form; password repair keeps its own dialog
 - **Then** the profile ID, label, URL, port and proxy prefix remain unchanged; a repair link must match the exact selected endpoint
 - **Then** password repair keeps URL and label read-only and sends the password only to the selected profile's endpoint
 - **Then** renewal is manual and issues a successor only after verifying the connected server is OpenCode `2.0.22`

@@ -577,6 +577,26 @@
   "@serversAddServer": {
     "description": "CodeWalk UI string — serversAddServer"
   },
+  "serversHarness": "Harness",
+  "@serversHarness": {
+    "description": "V2 add-server flow"
+  },
+  "serversComingSoon": "Coming soon",
+  "@serversComingSoon": {
+    "description": "V2 add-server flow"
+  },
+  "serversMethodManual": "Manual",
+  "@serversMethodManual": {
+    "description": "V2 add-server flow"
+  },
+  "hostsSaveAnyway": "Save anyway",
+  "@hostsSaveAnyway": {
+    "description": "V2 add-server flow"
+  },
+  "hostsSaveAnywayHint": "The server is saved as Offline and checked again automatically.",
+  "@hostsSaveAnywayHint": {
+    "description": "V2 add-server flow"
+  },
   "serversNoServersFound": "No servers found",
   "@serversNoServersFound": {
     "description": "CodeWalk UI string — serversNoServersFound"

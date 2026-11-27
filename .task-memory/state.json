@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 9,
+  "artifact_seq": 14,
   "artifacts": {
     "A0001": {
       "active": false,
@@ -86,7 +86,7 @@
       "title": "ART-REVIEW-REPORTS U1 R2 (re-review 3ddb47ed)"
     },
     "A0006": {
-      "active": true,
+      "active": false,
       "bytes": 1084,
       "created_at": "2026-11-27T11:20:10Z",
       "evidence": "/tmp/opencode/g6u2/r1_*.out; /tmp/opencode/g6u2/gate.log:1289",
@@ -96,13 +96,14 @@
       "path": "artifacts/tm_20261127T094158Z_6862cb28/A0006.md",
       "purpose": "Review f4f1e630..2e718bf9",
       "rerun_when": "boundary mudar",
+      "retired": true,
       "sha256": "defb77321932169b94fabb38db74007a0f19457a03e4880917ef509d1a343327",
       "stage": "CONT4",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS U2 R1 group6-u2-harness"
     },
     "A0007": {
-      "active": true,
+      "active": false,
       "bytes": 684,
       "created_at": "2026-11-27T11:29:44Z",
       "evidence": "/tmp/opencode/g6u2/r2_*.out",
@@ -112,13 +113,14 @@
       "path": "artifacts/tm_20261127T094158Z_6862cb28/A0007.md",
       "purpose": "Re-review fix round U2",
       "rerun_when": "boundary mudar",
+      "retired": true,
       "sha256": "63f73e27e13514e45292b7464133bb7af01b396ce236838450a39e9bd8575c84",
       "stage": "CONT4",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS U2 R2 (re-review f0d09e9c)"
     },
     "A0008": {
-      "active": true,
+      "active": false,
       "bytes": 656,
       "created_at": "2026-11-27T11:39:01Z",
       "evidence": "/tmp/opencode/g6u2/r3_*.out",
@@ -128,13 +130,14 @@
       "path": "artifacts/tm_20261127T094158Z_6862cb28/A0008.md",
       "purpose": "Re-review fix round 2 U2",
       "rerun_when": "boundary mudar",
+      "retired": true,
       "sha256": "503d35667acb3254dbebdc50ad16d146ffdb675e267c1b6ad399e7b71cda696b",
       "stage": "CONT4",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS U2 R3 (re-review 0e420d07)"
     },
     "A0009": {
-      "active": true,
+      "active": false,
       "bytes": 451,
       "created_at": "2026-11-27T11:46:09Z",
       "evidence": "/tmp/opencode/g6u2/r4_*.out, r4b_*.err",
@@ -144,10 +147,96 @@
       "path": "artifacts/tm_20261127T094158Z_6862cb28/A0009.md",
       "purpose": "Re-review após replan U2",
       "rerun_when": "boundary mudar",
+      "retired": true,
       "sha256": "bee426abfcaa8d3079a73f831497a1993ccc5978f137e95981a30ee5bdd63647",
       "stage": "CONT4",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS U2 R4 (re-plan 9fe4a99f)"
+    },
+    "A0010": {
+      "active": false,
+      "bytes": 1046,
+      "created_at": "2026-11-27T12:33:00Z",
+      "evidence": "/tmp/opencode/g6u3/r1_*.out",
+      "id": "A0010",
+      "impact": "Fix round + re-review",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0010.md",
+      "purpose": "Review 00befeaa..8a8b9d9b",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "0181b283702a080172b34f4c7d70d7e0db7cdd533ee73c6c891e9f3f0a744d88",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U3 R1 group6-u3-add-flow"
+    },
+    "A0011": {
+      "active": false,
+      "bytes": 1012,
+      "created_at": "2026-11-27T12:48:39Z",
+      "evidence": "/tmp/opencode/g6u3/r2_*.out",
+      "id": "A0011",
+      "impact": "Simplificar: só página /pair (sem diálogo), geração por tentativa, demais ajustes",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0011.md",
+      "purpose": "Re-review fix round U3",
+      "rerun_when": "boundary mudar",
+      "retired": true,
+      "sha256": "e00095473cd0b5ad40ac6e8c89bbb2b1eda282cf08ed442eb148abdccb65a171",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U3 R2 (re-review bea9e18b)"
+    },
+    "A0012": {
+      "active": false,
+      "bytes": 844,
+      "created_at": "2026-11-27T13:11:15Z",
+      "evidence": "/tmp/opencode/g6u3/r3_*.out",
+      "id": "A0012",
+      "impact": "Fix round 3 necessário",
+      "origin": "8 helpers (key group6-u3-add-flow-20261127T122257Z-0e67)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0012.md",
+      "purpose": "Re-review 062728b5",
+      "rerun_when": "novo commit de correção",
+      "retired": true,
+      "sha256": "06f9ea80a1b3d2798d7953510f7a9bff02792afb04f38bebbf71454009ec03c4",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "U3 re-review R3"
+    },
+    "A0013": {
+      "active": false,
+      "bytes": 625,
+      "created_at": "2026-11-27T13:34:47Z",
+      "evidence": "/tmp/opencode/g6u3/r4_*.out",
+      "id": "A0013",
+      "impact": "Fix round 4 provável (Sol-F)",
+      "origin": "6 helpers (key group6-u3-add-flow-20261127T122257Z-0e67)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0013.md",
+      "purpose": "Re-review 9ea4eea4",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "5124f7c983166120786cfa1f6c2fd344529fafb5735c2d2b97a715e32009bdc2",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "U3 re-review R4"
+    },
+    "A0014": {
+      "active": false,
+      "bytes": 349,
+      "created_at": "2026-11-27T13:49:54Z",
+      "evidence": "/tmp/opencode/g6u3/r5_*.out",
+      "id": "A0014",
+      "impact": "Correção pontual; R6 dispensável se o teste cobrir",
+      "origin": "6 helpers (key group6-u3-add-flow-20261127T122257Z-0e67)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0014.md",
+      "purpose": "Re-review 1b22bc4a",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "ea81486bef191fb0cd27289ef0039cc3c227d1659a473ff52244e6304df0dad8",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "U3 re-review R5"
     }
   },
   "checklist": [
@@ -218,16 +307,16 @@
       "depends": [],
       "id": "CONT4",
       "label": "#506/#504: tela única de adicionar servidor (harness, Link|Manual, salvar verificando)",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "U3 (#506/#504) aceita: tela única de adicionar servidor na rota /pair (página no compacto, diálogo a partir de 600 dp), harness no topo, Link|Manual, Salvar verifica, Salvar mesmo assim; 5 rodadas de revisão convergidas; follow-up #531.",
+      "status": "done",
+      "validation": "make check verde em d8903c82 (gate-r5.log); testes focados 174; mutações verificadas"
     },
     {
       "depends": [],
       "id": "CONT5",
       "label": "#505: redesenho da listagem de servidores",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -382,10 +471,46 @@
     {
       "at": "2026-11-27T11:46:09Z",
       "text": "ART-REVIEW-JUDGMENT U2 R4 (9fe4a99f, 5/8 approve, 3 failed por cota OpenCode Go): ACEITOS v2-plan §17 sem 'creation/removal intents' na abertura; fakes.dart updateProfile copia harness do perfil armazenado + store test confere 'harness' do item após edição. Simples/locais -> sem re-review (rationale: docs + teste). Sem posição Frontier rejeitada."
+    },
+    {
+      "at": "2026-11-27T12:05:57Z",
+      "text": "U2 squash f4f1e630..HEAD -> 00befeaa (árvore idêntica; nada publicado). R4 fixes: v2-plan §17 sem intenções; fake copia harness armazenado; store test confere item após edição. make check rodando em 00befeaa (log /tmp/opencode/g6u2/gate5.log). #504 continua aberta: U2 é só a parte de dados; U3 entrega o fluxo."
+    },
+    {
+      "at": "2026-11-27T12:22:57Z",
+      "text": "Review U3 R1: work_item=group6-u3-add-flow boundary 00befeaa..8a8b9d9b, review_id=rvw_20261127T122257Z_1af1bcb6, job_key=group6-u3-add-flow-20261127T122257Z-0e67, dir=/home/ubuntu/MEGA/WORK/codewalk; pool 11 redescoberto."
+    },
+    {
+      "at": "2026-11-27T12:23:59Z",
+      "text": "Handshakes U3 job_key=group6-u3-add-flow-20261127T122257Z-0e67 dir=/home/ubuntu/MEGA/WORK/codewalk: READY 8 (helperCodex-6-luna-max helperCodex-6.2-sol-xhigh-F helperDeepSeek-41-flash-high helperErnie-55-flash-high helperGLM-53-high helperGemini-4-hydrogen-xhigh helperHungerg-free helperKimi-K31-pro-high ). FAILED após retry: helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F (SESSION_CLAUDE_ERROR), helperGrok-47-high-F (sem créditos)."
+    },
+    {
+      "at": "2026-11-27T12:39:31Z",
+      "text": "ART-REVIEW-JUDGMENT U3 R1 (8a8b9d9b, 8/8; luna/deepseek/ernie/glm/kimi approve, sol-F/gemini/hungerg fix_required): ACEITOS W1 link novo volta ao modo Link (linkRevision); W2 diálogo fecha ao chegar deep link e dispose só fecha pairing se nenhum link novo; W3 PopScope bloqueia saída durante save/pairing busy + Cancel usa maybePop + conclusão só navega se ModalRoute.isCurrent (back do AppShell usa context.pop e ignora PopScope: race coberto por isCurrent); W4 trava Retry-After (_fence) sobrevive à falha do Save anyway; W5 reconciliação incerta hidrata _credentials; W6 painel só cancela probe próprio (_ownsProbe); W7 ModalPrimaryActionShortcuts no form manual; W8 LegacyEndpointPage via rootNavigator; S1 canSaveDespite exclui retryDeferred; S2 EndpointStatusView/LegacyEndpointPage extraídos p/ endpoint_status_view.dart (re-export em hosts_page); S3 pairing-label maxLength 160. Sem posição Frontier rejeitada. Re-review necessário (navegação/async)."
+    },
+    {
+      "at": "2026-11-27T12:49:45Z",
+      "text": "U3 R2 dissent Sol-F (canSaveDespite exclui retryDeferred): disagree, change_decision yes, residual: Retry-After finito >24h é falha salvável pela regra do owner; preservar recheck finito. Decisão MUDOU: permitir Save anyway p/ retryDeferred gravando avaliação com retryAt = agora+1 dia (janela máxima do probe), então a saúde rechecka depois. Demais R2: simplificar p/ página /pair em todas as larguras (remove diálogo e corridas de handoff), geração _attempt anula probe/save obsoletos (link novo, saída), probe concluído com rota não atual não persiste, conclusão com rota coberta adia fechar até voltar, _ownsProbe zera ao fim do probe, valida senha (<=16384, sem controle) e rótulo (<=160 UTF-16, sem controle), trava Retry-After visível, endpointStatusText movido p/ endpoint_status_view.dart (quebra ciclo). Owner aprovou 'diálogo no desktop' em Q5: mudança de apresentação registrada p/ relatar."
+    },
+    {
+      "at": "2026-11-27T12:58:34Z",
+      "text": "Fix R2 commitado 062728b5: /pair em todas as larguras (diálogo removido), _attempt anula probe/save obsoletos, fechar só a própria rota (Navigator.of), sem bloqueio de persistência quando coberto por diálogo raiz, validação nome<=160/senha<=16384 sem controle, trava Retry-After visível, endpointStatusText movido (sem ciclo), save anyway p/ retryDeferred com retryAt=agora+1d. Métricas R2 gravadas; hey R2 enviado."
+    },
+    {
+      "at": "2026-11-27T13:13:56Z",
+      "text": "R3 julgado. Aceitos: (1) Sol-F Q5: /pair vira camada estilo diálogo >=600dp via Page própria no go_router (mesma rota, sem corridas); (2) Sol-F: save anyway de deferido grava a avaliação como veio (sem +1d), seguindo a política da lane; (3) Sol-F: resultado do probe com rota saindo (isActive false) não grava nem abre legado; (4) link novo zera _pendingDone; (5) _finish obsoleto não mexe em _saving; (6) esquecer verificação (senha) do controller ao editar/sair, só se for a nossa; (7) Save anyway valida o form; (8) teste do rótulo de pareamento. Rejeitado: Luna (link durante gravação ainda grava o servidor pedido; escrita em curso não é retirável). Métricas R3 gravadas."
+    },
+    {
+      "at": "2026-11-27T13:38:27Z",
+      "text": "R4 julgado: aceitos Sol-F W1 (barreira própria: respeita PopScope, sem rota abaixo vai p/ /hosts), W3 (revisão do link capturada na tentativa), W4 (forgetVerification por geração do check), S (animation.drive); Hungerg S (sem promessa de recheck p/ deferido). Rejeitado Sol-F W2 (Retry-After longo só na sessão e não persistido = política da lane pré-existente) após troca de dissenso: Sol-F respondeu 'agree'; follow-up issue a abrir. Fix commitado 1b22bc4a; métricas R4 gravadas."
+    },
+    {
+      "at": "2026-11-27T13:50:52Z",
+      "text": "R5: 4 approve; Luna+Hungerg acharam o mesmo (tentativa iniciada após prepareLink e antes do rebuild usa revisão viva). Corrigido usando _ownedRevision + checagem no início, teste que falha sem a correção. Re-review R6 dispensada: correção de 1 linha exatamente como sugerida pelos dois revisores, coberta por teste com mutação verificada; os demais revisores (incluindo Sol-F) aprovaram o resto. Métricas R5 gravadas."
     }
   ],
-  "generation": 65,
-  "next_action": "Após gate4: aplicar 2 ajustes, testes focados, commit, squash U2, gate final, push",
+  "generation": 94,
+  "next_action": "Squash 00befeaa..HEAD, push, fechar #506/#504, marcar #527; depois implementar U4 (#505).",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -408,7 +533,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T094158Z_6862cb28",
   "title": "Pesquisa prévia do grupo 6 da #527 (servidores)",
-  "updated_at": "2026-11-27T12:05:16Z",
+  "updated_at": "2026-11-27T13:58:52Z",
   "validations": [
     {
       "at": "2026-11-27T09:42:17Z",
@@ -485,6 +610,55 @@
       "check": "Gate U2 make check + v2-native-check em 9fe4a99f",
       "criterion": null,
       "evidence": "CHECK_RC=0 NATIVE_RC=0; log /tmp/opencode/g6u2/gate4.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:12:32Z",
+      "check": "Gate U2 make check em 00befeaa (pós-squash)",
+      "criterion": null,
+      "evidence": "CHECK_RC=0; v2-native-check verde em 9fe4a99f (mesmos packages); log /tmp/opencode/g6u2/gate5.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:22:47Z",
+      "check": "U3 focused checks",
+      "criterion": null,
+      "evidence": "analyze lib + test/v2 0; hosts 11 page tests + controller 20 + pairing + fixture/live smoke + credentials + chrome + settings 189 ok; workspace_shell 32 ok; l10n --check ok; overflow do seletor corrigido (isExpanded)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:33:00Z",
+      "check": "Gate U3 make check em 8a8b9d9b",
+      "criterion": null,
+      "evidence": "CHECK_RC=0; log /tmp/opencode/g6u3/gate.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:47:29Z",
+      "check": "Gate U3 make check em bea9e18b",
+      "criterion": null,
+      "evidence": "CHECK_RC=0; log /tmp/opencode/g6u3/gate2.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T13:05:05Z",
+      "check": "make check TEST_JOBS=4 @062728b5",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u3/gate-r2.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T13:27:09Z",
+      "check": "make check TEST_JOBS=4 @9ea4eea4",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u3/gate-r3.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T13:45:05Z",
+      "check": "make check TEST_JOBS=4 @1b22bc4a",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u3/gate-r4.log exit 0",
       "outcome": "pass"
     }
   ]

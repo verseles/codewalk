@@ -469,6 +469,21 @@ class V2LocalizationsKo extends V2Localizations {
   String get serversAddServer => '서버 추가';
 
   @override
+  String get serversHarness => 'Harness';
+
+  @override
+  String get serversComingSoon => '출시 예정';
+
+  @override
+  String get serversMethodManual => '수동';
+
+  @override
+  String get hostsSaveAnyway => '그래도 저장';
+
+  @override
+  String get hostsSaveAnywayHint => '서버가 오프라인으로 저장되고 자동으로 다시 확인됩니다.';
+
+  @override
   String get serversNoServersFound => '서버를 찾을 수 없음';
 
   @override

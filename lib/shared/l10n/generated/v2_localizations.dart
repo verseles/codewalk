@@ -983,6 +983,36 @@ abstract class V2Localizations {
   /// **'Add Server'**
   String get serversAddServer;
 
+  /// V2 add-server flow
+  ///
+  /// In en, this message translates to:
+  /// **'Harness'**
+  String get serversHarness;
+
+  /// V2 add-server flow
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get serversComingSoon;
+
+  /// V2 add-server flow
+  ///
+  /// In en, this message translates to:
+  /// **'Manual'**
+  String get serversMethodManual;
+
+  /// V2 add-server flow
+  ///
+  /// In en, this message translates to:
+  /// **'Save anyway'**
+  String get hostsSaveAnyway;
+
+  /// V2 add-server flow
+  ///
+  /// In en, this message translates to:
+  /// **'The server is saved as Offline and checked again automatically.'**
+  String get hostsSaveAnywayHint;
+
   /// CodeWalk UI string — serversNoServersFound
   ///
   /// In en, this message translates to:
