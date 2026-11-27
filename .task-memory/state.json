@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 6,
+  "artifact_seq": 8,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -96,6 +96,38 @@
       "stage": "S4",
       "supersedes": null,
       "title": "u3 re-review r2 (#534 fix 0e911541)"
+    },
+    "A0007": {
+      "active": true,
+      "bytes": 192,
+      "created_at": "2026-11-27T23:25:18Z",
+      "evidence": "/tmp/opencode/g8/rev/u3/r3_*.out",
+      "id": "A0007",
+      "impact": "#534 review converged pending haiku resume",
+      "origin": "7 delivered + haiku failed",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0007.md",
+      "purpose": "Re-review",
+      "rerun_when": "#534 files change",
+      "sha256": "554166a51cde6f9c2675475487632fff7fdab5ae8ae985c89d5e4676c2018785",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "u3 re-review r3 (#534 fix 7122ddc7)"
+    },
+    "A0008": {
+      "active": true,
+      "bytes": 182,
+      "created_at": "2026-11-27T23:25:59Z",
+      "evidence": "/tmp/opencode/g8/rev/u3/r3b_helperClaude-haiku-5-max.err",
+      "id": "A0008",
+      "impact": "#534 review done",
+      "origin": "helperClaude-haiku-5-max",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0008.md",
+      "purpose": "Recovery",
+      "rerun_when": "never",
+      "sha256": "ab36a0451fea23c332da8156fc94f1db5c68be6e5b15d61d65ebb5e0d19b64d6",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "u3 r3 haiku resume"
     }
   },
   "checklist": [
@@ -465,16 +497,9 @@
       "text": "u3 r2 judgment: accepted R1 (sol-F warning + haiku/deepseek/opus-F: stamps untouched unless written; ahead-filter only when stamping; doc fixed; backward jump >1 day drop documented as tradeoff), R2 haiku (scope reset at build start incl. server list), R3 tests (search+Load more, exact bound). Rejected haiku's two-server reset test: needs a second profile rig; the reset is a record comparison covered by the project-switch test. Fix 7122ddc7. Re-review r3 for the persistence change."
     }
   ],
-  "generation": 40,
+  "generation": 43,
   "next_action": "u3 handshakes, payload, gate, dispatch",
-  "pending_operation": {
-    "expected_bytes": 25000,
-    "expected_seconds": 600,
-    "id": "op_1acdd7ace0db",
-    "kind": "subagent",
-    "prepared_at": "2026-11-27T23:21:47Z",
-    "purpose": "u3 re-review round 3 (#534 fix 7122ddc7, 8 helpers)"
-  },
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -496,7 +521,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-27T23:21:47Z",
+  "updated_at": "2026-11-27T23:25:59Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
