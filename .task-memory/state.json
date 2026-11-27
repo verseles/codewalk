@@ -36,7 +36,7 @@
       "title": "Planner R1 resume opus-F: failed"
     },
     "A0003": {
-      "active": true,
+      "active": false,
       "bytes": 7525,
       "created_at": "2026-11-27T10:27:33Z",
       "evidence": "/tmp/opencode/g6plan/r1_*.out; síntese do orquestrador",
@@ -391,12 +391,18 @@
       "depends": [],
       "id": "CONT6",
       "label": "Avaliar helpers, docs, #527, push e release minor",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "Grupo 6 concluído: #514/#507 (f4f1e630), #504 parte harness (00befeaa), #506/#504 (7173abf0), #505 (53cc195d); README e notas; release v2.12.0 (6091f893, tag v2.12.0) com watch-release disparado; follow-ups #528 #529 #530 #531.",
+      "status": "done",
+      "validation": "make check verde no SHA do release ad6e7660; make release V=stable ok"
     }
   ],
-  "completion": null,
+  "completion": {
+    "at": "2026-11-27T15:22:23Z",
+    "by": "agent",
+    "delivered": "Grupo 6 da #527 via flow: #514/#507 (f4f1e630), harness no perfil (00befeaa), tela única de adicionar servidor #506/#504 (7173abf0), cartões da lista #505 (53cc195d), README e notas; release v2.12.0 (6091f893, tag v2.12.0) com make watch-release disparado.",
+    "residual_risk": "Resultado do workflow Release ainda não observado (notificação detached). Follow-ups abertos: #528 (dry run Android), #529 (travas 2.0.22), #530 (compatibilidade antes do Codex), #531 (persistir Retry-After longo).",
+    "validation": "make check verde em cada unidade e no SHA do release ad6e7660; revisões convergidas (U3 5 rodadas, U4 4 rodadas); l10n --check ok."
+  },
   "contract": {
     "complete_when": [
       {
@@ -587,10 +593,14 @@
     {
       "at": "2026-11-27T14:55:23Z",
       "text": "U4 R3 julgado: aceitos E1 (overflow visível com maxLines null), E2 (serversWaitUntil/serversWaitNoEnd em 14 idiomas), E3 (arredondamento em UTC com microssegundos), E4 (comentário), E5 (testes sem tocar Check desabilitado); rejeitado E6 do Haiku (catálogo: mesmo padrão PORT_KEYS dos keys da U3, --check passa). Fix commitado 86e840fa; métricas R3 gravadas."
+    },
+    {
+      "at": "2026-11-27T15:22:22Z",
+      "text": "R0001 resolvido: U2 replanejada e publicada (00befeaa) sem tratar kinds desconhecidos; compatibilidade adiada para #530 antes do Codex, com concordância do Sol-F."
     }
   ],
-  "generation": 112,
-  "next_action": "Squash 7173abf0..HEAD, push, fechar #505, marcar #527; avaliação dos helpers; release-notes v2.12.0; gate no SHA; make release V=stable; make watch-release.",
+  "generation": 116,
+  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -604,16 +614,16 @@
       "id": "R0001",
       "mitigation": "Replanejar: harnessKind persistido fora do sameBinding, sem marcador/ocultação/fail-closed; issue de follow-up para compatibilidade de schema antes do Codex; dissent exchange com Sol-F (frontier) e Grok-F registrado indisponível; avisar owner via hey.",
       "stage": "CONT4",
-      "status": "open",
+      "status": "resolved",
       "text": "U2: 3 rodadas de review no mesmo problema (perfis de harness desconhecido vindos de build mais novo). Suposição duvidosa: esta build precisa tratar kinds desconhecidos; nenhuma build atual grava kind != opencode e builds pré-U2 já tratariam tudo como OpenCode."
     }
   ],
   "schema": 1,
   "started_at": "2026-11-27T09:41:58Z",
-  "status": "in_progress",
+  "status": "completed",
   "task_id": "tm_20261127T094158Z_6862cb28",
   "title": "Pesquisa prévia do grupo 6 da #527 (servidores)",
-  "updated_at": "2026-11-27T15:14:34Z",
+  "updated_at": "2026-11-27T15:22:23Z",
   "validations": [
     {
       "at": "2026-11-27T09:42:17Z",
@@ -774,6 +784,13 @@
       "check": "make check TEST_JOBS=4 @46ffc67d (U4 final)",
       "criterion": null,
       "evidence": "/tmp/opencode/g6u4/gate-r4.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T15:21:59Z",
+      "check": "Release v2.12.0",
+      "criterion": null,
+      "evidence": "make check verde em ad6e7660 (gate-release.log); make release V=stable -> 6091f893 tag v2.12.0 push atômico; make watch-release disparado (notificação detached)",
       "outcome": "pass"
     }
   ]
