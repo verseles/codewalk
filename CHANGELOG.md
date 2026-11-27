@@ -2,6 +2,23 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.12.1 - 2026-11-27
+
+> 📣 CodeWalk 2.12.1 publishes everything from 2.12.0, which never shipped because GitHub had no macOS runner for its release build: servers are added from one screen, healthy servers read Online on every OpenCode 2 version, and the server list is tidier.
+
+### Build & release
+
+- The 2.12.0 release build stopped when GitHub could not assign a macOS (Apple Silicon) runner, so 2.12.0 was never published. No app code changed for this release.
+- The Linux preview check now opens the new Add Server screen instead of the removed "Pair a server" button, so the main branch checks pass again.
+
+### Included from 2.12.0
+
+- One Add server screen replaces the separate Add and Pair buttons: a full page on phones and a dialog over the server list from 600 dp. Pair again and Renew open it too (`#506`).
+- The screen starts with a harness picker (OpenCode; Codex is listed as Coming soon) and the choice is kept with the server. Below it, a Pairing link | Manual switch opens on the link, with QR scanning and image import inside (`#504`).
+- In Manual mode, Save checks the server and saves it at once when it answers. When the check fails, the reason is shown and "Save anyway" keeps the server as Offline; OpenCode 1 servers are still refused (`#504`).
+- Server cards show the name with an Active badge, one status line with harness and version (for example "Online · OpenCode 2.0.23"), the URL on one line, and a quiet line with Default, sign-in and pairing expiry (with the year). A reason in red appears only when something is wrong (`#505`).
+- Every stable OpenCode 2 version from 2.0.20 on reads as Online, and a first check shows a neutral "Checking…" that turns Delayed only after 5 seconds without an answer (`#507`, `#514`).
+
 ## v2.12.0 - 2026-11-27
 
 > 📣 CodeWalk 2.12.0 adds servers from one screen with a harness picker, pairing link or manual URL, saves a server even when it is down, shows healthy servers as Online on every OpenCode 2 version, and tidies the server list with one status line and the version.
