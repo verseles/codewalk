@@ -206,16 +206,18 @@ def smoke(archive_path, evidence):
             # The empty workspace's setup action ("Set up server", 3f27b60e) opens the same Servers page.
             click(window, "Set up server")
             expect(window, ["Servers", "No servers found"], "02-hosts")
-            # The full-width page leaves its outlined button hard to read, so
-            # the pairing opens by keyboard order when OCR misses it: Add
-            # Server, then Pair a server.
-            if locate(capture(window, snapshot), "Pair a server") is not None:
-                click(window, "Pair")
+            # One Add Server action opens the add screen (#506), a dialog at
+            # this width that opens on the pairing link. Its filled button can
+            # escape OCR, so it opens by keyboard order when OCR misses it.
+            if locate(capture(window, snapshot), "Add Server") is not None:
+                click(window, "Add Server")
             else:
-                run(["xdotool", "key", "--clearmodifiers", "--delay", "300", "Tab", "Tab"])
+                run(["xdotool", "key", "--clearmodifiers", "Tab"])
                 time.sleep(0.5)
                 run(["xdotool", "key", "--clearmodifiers", "Return"])
-            expect(window, ["Pair a server", "Pairing link", "Confirm and pair"], "03-pairing")
+            # The list's "Add Server" stays visible under the dialog, so only
+            # labels unique to the add screen prove it opened.
+            expect(window, ["Harness", "Pairing link", "Confirm and pair"], "03-pairing")
             run(["xdotool", "key", "--clearmodifiers", "ctrl+comma"])
             # A fresh release's What's new card tops the rail and pushes
             # Shortcuts below the window, so the page is awaited first and the
