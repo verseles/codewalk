@@ -418,14 +418,22 @@
       "outcome": "v2.12.1 cut (9c5febb0, tag v2.12.1 pushed atomically); make watch-release started",
       "status": "done",
       "validation": "cut_stable dry run ok; tag on origin; watcher detached"
+    },
+    {
+      "depends": [],
+      "id": "CONT10",
+      "label": "Add the two approved pitfalls to AGENTS.md",
+      "outcome": "Two pitfalls added to AGENTS.md Known pitfalls (Linux smoke follows its screens; rerun before patch for runner capacity)",
+      "status": "done",
+      "validation": "git diff AGENTS.md: +2 lines, docs only"
     }
   ],
   "completion": {
-    "at": "2026-11-27T19:09:43Z",
+    "at": "2026-11-27T19:31:54Z",
     "by": "agent",
-    "delivered": "Diagnosed v2.12.0: macOS arm64 hosted runner never acquired (GitHub capacity), so verify/publish skipped; CI main red from stale Linux smoke step 03-pairing. Fixed the smoke (549b10a2), wrote v2.12.1 notes (3d688127), gate green, cut v2.12.1 (9c5febb0) and started make watch-release.",
-    "residual_risk": "Release outcome pending (watch-release notifies); macOS runner capacity may fail again; smoke steps after 03 with the dialog not yet proven on CI x64; reviewer skipped for a label-only CI script change; libgtk-3-dev and CI build deps installed on mercury.",
-    "validation": "make check rc=0; local Xvfb smoke 03-pairing passed twice on the new Add Server dialog; A/B on last-green 09039135 shows later-step failures are local arm64 env; smoke unit tests 34 OK."
+    "delivered": "AGENTS.md Known pitfalls gained the two owner-approved rules (Linux smoke follows its screens; offer gh run rerun --failed before a patch when a runner is not acquired).",
+    "residual_risk": "AGENTS.md change is not committed or pushed yet; awaiting owner order.",
+    "validation": "Docs-only diff, 2 added bullets; no gate needed per project Validation rules."
   },
   "contract": {
     "complete_when": [
@@ -633,9 +641,17 @@
     {
       "at": "2026-11-27T18:44:50Z",
       "text": "Diagnosis: Release run 46024248537 (v2.12.0) failed because Build macOS (arm64, macos-15) was never acquired by a hosted runner (annotation: capacity constraints), so verify/publish skipped; all other builds green. Separately CI run 46024351553 on main failed v2_native_builds (linux): tool/ci/smoke_v2_linux_preview.py:218 still expects the removed 'Pair a server' screen; the group 6 add screen shows Add Server -> Harness / Pairing link / Confirm and pair. Patch: update the smoke to the new add screen, validate it locally under xvfb, then cut v2.12.1 (the tag rerun retries macOS)."
+    },
+    {
+      "at": "2026-11-27T19:31:46Z",
+      "text": "Completed milestone preserved at 2026-11-27T19:09:43Z by agent: delivered=Diagnosed v2.12.0: macOS arm64 hosted runner never acquired (GitHub capacity), so verify/publish skipped; CI main red from stale Linux smoke step 03-pairing. Fixed the smoke (549b10a2), wrote v2.12.1 notes (3d688127), gate green, cut v2.12.1 (9c5febb0) and started make watch-release. | validation=make check rc=0; local Xvfb smoke 03-pairing passed twice on the new Add Server dialog; A/B on last-green 09039135 shows later-step failures are local arm64 env; smoke unit tests 34 OK. | residual_risk=Release outcome pending (watch-release notifies); macOS runner capacity may fail again; smoke steps after 03 with the dialog not yet proven on CI x64; reviewer skipped for a label-only CI script change; libgtk-3-dev and CI build deps installed on mercury."
+    },
+    {
+      "at": "2026-11-27T19:31:46Z",
+      "text": "Continuation request: as duas | reason: Owner approved both AGENTS.md pitfalls recommended after the v2.12.1 patch (Linux smoke follows its screens; offer a rerun for runner-capacity release failures)."
     }
   ],
-  "generation": 125,
+  "generation": 128,
   "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
   "pending_operation": null,
   "queued_followups": [],
@@ -659,7 +675,7 @@
   "status": "completed",
   "task_id": "tm_20261127T094158Z_6862cb28",
   "title": "Pesquisa prévia do grupo 6 da #527 (servidores)",
-  "updated_at": "2026-11-27T19:09:43Z",
+  "updated_at": "2026-11-27T19:31:54Z",
   "validations": [
     {
       "at": "2026-11-27T09:42:17Z",
