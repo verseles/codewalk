@@ -242,16 +242,32 @@
       "depends": [],
       "id": "CONT5",
       "label": "Liberar patch v2.11.1",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "v2.11.1 cortada: commit 2692ac1d, tag v2.11.1 push atômico",
+      "status": "done",
+      "validation": "cut_stable.py OK; gate f07508d1 verde; dry run 45970723349 verde"
     },
     {
       "depends": [],
       "id": "CONT6",
       "label": "Monitorar Release v2.11.1 e fechar #460 se build-android verde",
+      "outcome": "make watch-release iniciado (detached, hey no resultado); #460 fechada como completed citando 57cd96c9, dry run 45970723349 e v2.11.1",
+      "status": "done",
+      "validation": "gh issue close 460 OK; watcher-started"
+    },
+    {
+      "depends": [],
+      "id": "CONT7",
+      "label": "Criar issue: CI Android testar build de release com lint",
+      "outcome": "Issue #528 criada (CI Android só debug; labels area:android, area:release, type:chore, v2; verbatim incluído)",
+      "status": "done",
+      "validation": "gh issue create OK"
+    },
+    {
+      "depends": [],
+      "id": "CONT8",
+      "label": "Adicionar regra de dry run em Known pitfalls do AGENTS.md, commitar e dar push",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     }
   ],
@@ -415,10 +431,18 @@
     {
       "at": "2026-11-27T09:14:36Z",
       "text": "Cut v2.11.1 autorizado pelo owner ('libera um patch'): cut_stable.py --bump patch em f07508d1 (gate verde + dry run 45970723349 verde); 2.11.0+1795769439 -> 2.11.1+1795772873."
+    },
+    {
+      "at": "2026-11-27T09:31:24Z",
+      "text": "Completed milestone preserved at 2026-11-27T09:15:01Z by agent: delivered=Causa da falha v2.11.0 (lint AGP 9.3.1 em JDK 17, Google #522845800) corrigida com AGP 9.3.3 (57cd96c9); release notes v2.11.1 (f07508d1); review R1 10/10; gate verde; dry run Release verde; v2.11.1 cortada e enviada (2692ac1d, tag v2.11.1); watch-release iniciado; #460 fechada. | validation=make check verde em f07508d1; dry run 45970723349 build-android+verify verdes; cut_stable.py push atômico OK | residual_risk=Resultado final do Release v2.11.1 (tag) chega via hey do watch-release; follow-up sugerido: check lintVitalRelease no CI Android (GLM R1)."
+    },
+    {
+      "at": "2026-11-27T09:31:24Z",
+      "text": "Continuation request: sim | reason: Aprovação direta das 2 recomendações pós-release v2.11.1: regra de dry run no AGENTS.md e issue para o CI Android testar o build de release"
     }
   ],
-  "generation": 76,
-  "next_action": "Após cut: make watch-release (detached, reporta via hey) e encerrar turno; fechar #460 quando o Release v2.11.1 reportar build-android verde",
+  "generation": 82,
+  "next_action": "Adicionar regra de dry run em Known pitfalls do AGENTS.md referenciando #528, commitar e dar push",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -432,7 +456,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T09:14:36Z",
+  "updated_at": "2026-11-27T09:31:57Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
@@ -551,6 +575,13 @@
       "check": "Dry run Release dry_run_version=2.11.1 (run 45970723349, f07508d1)",
       "criterion": null,
       "evidence": "conclusion=success: plan, Windows x64, Linux arm64/x64, macOS arm64, build-android (09:05:46-09:12:36Z), verify ok; publish skipped (dry run)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T09:31:57Z",
+      "check": "AGENTS.md Known pitfalls: regra dry run pré-tag",
+      "criterion": null,
+      "evidence": "1 bullet adicionado após a linha 170, referencia #528 e a exceção a CI never watch it; docs-only, isento de gate/revisão",
       "outcome": "pass"
     }
   ]
