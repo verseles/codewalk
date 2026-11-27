@@ -646,6 +646,14 @@ void main() {
     ], next: 'page-2');
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('sessions-reveal')), findsNothing);
+    // Asked for during a search, the page stays in sight once it is cleared.
+    await tester.tap(find.byKey(const ValueKey('sessions-search')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('sessions-search-field')),
+      'p',
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('sessions-more')));
     await tester.pump();
     source.respond([
@@ -653,6 +661,9 @@ void main() {
         source.row('p$i', directory: '/work/alpha', title: 'P$i'),
     ]);
     await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('sessions-search-clear')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sessions-search-field')), findsNothing);
     // The page shows at once: the list opened when it was asked for.
     expect(_row(rig, 'p7'), findsOneWidget);
     expect(find.text(l10n.chatProjectShowFewerSessions), findsOneWidget);

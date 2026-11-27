@@ -60,7 +60,7 @@ class _SessionsPageState extends State<SessionsPage> {
 
   // The server and project the fold and the expansion were made for: another
   // server showing the same directory starts over too.
-  (String?, String)? _scope;
+  (String?, String?)? _scope;
 
   // Where each keyed row of the project list sits in this build, so a row
   // that moves when the projects reorder keeps its element, focus included
@@ -171,6 +171,15 @@ class _SessionsPageState extends State<SessionsPage> {
           controller.sessions.isEmpty)
         scoped ? l10n.chatNoConversationsInProject : l10n.sessionsEmpty,
     ];
+    // A fold and a "Show more" belong to the server and project shown when
+    // they were made: another project shown by any route (a tap, a preview,
+    // a link), or another server, even for a while, drops them.
+    final scope = (controller.selectedProfile?.id, scoped ? directory : null);
+    if (_scope != scope) {
+      _scope = scope;
+      _folded = null;
+      _expanded = null;
+    }
     _rowIndex.clear();
     final rows = scoped
         ? _scopedRows(context, controller, contexts, available, compact)
@@ -300,15 +309,6 @@ class _SessionsPageState extends State<SessionsPage> {
       _rowIndex[key] = builders.length;
     }
 
-    // A fold and a "Show more" belong to the project shown when they were
-    // made: the page builds again on every switch, so another project shown
-    // by any route (a tap, a preview, a link), or another server, drops them.
-    final scope = (controller.selectedProfile?.id, shown);
-    if (_scope != scope) {
-      _scope = scope;
-      _folded = null;
-      _expanded = null;
-    }
     final searching = contexts.query.isNotEmpty;
     for (final directory in contexts.ordered) {
       final active = directory == shown;

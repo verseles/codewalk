@@ -230,6 +230,11 @@ void main() {
     const year = 365 * Duration.millisecondsPerDay;
     await store.open(_a, '/two', nowMs: year);
     expect(store.workspace(_a).shown, {'/one': year, '/two': year + 1});
+    // Showing the shown project again keeps every stamp and writes nothing.
+    expect(
+      await store.activate(_a, '/two', nowMs: 1000),
+      ProjectStoreResult.unchanged,
+    );
     // ...and once it is right again, those stamps no longer rule.
     await store.activate(_a, '/one', nowMs: 1000);
     expect(store.workspace(_a).shown, {'/one': 1001, '/two': 1000});
@@ -241,7 +246,7 @@ void main() {
         'v': 1,
         'servers': {
           _a: {
-            'open': ['/a', '/b', '/far'],
+            'open': ['/a', '/b', '/far', '/edge'],
             'active': '/a',
             'shown': {
               '/a': 7,
@@ -249,7 +254,8 @@ void main() {
               '/closed': 9,
               '/x': 'late',
               // Past what a DateTime holds: it would break the drawer.
-              '/far': 9000000000000000,
+              '/far': ProjectWorkspaceStore.maxShownMs + 1,
+              '/edge': ProjectWorkspaceStore.maxShownMs,
             },
           },
           'profile_b': {
@@ -261,7 +267,10 @@ void main() {
       });
     final store = await _open(backend);
     expect(store.unreadable, isFalse);
-    expect(store.workspace(_a).shown, {'/a': 7});
+    expect(store.workspace(_a).shown, {
+      '/a': 7,
+      '/edge': ProjectWorkspaceStore.maxShownMs,
+    });
     expect(store.workspace('profile_b').shown, isEmpty);
     // A record from before the stamps reads as none.
     final legacy = _MemoryBackend()

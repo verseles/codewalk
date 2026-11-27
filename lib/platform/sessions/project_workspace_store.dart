@@ -177,27 +177,32 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
   /// The stamps after [active] replaces the state's active context: the
   /// context left keeps the moment it stopped being shown and [active]
   /// comes right after, both later than every stamp already kept, so a
-  /// coarse or rewound clock never ties or inverts them. Without a clock, or
-  /// when the active context does not change, the stamps stay.
+  /// coarse or rewound clock never ties or inverts them. Without a usable
+  /// clock, or when the active context does not change, the stamps stay as
+  /// they are (only the open contexts keep theirs).
+  ///
+  /// When stamping, a stamp more than a day ahead of the clock is dropped
+  /// rather than carried into every later stamp: it came from a clock that
+  /// jumped ahead. A clock set back by more than a day drops the stamps the
+  /// same way; they only order the drawer, which then follows replies until
+  /// the projects are shown again (#534).
   static Map<String, int> _stamped(
     ProjectWorkspace state,
     List<String> open,
     String? active,
     int? nowMs,
   ) {
-    // A stamp more than a day ahead of the clock came from a clock that
-    // jumped: it is dropped instead of carried into every later stamp.
-    final ahead = nowMs == null ? maxShownMs : nowMs + _clockSlackMs;
     final kept = {
       for (final MapEntry(:key, :value) in state.shown.entries)
-        if (open.contains(key) && value <= ahead) key: value,
+        if (open.contains(key)) key: value,
     };
     if (nowMs == null ||
+        nowMs < 0 ||
         active == null ||
-        active == state.active ||
-        nowMs < 0) {
+        active == state.active) {
       return kept;
     }
+    kept.removeWhere((_, value) => value > nowMs + _clockSlackMs);
     final latest = kept.values.fold<int>(-1, (a, b) => a > b ? a : b);
     final at = nowMs > latest ? nowMs : latest + 1;
     if (at + 1 > maxShownMs) return kept;
