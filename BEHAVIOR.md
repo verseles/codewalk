@@ -853,6 +853,7 @@ description of this code.
 - **Then** the searchable preset picker and five density tiers work in compact and wide layouts; on narrow screens or enlarged text the segmented choices become fields that open the same searchable picker
 - **Then** the controls use the scoped 14-language catalog, including right-to-left layout
 - **Then** Session tabs and Recent sessions can each be turned off and on, persisted as `cw2.settings.showSessionTabs` and `cw2.settings.showRecentSessions` (on by default); the Session tabs choice explains that each tab has its own menu, turning tabs off also hides their first-use hint, and the Recent sessions choice also governs the section above the project list
+- **Then** with Session tabs off, a shown conversation heads the toolbar on every width instead of the project: its project's icon leads it and opens the project picker, and its title is the first non-empty one of the open view, an open project's row or its tab; the list, the New Chat draft, an untitled conversation and another server's conversation keep the project title, and a toolbar so crowded with actions that under 48 dp remain shows neither (#535)
 - **Then** the chat's overflow opens Display, a sheet with the same thinking, tool call, composer tip, session tab and Recent session choices, plus the task list and Tokens per second switches that live only there, so the workspace can be reshaped without leaving the chat
 
 - **Given** the user changes Settings > Appearance > Text size
