@@ -814,7 +814,7 @@ description of this code.
 - **Then** a 320-pixel destination rail and detail appear side by side, with Appearance selected initially
 - **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
 - **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
-- **Then** Servers opens the existing hosts route; Help exposes App Logs, Release history and About, while other unimplemented feature settings remain with their owning Issues
+- **Then** Servers opens the existing hosts route; Help exposes App Logs, Version and updates (with the release history below the update controls) and About, while other unimplemented feature settings remain with their owning Issues
 - **Then** About lists GitHub and a permanent Telegram entry (`https://t.me/codewalkapp`) that open in the external handler, with a snackbar when the link cannot be opened; Settings search finds About by GitHub or Telegram, Appearance by text size, math rendering, the thinking and tool call bubbles or composer tips, and Behavior by its render modes, language, composer spell check or, on a desktop window, its title bar and close choices
 
 - **Given** the user opens Shortcuts
@@ -949,7 +949,9 @@ description of this code.
 - **Then** changing consent invalidates pending copy-success feedback; contents already written to the operating-system clipboard cannot be revoked
 - **Then** a committed profile removal is reported separately from a failed subsequent catalog refresh
 
-- **Given** the user opens Settings > Release history
+- **Given** the user opens Settings > Version and updates (#519)
+- **Then** the installed version and update controls come first and the release history follows below them in the same scroll; Settings search finds this one destination by update or history words
+- **Then** What's new Changelog and About's Release history open it scrolled to the history heading, which stays in view while the history loads or an update card appears above it, until the user scrolls; selecting the destination itself opens it at the top, also when it is already open
 - **When** native loading is available
 - **Then** the public fixed GitHub changelog is read without profile authentication, redirects or automatic replay, with a 256 KiB body limit and bounded timeouts
 - **Then** the isolated `cw2.releaseHistory.cache` stores a validated envelope of at most 512 KiB, with one-hour freshness and coalesced loading

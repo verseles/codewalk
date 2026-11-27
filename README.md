@@ -181,7 +181,7 @@ CodeWalk 2 uses a modular Dart workspace (`packages/codewalk_core`, `packages/co
 
 ## Community
 
-Chat with users, get release news, and send feedback: [Telegram — t.me/codewalkapp](https://t.me/codewalkapp). Release highlights also appear in-app under **Settings → Release history**.
+Chat with users, get release news, and send feedback: [Telegram — t.me/codewalkapp](https://t.me/codewalkapp). Release highlights also appear in-app under **Settings → Version and updates**, below the update controls.
 
 ## License
 
