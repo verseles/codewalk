@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 7,
+  "artifact_seq": 8,
   "artifacts": {
     "A0001": {
       "active": false,
@@ -119,6 +119,22 @@
       "stage": "S5",
       "supersedes": null,
       "title": "ART-REVIEWER-LEDGER & ART-REVIEW-REPORTS Batch 3 (#525) R1"
+    },
+    "A0008": {
+      "active": true,
+      "bytes": 754,
+      "created_at": "2026-11-27T09:03:21Z",
+      "evidence": "/tmp/opencode/rvw/r1_*.out",
+      "id": "A0008",
+      "impact": "Decide se precisa dry run antes do tag e se há fix de código",
+      "origin": "10 helpers (reviewer R1)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0008.md",
+      "purpose": "Review 09039135..57cd96c9 AGP 9.3.1->9.3.3",
+      "rerun_when": "boundary muda",
+      "sha256": "faf39e4e1305befda324c850bc5b96c4dc9f406809218e5df70ec556ddf321bb",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS R1 agp-933-release-lint-fix"
     }
   },
   "checklist": [
@@ -218,16 +234,16 @@
       "depends": [],
       "id": "CONT4",
       "label": "Revisar a correção e commitar",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "Review R1 convergido sem fix de código (10/10 approve no fix; dry run pré-tag aceito como validação); sessões fechadas",
+      "status": "done",
+      "validation": "Gate make check verde em f07508d1; metrics R1 recorded"
     },
     {
       "depends": [],
       "id": "CONT5",
       "label": "Liberar patch v2.11.1",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -383,18 +399,27 @@
     {
       "at": "2026-11-27T08:53:19Z",
       "text": "Handshakes R1 agp-933-release-lint-fix dir=/home/ubuntu/MEGA/WORK/codewalk job_key=agp-933-release-lint-fix-20261127T085155Z-902b: READY (10/10): helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high."
+    },
+    {
+      "at": "2026-11-27T08:54:28Z",
+      "text": "Release notes v2.11.1 commitadas em f07508d1 (📣 266 chars, sem ##, inclui itens da 2.11.0 nunca publicada). Gate make check TEST_JOBS=4 iniciado em background no SHA f07508d1 (log /tmp/opencode/rvw/gate.log). Review R1 op_aee3490a147c em andamento (dispatch 08:54 UTC)."
+    },
+    {
+      "at": "2026-11-27T09:04:27Z",
+      "text": "ART-REVIEW-JUDGMENT R1 agp-933-release-lint-fix (rvw_20261127T085155Z_e5231412, 57cd96c9, 10/10): fix AGP 9.3.3 aprovado por todos. REJEITADO F1 haiku CRITICAL pubspec 2.11.0: cut_stable.py --bump patch faz pubspec+CHANGELOG+tag (AGENTS.md:157). ACEITO F2 haiku WARNING + opus-F SUGGESTION: dry run release.yml dry_run_version=2.11.1 em main antes do tag (R8/minify/packaging nunca rodaram em AGP 9.x; tag imutável); vs regra CI never watch: falha reportada e validação só no CI; espera via background do harness, sem cimonitor/gh run watch. ADIADO GLM SUGGESTION lintVitalRelease no ci.yml (follow-up). Sem fix de código -> sem re-review. Sem posição Frontier rejeitada -> sem dissent. Identity: 5 wrappers binding mismatch, omitidos. Metrics R1 recorded: high-value haiku, opus-F; useful-common demais 8."
+    },
+    {
+      "at": "2026-11-27T09:05:09Z",
+      "text": "Push main 09039135..f07508d1 feito. Dry run Release workflow_dispatch dry_run_version=2.11.1 run 45970723349 em f07508d1 (09:04:57Z), aguardando em background."
+    },
+    {
+      "at": "2026-11-27T09:14:36Z",
+      "text": "Cut v2.11.1 autorizado pelo owner ('libera um patch'): cut_stable.py --bump patch em f07508d1 (gate verde + dry run 45970723349 verde); 2.11.0+1795769439 -> 2.11.1+1795772873."
     }
   ],
-  "generation": 68,
-  "next_action": "tm prepare e despachar payload canônico R1 aos 10 helpers com --resume",
-  "pending_operation": {
-    "expected_bytes": 40000,
-    "expected_seconds": 900,
-    "id": "op_aee3490a147c",
-    "kind": "subagent",
-    "prepared_at": "2026-11-27T08:53:54Z",
-    "purpose": "Review R1 agp-933-release-lint-fix: 10 helpers sobre 09039135..57cd96c9"
-  },
+  "generation": 76,
+  "next_action": "Após cut: make watch-release (detached, reporta via hey) e encerrar turno; fechar #460 quando o Release v2.11.1 reportar build-android verde",
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 104,
@@ -407,7 +432,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T08:53:54Z",
+  "updated_at": "2026-11-27T09:14:36Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
@@ -513,6 +538,20 @@
       "criterion": null,
       "evidence": "Não executável em mercury (aarch64, sem JDK; AGENTS.md: APKs não buildam de forma confiável em ARM64). Validação real fica no job build-android do Release v2.11.1. Única referência de build ao AGP: android/settings.gradle.kts:21 (9.3.1->9.3.3); 9.3.3 presente no Google Maven.",
       "outcome": "info"
+    },
+    {
+      "at": "2026-11-27T09:04:37Z",
+      "check": "Gate local make check TEST_JOBS=4",
+      "criterion": null,
+      "evidence": "SHA f07508d1, 08:54-09:04 UTC, GATE_RC=0, analyze 4<=4; log /tmp/opencode/rvw/gate.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T09:14:25Z",
+      "check": "Dry run Release dry_run_version=2.11.1 (run 45970723349, f07508d1)",
+      "criterion": null,
+      "evidence": "conclusion=success: plan, Windows x64, Linux arm64/x64, macOS arm64, build-android (09:05:46-09:12:36Z), verify ok; publish skipped (dry run)",
+      "outcome": "pass"
     }
   ]
 }
