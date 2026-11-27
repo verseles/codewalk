@@ -1295,7 +1295,7 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableList =>
-      'فہریہ اینڈ پوائنٹ کا موجودہ جواب نہیں۔';
+      'گفتگو کی مطابقت پذیری ہو رہی ہے؛ تھوڑی دیر بعد دوبارہ کوشش کریں۔';
 
   @override
   String get sessionsActionUnavailableBusy =>

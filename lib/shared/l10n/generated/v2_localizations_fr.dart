@@ -1316,7 +1316,7 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableList =>
-      'La liste n\'est pas la réponse actuelle du point de terminaison.';
+      'Synchronisation des conversations ; réessayez dans un instant.';
 
   @override
   String get sessionsActionUnavailableBusy =>

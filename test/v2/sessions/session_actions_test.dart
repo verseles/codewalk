@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
@@ -142,6 +144,37 @@ void main() {
     expect(item.enabled, isFalse);
     // Every unavailable native entry carries the reason.
     expect(find.text(l10n.sessionsActionUnavailableVersion), findsWidgets);
+  });
+
+  testWidgets('a list whose read failed says so instead of a sync', (
+    tester,
+  ) async {
+    final (source, l10n, sessions) = await open(tester);
+    final key = source.row('first').info.ref.storageKey;
+    unawaited(sessions.refresh());
+    await tester.pump();
+    // A failure that is not retried by itself: promising a sync would leave
+    // the user waiting for one that never comes (#532).
+    source.fail(SessionCatalogFailure.incompatibleResponse);
+    await tester.pumpAndSettle();
+    expect(sessions.failure, SessionCatalogFailure.incompatibleResponse);
+    await tester.tap(find.byKey(ValueKey('session-actions-$key')));
+    await tester.pumpAndSettle();
+    final item = tester.widget<PopupMenuItem<SessionRowAction>>(
+      find.ancestor(
+        of: find.text(l10n.sessionsActionRename),
+        matching: find.byType(PopupMenuItem<SessionRowAction>),
+      ),
+    );
+    expect(item.enabled, isFalse);
+    expect(find.text(l10n.sessionsActionUnavailableList), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(PopupMenuItem<SessionRowAction>),
+        matching: find.text(l10n.sessionsReadFailed),
+      ),
+      findsWidgets,
+    );
   });
 
   testWidgets('a rename sends the new title', (tester) async {

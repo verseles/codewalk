@@ -1289,7 +1289,7 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableList =>
-      'তালিকাটি এন্ডপয়েন্টের বর্তমান উত্তর নয়।';
+      'কথোপকথন সিঙ্ক হচ্ছে; একটু পরে আবার চেষ্টা করুন।';
 
   @override
   String get sessionsActionUnavailableBusy => 'এই সেশনে আরেকটি কমান্ড চলছে।';

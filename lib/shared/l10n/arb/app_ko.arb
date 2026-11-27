@@ -1038,7 +1038,7 @@
   "@sessionsActionUnavailableAuth": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsActionUnavailableList": "목록은 엔드포인트의 현재 답이 아닙니다.",
+  "sessionsActionUnavailableList": "대화 동기화 중입니다. 잠시 후 다시 시도하세요.",
   "@sessionsActionUnavailableList": {
     "description": "V2 bounded read-only session catalog"
   },

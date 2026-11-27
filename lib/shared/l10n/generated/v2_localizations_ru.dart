@@ -1305,7 +1305,7 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableList =>
-      'Список — не текущий ответ endpoint.';
+      'Синхронизация бесед; повторите попытку через минуту.';
 
   @override
   String get sessionsActionUnavailableBusy =>

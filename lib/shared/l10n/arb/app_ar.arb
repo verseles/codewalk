@@ -1037,7 +1037,7 @@
   "@sessionsActionUnavailableAuth": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsActionUnavailableList": "القائمة ليست الإجابة الحالية لنقطة النهاية.",
+  "sessionsActionUnavailableList": "جاري مزامنة المحادثات؛ حاول مرة أخرى بعد قليل.",
   "@sessionsActionUnavailableList": {
     "description": "V2 bounded read-only session catalog"
   },

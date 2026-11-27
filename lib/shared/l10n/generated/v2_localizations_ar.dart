@@ -1287,7 +1287,7 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableList =>
-      'القائمة ليست الإجابة الحالية لنقطة النهاية.';
+      'جاري مزامنة المحادثات؛ حاول مرة أخرى بعد قليل.';
 
   @override
   String get sessionsActionUnavailableBusy =>

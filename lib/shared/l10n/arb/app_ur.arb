@@ -1038,7 +1038,7 @@
   "@sessionsActionUnavailableAuth": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsActionUnavailableList": "فہریہ اینڈ پوائنٹ کا موجودہ جواب نہیں۔",
+  "sessionsActionUnavailableList": "گفتگو کی مطابقت پذیری ہو رہی ہے؛ تھوڑی دیر بعد دوبارہ کوشش کریں۔",
   "@sessionsActionUnavailableList": {
     "description": "V2 bounded read-only session catalog"
   },

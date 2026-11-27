@@ -22,6 +22,7 @@ import 'session_composer_controls.dart';
 import 'session_composer_status.dart';
 import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
+import 'sessions_page.dart' show sessionCatalogFailureText;
 import 'workspace_draft_controller.dart';
 
 bool canOpenWorkspaceDraft(SessionsController catalog) =>
@@ -183,8 +184,12 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
             l10n.sessionsActionUnavailablePlatform,
           SessionActionReason.authenticationRequired =>
             l10n.sessionsActionUnavailableAuth,
-          SessionActionReason.listNotCurrent =>
-            l10n.sessionsActionUnavailableList,
+          // A failed read says what failed; only a list that is catching up
+          // promises the sync (#532).
+          SessionActionReason.listNotCurrent => switch (catalog?.failure) {
+            final failure? => sessionCatalogFailureText(l10n, failure),
+            null => l10n.sessionsActionUnavailableList,
+          },
           SessionActionReason.commandInFlight =>
             l10n.sessionsActionUnavailableBusy,
           SessionActionReason.noIdleMarker =>

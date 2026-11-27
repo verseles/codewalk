@@ -1,319 +1,364 @@
 {
-  "artifact_seq": 3,
+  "artifact_seq": 1,
   "artifacts": {
     "A0001": {
-      "active": false,
-      "bytes": 1071,
-      "created_at": "2026-11-27T19:54:31Z",
-      "evidence": "/tmp/opencode/g7/r1_<helper>.out",
+      "active": true,
+      "bytes": 740,
+      "created_at": "2026-11-27T22:11:17Z",
+      "evidence": "/tmp/opencode/g8/rev/u1/r1_*.out",
       "id": "A0001",
-      "impact": "F1/F2 change scroll behavior of the unified page",
-      "origin": "helper batch r1",
-      "path": "artifacts/tm_20261127T193607Z_a313a05a/A0001.md",
-      "purpose": "Review 21843121..8d786867",
-      "rerun_when": "updates_settings_page.dart or settings_shell_page.dart change",
-      "sha256": "a407ddc0a4198c0ca0b3606995feb4e09014ba2b98a57f80269dd9cd3c203703",
-      "stage": "S3",
+      "impact": "F1 may need a wording/reason fix; F2 docs step; F3 test strengthening",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0001.md",
+      "purpose": "Review 170e8de5..f5a05c40",
+      "rerun_when": "sessions_page.dart, session_actions_menu.dart or workspace_draft_page.dart change",
+      "sha256": "fae4e064501ebfe88a83d3b159c097220aa7502f04d2065985b089f669f31cf8",
+      "stage": "S2",
       "supersedes": null,
-      "title": "#519 review R1 reports (8 helpers)"
-    },
-    "A0002": {
-      "active": false,
-      "bytes": 903,
-      "created_at": "2026-11-27T20:23:09Z",
-      "evidence": "/tmp/opencode/g7/r2_<helper>.out",
-      "id": "A0002",
-      "impact": "G1 anchor release; G2 keyboard scroll regression",
-      "origin": "helper batch r2",
-      "path": "artifacts/tm_20261127T193607Z_a313a05a/A0002.md",
-      "purpose": "Re-review 40941cfd",
-      "rerun_when": "updates_settings_page.dart changes",
-      "sha256": "314a33491900c3033e6cb17a98a2f85d28adec205692578b69a0872e09e8e61e",
-      "stage": "S3",
-      "supersedes": null,
-      "title": "#519 review R2 reports (8 helpers)"
-    },
-    "A0003": {
-      "active": false,
-      "bytes": 707,
-      "created_at": "2026-11-27T20:47:09Z",
-      "evidence": "/tmp/opencode/g7/r3_<helper>.out",
-      "id": "A0003",
-      "impact": "H1 reveal handoff; H2 desktop paging",
-      "origin": "helper batch r3",
-      "path": "artifacts/tm_20261127T193607Z_a313a05a/A0003.md",
-      "purpose": "Re-review 63007b20",
-      "rerun_when": "updates_settings_page.dart changes",
-      "sha256": "9de63356eb2d9a6493400cbea7592aa4b404cf42960c8ee8eca25b8c22c2a245",
-      "stage": "S3",
-      "supersedes": null,
-      "title": "#519 review R3 reports (8 helpers)"
+      "title": "u1 review r1 (#532+#533)"
     }
   },
   "checklist": [
     {
       "depends": [],
       "id": "S1",
-      "label": "Research #519: settings shell, updates and history pages, entry points, smoke",
-      "outcome": "Paths mapped: settings_shell_page, updates/history pages, about, news card, 2 test files, smoke 08b/09",
+      "label": "Plan group 8, create its GitHub issues and #527 section, ask owner questions",
+      "outcome": "Planning settled: no blocking owner question; defaults item3=chat timeline on phones, item14=card hides on the next visit after first view, item17=2 before/2 after; planner only for #534,#537,#539-#542; questions asked just in time per unit",
       "status": "done",
-      "validation": "code read"
+      "validation": "issues #532-#553 exist; #527 section 8 present"
     },
     {
       "depends": [
         "S1"
       ],
       "id": "S2",
-      "label": "Plan and ask owner clarifying questions",
-      "outcome": "Plan D1-D5 recorded; no blocking question",
+      "label": "[19] Sidebar: remove or fix the stale and 'not the endpoint response' texts (#19)",
+      "outcome": "#532 done: 92d646ee + review fix 3cf9f7b7 (failure text instead of sync promise)",
       "status": "done",
-      "validation": "n/a"
+      "validation": "gate make check pass on f5a05c40; review r1 8/8 delivered; focused suites 105 pass"
     },
     {
       "depends": [
         "S2"
       ],
       "id": "S3",
-      "label": "Implement the unified Version and history screen with tests and smoke",
-      "outcome": "Stage squashed to 851747a3 (tree equal), docs and v2.13.0 notes committed",
+      "label": "[10] Sidebar: header row closer to the top, transient messages below it",
+      "outcome": "#533 done: f5a05c40 (server row first, notices below, top padding 8); BEHAVIOR.md updated for #532/#533",
       "status": "done",
-      "validation": "3 review rounds converged; mutations M1-M7 fail as expected; gate green on 63007b20"
+      "validation": "gate pass; review r1 approve except #532 F1 fixed"
     },
     {
       "depends": [
         "S3"
       ],
       "id": "S4",
-      "label": "Gate and reviewer loop, apply accepted fixes",
-      "outcome": "Review converged (3 rounds), gate green on 55450f33, pushed, #519 closed, #527 group 7 checked",
-      "status": "done",
-      "validation": "make check rc=0 on 55450f33"
+      "label": "[11] Sidebar revamp: no Recent sessions; active project first with 5 sessions; others 3 compact by recency",
+      "outcome": "",
+      "status": "current",
+      "validation": ""
     },
     {
       "depends": [
         "S4"
       ],
       "id": "S5",
-      "label": "Evaluate helpers, docs, #519/#527, squash, push and minor release",
-      "outcome": "v2.13.0 cut (6ab5c1ce, tag pushed atomically), watch-release started, helper evaluation sent",
-      "status": "done",
-      "validation": "gate green on 55450f33; cut_stable ok; tag on origin"
+      "label": "[7] Top bar without tabs: session title with project icon that switches project",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
     },
     {
-      "depends": [],
-      "id": "CONT1",
-      "label": "Add the approved widget-test pitfall to AGENTS.md",
-      "outcome": "Widget-test pitfall added to AGENTS.md Known pitfalls",
-      "status": "done",
-      "validation": "git diff AGENTS.md: +1 line, docs only"
+      "depends": [
+        "S5"
+      ],
+      "id": "S6",
+      "label": "[3] Timeline: slightly wider side padding on phones",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S6"
+      ],
+      "id": "S7",
+      "label": "[5] Timeline: collapsed tool/thinking summary by default, Display toggle for expanded tools",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S7"
+      ],
+      "id": "S8",
+      "label": "[4] TPS and duration on by default, inline after the last word without icons",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S8"
+      ],
+      "id": "S9",
+      "label": "[12] Message action bar: always-selectable text, floating bar (copy, undo turn, overflow rewind/fork), desktop hover",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S9"
+      ],
+      "id": "S10",
+      "label": "[12c] Message action: share as image",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S10"
+      ],
+      "id": "S11",
+      "label": "[12b] Message action: read aloud with multi-provider TTS, Edge by default",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S11"
+      ],
+      "id": "S12",
+      "label": "[12a] Message action: forward to another session",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S12"
+      ],
+      "id": "S13",
+      "label": "[1] Composer: never show 'Subagents running: N'",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S13"
+      ],
+      "id": "S14",
+      "label": "[2] Activity chip: count shells only after 5 s",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S14"
+      ],
+      "id": "S15",
+      "label": "[8] Mic: debounce the return to the right after send",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S15"
+      ],
+      "id": "S16",
+      "label": "[9] Mic: expanded composer without keyboard, input grows to 3 lines",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S16"
+      ],
+      "id": "S17",
+      "label": "[16] Model selector: remember the last effort variant per model",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S17"
+      ],
+      "id": "S18",
+      "label": "[6] Composer tips: real tips with a tappable menu link",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S18"
+      ],
+      "id": "S19",
+      "label": "[15] Tasks widget: title 'Tasks' plus done/total chip",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S19"
+      ],
+      "id": "S20",
+      "label": "[17] Task list: open by default, 5 visible rows centered on the in-progress item",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S20"
+      ],
+      "id": "S21",
+      "label": "[13] Settings: back and title only in the top bar, consistent across pages",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S21"
+      ],
+      "id": "S22",
+      "label": "[14] Settings news card: X close, hide after first view, 'Novidades' label",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S22"
+      ],
+      "id": "S23",
+      "label": "[18] Default GitHub theme on new installs",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
+    },
+    {
+      "depends": [
+        "S23"
+      ],
+      "id": "S24",
+      "label": "Group 8 docs, #527 check-off, push and minor release",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
     }
   ],
-  "completion": {
-    "at": "2026-11-27T21:00:45Z",
-    "by": "agent",
-    "delivered": "AGENTS.md Known pitfalls gained the owner-approved rule: never await scroll animations in widget tests; start unawaited, then pumpAndSettle.",
-    "residual_risk": "AGENTS.md change not committed yet; awaiting owner order. Group 8 collection continues as queued follow-ups (12 items).",
-    "validation": "Docs-only diff, 1 added bullet; no gate needed."
-  },
+  "completion": null,
   "contract": {
     "complete_when": [
       {
-        "evidence": "851747a3; test/v2/settings/diagnostics_history_pages_test.dart 11 tests incl. page-level anchoring; focused suites 205 pass",
+        "evidence": null,
         "id": "C1",
-        "text": "#519 behavior implemented and tested",
+        "text": "all 22 items delivered and their issues closed",
         "waived": false
       },
       {
-        "evidence": "rc=0, log /tmp/opencode/g7/gate-final.log",
+        "evidence": null,
         "id": "C2",
-        "text": "gate green on release SHA",
+        "text": "#527 group 8 fully checked",
         "waived": false
       },
       {
-        "evidence": "R1-R3 judged (rvw_20261127T194247Z_cd3e20bb); R3 7/8 approve, Sol-F finding fixed exactly as suggested and mutation-tested",
+        "evidence": null,
         "id": "C3",
-        "text": "review converged",
-        "waived": false
-      },
-      {
-        "evidence": "6ab5c1ce release: cut v2.13.0; tag v2.13.0 on origin; make watch-release started",
-        "id": "C4",
-        "text": "release cut and watcher started",
+        "text": "final release cut with watch-release started",
         "waived": false
       }
     ],
     "constraints": [
-      "project AGENTS.md flow and Known pitfalls (Linux smoke follows its screens)",
-      "Brazilian Portuguese to owner, hey for questions/conclusions",
-      "no edits during the gate",
-      "harness-neutral guard"
+      "project AGENTS.md flow and Known pitfalls",
+      "v1 is a UX reference, never a source of code",
+      "Brazilian Portuguese to the owner with hey for questions and conclusions",
+      "the owner compacts context after the issues exist; planning resumes from this Task Memory"
     ],
-    "delivery_boundary": "pushed main, #519 closed, #527 group 7 checked, minor release cut with watch-release",
+    "delivery_boundary": "issues created now; implementation and releases in later turns after planning",
     "expected_results": [
-      "single Settings section with version/update first and history below in one scroll",
-      "old history entry points open the unified section",
-      "green gate and converged review",
-      "v2.13.0 released"
+      "22 issues created and listed under #527 group 8",
+      "each item delivered with tests, review, docs",
+      "releases cut per the flow"
     ],
-    "objective": "Deliver #527 group 7 (#519): Settings shows one screen with version and updates on top and the release history below it, via the project flow ending in a minor release.",
+    "objective": "Plan and deliver #527 group 8: the 19 owner UX items (item 12 split into bar, share image, read aloud, forward) in the agent-decided order, through the project flow.",
     "scope_in": [
-      "#519 unification of the Version/Updates and Release history Settings sections",
-      "navigation entry points (What's new card, About, search, routes) to the unified section",
-      "Linux preview smoke steps that open these screens",
-      "tests, l10n if needed, BEHAVIOR.md, v2-plan.md §17 if decisions change, #519 and #527 updates",
-      "review loop, squash, push, minor release"
+      "create one GitHub issue per item with its verbatim and add group 8 to #527 in execution order",
+      "plan, implement, review and release each item per the project flow",
+      "Linux smoke updates when touched screens change"
     ],
     "scope_out": [
-      "other ROADMAP.md lines",
-      "update mechanism changes beyond layout/navigation",
-      "unrelated Settings sections"
+      "work outside the 22 listed items",
+      "importing v1 code (adapt only, v1 is a UX reference)"
     ]
   },
   "decisions": [
     {
-      "at": "2026-11-27T19:37:28Z",
-      "text": "Plan #519 (no planner: single-feature scope; no blocking product question, defaults announced via hey): D1 one Help destination 'Version and updates' (SettingsSection.releaseHistory removed); search matches updates + history words. D2 UpdatesSettingsPage = updates block on top, then a 'Release history' heading with refresh/retry, entries in batches of 20 and Load more, all in one ListView; history loads when the section opens (1h cache as before). D3 What's new 'Changelog' and About 'Release history' open the unified section scrolled to the history heading (historyRequest token, Scrollable.ensureVisible). D4 ReleaseHistorySettingsPage becomes ReleaseHistorySection (Column). D5 Linux smoke 09-history: open Version and updates, scroll detail pane to Release history, expect Release history + Refresh. Tests: diagnostics_history_pages_test, updates_settings_page_test, new entry-point/search tests. Docs: BEHAVIOR.md."
+      "at": "2026-11-27T21:39:59Z",
+      "text": "Group 8 order (agent decided by similarity then priority): 8.1 Sidebar e topo 19,10,11,7; 8.2 Timeline e ações da mensagem 3,5,4,12,12c,12b,12a; 8.3 Composer, microfone e chip 1,2,8,9,16,6 (tips last so they can point to final Display options); 8.4 Widget de tarefas 15,17; 8.5 Configurações 13,14; 8.6 Padrões 18. Code pointers per item from an Explore pass are saved in /tmp/opencode/g8/pointers.txt and go into each issue body (durable copy on GitHub)."
     },
     {
-      "at": "2026-11-27T19:42:53Z",
-      "text": "Review R1 setup: boundary 21843121..8d786867 (#519 stage). Eligible helpers (9): Claude-haiku-5-max, Claude-opus-5-xhigh-F, Codex-6-luna-max, Codex-6.2-sol-xhigh-F, DeepSeek-41-flash-high (Fri 19:42 UTC, allowed), Ernie-55-flash-high, Gemini-4-hydrogen-xhigh, Grok-47-high-F, Hungerg-free. Job key codewalk-519-version-and-history-screen-20261127T194247Z-68e8, dir /home/ubuntu/MEGA/WORK/codewalk, files /tmp/opencode/g7. Metrics review id rvw_20261127T194247Z_cd3e20bb. Focused checks: settings/updates/window tests 200 pass; mutation checks on history scroll and reset both fail as expected."
+      "at": "2026-11-27T21:41:22Z",
+      "text": "Group 8 GitHub issues created (label ux), in execution order: 8.1 #532(19 textos sidebar) #533(10 cabeçalho) #534(11 revamp) #535(7 topo sem abas); 8.2 #536(3 padding) #537(5 resumo ferramentas) #538(4 TPS inline) #539(12 barra de ações) #540(12c imagem) #541(12b TTS) #542(12a encaminhar); 8.3 #543(1 subagentes) #544(2 shell 5s) #545(8 debounce mic) #546(9 mic expandido) #547(16 variante) #548(6 dicas); 8.4 #549(15 título tarefas) #550(17 lista 5 itens); 8.5 #551(13 títulos settings) #552(14 cartão novidades); 8.6 #553(18 tema GitHub). #527 body gained section 8 with these checkboxes; #539 comment links #540-#542. Each issue body has context, code pointers and the owner verbatim."
     },
     {
-      "at": "2026-11-27T19:43:42Z",
-      "text": "R1 handshakes (key codewalk-519-version-and-history-screen-20261127T194247Z-68e8, dir /home/ubuntu/MEGA/WORK/codewalk): READY = Claude-haiku-5-max, Claude-opus-5-xhigh-F, Codex-6-luna-max, Codex-6.2-sol-xhigh-F, DeepSeek-41-flash-high, Ernie-55-flash-high, Gemini-4-hydrogen-xhigh, Hungerg-free. Grok-47-high-F failed handshake and its one retry (out of Grok credits) -> failed for this job."
+      "at": "2026-11-27T22:02:06Z",
+      "text": "#532 committed 92d646ee (sidebar drops liveStale and listNotCurrent notices; sessionsActionUnavailableList reworded in 14 locales). #533 implemented: server row first, WorkspaceDrawerNotice and loading bar below it, list top padding 8. Review boundary covers #532+#533 together (170e8de5..HEAD): both small, same file and header, saves one helper round."
     },
     {
-      "at": "2026-11-27T20:12:49Z",
-      "text": "R1 judgment (#519): ACCEPT F1 wide re-select stays at history (Sol-F, Hungerg, Gemini, Ernie) -> request token + bool, plain select animates to top. ACCEPT F2 reveal before load/update card (Gemini, Sol-F) -> anchor heading via SizeChangedLayoutNotifier until UserScrollNotification. ACCEPT F3 didUpdateWidget untested (Opus-F, DeepSeek) -> page-level tests both directions + held-load anchoring + cancel on drag; mutations M1-M3 all fail as expected. ACCEPT F4 docs (BEHAVIOR.md 817/952, README.md:184) -> docs step. ACCEPT F5 (haiku) KeyedSubtree + const section. REJECT F6 (haiku) _back reset: no reachable effect after redesign (page disposed on compact back; every select sets history). No -F position rejected, no dissent needed. Extra: smoke scroll_detail moved pointer once (synced move to same spot hangs, found locally). Fix commit 40941cfd. Local trimmed smoke 01-04,08b,09 pass. Focused suites 202 pass. Re-review needed: fixes touch async scroll anchoring."
+      "at": "2026-11-27T22:02:15Z",
+      "text": "Review u1 (#532+#533, 170e8de5..f5a05c40): WORK ITEM codewalk-532-533-sidebar-header-notices, job key codewalk-532-533-sidebar-header-notices-20261127T220210Z-1edf, dir /home/ubuntu/MEGA/WORK/codewalk, metrics rvw_20261127T220211Z_16a7fc94, helpers (9): helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperDeepSeek-41-flash-high, helperErnie-55-flash-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free. Files /tmp/opencode/g8/rev/u1."
     },
     {
-      "at": "2026-11-27T20:37:54Z",
-      "text": "R2 judgment (#519): ACCEPT G1 (haiku, Opus-F, Sol-F, Hungerg warn; DeepSeek, Gemini sugg) anchor kept after keyboard/Tab/scrollbar moves -> clear on any depth-0 ScrollStartNotification not made by the page (_revealing flag around ensureVisible). ACCEPT G2 (Sol-F warn) explicit ScrollController broke PrimaryScrollController paging on compact -> controller removed, top reset via Scrollable.maybeOf(heading).position. Tests added: outside programmatic move releases anchor; update card appearing above keeps history in view; page keeps route primary scroll. Mutations M4 (UserScroll-only), M5 (explicit controller), M6 (no _revealing guard) each fail a test. No -F position rejected. Fix commit 63007b20. Focused suites 205 pass, analyze clean. R3 re-review: fixes again touch async scroll anchoring."
+      "at": "2026-11-27T22:03:38Z",
+      "text": "u1 handshakes: READY from helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperDeepSeek-41-flash-high, helperErnie-55-flash-high, helperGemini-4-hydrogen-xhigh, helperHungerg-free (key codewalk-532-533-sidebar-header-notices-20261127T220210Z-1edf, dir /home/ubuntu/MEGA/WORK/codewalk). helperGrok-47-high-F failed twice: out of Grok credits (failed for the job)."
     },
     {
-      "at": "2026-11-27T20:48:31Z",
-      "text": "R3 judgment (#519): 7/8 approve. ACCEPT H1 (Sol-F warn, haiku sugg): outside scroll during the 250 ms reveal animation started no ScrollStart -> reveal is now an immediate jump (Sol-F's first option); test asserts the jump lands in one frame; mutation M7 (250 ms animation) fails it. REJECT H2 (haiku sugg) desktop Page Down with Back focused: pre-existing (desktop never inherits PrimaryScrollController; the old ListView page behaved the same), out of #519 scope. No -F position rejected. Fix commit (jump). Re-review skipped: one-line change exactly as Sol-F suggested, mutation-tested; gate reruns on the final SHA."
+      "at": "2026-11-27T22:11:43Z",
+      "text": "u1 gate make check on f5a05c40: pass. Planning #534 (sidebar revamp; planner trigger: cross-module + tradeoffs): WORK ITEM codewalk-534-sidebar-revamp-plan, key codewalk-534-sidebar-revamp-plan-20261127T220455Z-37f2, dir /home/ubuntu/MEGA/WORK/codewalk, metrics rvw_20261127T221143Z_c75d2156, helpers (9) same pool as u1 incl. helperGrok-47-high-F. Files /tmp/opencode/g8/plan/p534."
     },
     {
-      "at": "2026-11-27T21:00:29Z",
-      "text": "Completed milestone preserved at 2026-11-27T20:56:34Z by agent: delivered=#519: one Settings > Version and updates screen (updates first, release history below in one scroll; Changelog/About open at the history with an anchor released by any outside scroll; destination opens at top; primary scroll kept), smoke step 09 updated. Squashed 851747a3, docs 10e1154a, notes 01e64b32, release 6ab5c1ce (v2.13.0). #519 closed, #527 group 7 checked. | validation=3 review rounds (8 helpers, Grok-F no credits) converged; mutations M1-M7 fail as expected; trimmed local Linux smoke passed 08b/09; make check green on 55450f33. | residual_risk=Release workflow result pending (watch-release notifies); smoke steps 08b/09 proven locally only on a trimmed run, CI x64 confirms on this push; desktop compact Page Down with Back focused remains pre-existing. Group 8 collection queued as follow-ups (11 items) until the owner says terminei."
+      "at": "2026-11-27T22:12:40Z",
+      "text": "p534 handshakes: READY from haiku, opus-F, luna, sol-F, deepseek, ernie, gemini, hungerg (key codewalk-534-sidebar-revamp-plan-20261127T220455Z-37f2). helperGrok-47-high-F failed handshake + retry: out of credits (failed for the job)."
     },
     {
-      "at": "2026-11-27T21:00:29Z",
-      "text": "Continuation request: sim | reason: Owner approved the evergreen AGENTS.md pitfall recommended at the end of the group 7 flow (never await scroll animations in widget tests)."
+      "at": "2026-11-27T22:14:49Z",
+      "text": "u1 r1 judgment: F1 (haiku warning) accepted: with catalog.failure set, row actions and draft show sessionCatalogFailureText instead of the sync promise; F3 (sol-F) accepted: test asserts createReason=listNotCurrent and no sidebar text after the 400 ms pump; F2 (haiku, opus-F) accepted for the docs step: BEHAVIOR.md 307/312 rewrite. All frontier positions accepted, no dissent needed. Fix commit 2 in fix round; re-review skipped: local text selection + tests, no concurrency/interface/persistence change; focused suites 105 pass, analyze clean, mutation fails as expected."
     }
   ],
-  "generation": 41,
-  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
-  "pending_operation": null,
-  "queued_followups": [
-    {
-      "at": "2026-11-27T19:57:45Z",
-      "request": "Vai anotando aí, pra gente anotar, pra gente implementar como grupo 8, após o release com sucesso desse grupo 7. Eu vou te mandando os problemas, e você vai só memorizando. Quando eu disser \"terminei\", você cria um novo grupo, combinado?"
-    },
-    {
-      "at": "2026-11-27T20:05:46Z",
-      "request": "[Grupo 8, item 1] Como nós temos um chip exclusivo para mostrar subagentes e uso de shell, o seguinte texto não deve aparecer no composer nunca: Subagentes em execução: 1"
-    },
-    {
-      "at": "2026-11-27T20:12:27Z",
-      "request": "[Grupo 8, item 2] O uso de terminal shell que deve aparecer dentro do chip e na contagem deve esperar pelo menos 5 segundos para poder fazer parte, porque muitos comandos shell são muito rápidos e ficam fazendo o chip oscilar a contagem sem necessidade. Ou seja, apenas comandos shell superiores a 5 segundos devem fazer parte daquela contagem e aparecer dentro do balão de subagentes."
-    },
-    {
-      "at": "2026-11-27T20:18:20Z",
-      "request": "[Grupo 8, item 3] Aumentar levemente o espaçamento da esquerda e da direita. Na verdade, acho que o termo é enchimento, para o texto não ficar tão colado nas bordas do celular. (Nota do agente: provável timeline do chat no celular; confirmar a tela ao criar o grupo.)"
-    },
-    {
-      "at": "2026-11-27T20:22:47Z",
-      "request": "[Grupo 8, item 4] A exibição de tokens por segundo e do tempo que levou deve vir ativada por padrão, mas deve sumir de cima da mensagem. Elas devem vir logo depois da última palavra dita na mensagem final e sem esses ícones. Ou seja, digamos que fique \"138tps 28s\" no final da frase. Possivelmente com a mesma coloracao fade atual. Clicar abre a dialog informacional com já é."
-    },
-    {
-      "at": "2026-11-27T20:29:17Z",
-      "request": "[Grupo 8, item 5] Nos aplicativos oficiais, a linha do tempo não fica mostrando, por padrão, a execução de cada ferramenta, apenas mostrando uma frase genérica do tipo \"executou n ferramentas\", \"pensou 3 vezes\", etc. Vamos fazer isso como padrão, mas com a opção no menu Display para ativar ferramentas expandidas, que virá desligado por padrão."
-    },
-    {
-      "at": "2026-11-27T20:29:17Z",
-      "request": "[Grupo 8, item 6] Vamos remover dicas bobas da função Dicas do Composer. Vamos trocar por dicas reais, como por exemplo, você pode ativar abas no menu Exibição. Talvez até a palavra Exibição fique clicável, parecendo um link, assim pula direto para abrir esse menu."
-    },
-    {
-      "at": "2026-11-27T20:42:10Z",
-      "request": "[Grupo 8, item 7] Na ausência de abas, o topo, em vez de simplesmente mostrar o projeto, passa a mostrar o título da sessão e, na esquerda, o ícone do projeto. Ao clicar no ícone, permite mudar o projeto."
-    },
-    {
-      "at": "2026-11-27T20:45:41Z",
-      "request": "[Grupo 8, item 8] Quando o ícone do microfone está no lugar do botão de enviar e o usuário clica e começa a se formar o texto no composer, o ícone desliza para a esquerda e o botão de enviar aparece. Até aí está tudo bem, está tudo correto. Porém, depois que ele clica em enviar, o microfone volta para a direita e logo em seguida volta para a esquerda porque começa o processo que mostra o botão de stop. Então a gente precisa colocar um debounce para o ícone pensar em voltar para a direita depois de enviar uma mensagem, porque se o processamento no servidor inicia, o ícone do microfone não deveria se movimentar para a direita de volta, já que logo em seguida o botão de stop vai aparecer."
-    },
-    {
-      "at": "2026-11-27T20:47:34Z",
-      "request": "[Grupo 8, item 9] Ainda sobre o botão de microfone, enquanto o usuário tá falando, o texto vai aparecendo. O problema é que a caixa não vai crescendo junto com a frase, então o usuário só vê o começo da frase enquanto ele tá falando. A forma mais rápida e eficiente de corrigir isso é mudar para o modo expandido, aquele que quando a caixa do composer tem foco, mostra o chip do modelo, o botão de anexos, etc., mas sem dar foco no teclado, para ele não aparecer, pois nesse momento o usuário tá usando só o microfone. Ou seja, temos duas coisas a fazer: ao clicar no microfone, transformar a caixa do composer no modo expandido e verificar se, quando o texto cresce, a caixa do composer cresce um pouco mais, parecendo um text area, digamos até três linhas, antes de começar a não crescer mais."
-    },
-    {
-      "at": "2026-11-27T20:48:58Z",
-      "request": "[Grupo 8, item 10] No menu lateral, a linha que mostra o servidor e o botão de configurações está um pouco deslocada do topo. Claro que não é para ficar super colado, mas está um pouco deslocado demais. Eu acredito que seja por aquelas mensagens transitórias, como quando está sincronizando as conversas, etc. Vamos corrigir esse espaçamento e aproveitar e colocar essas mensagens abaixo dessa linha de servidores e botão de configuração."
-    },
-    {
-      "at": "2026-11-27T20:53:59Z",
-      "request": "[Grupo 8, item 11] Vamos fazer um revamp na barra lateral. Isso significa deixar de existir sessões recentes. Como colocamos o limite de dois itens por projeto, não faz mais sentido elas serem chamadas de recentes. Então, as sessões recentes devem sumir e os projetos devem funcionar da seguinte maneira, mais ou menos como já é hoje. O projeto em aberto no momento deve ser o mais alto no topo e deve listar até cinco sessões mais recentes, enquanto os outros projetos, mais embaixo, devem mostrar até três de forma compactada, como é hoje. A cada item daquela sessão é uma linha fina. Enquanto o projeto principal que está aberto no momento é o que deve ficar mais no topo com as linhas um pouco mais expandidas. Inclusive, essa linha talvez tenha que reduzir um pouco, pois ela está com um espaço muito grande para um texto que nem sempre aparece, o subtítulo. Então, recapitulando, sessões recentes deixam de existir tanto na sidebar como opção no display. O projeto ativo é o primeiro do topo, com até cinco sessões recentes, podendo expandir para ver mais. E os outros projetos abertos ficam no modo semicolapsado, mostrando, como já é hoje, até três sessões recentes de forma bem compactada. Porém, a ordem que os projetos aparecem depois do primeiro, que é o principal, deve ser pela ordem de recente, o que respondeu recente ou o que foi aberto recente."
-    },
-    {
-      "at": "2026-11-27T21:00:39Z",
-      "request": "[Grupo 8, item 12] Recentemente a gente implementou que na timeline, quando o usuário tocar e segurar em uma bolha de texto, vai aparecer a opção para copiar o texto todo ou selecionar o texto. Mas ficou muito ruim, então vamos desfazer isso, ou seja, o usuário deve conseguir selecionar o texto a qualquer momento. E se ele tocar e segurar numa área limpa do balão, ou até na esquerda ou na direita do balão, a gente vai implementar um balãozinho meio que flutuante, que fica ou em cima da mensagem ou embaixo, meio que metade dentro do balão e metade fora. Uma barrinha horizontal, que fica metade dentro e metade fora, com a lista de opções. Nela a gente vai ter o de copiar todo o texto, encaminhar, que ainda não está implementado, mas você já coloca porque tinha na V1, tocar a mensagem em voz alta, que também tinha na V1, e compartilhar a imagem, que também tinha na V1, a imagem da mensagem todinha. Toque simples também pode fazer isso, mas apenas quando não tiver outra função. Por exemplo, código simples ou bloco de código grande deve permitir copiar rápido. Aqueles com backticks, como já é hoje, quando a gente clica, ele copia só aquele texto. Isso é ótimo para usabilidade e já está funcionando. Mas se a pessoa clica um toque simples na área limpa ou um toque simples que não é para copiar texto, o balãozinho aparece também. Inclusive, adiciona mais um botão nesse balãozinho, que é o de desfazer o turno. Prático, padrão. Caso o usuário toque e segure em cima do botão, aí mostra do que se trata aquele botão, padrão também aqui no Android no geral. Já no desktop, onde tem o mouse, esses balãozinhos aparecem quando a pessoa passa o mouse em cima ou, claro, clica levemente em qualquer área ali do balão de texto. E tem que ter um tempo para ele sumir, já que o usuário pode passar o mouse e acabar sumindo a caixinha sem que ele consiga clicar no que quer."
-    }
-  ],
+  "generation": 15,
+  "next_action": "Squash 170e8de5..HEAD into one commit, comment+close #532/#533, check them in #527; #534 planners running (op_a89edfeeb7df); meanwhile implement #535",
+  "pending_operation": {
+    "expected_bytes": 120000,
+    "expected_seconds": 1500,
+    "id": "op_a89edfeeb7df",
+    "kind": "subagent",
+    "prepared_at": "2026-11-27T22:12:40Z",
+    "purpose": "p534 planning round 1 (8 helpers)"
+  },
+  "queued_followups": [],
   "request": {
-    "bytes": 13,
-    "path": "requests/tm_20261127T193607Z_a313a05a.txt",
-    "sha256": "8b3b92652ef683a90d5ffc8a1766fd79cb394f78a903014ed4305d02db967ff1"
+    "bytes": 13157,
+    "path": "requests/tm_20261127T213730Z_22ec9025.txt",
+    "sha256": "3312d9f5549abb4c885855d481df60fe972e395873a88d7d74b32332491a897b"
   },
   "risks": [],
   "schema": 1,
-  "started_at": "2026-11-27T19:36:07Z",
-  "status": "completed",
-  "task_id": "tm_20261127T193607Z_a313a05a",
-  "title": "#527 group 7: one Settings screen for version, updates and release history (#519)",
-  "updated_at": "2026-11-27T21:00:45Z",
-  "validations": [
-    {
-      "at": "2026-11-27T20:21:36Z",
-      "check": "make check TEST_JOBS=$(nproc) on 40941cfd (+ uncommitted docs BEHAVIOR.md/README.md/v2-plan.md)",
-      "criterion": null,
-      "evidence": "rc=0, log /tmp/opencode/g7/gate-r2.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-27T20:45:37Z",
-      "check": "make check TEST_JOBS=$(nproc) on 63007b20 (+ uncommitted docs and release-notes/v2.13.0.md)",
-      "criterion": null,
-      "evidence": "rc=0, log /tmp/opencode/g7/gate-r3.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-27T20:55:55Z",
-      "check": "make check TEST_JOBS=$(nproc) on final SHA 55450f33",
-      "criterion": "C2",
-      "evidence": "rc=0, log /tmp/opencode/g7/gate-final.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-27T20:56:34Z",
-      "check": "#519 behavior implemented and tested",
-      "criterion": "C1",
-      "evidence": "851747a3; test/v2/settings/diagnostics_history_pages_test.dart 11 tests incl. page-level anchoring; focused suites 205 pass",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-27T20:56:34Z",
-      "check": "Review converged",
-      "criterion": "C3",
-      "evidence": "R1-R3 judged (rvw_20261127T194247Z_cd3e20bb); R3 7/8 approve, Sol-F finding fixed exactly as suggested and mutation-tested",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-27T20:56:34Z",
-      "check": "Release cut and watcher started",
-      "criterion": "C4",
-      "evidence": "6ab5c1ce release: cut v2.13.0; tag v2.13.0 on origin; make watch-release started",
-      "outcome": "pass"
-    }
-  ]
+  "started_at": "2026-11-27T21:37:30Z",
+  "status": "in_progress",
+  "task_id": "tm_20261127T213730Z_22ec9025",
+  "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
+  "updated_at": "2026-11-27T22:15:21Z",
+  "validations": []
 }

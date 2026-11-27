@@ -1240,7 +1240,7 @@ class V2LocalizationsKo extends V2Localizations {
   String get sessionsActionUnavailableAuth => '엔드포인트가 자격 증명을 거부했습니다.';
 
   @override
-  String get sessionsActionUnavailableList => '목록은 엔드포인트의 현재 답이 아닙니다.';
+  String get sessionsActionUnavailableList => '대화 동기화 중입니다. 잠시 후 다시 시도하세요.';
 
   @override
   String get sessionsActionUnavailableBusy => '이 세션에서 다른 명령이 실행 중입니다.';

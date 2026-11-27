@@ -1314,7 +1314,7 @@ class V2LocalizationsIt extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableList =>
-      'L\'elenco non è la risposta attuale dell\'endpoint.';
+      'Sincronizzazione conversazioni; riprova tra un momento.';
 
   @override
   String get sessionsActionUnavailableBusy =>

@@ -2450,7 +2450,7 @@ abstract class V2Localizations {
   /// V2 bounded read-only session catalog
   ///
   /// In en, this message translates to:
-  /// **'The list is not the endpoint\'\'s current answer.'**
+  /// **'Syncing conversations; try again in a moment.'**
   String get sessionsActionUnavailableList;
 
   /// V2 bounded read-only session catalog

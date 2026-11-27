@@ -1589,7 +1589,7 @@
   "@sessionsActionUnavailableAuth": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsActionUnavailableList": "The list is not the endpoint''s current answer.",
+  "sessionsActionUnavailableList": "Syncing conversations; try again in a moment.",
   "@sessionsActionUnavailableList": {
     "description": "V2 bounded read-only session catalog"
   },

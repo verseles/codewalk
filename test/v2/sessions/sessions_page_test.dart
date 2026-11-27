@@ -5,6 +5,7 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/project_context_list.dart';
 import 'package:codewalk/features/sessions/session_ownership.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
+import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -287,7 +288,8 @@ void main() {
   });
 
   testWidgets(
-    'a failed re-read keeps the rows and says the list is not up to date',
+    'a failed re-read keeps the rows and only the workspace notice says it '
+    'is syncing',
     (tester) async {
       tester.view.physicalSize = const Size(390, 844);
       tester.view.devicePixelRatio = 1;
@@ -309,18 +311,39 @@ void main() {
       final source = rig.sources.single;
       source.respond([source.row('first')]);
       await tester.pumpAndSettle();
-      expect(find.text(l10n.liveStale), findsNothing);
+      expect(find.text(l10n.chatBadgeSyncing), findsNothing);
 
       directory.feeds.last.emit(const SessionCatalogChanged());
       // The catalog debounces the re-read; the clock has to pass it.
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
+      // A re-read in flight is routine: the create waits for it, and the
+      // sidebar does not explain why (#532).
+      expect(
+        dependencies.sessions!.createReason,
+        SessionActionReason.listNotCurrent,
+      );
+      expect(find.text(l10n.sessionsActionUnavailableList), findsNothing);
       source.fail(SessionCatalogFailure.connection);
       // The hamburger spins while the list recovers (#467), so nothing
       // settles: the clock passes instead.
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
-      expect(find.text(l10n.liveStale), findsOneWidget);
+      // The workspace notice says it in plain words; the sidebar repeats no
+      // stale or endpoint wording below it (#532).
+      expect(find.text(l10n.chatBadgeSyncing), findsOneWidget);
+      expect(find.text(l10n.liveStale), findsNothing);
+      expect(find.text(l10n.sessionsActionUnavailableList), findsNothing);
+      // The server row keeps the top of the sidebar and the notice comes
+      // below it, instead of pushing it down (#533).
+      final settings = tester.getRect(
+        find.byKey(const ValueKey('sidebar_settings_icon_button')),
+      );
+      final notice = tester.getRect(
+        find.byKey(const ValueKey('workspace-drawer-notice')),
+      );
+      expect(settings.top, 8);
+      expect(settings.bottom, lessThanOrEqualTo(notice.top));
       expect(
         find.byKey(ValueKey(source.row('first').info.ref)),
         findsOneWidget,
@@ -471,7 +494,7 @@ void main() {
     source.fail(SessionCatalogFailure.connection);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text(l10n.liveStale), findsOneWidget);
+    expect(find.text(l10n.chatBadgeSyncing), findsOneWidget);
     expect(find.text(l10n.sessionsOwnershipUnknown), findsNothing);
     expect(find.text(l10n.sessionsOwnershipLiveShared), findsNothing);
     expect(

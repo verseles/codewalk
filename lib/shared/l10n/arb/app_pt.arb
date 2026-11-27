@@ -1038,7 +1038,7 @@
   "@sessionsActionUnavailableAuth": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsActionUnavailableList": "A lista não é a resposta atual do endpoint.",
+  "sessionsActionUnavailableList": "Sincronizando conversas; tente de novo em instantes.",
   "@sessionsActionUnavailableList": {
     "description": "V2 bounded read-only session catalog"
   },

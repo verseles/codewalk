@@ -1298,7 +1298,7 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get sessionsActionUnavailableList =>
-      'सूची एंडपॉइंट का मौजूदा उत्तर नहीं है।';
+      'बातचीत सिंक हो रही है; थोड़ी देर में फिर कोशिश करें।';
 
   @override
   String get sessionsActionUnavailableBusy =>

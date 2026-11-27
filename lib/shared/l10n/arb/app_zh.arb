@@ -1038,7 +1038,7 @@
   "@sessionsActionUnavailableAuth": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsActionUnavailableList": "列表不是端点的当前回答。",
+  "sessionsActionUnavailableList": "正在同步会话，请稍后再试。",
   "@sessionsActionUnavailableList": {
     "description": "V2 bounded read-only session catalog"
   },

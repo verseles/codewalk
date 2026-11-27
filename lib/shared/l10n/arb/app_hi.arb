@@ -1038,7 +1038,7 @@
   "@sessionsActionUnavailableAuth": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsActionUnavailableList": "सूची एंडपॉइंट का मौजूदा उत्तर नहीं है।",
+  "sessionsActionUnavailableList": "बातचीत सिंक हो रही है; थोड़ी देर में फिर कोशिश करें।",
   "@sessionsActionUnavailableList": {
     "description": "V2 bounded read-only session catalog"
   },

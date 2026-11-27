@@ -1038,7 +1038,7 @@
   "@sessionsActionUnavailableAuth": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsActionUnavailableList": "Список — не текущий ответ endpoint.",
+  "sessionsActionUnavailableList": "Синхронизация бесед; повторите попытку через минуту.",
   "@sessionsActionUnavailableList": {
     "description": "V2 bounded read-only session catalog"
   },

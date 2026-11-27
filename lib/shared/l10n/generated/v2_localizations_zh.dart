@@ -1214,7 +1214,7 @@ class V2LocalizationsZh extends V2Localizations {
   String get sessionsActionUnavailableAuth => '端点拒绝了凭据。';
 
   @override
-  String get sessionsActionUnavailableList => '列表不是端点的当前回答。';
+  String get sessionsActionUnavailableList => '正在同步会话，请稍后再试。';
 
   @override
   String get sessionsActionUnavailableBusy => '此会话有另一个命令正在运行。';

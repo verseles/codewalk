@@ -125,10 +125,14 @@ class _SessionsPageState extends State<SessionsPage> {
         contexts.available &&
         directory != null &&
         contexts.active == directory;
+    // A list that is catching up is transient, not a reason to read: the
+    // workspace notice above already says the conversations are syncing, and
+    // the draft explains a create it holds (#532).
     final createReason =
         controller.selectedProfile != null &&
             controller.createReason != SessionActionReason.none &&
-            controller.createReason != SessionActionReason.commandInFlight
+            controller.createReason != SessionActionReason.commandInFlight &&
+            controller.createReason != SessionActionReason.listNotCurrent
         ? _actionReasonText(l10n, controller.createReason)
         : null;
     final notice = contexts?.notice ?? ProjectContextNotice.none;
@@ -139,7 +143,6 @@ class _SessionsPageState extends State<SessionsPage> {
       if (controller.failure != null)
         sessionCatalogFailureText(l10n, controller.failure!),
       if (controller.stale) l10n.sessionsPreviousResults,
-      if (controller.behind) l10n.liveStale,
       if (controller.limited) l10n.sessionsLimit,
       if (controller.actionFailure != null) l10n.sessionsActionFailed,
       if (controller.actionUncertain) l10n.sessionsActionPending,
@@ -171,9 +174,13 @@ class _SessionsPageState extends State<SessionsPage> {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 960),
         child: ListView.builder(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 12 : 8,
-            vertical: compact ? 16 : 8,
+          // The server row sits near the top edge; the phone keeps more room
+          // at the end, above the system gestures (#533).
+          padding: EdgeInsets.fromLTRB(
+            compact ? 12 : 8,
+            8,
+            compact ? 12 : 8,
+            compact ? 16 : 8,
           ),
           itemCount: rows.length + 1,
           itemBuilder: (context, index) =>
@@ -196,9 +203,9 @@ class _SessionsPageState extends State<SessionsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const WorkspaceDrawerNotice(),
-        if (hosts.loading || controller.loading)
-          AppIndeterminateBar(semanticsLabel: l10n.sessionsLoading),
+        // The server row stays at the top; transient notices (syncing, an
+        // update, a loading bar) come below it instead of pushing it down
+        // (#533).
         Row(
           children: [
             const Expanded(child: ServerSwitcher()),
@@ -210,6 +217,9 @@ class _SessionsPageState extends State<SessionsPage> {
             ),
           ],
         ),
+        const WorkspaceDrawerNotice(),
+        if (hosts.loading || controller.loading)
+          AppIndeterminateBar(semanticsLabel: l10n.sessionsLoading),
         const SizedBox(height: 8),
         SessionDrawerHeader(
           contexts: contexts,

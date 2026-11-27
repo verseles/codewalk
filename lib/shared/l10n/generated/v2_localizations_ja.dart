@@ -1237,7 +1237,7 @@ class V2LocalizationsJa extends V2Localizations {
   String get sessionsActionUnavailableAuth => 'エンドポイントが資格情報を拒否しました。';
 
   @override
-  String get sessionsActionUnavailableList => '一覧はエンドポイントの最新の回答ではありません。';
+  String get sessionsActionUnavailableList => '会話を同期中です。少ししてからもう一度お試しください。';
 
   @override
   String get sessionsActionUnavailableBusy => 'このセッションでは別のコマンドが実行中です。';

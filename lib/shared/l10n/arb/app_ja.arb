@@ -1038,7 +1038,7 @@
   "@sessionsActionUnavailableAuth": {
     "description": "V2 bounded read-only session catalog"
   },
-  "sessionsActionUnavailableList": "一覧はエンドポイントの最新の回答ではありません。",
+  "sessionsActionUnavailableList": "会話を同期中です。少ししてからもう一度お試しください。",
   "@sessionsActionUnavailableList": {
     "description": "V2 bounded read-only session catalog"
   },

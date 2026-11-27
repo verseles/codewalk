@@ -7,8 +7,10 @@ import 'package:provider/provider.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_actions.dart';
+import '../../shared/sessions/session_catalog_source.dart';
 import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
+import 'sessions_page.dart' show sessionCatalogFailureText;
 
 /// The actions one session row offers.
 enum SessionRowAction {
@@ -95,6 +97,7 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
       support.reason,
       listCurrent: listCurrent,
       pending: pending,
+      failure: controller.failure,
     );
     final unread = controller.viewState(row) == SessionViewState.unread;
     return KeyedSubtree(
@@ -196,8 +199,15 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
     SessionActionReason reason, {
     required bool listCurrent,
     required bool pending,
+    SessionCatalogFailure? failure,
   }) {
-    if (!listCurrent) return l10n.sessionsActionUnavailableList;
+    // A failed read says what failed; only a list that is catching up
+    // promises the sync (#532).
+    if (!listCurrent) {
+      return failure == null
+          ? l10n.sessionsActionUnavailableList
+          : sessionCatalogFailureText(l10n, failure);
+    }
     if (pending) return l10n.sessionsActionUnavailableBusy;
     return switch (reason) {
       SessionActionReason.none => null,
