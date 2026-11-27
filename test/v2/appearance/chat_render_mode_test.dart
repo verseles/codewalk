@@ -46,7 +46,7 @@ void main() {
         ..setShowReasoning(false)
         ..setShowToolCalls(false)
         ..setShowTaskList(false)
-        ..setShowTokensPerSecond(true)
+        ..setShowTokensPerSecond(false)
         ..setTaskListCollapsed(true)
         ..setComposerSpellCheck(false)
         ..setComposerTips(false)
@@ -56,7 +56,8 @@ void main() {
       expect(backend.values['cw2.settings.showReasoning'], false);
       expect(backend.values['cw2.settings.showToolCalls'], false);
       expect(backend.values['cw2.settings.showTaskList'], false);
-      expect(backend.values['cw2.settings.showTokensPerSecond'], true);
+      // On by default since #538: only turning it off is stored.
+      expect(backend.values['cw2.settings.showTokensPerSecond'], false);
       expect(backend.values['cw2.settings.taskListCollapsed'], true);
       expect(backend.values['cw2.settings.composerSpellCheck'], false);
       expect(backend.values['cw2.settings.composerTips'], false);
@@ -69,7 +70,7 @@ void main() {
       expect(second.showReasoning, isFalse);
       expect(second.showToolCalls, isFalse);
       expect(second.showTaskList, isFalse);
-      expect(second.showTokensPerSecond, isTrue);
+      expect(second.showTokensPerSecond, isFalse);
       expect(second.taskListCollapsed, isTrue);
       expect(second.composerSpellCheck, isFalse);
       expect(second.composerTips, isFalse);
@@ -80,7 +81,7 @@ void main() {
         ..setShowReasoning(true)
         ..setShowToolCalls(true)
         ..setShowTaskList(true)
-        ..setShowTokensPerSecond(false)
+        ..setShowTokensPerSecond(true)
         ..setTaskListCollapsed(false)
         ..setComposerSpellCheck(true)
         ..setComposerTips(true)
@@ -122,7 +123,7 @@ void main() {
       expect(p.showReasoning, isTrue);
       expect(p.showToolCalls, isTrue);
       expect(p.showTaskList, isTrue);
-      expect(p.showTokensPerSecond, isFalse);
+      expect(p.showTokensPerSecond, isTrue);
       expect(p.taskListCollapsed, isFalse);
       expect(p.composerSpellCheck, isTrue);
       expect(p.composerTips, isTrue);

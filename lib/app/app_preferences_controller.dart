@@ -185,7 +185,8 @@ class AppPreferencesController extends ChangeNotifier {
   bool _expandedTools = false;
   bool _showTaskList = true;
   bool _taskListCollapsed = false;
-  bool _showTokensPerSecond = false;
+  // On by default since #538: the final answer ends with its speed and time.
+  bool _showTokensPerSecond = true;
   ChatRenderMode get chatRenderMode => _chatRenderMode;
   bool get showReasoning => _showReasoning;
   bool get showToolCalls => _showToolCalls;
@@ -414,7 +415,7 @@ class AppPreferencesController extends ChangeNotifier {
     'expandedTools': _expandedTools ? true : null,
     'showTaskList': _showTaskList ? null : false,
     'taskListCollapsed': _taskListCollapsed ? true : null,
-    'showTokensPerSecond': _showTokensPerSecond ? true : null,
+    'showTokensPerSecond': _showTokensPerSecond ? null : false,
     'composerSpellCheck': _composerSpellCheck ? null : false,
     'composerTips': _composerTips ? null : false,
     'composerQueue': _composerQueue ? true : null,

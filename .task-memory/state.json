@@ -165,9 +165,9 @@
       ],
       "id": "S4",
       "label": "[11] Sidebar revamp: no Recent sessions; active project first with 5 sessions; others 3 compact by recency",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "#534 done: 4a0e9904 + fixes 0e911541, 7122ddc7, docs 5d0e3e74 (not pushed yet: waits for #536-#538 review)",
+      "status": "done",
+      "validation": "gate pass 4a0e9904; review 3 rounds, final 7/7 approve"
     },
     {
       "depends": [
@@ -175,9 +175,9 @@
       ],
       "id": "S5",
       "label": "[7] Top bar without tabs: session title with project icon that switches project",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#535 done earlier: 022ca26c + 13242f18, docs 7b6b6992, pushed, issue closed",
+      "status": "done",
+      "validation": "gate pass 022ca26c; review r1 judged"
     },
     {
       "depends": [
@@ -186,7 +186,7 @@
       "id": "S6",
       "label": "[3] Timeline: slightly wider side padding on phones",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -495,10 +495,14 @@
     {
       "at": "2026-11-27T23:21:38Z",
       "text": "u3 r2 judgment: accepted R1 (sol-F warning + haiku/deepseek/opus-F: stamps untouched unless written; ahead-filter only when stamping; doc fixed; backward jump >1 day drop documented as tradeoff), R2 haiku (scope reset at build start incl. server list), R3 tests (search+Load more, exact bound). Rejected haiku's two-server reset test: needs a second profile rig; the reset is a record comparison covered by the project-switch test. Fix 7122ddc7. Re-review r3 for the persistence change."
+    },
+    {
+      "at": "2026-11-27T23:26:01Z",
+      "text": "#534 review converged after 3 rounds (r3: 7 approve, haiku failed twice SESSION_CLAUDE_ERROR). Docs committed. Squash skipped: #536 5d2bc856 and #537 538c0b0a sit between the #534 commits. Push held until #536-#538 are reviewed (no unreviewed code on main); #534 issue closes after that push."
     }
   ],
-  "generation": 43,
-  "next_action": "u3 handshakes, payload, gate, dispatch",
+  "generation": 46,
+  "next_action": "#536 committed 5d2bc856; #537 538c0b0a; finish #538 then review #536-#538 together",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -521,7 +525,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-27T23:25:59Z",
+  "updated_at": "2026-11-27T23:26:07Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

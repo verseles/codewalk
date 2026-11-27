@@ -29,6 +29,9 @@ class CanonicalMessageBody extends StatelessWidget {
     this.onCopyCode,
     this.bodyStyle,
     this.onCopyInlineCode,
+    this.trailingText,
+    this.trailingStyle,
+    this.onTapTrailing,
   });
 
   final String source;
@@ -44,6 +47,12 @@ class CanonicalMessageBody extends StatelessWidget {
 
   /// See [MarkdownContent.onCopyInlineCode].
   final ValueChanged<String>? onCopyInlineCode;
+
+  /// See [MarkdownContent.trailingText]; a source over the rich budget does
+  /// not show it.
+  final String? trailingText;
+  final TextStyle? trailingStyle;
+  final VoidCallback? onTapTrailing;
 
   Widget _rich(BuildContext context, String verbatimSource) {
     return MarkdownContent(
@@ -62,6 +71,9 @@ class CanonicalMessageBody extends StatelessWidget {
       onCopyCode: onCopyCode,
       bodyStyle: bodyStyle,
       onCopyInlineCode: onCopyInlineCode,
+      trailingText: trailingText,
+      trailingStyle: trailingStyle,
+      onTapTrailing: onTapTrailing,
     );
   }
 

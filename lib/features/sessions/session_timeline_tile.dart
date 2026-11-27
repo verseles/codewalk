@@ -273,8 +273,10 @@ class SessionTimelineTile extends StatelessWidget {
     // A message without a time, a duration, TPS or an action has no header at
     // all, so it takes no space above its body. The user's bubble names no
     // sender: its color and side already do.
+    // With the speed on, the final answer's speed and time follow its last
+    // word instead of heading it (#538).
     final headerShown = switch (item) {
-      AssistantText() => clock != null || message != null || showTps,
+      AssistantText() => clock != null || (message != null && !showTps),
       UserInput() => clock != null,
       _ => true,
     };
@@ -311,41 +313,13 @@ class SessionTimelineTile extends StatelessWidget {
               // message's text leaves it out.
               SelectionContainer.disabled(
                 child: showTps
-                    ? SizedBox(
-                        width: double.infinity,
-                        child: Wrap(
-                          alignment: clock != null
-                              ? WrapAlignment.spaceBetween
-                              : WrapAlignment.end,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 8,
-                          children: [
-                            if (clock != null)
-                              Text(
-                                clock,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colorScheme.onSurfaceVariant,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            Wrap(
-                              alignment: WrapAlignment.end,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              children: [
-                                MessageTokensPerSecondChip(
-                                  message: item.meta.message!,
-                                  tokensPerSecond: turnTokensPerSecond!,
-                                ),
-                                if (message != null)
-                                  MessageElapsedChip(
-                                    message: message,
-                                    tokensPerSecond: turnTokensPerSecond,
-                                  ),
-                              ],
-                            ),
-                          ],
+                    ? Text(
+                        clock!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontSize: 11,
                         ),
                       )
                     : Row(
@@ -390,7 +364,16 @@ class SessionTimelineTile extends StatelessWidget {
               ),
             const SizedBox(height: 8),
           ],
-          _buildBody(context, l10n),
+          _buildBody(
+            context,
+            l10n,
+            trailing: showTps
+                ? formatInlineTurnStats(
+                    turnTokensPerSecond!,
+                    item.meta.message!,
+                  )
+                : null,
+          ),
         ],
       ),
     );
@@ -505,7 +488,7 @@ class SessionTimelineTile extends StatelessWidget {
     );
   }
 
-  Widget _buildBody(BuildContext context, dynamic l10n) {
+  Widget _buildBody(BuildContext context, dynamic l10n, {String? trailing}) {
     final item = this.item;
     switch (item) {
       // A message selects its text only on request (#492): an always-on
@@ -561,6 +544,19 @@ class SessionTimelineTile extends StatelessWidget {
           onTapFilePath: onTapFilePath,
           onCopyCode: onCopyCode,
           onCopyInlineCode: (code) => copyConversationText(context, code),
+          trailingText: trailing,
+          trailingStyle: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 12,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+          onTapTrailing: trailing == null
+              ? null
+              : () => showMessageInfoDialog(
+                  context,
+                  item.meta.message!,
+                  tokensPerSecond: turnTokensPerSecond,
+                ),
         );
       case Reasoning():
         return const SizedBox.shrink();

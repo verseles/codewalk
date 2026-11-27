@@ -159,6 +159,9 @@ void main() {
       sessionLiveDirectory: liveDirectory ?? rig.openDirectory,
     );
     dependencies.preferences.setLocale(locale);
+    // The texts compared are the captured ones; the speed and time that end
+    // a final answer (#538) are not part of a capture.
+    dependencies.preferences.setShowTokensPerSecond(false);
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: dependencies));
     await pumpSpin(
       tester,
@@ -420,6 +423,7 @@ void main() {
       sessionLiveDirectory: () => live,
     );
     scripted.preferences.setLocale(const Locale('en'));
+    scripted.preferences.setShowTokensPerSecond(false);
     await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: scripted));
     await showSessionList(tester);
     final read = scripted.sessions!.selectProfile('profile_a');

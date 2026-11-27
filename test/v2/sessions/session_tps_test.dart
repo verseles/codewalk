@@ -4,7 +4,6 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/app/workspace_chrome.dart';
 import 'package:codewalk/features/sessions/session_live_scroll.dart';
 import 'package:codewalk/features/sessions/session_live_timeline.dart';
-import 'package:codewalk/features/sessions/session_message_info.dart';
 import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/features/settings/appearance_settings_page.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
@@ -12,6 +11,7 @@ import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/theme/app_theme.dart';
 import 'package:codewalk/shared/theme/chat_appearance.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/gestures.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -174,18 +174,46 @@ List<TimelineItem> _multiTurnItems() {
   ];
 }
 
+/// The run of text after an answer's last word that reads [text] (#538).
+TextSpan? _stats(WidgetTester tester, String text) {
+  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
+    TextSpan? hit;
+    rich.text.visitChildren((span) {
+      if (span is TextSpan && span.text == text) {
+        hit = span;
+        return false;
+      }
+      return true;
+    });
+    if (hit != null) return hit;
+  }
+  return null;
+}
+
+/// How many answers end with their speed.
+int _statsCount(WidgetTester tester) {
+  var count = 0;
+  for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
+    rich.text.visitChildren((span) {
+      if (span is TextSpan && (span.text?.contains('tps') ?? false)) count++;
+      return true;
+    });
+  }
+  return count;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets(
-    'Display menu toggles showTokensPerSecond (default OFF) and Appearance settings has no toggle',
+    'Display menu toggles showTokensPerSecond (default ON, #538) and Appearance settings has no toggle',
     (tester) async {
       final prefs = AppPreferencesController(
         store: V2MetadataStore(backend: FakeMetadataBackend()),
       );
       addTearDown(prefs.dispose);
       await prefs.initialize();
-      expect(prefs.showTokensPerSecond, isFalse);
+      expect(prefs.showTokensPerSecond, isTrue);
 
       await tester.pumpWidget(
         _wrap(
@@ -216,12 +244,12 @@ void main() {
       await tester.pumpAndSettle();
       final toggle = find.byKey(const ValueKey('display-toggle-tps'));
       expect(toggle, findsOneWidget);
-      expect(tester.widget<SwitchListTile>(toggle).value, isFalse);
+      expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
 
       await tester.tap(toggle);
       await tester.pumpAndSettle();
-      expect(prefs.showTokensPerSecond, isTrue);
-      expect(tester.widget<SwitchListTile>(toggle).value, isTrue);
+      expect(prefs.showTokensPerSecond, isFalse);
+      expect(tester.widget<SwitchListTile>(toggle).value, isFalse);
     },
   );
 
@@ -251,7 +279,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byType(MessageTokensPerSecondChip), findsNothing);
+      expect(_statsCount(tester), 0);
+      // Off, the time keeps its chip above the answer.
+      expect(
+        find.byKey(const ValueKey('message-elapsed-msg_2')),
+        findsOneWidget,
+      );
 
       // Toggle ON: Turn 1 (messageHeader == false) and Turn 2 (alongside elapsed)
       // both show TPS chips; Turn 3 (missing streamed) does not.
@@ -270,42 +303,18 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final chip1 = find.byKey(const ValueKey('message-tps-msg_1'));
-      final chip2 = find.byKey(const ValueKey('message-tps-msg_2'));
-      final chip3 = find.byKey(const ValueKey('message-tps-msg_3'));
-      expect(chip1, findsOneWidget);
-      expect(chip2, findsOneWidget);
-      expect(chip3, findsNothing);
+      // On, each final answer ends with its speed and time, with no icons;
+      // the time leaves the header (#538). Turn 3 has no streamed time.
+      expect(_stats(tester, '50tps 3s'), isNotNull);
+      expect(_stats(tester, '43tps 3s'), isNotNull);
+      expect(_statsCount(tester), 2);
+      expect(find.byKey(const ValueKey('message-elapsed-msg_2')), findsNothing);
 
-      expect(
-        find.descendant(of: chip1, matching: find.text('50.0 tok/s')),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(of: chip2, matching: find.text('42.5 tok/s')),
-        findsOneWidget,
-      );
-      // Turn 2 also keeps its elapsed chip beside TPS.
-      expect(
-        find.byKey(const ValueKey('message-elapsed-msg_2')),
-        findsOneWidget,
-      );
-      // Hit target meets 48x48 minimum.
-      final box = tester.getSize(chip2);
-      expect(box.width, greaterThanOrEqualTo(48));
-      expect(box.height, greaterThanOrEqualTo(48));
-
-      // Tapping TPS chip opens Message Info with Speed row.
-      await tester.tap(chip2);
+      // A tap opens Message Info with the precise speed.
+      (_stats(tester, '43tps 3s')!.recognizer! as TapGestureRecognizer)
+          .onTap!();
       await tester.pumpAndSettle();
       expect(find.text('Message Info'), findsOneWidget);
-      expect(find.text('Speed: 42.5 tok/s'), findsOneWidget);
-      await tester.tap(find.byKey(const ValueKey('message-info-close')));
-      await tester.pumpAndSettle();
-
-      // Tapping elapsed chip also shows the same Speed row.
-      await tester.tap(find.byKey(const ValueKey('message-elapsed-msg_2')));
-      await tester.pumpAndSettle();
       expect(find.text('Speed: 42.5 tok/s'), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('message-info-close')));
       await tester.pumpAndSettle();
@@ -326,8 +335,8 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(chip1, findsOneWidget);
-      expect(chip2, findsNothing);
+      expect(_stats(tester, '50tps 3s'), isNotNull);
+      expect(_stats(tester, '43tps 3s'), isNull);
     },
   );
 
@@ -416,16 +425,11 @@ void main() {
     ]);
     await tester.pumpAndSettle();
 
-    final chip = find.byKey(const ValueKey('message-tps-msg_hist'));
-    expect(chip, findsOneWidget);
-    expect(
-      find.descendant(of: chip, matching: find.text('60.0 tok/s')),
-      findsOneWidget,
-    );
+    expect(_stats(tester, '60tps 3s'), isNotNull);
   });
 
   testWidgets(
-    'formats decimal per locale (pt), handles RTL (ar), and avoids overflow on 320px at 200% text scale',
+    'ends the answer the same in pt and RTL ar, with no overflow on 320px at 200% text scale',
     (tester) async {
       tester.view.physicalSize = const Size(320, 640);
       tester.view.devicePixelRatio = 1;
@@ -440,10 +444,7 @@ void main() {
         output: 85,
       );
 
-      for (final (locale, expected) in [
-        (const Locale('pt'), '42,5 tok/s'),
-        (const Locale('ar'), 'tok/s'),
-      ]) {
+      for (final locale in [const Locale('pt'), const Locale('ar')]) {
         await tester.pumpWidget(
           _wrap(
             Scaffold(
@@ -466,11 +467,9 @@ void main() {
         );
         await tester.pumpAndSettle();
         expect(tester.takeException(), isNull, reason: 'locale=$locale');
-        expect(
-          find.textContaining(expected),
-          findsOneWidget,
-          reason: 'locale=$locale',
-        );
+        // The inline run reads the same in every locale; the dialog
+        // formats the precise speed.
+        expect(_stats(tester, '43tps 4s'), isNotNull, reason: 'locale=$locale');
       }
     },
   );

@@ -74,81 +74,12 @@ String formatTokensPerSecond(double tps, BuildContext context) {
   return context.v2L10n.msgInfoTokensPerSecondValue(value);
 }
 
-/// Discreet clickable tokens-per-second indicator on a completed turn's final
-/// assistant response; opens the existing message details dialog (#499).
-class MessageTokensPerSecondChip extends StatelessWidget {
-  const MessageTokensPerSecondChip({
-    super.key,
-    required this.message,
-    required this.tokensPerSecond,
-  });
-
-  final MessageContext message;
-  final double tokensPerSecond;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.v2L10n;
-    final label = formatTokensPerSecond(tokensPerSecond, context);
-    final scheme = Theme.of(context).colorScheme;
-    return Tooltip(
-      message: l10n.msgInfoMessageInfo,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: ValueKey('message-tps-${message.message.value}'),
-          onTap: () => showMessageInfoDialog(
-            context,
-            message,
-            tokensPerSecond: tokensPerSecond,
-          ),
-          borderRadius: BorderRadius.circular(12),
-          child: Semantics(
-            button: true,
-            label: '${l10n.msgInfoMessageInfo}: $label',
-            excludeSemantics: true,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 8,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Symbols.speed,
-                        size: 13,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                                fontSize: 11,
-                                fontFeatures: const [
-                                  FontFeature.tabularFigures(),
-                                ],
-                              ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+/// A final answer's speed and time as one discreet run of text after its
+/// last word, with no icons: "138tps 28s" (#538).
+String formatInlineTurnStats(double tps, MessageContext message) {
+  final speed = '${tps.round()}tps';
+  final elapsed = formatMessageElapsed(message);
+  return elapsed == null ? speed : '$speed $elapsed';
 }
 
 /// The elapsed time of a message's response; it opens the message details.

@@ -42,6 +42,9 @@ class MarkdownContent extends StatefulWidget {
     this.maxRichCharsForRender = MessageRenderBudget.richRenderMaxChars,
     this.bodyStyle,
     this.onCopyInlineCode,
+    this.trailingText,
+    this.trailingStyle,
+    this.onTapTrailing,
   });
 
   final String source;
@@ -62,6 +65,14 @@ class MarkdownContent extends StatefulWidget {
 
   /// Copies an inline code span on a tap; inline code is plain when null.
   final ValueChanged<String>? onCopyInlineCode;
+
+  /// A short text right after the last word, in [trailingStyle], that runs
+  /// [onTapTrailing] when tapped: the turn's speed and time (#538). After a
+  /// last block that is not running text (code, a table, math) it takes a
+  /// line of its own.
+  final String? trailingText;
+  final TextStyle? trailingStyle;
+  final VoidCallback? onTapTrailing;
 
   @override
   State<MarkdownContent> createState() => _MarkdownContentState();
@@ -118,11 +129,15 @@ class _MarkdownContentState extends State<MarkdownContent> {
     _codesInUse.clear();
   }
 
+  /// The tap on [MarkdownContent.trailingText], kept across rebuilds.
+  TapGestureRecognizer? _trailingTap;
+
   @override
   void dispose() {
     for (final recognizer in _codeTaps.values) {
       recognizer.dispose();
     }
+    _trailingTap?.dispose();
     super.dispose();
   }
 
@@ -211,6 +226,19 @@ class _MarkdownContentState extends State<MarkdownContent> {
       );
     }
 
+    final trailing = widget.trailingText;
+    if (trailing != null) {
+      inlineSyntaxes.insert(0, _TrailingSyntax());
+      builders[_TrailingSyntax.tag] = _TrailingBuilder(
+        text: trailing,
+        style: widget.trailingStyle,
+        recognizer: widget.onTapTrailing == null
+            ? null
+            : ((_trailingTap ??= TapGestureRecognizer())
+                ..onTap = widget.onTapTrailing),
+      );
+    }
+
     final extensionSet = md.ExtensionSet(
       [...blockSyntaxes, ...md.ExtensionSet.gitHubFlavored.blockSyntaxes],
       [...inlineSyntaxes, ...md.ExtensionSet.gitHubFlavored.inlineSyntaxes],
@@ -223,7 +251,7 @@ class _MarkdownContentState extends State<MarkdownContent> {
     }
 
     return MarkdownBody(
-      data: widget.source,
+      data: trailing == null ? widget.source : withTrailingMark(widget.source),
       extensionSet: extensionSet,
       styleSheet: styleSheet,
       builders: builders,
@@ -237,4 +265,75 @@ class _MarkdownContentState extends State<MarkdownContent> {
           Text('![${alt ?? ''}]($uri${title == null ? '' : ' "$title"'})'),
     );
   }
+}
+
+/// The private-use character that marks where [MarkdownContent.trailingText]
+/// goes; a model's answer has no business using it.
+const _trailingMark = '\uE000';
+
+/// [source] with the trailing mark after its last word, or on a line of its
+/// own when the last block is not running text: a fence, a table, indented
+/// code, display math or HTML, which would swallow or break on it.
+@visibleForTesting
+String withTrailingMark(String source) {
+  final trimmed = source.trimRight();
+  if (trimmed.isEmpty) return _trailingMark;
+  final last = trimmed.split('\n').last;
+  final lead = last.trimLeft();
+  final block =
+      last.startsWith('    ') ||
+      last.startsWith('\t') ||
+      lead.startsWith('```') ||
+      lead.startsWith('~~~') ||
+      lead.startsWith('|') ||
+      lead.startsWith(r'$$') ||
+      lead.startsWith('<') ||
+      _openFence(trimmed);
+  return block ? '$trimmed\n\n$_trailingMark' : '$trimmed $_trailingMark';
+}
+
+/// Whether [source] ends inside a fenced code block that never closed.
+bool _openFence(String source) {
+  var open = false;
+  for (final line in source.split('\n')) {
+    final lead = line.trimLeft();
+    if (lead.startsWith('```') || lead.startsWith('~~~')) open = !open;
+  }
+  return open;
+}
+
+class _TrailingSyntax extends md.InlineSyntax {
+  _TrailingSyntax() : super(_trailingMark);
+
+  static const tag = 'cwTrailing';
+
+  @override
+  bool onMatch(md.InlineParser parser, Match match) {
+    parser.addNode(md.Element.empty(tag));
+    return true;
+  }
+}
+
+/// The trailing text as a span of the paragraph it ends, so it flows right
+/// after the last word.
+class _TrailingBuilder extends MarkdownElementBuilder {
+  _TrailingBuilder({required this.text, this.style, this.recognizer});
+
+  final String text;
+  final TextStyle? style;
+  final GestureRecognizer? recognizer;
+
+  @override
+  Widget? visitElementAfterWithContext(
+    BuildContext context,
+    md.Element element,
+    TextStyle? preferredStyle,
+    TextStyle? parentStyle,
+  ) => Text.rich(
+    TextSpan(
+      text: text,
+      style: (parentStyle ?? preferredStyle)?.merge(style) ?? style,
+      recognizer: recognizer,
+    ),
+  );
 }
