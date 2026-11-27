@@ -98,14 +98,22 @@
       "outcome": "v2.13.0 cut (6ab5c1ce, tag pushed atomically), watch-release started, helper evaluation sent",
       "status": "done",
       "validation": "gate green on 55450f33; cut_stable ok; tag on origin"
+    },
+    {
+      "depends": [],
+      "id": "CONT1",
+      "label": "Add the approved widget-test pitfall to AGENTS.md",
+      "outcome": "Widget-test pitfall added to AGENTS.md Known pitfalls",
+      "status": "done",
+      "validation": "git diff AGENTS.md: +1 line, docs only"
     }
   ],
   "completion": {
-    "at": "2026-11-27T20:56:34Z",
+    "at": "2026-11-27T21:00:45Z",
     "by": "agent",
-    "delivered": "#519: one Settings > Version and updates screen (updates first, release history below in one scroll; Changelog/About open at the history with an anchor released by any outside scroll; destination opens at top; primary scroll kept), smoke step 09 updated. Squashed 851747a3, docs 10e1154a, notes 01e64b32, release 6ab5c1ce (v2.13.0). #519 closed, #527 group 7 checked.",
-    "residual_risk": "Release workflow result pending (watch-release notifies); smoke steps 08b/09 proven locally only on a trimmed run, CI x64 confirms on this push; desktop compact Page Down with Back focused remains pre-existing. Group 8 collection queued as follow-ups (11 items) until the owner says terminei.",
-    "validation": "3 review rounds (8 helpers, Grok-F no credits) converged; mutations M1-M7 fail as expected; trimmed local Linux smoke passed 08b/09; make check green on 55450f33."
+    "delivered": "AGENTS.md Known pitfalls gained the owner-approved rule: never await scroll animations in widget tests; start unawaited, then pumpAndSettle.",
+    "residual_risk": "AGENTS.md change not committed yet; awaiting owner order. Group 8 collection continues as queued follow-ups (12 items).",
+    "validation": "Docs-only diff, 1 added bullet; no gate needed."
   },
   "contract": {
     "complete_when": [
@@ -185,9 +193,17 @@
     {
       "at": "2026-11-27T20:48:31Z",
       "text": "R3 judgment (#519): 7/8 approve. ACCEPT H1 (Sol-F warn, haiku sugg): outside scroll during the 250 ms reveal animation started no ScrollStart -> reveal is now an immediate jump (Sol-F's first option); test asserts the jump lands in one frame; mutation M7 (250 ms animation) fails it. REJECT H2 (haiku sugg) desktop Page Down with Back focused: pre-existing (desktop never inherits PrimaryScrollController; the old ListView page behaved the same), out of #519 scope. No -F position rejected. Fix commit (jump). Re-review skipped: one-line change exactly as Sol-F suggested, mutation-tested; gate reruns on the final SHA."
+    },
+    {
+      "at": "2026-11-27T21:00:29Z",
+      "text": "Completed milestone preserved at 2026-11-27T20:56:34Z by agent: delivered=#519: one Settings > Version and updates screen (updates first, release history below in one scroll; Changelog/About open at the history with an anchor released by any outside scroll; destination opens at top; primary scroll kept), smoke step 09 updated. Squashed 851747a3, docs 10e1154a, notes 01e64b32, release 6ab5c1ce (v2.13.0). #519 closed, #527 group 7 checked. | validation=3 review rounds (8 helpers, Grok-F no credits) converged; mutations M1-M7 fail as expected; trimmed local Linux smoke passed 08b/09; make check green on 55450f33. | residual_risk=Release workflow result pending (watch-release notifies); smoke steps 08b/09 proven locally only on a trimmed run, CI x64 confirms on this push; desktop compact Page Down with Back focused remains pre-existing. Group 8 collection queued as follow-ups (11 items) until the owner says terminei."
+    },
+    {
+      "at": "2026-11-27T21:00:29Z",
+      "text": "Continuation request: sim | reason: Owner approved the evergreen AGENTS.md pitfall recommended at the end of the group 7 flow (never await scroll animations in widget tests)."
     }
   ],
-  "generation": 37,
+  "generation": 41,
   "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
   "pending_operation": null,
   "queued_followups": [
@@ -238,6 +254,10 @@
     {
       "at": "2026-11-27T20:53:59Z",
       "request": "[Grupo 8, item 11] Vamos fazer um revamp na barra lateral. Isso significa deixar de existir sessões recentes. Como colocamos o limite de dois itens por projeto, não faz mais sentido elas serem chamadas de recentes. Então, as sessões recentes devem sumir e os projetos devem funcionar da seguinte maneira, mais ou menos como já é hoje. O projeto em aberto no momento deve ser o mais alto no topo e deve listar até cinco sessões mais recentes, enquanto os outros projetos, mais embaixo, devem mostrar até três de forma compactada, como é hoje. A cada item daquela sessão é uma linha fina. Enquanto o projeto principal que está aberto no momento é o que deve ficar mais no topo com as linhas um pouco mais expandidas. Inclusive, essa linha talvez tenha que reduzir um pouco, pois ela está com um espaço muito grande para um texto que nem sempre aparece, o subtítulo. Então, recapitulando, sessões recentes deixam de existir tanto na sidebar como opção no display. O projeto ativo é o primeiro do topo, com até cinco sessões recentes, podendo expandir para ver mais. E os outros projetos abertos ficam no modo semicolapsado, mostrando, como já é hoje, até três sessões recentes de forma bem compactada. Porém, a ordem que os projetos aparecem depois do primeiro, que é o principal, deve ser pela ordem de recente, o que respondeu recente ou o que foi aberto recente."
+    },
+    {
+      "at": "2026-11-27T21:00:39Z",
+      "request": "[Grupo 8, item 12] Recentemente a gente implementou que na timeline, quando o usuário tocar e segurar em uma bolha de texto, vai aparecer a opção para copiar o texto todo ou selecionar o texto. Mas ficou muito ruim, então vamos desfazer isso, ou seja, o usuário deve conseguir selecionar o texto a qualquer momento. E se ele tocar e segurar numa área limpa do balão, ou até na esquerda ou na direita do balão, a gente vai implementar um balãozinho meio que flutuante, que fica ou em cima da mensagem ou embaixo, meio que metade dentro do balão e metade fora. Uma barrinha horizontal, que fica metade dentro e metade fora, com a lista de opções. Nela a gente vai ter o de copiar todo o texto, encaminhar, que ainda não está implementado, mas você já coloca porque tinha na V1, tocar a mensagem em voz alta, que também tinha na V1, e compartilhar a imagem, que também tinha na V1, a imagem da mensagem todinha. Toque simples também pode fazer isso, mas apenas quando não tiver outra função. Por exemplo, código simples ou bloco de código grande deve permitir copiar rápido. Aqueles com backticks, como já é hoje, quando a gente clica, ele copia só aquele texto. Isso é ótimo para usabilidade e já está funcionando. Mas se a pessoa clica um toque simples na área limpa ou um toque simples que não é para copiar texto, o balãozinho aparece também. Inclusive, adiciona mais um botão nesse balãozinho, que é o de desfazer o turno. Prático, padrão. Caso o usuário toque e segure em cima do botão, aí mostra do que se trata aquele botão, padrão também aqui no Android no geral. Já no desktop, onde tem o mouse, esses balãozinhos aparecem quando a pessoa passa o mouse em cima ou, claro, clica levemente em qualquer área ali do balão de texto. E tem que ter um tempo para ele sumir, já que o usuário pode passar o mouse e acabar sumindo a caixinha sem que ele consiga clicar no que quer."
     }
   ],
   "request": {
@@ -251,7 +271,7 @@
   "status": "completed",
   "task_id": "tm_20261127T193607Z_a313a05a",
   "title": "#527 group 7: one Settings screen for version, updates and release history (#519)",
-  "updated_at": "2026-11-27T20:56:34Z",
+  "updated_at": "2026-11-27T21:00:45Z",
   "validations": [
     {
       "at": "2026-11-27T20:21:36Z",
