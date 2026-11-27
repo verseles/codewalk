@@ -121,9 +121,9 @@
       ],
       "id": "S6",
       "label": "#518 rótulo do switch de aprovação automática",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "#518 bf8fc28b; review #516+#518 despachado",
+      "status": "done",
+      "validation": "65 testes ok"
     },
     {
       "depends": [
@@ -132,7 +132,7 @@
       "id": "S7",
       "label": "#524 nomes curtos no chip do composer",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -281,11 +281,22 @@
     {
       "at": "2026-11-27T04:06:18Z",
       "text": "ART-REVIEW-JUDGMENT #517+#526: 9/9 approve; aceitas as 2 sugestões do Haiku (§17 registra o mapa de ícone por id como apresentação; teste de alinhamento dx Auto/low). Sem re-review (teste + doc). High-value: Haiku; Useful: Sol-F, Grok-F, Ernie, GLM, Gemini, Hungerg, Kimi, Luna."
+    },
+    {
+      "at": "2026-11-27T04:06:58Z",
+      "text": "Round #516+#518 (ff186bb6..bf8fc28b), metrics rvw_20261127T040627Z_454cecc0: helperDeepSeek-41-flash-high entra (04:06 UTC, fora do pico) com handshake READY no mesmo job key e payload completo; os outros 9 por continuação."
     }
   ],
-  "generation": 37,
-  "next_action": "#518: título curto do switch, remover subtítulo do servidor, Text.rich",
-  "pending_operation": null,
+  "generation": 41,
+  "next_action": "#524: tabela de regras no chip do composer",
+  "pending_operation": {
+    "expected_bytes": 60000,
+    "expected_seconds": 1200,
+    "id": "op_1f8e3dc08aa2",
+    "kind": "subagent",
+    "prepared_at": "2026-11-27T04:06:58Z",
+    "purpose": "Review #516+#518 pelos 10 helpers"
+  },
   "queued_followups": [
     {
       "at": "2026-11-27T03:22:09Z",
@@ -303,7 +314,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T025825Z_6ddaec3e",
   "title": "Grupo 4 da #527 — seletor de modelos (flow)",
-  "updated_at": "2026-11-27T04:06:18Z",
+  "updated_at": "2026-11-27T04:10:56Z",
   "validations": [
     {
       "at": "2026-11-27T03:32:10Z",
@@ -345,6 +356,13 @@
       "check": "#518 focused",
       "criterion": null,
       "evidence": "composer_controls + draft_page + selection_chip: 65 pass; generate --check ok; chaves chatPermissionAutoApproveOn/Off e livePermissionServerRule removidas (sem outros usos); analyze limpo",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T04:10:56Z",
+      "check": "#524 focused",
+      "criterion": null,
+      "evidence": "session_model_chip_label_test (todas as regras + exemplos do owner), picker (chip curto, tooltip completo, ícone, default name#variant), composer_controls, fixture_flow (Fledge Alpha + ícone), draft: passam, só os 3 goldens; analyze limpo",
       "outcome": "pass"
     }
   ]

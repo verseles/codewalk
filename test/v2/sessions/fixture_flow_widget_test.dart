@@ -986,14 +986,22 @@ void main() {
       });
       // The composer's chip shows the new model and variant (#484).
       await emitFrames(tester, rig.server, 0, count: 1);
-      bool chipShows(String key, String text) => find
-          .descendant(of: find.byKey(ValueKey(key)), matching: find.text(text))
+      // The chip shortens the name: "Free" becomes its icon (#524).
+      bool chipShows(String key, Pattern text) => find
+          .descendant(
+            of: find.byKey(ValueKey(key)),
+            matching: find.textContaining(text),
+          )
           .evaluate()
           .isNotEmpty;
       await pumpSpin(
         tester,
-        () => chipShows('live-model-chip', 'Fledge Alpha Free high'),
-        reason: 'selection chips updated to Fledge Alpha Free, high',
+        () => chipShows('live-model-chip', RegExp(r'^Fledge Alpha\W* high$')),
+        reason: 'selection chips updated to Fledge Alpha (free), high',
+      );
+      expect(
+        find.byKey(const ValueKey('live-model-chip-free')),
+        findsOneWidget,
       );
       final liveScroll = tester
           .widget<SessionLivePage>(find.byType(SessionLivePage))

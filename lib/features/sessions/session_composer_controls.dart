@@ -7,6 +7,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_selection.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_agent_color.dart';
+import 'session_model_chip_label.dart';
 import 'session_selection_chip.dart';
 import 'session_selection_host.dart';
 
@@ -44,12 +45,18 @@ class SessionModelChip extends StatelessWidget {
         if (live.isChild) l10n.chatModelLockedSubConversation,
         ?sessionSelectionStatus(state, l10n),
       ].join(': ');
-      final modelText = switch (selection?.modelId) {
-        final modelId? => catalogLabel(model?.label, modelId),
-        null =>
-          selection == null
-              ? l10n.chatChooseModel
-              : state.defaultModel ?? l10n.liveSelectionDefault,
+      // The chip shortens long model names; its tooltip and the screen
+      // reader keep the full one (#524).
+      final shown = switch (selection?.modelId) {
+        final modelId? => modelChipLabel(catalogLabel(model?.label, modelId)),
+        null => switch (selection == null ? null : state.defaultModel) {
+          final named? => defaultModelChipLabel(named),
+          null => ModelChipLabel(
+            selection == null
+                ? l10n.chatChooseModel
+                : l10n.liveSelectionDefault,
+          ),
+        },
       };
       final background = sessionAgentWash(
         sessionAgentColor(state.agents, selection?.agentId),
@@ -83,9 +90,22 @@ class SessionModelChip extends StatelessWidget {
               TextSpan(
                 children: [
                   TextSpan(
-                    text: modelText,
+                    text: shown.text,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
+                  if (shown.free)
+                    WidgetSpan(
+                      alignment: PlaceholderAlignment.middle,
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.only(start: 4),
+                        child: Icon(
+                          Symbols.money_off,
+                          key: const ValueKey('live-model-chip-free'),
+                          size: 16,
+                          color: foreground,
+                        ),
+                      ),
+                    ),
                   if (variant != null)
                     // Same color as the model, so it keeps the contrast;
                     // the lighter weight sets it apart.

@@ -201,6 +201,70 @@ void main() {
     );
   });
 
+  testWidgets('the composer chip shortens the name; its tooltip keeps it', (
+    tester,
+  ) async {
+    final long = ModelEntry(
+      id: 'opus',
+      providerId: 'prov',
+      label: 'Claude Opus 5.5 Free',
+      variants: ['high'],
+    );
+    await open(
+      tester,
+      state: SessionSelectionState(
+        selection: _selection(long, 'high'),
+        models: [long, _beta],
+      ),
+    );
+    final chip = find.byKey(const ValueKey('live-model-chip'));
+    final text = tester.widget<Text>(
+      find.descendant(of: chip, matching: find.byType(Text)).first,
+    );
+    expect(text.textSpan!.toPlainText(), startsWith('Opus 5.5'));
+    expect(text.textSpan!.toPlainText(), endsWith(' high'));
+    expect(text.textSpan!.toPlainText(), isNot(contains('Claude')));
+    // The name said Free: the chip draws the icon instead (#524).
+    expect(
+      find.descendant(
+        of: chip,
+        matching: find.byKey(const ValueKey('live-model-chip-free')),
+      ),
+      findsOneWidget,
+    );
+    final tooltip = tester.widget<Tooltip>(
+      find.ancestor(of: chip, matching: find.byType(Tooltip)).first,
+    );
+    expect(tooltip.message, contains('Claude Opus 5.5 Free'));
+    // The pick keeps the full name.
+    await openPicker(tester);
+    expect(
+      find.descendant(
+        of: row('model-prov/opus'),
+        matching: find.text('Claude Opus 5.5 Free'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a default model is shortened before its variant', (
+    tester,
+  ) async {
+    await open(
+      tester,
+      state: SessionSelectionState(
+        selection: const Selection(agentId: 'build'),
+        models: [_alpha],
+        defaultModel: 'Kimi K3.1 Pro Highspeed#max',
+      ),
+    );
+    final chip = find.byKey(const ValueKey('live-model-chip'));
+    expect(
+      find.descendant(of: chip, matching: find.text('K3.1 Pro HS#max')),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('Free marks only a stated zero price', (tester) async {
     await open(tester);
     await openPicker(tester);
