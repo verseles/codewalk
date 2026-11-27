@@ -36,7 +36,7 @@
       "title": "Planner R1 resume opus-F: failed"
     },
     "A0003": {
-      "active": true,
+      "active": false,
       "bytes": 7525,
       "created_at": "2026-11-27T10:27:33Z",
       "evidence": "/tmp/opencode/g6plan/r1_*.out; síntese do orquestrador",
@@ -415,12 +415,18 @@
       "depends": [],
       "id": "CONT9",
       "label": "Cut the patch release and start watch-release",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "v2.12.1 cut (9c5febb0, tag v2.12.1 pushed atomically); make watch-release started",
+      "status": "done",
+      "validation": "cut_stable dry run ok; tag on origin; watcher detached"
     }
   ],
-  "completion": null,
+  "completion": {
+    "at": "2026-11-27T19:09:43Z",
+    "by": "agent",
+    "delivered": "Diagnosed v2.12.0: macOS arm64 hosted runner never acquired (GitHub capacity), so verify/publish skipped; CI main red from stale Linux smoke step 03-pairing. Fixed the smoke (549b10a2), wrote v2.12.1 notes (3d688127), gate green, cut v2.12.1 (9c5febb0) and started make watch-release.",
+    "residual_risk": "Release outcome pending (watch-release notifies); macOS runner capacity may fail again; smoke steps after 03 with the dialog not yet proven on CI x64; reviewer skipped for a label-only CI script change; libgtk-3-dev and CI build deps installed on mercury.",
+    "validation": "make check rc=0; local Xvfb smoke 03-pairing passed twice on the new Add Server dialog; A/B on last-green 09039135 shows later-step failures are local arm64 env; smoke unit tests 34 OK."
+  },
   "contract": {
     "complete_when": [
       {
@@ -629,8 +635,8 @@
       "text": "Diagnosis: Release run 46024248537 (v2.12.0) failed because Build macOS (arm64, macos-15) was never acquired by a hosted runner (annotation: capacity constraints), so verify/publish skipped; all other builds green. Separately CI run 46024351553 on main failed v2_native_builds (linux): tool/ci/smoke_v2_linux_preview.py:218 still expects the removed 'Pair a server' screen; the group 6 add screen shows Add Server -> Harness / Pairing link / Confirm and pair. Patch: update the smoke to the new add screen, validate it locally under xvfb, then cut v2.12.1 (the tag rerun retries macOS)."
     }
   ],
-  "generation": 123,
-  "next_action": "Commit TM, push main, cut v2.12.1 with cut_stable.py --bump patch, start make watch-release",
+  "generation": 125,
+  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -650,10 +656,10 @@
   ],
   "schema": 1,
   "started_at": "2026-11-27T09:41:58Z",
-  "status": "in_progress",
+  "status": "completed",
   "task_id": "tm_20261127T094158Z_6862cb28",
   "title": "Pesquisa prévia do grupo 6 da #527 (servidores)",
-  "updated_at": "2026-11-27T19:09:25Z",
+  "updated_at": "2026-11-27T19:09:43Z",
   "validations": [
     {
       "at": "2026-11-27T09:42:17Z",
