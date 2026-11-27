@@ -15,6 +15,7 @@ import 'session_agent_color.dart';
 import 'session_live_controller.dart';
 import 'session_model_options.dart';
 import 'session_selection_host.dart';
+import 'session_variant_icon.dart';
 
 /// The live session's model and agent (V2-054A). The label is the server's
 /// selection, or a switch it accepted and has not reported yet; a missing
@@ -884,7 +885,23 @@ class _VariantMenu extends StatelessWidget {
             ),
             value: value,
             checked: (current ?? auto) == value,
-            child: Text(value.isEmpty ? sessionAutoVariantLabel : value),
+            // A known effort level shows its icon before the name; Auto and
+            // other variants keep the slot empty so the names align (#526).
+            child: Row(
+              children: [
+                SizedBox.square(
+                  dimension: 20,
+                  child: switch (sessionVariantIcon(value)) {
+                    final icon? => Icon(icon, size: 20),
+                    null => null,
+                  },
+                ),
+                const SizedBox(width: 12),
+                Flexible(
+                  child: Text(value.isEmpty ? sessionAutoVariantLabel : value),
+                ),
+              ],
+            ),
           ),
       ],
       child: Container(

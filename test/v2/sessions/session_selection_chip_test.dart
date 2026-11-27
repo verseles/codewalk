@@ -7,6 +7,7 @@ import 'package:codewalk/shared/widgets/app_indeterminate_progress.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import 'fakes.dart';
 import 'live_fakes.dart';
@@ -171,6 +172,36 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+    // A known effort level shows its icon before the name; Auto keeps an
+    // empty slot (#526).
+    Finder icon(String item, IconData glyph) => find.descendant(
+      of: find.byKey(ValueKey(item)),
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Icon && widget.icon == glyph,
+      ),
+    );
+    expect(
+      icon('live-selection-variant-prov/alpha#low', Symbols.clock_loader_20),
+      findsOneWidget,
+    );
+    final levels = {
+      Symbols.clock_loader_10,
+      Symbols.clock_loader_20,
+      Symbols.clock_loader_40,
+      Symbols.clock_loader_60,
+      Symbols.clock_loader_80,
+      Symbols.psychology_alt,
+      Symbols.person_celebrate,
+    };
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('live-selection-auto-prov/alpha')),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Icon && levels.contains(widget.icon),
+        ),
+      ),
+      findsNothing,
+    );
     await tester.tap(
       find.byKey(const ValueKey('live-selection-variant-prov/alpha#low')),
     );

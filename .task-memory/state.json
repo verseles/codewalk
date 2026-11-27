@@ -75,9 +75,9 @@
       ],
       "id": "S3",
       "label": "#517 'Auto' no seletor de variant",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "#517 e699c71d",
+      "status": "done",
+      "validation": "46 testes ok; generate --check ok"
     },
     {
       "depends": [
@@ -86,7 +86,7 @@
       "id": "S4",
       "label": "#526 ícones de nível no menu de variant",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -263,8 +263,8 @@
       "text": "Follow-up TM instalado em ~/MEGA/CONFIG/opencode/skills/task-memory (backup em /tmp/opencode/g4/tm/orig): --quiet, state.json indentado, raiz descoberta no worktree. Teste ao vivo rodado de lib/."
     }
   ],
-  "generation": 28,
-  "next_action": "#517: remover liveSelectionAuto dos ARBs/catálogo e usar 'Auto' literal",
+  "generation": 30,
+  "next_action": "#526: ícones de nível no menu de variant",
   "pending_operation": null,
   "queued_followups": [
     {
@@ -283,7 +283,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T025825Z_6ddaec3e",
   "title": "Grupo 4 da #527 — seletor de modelos (flow)",
-  "updated_at": "2026-11-27T03:56:22Z",
+  "updated_at": "2026-11-27T03:58:31Z",
   "validations": [
     {
       "at": "2026-11-27T03:32:10Z",
@@ -304,6 +304,13 @@
       "check": "#517 focused",
       "criterion": null,
       "evidence": "liveSelectionAuto removida (14 ARBs, catálogo, 15 gerados; generate --check ok); picker+chip+composer tests 46 pass, só 3 goldens falham; analyze limpo",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T03:58:31Z",
+      "check": "#526 focused",
+      "criterion": null,
+      "evidence": "session_variant_icon_test + chip + picker: tudo passa exceto os 3 goldens do seletor; analyze limpo",
       "outcome": "pass"
     }
   ]
