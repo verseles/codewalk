@@ -1,1 +1,0 @@
-salva a questao atual no tm (porque ao anexar a imagem diz "Prévia indisponível neste dispositivo", pelo menos aqui no android? o modelo reconhece o que tem na imagem tranquilamente.)

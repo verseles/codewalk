@@ -68,12 +68,12 @@ final class ScriptedTransport implements EndpointHttpTransport {
 }) => (status: status, body: body, media: media, retry: retry);
 
 void main() {
-  test('v2 runtime admits stable 2.x without claiming it is tested', () {
+  test('v2 runtime treats every stable 2.x from the minimum as usable', () {
     expect(OpenCodeCompatibility.supportsV2('2.2.2'), isTrue);
     expect(OpenCodeCompatibility.supportsV2('2.9.0+build'), isTrue);
     expect(
       OpenCodeCompatibility.assess('2.2.2').status,
-      EndpointStatus.untested,
+      EndpointStatus.compatible,
     );
     expect(OpenCodeCompatibility.supportsV2('3.0.0'), isFalse);
     expect(OpenCodeCompatibility.supportsV2('2.0.19'), isFalse);
@@ -105,7 +105,7 @@ void main() {
   for (final entry in {
     '2.0.19': EndpointStatus.belowMinimum,
     '2.0.20-rc.1': EndpointStatus.belowMinimum,
-    '2.0.20': EndpointStatus.untested,
+    '2.0.20': EndpointStatus.compatible,
     '2.0.21-rc.1': EndpointStatus.unrecognized,
     '2.0.21': EndpointStatus.compatible,
     '2.0.22+build.999': EndpointStatus.compatible,
@@ -117,11 +117,12 @@ void main() {
     '2.0.22-rc.01': EndpointStatus.unrecognized,
     '2.0.22-rc..1': EndpointStatus.unrecognized,
     '2.0.22-rc.1+build.999': EndpointStatus.unrecognized,
-    '2.0.23': EndpointStatus.untested,
+    '2.0.23': EndpointStatus.compatible,
+    '2.1.0': EndpointStatus.compatible,
     '3.0.0': EndpointStatus.unrecognized,
     'invalid-private-url': EndpointStatus.unrecognized,
   }.entries) {
-    test('version ${entry.key}: support and test evidence differ', () async {
+    test('version ${entry.key}: usable only from the stable minimum', () async {
       final transport = ScriptedTransport([reply(info(entry.key))]);
       final result = await OpenCodeEndpointProbe(transport).detect();
       expect(result.status, entry.value);

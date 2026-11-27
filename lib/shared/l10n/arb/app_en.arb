@@ -585,7 +585,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "Run opencode upgrade on your server. Minimum: 2.0.20; tested: 2.0.21–2.0.22. CodeWalk does not install or change your server.",
+  "hostsUpgradeInstructions": "Run opencode upgrade on your server. Minimum: 2.0.20. CodeWalk does not install or change your server.",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -595,10 +595,6 @@
   },
   "hostsUpgradeRequired": "Server upgrade required",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "Untested version",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "Could not reach the server. Check the URL, TLS and VPN connection.",
@@ -2105,6 +2101,10 @@
   "statusDelayed": "Delayed",
   "@statusDelayed": {
     "description": "CodeWalk UI string — statusDelayed"
+  },
+  "statusChecking": "Checking…",
+  "@statusChecking": {
+    "description": "CodeWalk UI string — statusChecking"
   },
   "statusOffline": "Offline",
   "@statusOffline": {

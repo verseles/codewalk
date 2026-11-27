@@ -998,7 +998,7 @@ abstract class V2Localizations {
   /// V2 endpoint profile and compatibility UI
   ///
   /// In en, this message translates to:
-  /// **'Run opencode upgrade on your server. Minimum: 2.0.20; tested: 2.0.21–2.0.22. CodeWalk does not install or change your server.'**
+  /// **'Run opencode upgrade on your server. Minimum: 2.0.20. CodeWalk does not install or change your server.'**
   String get hostsUpgradeInstructions;
 
   /// V2 endpoint profile and compatibility UI
@@ -1012,12 +1012,6 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Server upgrade required'**
   String get hostsUpgradeRequired;
-
-  /// V2 endpoint profile and compatibility UI
-  ///
-  /// In en, this message translates to:
-  /// **'Untested version'**
-  String get hostsUntested;
 
   /// V2 endpoint profile and compatibility UI
   ///
@@ -3184,6 +3178,12 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Delayed'**
   String get statusDelayed;
+
+  /// CodeWalk UI string — statusChecking
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get statusChecking;
 
   /// CodeWalk UI string — statusOffline
   ///

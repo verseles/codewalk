@@ -178,7 +178,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "请在服务器上运行 opencode upgrade。最低版本：2.0.20；已测试：2.0.21–2.0.22。CodeWalk 不会安装或更改服务器。",
+  "hostsUpgradeInstructions": "请在服务器上运行 opencode upgrade。最低版本：2.0.20。CodeWalk 不会安装或更改服务器。",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -188,10 +188,6 @@
   },
   "hostsUpgradeRequired": "需要升级服务器",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "未经测试的版本",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "无法连接服务器。请检查 URL、TLS 和 VPN 连接。",
@@ -1460,6 +1456,7 @@
   "serversSearchActiveHint": "搜索活动服务器",
   "serversSetActive": "设为活动",
   "statusDelayed": "延迟",
+  "statusChecking": "检查中…",
   "statusOffline": "离线",
   "statusOnline": "在线",
   "healthCredentialMissing": "此服务器没有已保存的凭据。请重新配对或输入密码。",

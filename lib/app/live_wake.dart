@@ -57,7 +57,7 @@ final class LiveRecovery {
           _sawOffline = false;
           retry(host: profile.id);
         }
-      case EndpointHealthStatus.delayed:
+      case EndpointHealthStatus.checking || EndpointHealthStatus.delayed:
         break;
     }
   }

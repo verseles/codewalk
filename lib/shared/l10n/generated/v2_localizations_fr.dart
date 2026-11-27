@@ -501,16 +501,13 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get hostsUpgradeInstructions =>
-      'Exécutez opencode upgrade sur le serveur. Minimum : 2.0.20 ; testé : 2.0.21–2.0.22. CodeWalk ne modifie ni n’installe votre serveur.';
+      'Exécutez opencode upgrade sur le serveur. Minimum : 2.0.20. CodeWalk ne modifie ni n’installe votre serveur.';
 
   @override
   String get hostsLegacyDownload => 'Télécharger CodeWalk 1';
 
   @override
   String get hostsUpgradeRequired => 'Mise à niveau du serveur requise';
-
-  @override
-  String get hostsUntested => 'Version non testée';
 
   @override
   String get hostsTransportHelp =>
@@ -1732,6 +1729,9 @@ class V2LocalizationsFr extends V2Localizations {
 
   @override
   String get statusDelayed => 'Retardé';
+
+  @override
+  String get statusChecking => 'Vérification…';
 
   @override
   String get statusOffline => 'Hors ligne';

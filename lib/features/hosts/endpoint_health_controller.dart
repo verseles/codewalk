@@ -5,7 +5,9 @@ import 'package:flutter/foundation.dart';
 
 import 'hosts_controller.dart';
 
-enum EndpointHealthStatus { online, delayed, offline }
+/// Checking is neutral: no answer yet. Delayed means the first check has been
+/// waiting for longer than [EndpointHealthController.delayedAfter] (#514).
+enum EndpointHealthStatus { checking, online, delayed, offline }
 
 enum EndpointCredentialFailure { missing, unreadable, expired }
 
@@ -16,6 +18,7 @@ final class EndpointHealthView {
     this.credentialFailure,
     this.checking = false,
     this.checkedAt,
+    this.slow = false,
   });
 
   final EndpointAssessment? assessment;
@@ -23,13 +26,15 @@ final class EndpointHealthView {
   final bool checking;
   final DateTime? checkedAt;
 
+  /// The first check has gone unanswered for longer than the delay threshold.
+  final bool slow;
+
   EndpointHealthStatus get status {
     if (credentialFailure != null) return EndpointHealthStatus.offline;
     return switch (assessment?.status) {
       EndpointStatus.compatible => EndpointHealthStatus.online,
-      null ||
-      EndpointStatus.untested ||
-      EndpointStatus.cancelled => EndpointHealthStatus.delayed,
+      null || EndpointStatus.cancelled =>
+        slow ? EndpointHealthStatus.delayed : EndpointHealthStatus.checking,
       _ => EndpointHealthStatus.offline,
     };
   }
@@ -48,13 +53,21 @@ final class EndpointHealthController extends ChangeNotifier {
     required this.hosts,
     DateTime Function()? now,
     this.interval = const Duration(seconds: 10),
+    this.delayedAfter = const Duration(seconds: 5),
   }) : _now = now ?? DateTime.now {
     if (interval <= Duration.zero) throw ArgumentError.value(interval);
+    if (delayedAfter <= Duration.zero) {
+      throw ArgumentError.value(delayedAfter);
+    }
     hosts.addListener(_sync);
   }
 
   final HostsController hosts;
   final Duration interval;
+
+  /// How long a server that never answered stays Checking before it reads
+  /// Delayed. Rechecks of a known status never use it (owner, 2026-11-27).
+  final Duration delayedAfter;
   final DateTime Function() _now;
   final _records = <String, _HealthRecord>{};
   Timer? _timer;
@@ -125,6 +138,7 @@ final class EndpointHealthController extends ChangeNotifier {
       credentialFailure: failure,
       checking: record.task != null,
       checkedAt: record.checkedAt,
+      slow: record.slow,
     );
   }
 
@@ -299,6 +313,7 @@ final class EndpointHealthController extends ChangeNotifier {
         credential.secret,
         connectionTimeout: connectionTimeout,
       );
+      if (record.assessment == null) _watchSlow(record, generation);
       if (notify) _notify();
       result = await task.result;
     } on Object {
@@ -310,6 +325,7 @@ final class EndpointHealthController extends ChangeNotifier {
       return;
     }
     record.task = null;
+    _stopSlow(record);
     if (!_foreground ||
         !_ready ||
         !_matches(
@@ -334,8 +350,36 @@ final class EndpointHealthController extends ChangeNotifier {
 
   void _cancel(_HealthRecord record) {
     record.generation++;
+    // A first check cut short by a reload never answered: recheck as soon as
+    // the lane is ready instead of waiting a whole interval in Checking.
+    if (record.task != null && record.assessment == null) record.nextAt = now;
     record.task?.cancel();
     record.task = null;
+    _stopSlow(record);
+  }
+
+  // Only a server without a known status can read Delayed: a slow recheck
+  // keeps the last answer instead of flashing orange.
+  void _watchSlow(_HealthRecord record, int generation) {
+    record.slowTimer?.cancel();
+    record.slowTimer = Timer(delayedAfter, () {
+      record.slowTimer = null;
+      if (_disposed ||
+          !identical(_records[record.profile.id], record) ||
+          generation != record.generation ||
+          record.task == null ||
+          record.assessment != null) {
+        return;
+      }
+      record.slow = true;
+      _notify();
+    });
+  }
+
+  void _stopSlow(_HealthRecord record) {
+    record.slowTimer?.cancel();
+    record.slowTimer = null;
+    record.slow = false;
   }
 
   void _notify() {
@@ -370,6 +414,8 @@ final class _HealthRecord {
   EndpointAssessment? assessment;
   EndpointCredentialFailure? credentialFailure;
   EndpointProbeTask? task;
+  Timer? slowTimer;
+  bool slow = false;
   DateTime? checkedAt;
   DateTime? lastNetworkCheck;
   int generation = 0;

@@ -262,7 +262,7 @@ void main() {
       await tester.pump();
       expect(rig.prober.calls.map((p) => p.endpoint), [a.endpoint, b.endpoint]);
       expect(rig.prober.calls.map((p) => p.secret), ['first', 'second']);
-      expect(rig.health.view(a).status, EndpointHealthStatus.delayed);
+      expect(rig.health.view(a).status, EndpointHealthStatus.checking);
       expect(rig.health.view(a).checking, isTrue);
     } finally {
       rig.dispose();
@@ -324,19 +324,19 @@ void main() {
   });
 
   testWidgets(
-    'an untested or cancelled result never claims confirmed offline',
+    'a cancelled result never claims confirmed offline',
     (tester) async {
       final rig = _Rig(tester);
       try {
         final profile = rig.save('a');
         await rig.start(tester);
-        rig.prober.calls.single.complete(EndpointStatus.untested);
+        rig.prober.calls.single.complete(EndpointStatus.cancelled);
         await tester.pump();
-        expect(rig.health.view(profile).status, EndpointHealthStatus.delayed);
+        expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
         final checking = rig.health.refresh(profile);
         rig.prober.calls.last.complete(EndpointStatus.cancelled);
         await checking;
-        expect(rig.health.view(profile).status, EndpointHealthStatus.delayed);
+        expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
         final confirmed = rig.health.refresh(profile);
         rig.prober.calls.last.complete(EndpointStatus.unreachable);
         await confirmed;
@@ -454,7 +454,7 @@ void main() {
       expect(rig.prober.calls.last.secret, 'after');
       stale.complete(EndpointStatus.unreachable);
       await tester.pump();
-      expect(rig.health.view(profile).status, EndpointHealthStatus.delayed);
+      expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
       rig.prober.calls.last.complete(EndpointStatus.compatible);
       await tester.pump();
       expect(rig.health.view(profile).status, EndpointHealthStatus.online);
@@ -521,6 +521,103 @@ void main() {
       stale.complete(EndpointStatus.compatible);
       await tester.pump(const Duration(seconds: 30));
       expect(rig.prober.calls, hasLength(1));
+      expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
+    } finally {
+      rig.dispose();
+    }
+  });
+
+  testWidgets('an unanswered first check reads Delayed only after 5 s', (
+    tester,
+  ) async {
+    final rig = _Rig(tester);
+    try {
+      final profile = rig.save('a');
+      await rig.start(tester);
+      expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
+      await tester.pump(const Duration(milliseconds: 4999));
+      expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(rig.health.view(profile).status, EndpointHealthStatus.delayed);
+      expect(rig.health.view(profile).checking, isTrue);
+      rig.prober.calls.single.complete(EndpointStatus.compatible);
+      await tester.pump();
+      expect(rig.health.view(profile).status, EndpointHealthStatus.online);
+    } finally {
+      rig.dispose();
+    }
+  });
+
+  testWidgets('a first answer before 5 s never passes through Delayed', (
+    tester,
+  ) async {
+    final rig = _Rig(tester);
+    try {
+      final profile = rig.save('a');
+      await rig.start(tester);
+      await tester.pump(const Duration(seconds: 2));
+      rig.prober.calls.single.complete(EndpointStatus.unreachable);
+      await tester.pump(const Duration(seconds: 6));
+      expect(rig.health.view(profile).status, EndpointHealthStatus.offline);
+    } finally {
+      rig.dispose();
+    }
+  });
+
+  testWidgets('a slow recheck keeps the last known status', (tester) async {
+    final rig = _Rig(tester);
+    try {
+      final profile = rig.save('a');
+      await rig.start(tester);
+      rig.prober.calls.single.complete(EndpointStatus.compatible);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 10));
+      expect(rig.prober.calls, hasLength(2));
+      await tester.pump(const Duration(seconds: 8));
+      expect(rig.health.view(profile).status, EndpointHealthStatus.online);
+      expect(rig.health.view(profile).checking, isTrue);
+    } finally {
+      rig.dispose();
+    }
+  });
+
+  testWidgets('a reload that cancels the first check rechecks at once', (
+    tester,
+  ) async {
+    final rig = _Rig(tester);
+    try {
+      final profile = rig.save('a');
+      await rig.start(tester);
+      final first = rig.prober.calls.single;
+      await rig.hosts.load();
+      await tester.pump();
+      expect(first.cancelled, isTrue);
+      expect(rig.prober.calls, hasLength(2));
+      expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
+      rig.prober.calls.last.complete(EndpointStatus.compatible);
+      await tester.pump();
+      expect(rig.health.view(profile).status, EndpointHealthStatus.online);
+    } finally {
+      rig.dispose();
+    }
+  });
+
+  testWidgets('a cancelled first check restarts the 5 s wait', (tester) async {
+    final rig = _Rig(tester);
+    try {
+      final profile = rig.save('a');
+      await rig.start(tester);
+      await tester.pump(const Duration(seconds: 4));
+      rig.health.setForeground(false);
+      expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
+      await tester.pump(const Duration(seconds: 3));
+      expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
+      rig.health.setForeground(true);
+      await tester.pump();
+      expect(rig.prober.calls, hasLength(2));
+      await tester.pump(const Duration(seconds: 4));
+      expect(rig.health.view(profile).status, EndpointHealthStatus.checking);
+      await tester.pump(const Duration(seconds: 1));
       expect(rig.health.view(profile).status, EndpointHealthStatus.delayed);
     } finally {
       rig.dispose();

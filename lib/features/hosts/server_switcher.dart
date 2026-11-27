@@ -89,8 +89,8 @@ class ServerSwitcher extends StatelessWidget {
     final workspace = context.watch<WorkspaceController?>();
     final profile = catalog?.selectedProfile;
     final status = profile != null
-        ? health?.view(profile).status ?? EndpointHealthStatus.delayed
-        : EndpointHealthStatus.delayed;
+        ? health?.view(profile).status ?? EndpointHealthStatus.checking
+        : EndpointHealthStatus.checking;
     final tokens = Theme.of(context).surfaceTokens;
     // v1: chat_page_status_presenter.dart:644-718 (cloud, status dot, name,
     // state, arrow) on the muted control surface.
@@ -160,13 +160,7 @@ class ServerSwitcher extends StatelessWidget {
                             child: Icon(
                               Symbols.circle,
                               size: 8,
-                              color: switch (status) {
-                                EndpointHealthStatus.online => Colors.green,
-                                EndpointHealthStatus.delayed => Colors.orange,
-                                EndpointHealthStatus.offline => Theme.of(
-                                  context,
-                                ).colorScheme.error,
-                              },
+                              color: healthStatusColor(context, status),
                             ),
                           ),
                         )

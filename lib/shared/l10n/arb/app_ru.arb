@@ -178,7 +178,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "Запустите opencode upgrade на сервере. Минимум: 2.0.20; проверено: 2.0.21–2.0.22. CodeWalk не устанавливает и не изменяет сервер.",
+  "hostsUpgradeInstructions": "Запустите opencode upgrade на сервере. Минимум: 2.0.20. CodeWalk не устанавливает и не изменяет сервер.",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -188,10 +188,6 @@
   },
   "hostsUpgradeRequired": "Нужно обновить сервер",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "Непроверенная версия",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "Сервер недоступен. Проверьте URL, TLS и подключение VPN.",
@@ -1460,6 +1456,7 @@
   "serversSearchActiveHint": "Поиск активного сервера",
   "serversSetActive": "Сделать активным",
   "statusDelayed": "Задержка",
+  "statusChecking": "Проверка…",
   "statusOffline": "Офлайн",
   "statusOnline": "Онлайн",
   "healthCredentialMissing": "Для этого сервера нет сохранённых учётных данных. Выполните сопряжение заново или введите пароль.",

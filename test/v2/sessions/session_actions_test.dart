@@ -236,7 +236,7 @@ void main() {
   test('a newer v2 server allows session actions', () async {
     final prober = FakeProber()
       ..assessment = const EndpointAssessment(
-        EndpointStatus.untested,
+        EndpointStatus.compatible,
         version: '2.2.2',
       );
     final source = createSessionActionSource(

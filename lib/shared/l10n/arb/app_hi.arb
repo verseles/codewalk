@@ -178,7 +178,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "सर्वर पर opencode upgrade चलाएँ। न्यूनतम: 2.0.20; जाँचा गया: 2.0.21–2.0.22। CodeWalk आपके सर्वर को इंस्टॉल या बदलता नहीं है।",
+  "hostsUpgradeInstructions": "सर्वर पर opencode upgrade चलाएँ। न्यूनतम: 2.0.20। CodeWalk आपके सर्वर को इंस्टॉल या बदलता नहीं है।",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -188,10 +188,6 @@
   },
   "hostsUpgradeRequired": "सर्वर अपग्रेड आवश्यक",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "अपरिक्षित संस्करण",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "सर्वर तक नहीं पहुँच सके। URL, TLS और VPN कनेक्शन जाँचें।",
@@ -1460,6 +1456,7 @@
   "serversSearchActiveHint": "सक्रिय सर्वर खोजें",
   "serversSetActive": "सक्रिय सेट करें",
   "statusDelayed": "विलंबित",
+  "statusChecking": "जाँच हो रही है…",
   "statusOffline": "ऑफ़लाइन",
   "statusOnline": "ऑनलाइन",
   "healthCredentialMissing": "इस सर्वर के लिए कोई सहेजा गया क्रेडेंशियल नहीं है। फिर से पेयर करें या पासवर्ड डालें।",

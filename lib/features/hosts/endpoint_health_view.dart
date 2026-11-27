@@ -7,13 +7,13 @@ import 'package:provider/provider.dart';
 
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/theme/app_surface_tokens.dart';
 import '../pairing/pairing_controller.dart';
 import 'endpoint_health_controller.dart';
 
 String endpointStatusText(V2Localizations l, EndpointStatus status) =>
     switch (status) {
       EndpointStatus.compatible => l.onboardingReady,
-      EndpointStatus.untested => l.hostsUntested,
       EndpointStatus.belowMinimum => l.hostsUpgradeRequired,
       EndpointStatus.legacyServer => l.hostsLegacyExplanation,
       EndpointStatus.authenticationRequired => l.hostsAuthRequired,
@@ -29,6 +29,7 @@ String endpointStatusText(V2Localizations l, EndpointStatus status) =>
 
 String healthStatusText(V2Localizations l, EndpointHealthStatus status) =>
     switch (status) {
+      EndpointHealthStatus.checking => l.statusChecking,
       EndpointHealthStatus.online => l.statusOnline,
       EndpointHealthStatus.delayed => l.statusDelayed,
       EndpointHealthStatus.offline => l.statusOffline,
@@ -45,6 +46,16 @@ String? endpointHealthReason(V2Localizations l, EndpointHealthView view) =>
             : null,
     };
 
+Color healthStatusColor(BuildContext context, EndpointHealthStatus status) {
+  final tokens = Theme.of(context).surfaceTokens;
+  return switch (status) {
+    EndpointHealthStatus.checking => tokens.statusChecking,
+    EndpointHealthStatus.online => tokens.statusOnline,
+    EndpointHealthStatus.delayed => tokens.statusDelayed,
+    EndpointHealthStatus.offline => tokens.statusOffline,
+  };
+}
+
 class EndpointHealthIndicator extends StatelessWidget {
   const EndpointHealthIndicator({required this.view, super.key});
   final EndpointHealthView view;
@@ -56,11 +67,7 @@ class EndpointHealthIndicator extends StatelessWidget {
       Icon(
         Symbols.circle,
         size: 10,
-        color: switch (view.status) {
-          EndpointHealthStatus.online => Colors.green,
-          EndpointHealthStatus.delayed => Colors.orange,
-          EndpointHealthStatus.offline => Theme.of(context).colorScheme.error,
-        },
+        color: healthStatusColor(context, view.status),
       ),
       const SizedBox(width: 4),
       Flexible(

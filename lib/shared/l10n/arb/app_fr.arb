@@ -178,7 +178,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "Exécutez opencode upgrade sur le serveur. Minimum : 2.0.20 ; testé : 2.0.21–2.0.22. CodeWalk ne modifie ni n’installe votre serveur.",
+  "hostsUpgradeInstructions": "Exécutez opencode upgrade sur le serveur. Minimum : 2.0.20. CodeWalk ne modifie ni n’installe votre serveur.",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -188,10 +188,6 @@
   },
   "hostsUpgradeRequired": "Mise à niveau du serveur requise",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "Version non testée",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "Serveur inaccessible. Vérifiez l’URL, TLS et la connexion VPN.",
@@ -1460,6 +1456,7 @@
   "serversSearchActiveHint": "Rechercher un serveur actif",
   "serversSetActive": "Définir comme actif",
   "statusDelayed": "Retardé",
+  "statusChecking": "Vérification…",
   "statusOffline": "Hors ligne",
   "statusOnline": "En ligne",
   "healthCredentialMissing": "Ce serveur n’a pas d’identifiant enregistré. Associez-le à nouveau ou saisissez son mot de passe.",

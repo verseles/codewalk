@@ -178,7 +178,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "서버에서 opencode upgrade를 실행하세요. 최소: 2.0.20, 테스트됨: 2.0.21–2.0.22. CodeWalk는 서버를 설치하거나 변경하지 않습니다.",
+  "hostsUpgradeInstructions": "서버에서 opencode upgrade를 실행하세요. 최소: 2.0.20. CodeWalk는 서버를 설치하거나 변경하지 않습니다.",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -188,10 +188,6 @@
   },
   "hostsUpgradeRequired": "서버 업그레이드 필요",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "테스트되지 않은 버전",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "서버에 연결할 수 없습니다. URL, TLS 및 VPN 연결을 확인하세요.",
@@ -1460,6 +1456,7 @@
   "serversSearchActiveHint": "활성 서버 검색",
   "serversSetActive": "활성으로 설정",
   "statusDelayed": "지연됨",
+  "statusChecking": "확인 중…",
   "statusOffline": "오프라인",
   "statusOnline": "온라인",
   "healthCredentialMissing": "이 서버에 저장된 인증 정보가 없습니다. 다시 페어링하거나 비밀번호를 입력하세요.",

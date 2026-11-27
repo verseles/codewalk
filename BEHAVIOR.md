@@ -10,7 +10,7 @@ description of this code.
 ## OpenCode v2 compatibility
 
 - **Given** a native OpenCode server on a stable 2.x version at or above 2.0.20
-- **Then** the v2 session runtime can connect; versions outside the tested window remain identified as untested
+- **Then** the v2 session runtime can connect to every stable version from the minimum on; a newer server version is never flagged (#507)
 - **Then** an uncertain prompt on a version other than 2.0.22 is never automatically replayed, and a history scan that cannot prove absence keeps it unresolved; observed pending or delivered prompts can still be reconciled
 - **Then** unsupported major versions and prereleases are refused, and pairing-token renewal remains limited to the verified 2.0.22 contract
 
@@ -93,7 +93,7 @@ description of this code.
 - **Given** the v2 app is in the foreground with saved servers whose credentials have loaded
 - **When** the health lane runs
 - **Then** every saved server is checked with the read-only compatibility probe at most every 10 seconds on its own lane, never cancelling or borrowing a manual check from the Servers page; a resume rechecks at once, a server `Retry-After` delays the next check, and nothing is probed in the background or while the server catalog is reloading or an edit is pending
-- **Then** a compatible answer shows Online, a check still pending or never completed shows Delayed, and a confirmed failure or a missing, unreadable or expired credential shows Offline with its localized reason and a way to recover (Retry, Servers or credential repair); a cancelled check never proves Offline, and a live stream that is reconnecting is shown separately from server health
+- **Then** a compatible answer shows Online; a server with no answer yet (first check pending, catalog reloading, or a check cancelled before any answer) shows a neutral Checking, which turns Delayed only when that first check stays unanswered for more than 5 seconds; a periodic, resume or network recheck keeps the last known status while it runs (#514, owner 2026-11-27); and a confirmed failure or a missing, unreadable or expired credential shows Offline with its localized reason and a way to recover (Retry, Servers or credential repair); a cancelled check never proves Offline, and a live stream that is reconnecting is shown separately from server health
 - **Then** an open conversation whose active server is confirmed Offline says Offline in its status bar, with the reason in the composer's recovery card, never a Live label; an authentication failure keeps its own status, while a server the app cannot use for any other reason, an unsupported version included, reads as Offline: the app never predicts or argues about server versions (owner, 2026-11-10)
 - **Then** a network signal prompts a fresh server check with a five-second connection timeout without using the device's Internet state as proof of server health; repeated same-route signals are bounded to one check per ten seconds, while a new route rechecks immediately; a reachable local or VPN server stays usable, and a failed or cancelled network feed cannot by itself mark a server Offline
 - **Then** the server switcher in the list header shows the active server with that status and opens a searchable list of saved servers; the Servers page has the same search
@@ -896,7 +896,7 @@ description of this code.
 - **Then** a bounded, authenticated, read-only `/api/info` probe verifies OpenCode 2 without adopting response URLs or rewriting the authored port
 - **Then** credentials, HTML responses, unrecognized data, unreachable servers and service starting/stopping/failure states have distinct localized outcomes
 - **Then** only a restricted fallback to healthy OpenCode 1 JSON at `/global/health` opens a full-screen upgrade explainer with server upgrade guidance and the stable CodeWalk 1 download link
-- **Then** versions below `2.0.20` cannot be saved; `2.0.21` and `2.0.22` are marked tested, while other valid supported versions remain selectable with an untested-version chip
+- **Then** versions below `2.0.20` cannot be saved; every valid stable OpenCode 2 version from `2.0.20` on is compatible and shows no tested or untested marker (#507)
 - **Then** retry hints delay manual checks without automatic HTTP replay, and changed input or a superseding probe invalidates the previous save authorization
 
 - **Given** a checked, usable endpoint is saved or deleted

@@ -178,7 +178,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "সার্ভারে opencode upgrade চালান। সর্বনিম্ন: 2.0.20; পরীক্ষিত: 2.0.21–2.0.22। CodeWalk সার্ভার ইনস্টল বা পরিবর্তন করে না।",
+  "hostsUpgradeInstructions": "সার্ভারে opencode upgrade চালান। সর্বনিম্ন: 2.0.20। CodeWalk সার্ভার ইনস্টল বা পরিবর্তন করে না।",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -188,10 +188,6 @@
   },
   "hostsUpgradeRequired": "সার্ভার আপগ্রেড প্রয়োজন",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "অপরীক্ষিত সংস্করণ",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "সার্ভারে পৌঁছানো যায়নি। URL, TLS ও VPN সংযোগ পরীক্ষা করুন।",
@@ -1460,6 +1456,7 @@
   "serversSearchActiveHint": "সক্রিয় সার্ভার অনুসন্ধান করুন",
   "serversSetActive": "সক্রিয় সেট করুন",
   "statusDelayed": "বিলম্বিত",
+  "statusChecking": "যাচাই করা হচ্ছে…",
   "statusOffline": "অফলাইন",
   "statusOnline": "অনলাইন",
   "healthCredentialMissing": "এই সার্ভারের কোনো সংরক্ষিত পরিচয়পত্র নেই। আবার পেয়ার করুন বা পাসওয়ার্ড দিন।",

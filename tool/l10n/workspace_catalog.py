@@ -5,7 +5,7 @@ PORT_KEYS = {
     "chatSetUpServer",
     "chatNewChat",
     "chatSelectOrCreate",
-    "statusOnline", "statusDelayed", "statusOffline",
+    "statusOnline", "statusDelayed", "statusChecking", "statusOffline",
     "serversSearchActiveHint", "serversSetActive",
     "chatAppBarMoreActions", "chatAppBarPinAction", "chatAppBarUnpinAction",
     "chatBadgeConversationError", "chatBadgeConversationNeedsInput",

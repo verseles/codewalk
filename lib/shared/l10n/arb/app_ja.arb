@@ -178,7 +178,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "サーバーで opencode upgrade を実行してください。最低：2.0.20、テスト済み：2.0.21–2.0.22。CodeWalk はサーバーをインストールまたは変更しません。",
+  "hostsUpgradeInstructions": "サーバーで opencode upgrade を実行してください。最低：2.0.20。CodeWalk はサーバーをインストールまたは変更しません。",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -188,10 +188,6 @@
   },
   "hostsUpgradeRequired": "サーバーの更新が必要",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "未テストのバージョン",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "サーバーに接続できません。URL、TLS、VPN 接続を確認してください。",
@@ -1460,6 +1456,7 @@
   "serversSearchActiveHint": "アクティブサーバーを検索",
   "serversSetActive": "アクティブに設定",
   "statusDelayed": "遅延",
+  "statusChecking": "確認中…",
   "statusOffline": "オフライン",
   "statusOnline": "オンライン",
   "healthCredentialMissing": "このサーバーの認証情報は保存されていません。再ペアリングするかパスワードを入力してください。",

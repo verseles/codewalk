@@ -495,16 +495,13 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get hostsUpgradeInstructions =>
-      'Запустите opencode upgrade на сервере. Минимум: 2.0.20; проверено: 2.0.21–2.0.22. CodeWalk не устанавливает и не изменяет сервер.';
+      'Запустите opencode upgrade на сервере. Минимум: 2.0.20. CodeWalk не устанавливает и не изменяет сервер.';
 
   @override
   String get hostsLegacyDownload => 'Скачать CodeWalk 1';
 
   @override
   String get hostsUpgradeRequired => 'Нужно обновить сервер';
-
-  @override
-  String get hostsUntested => 'Непроверенная версия';
 
   @override
   String get hostsTransportHelp =>
@@ -1716,6 +1713,9 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get statusDelayed => 'Задержка';
+
+  @override
+  String get statusChecking => 'Проверка…';
 
   @override
   String get statusOffline => 'Офлайн';

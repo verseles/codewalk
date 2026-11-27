@@ -490,16 +490,13 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get hostsUpgradeInstructions =>
-      'شغّل opencode upgrade على الخادم. الحد الأدنى: 2.0.20؛ المختبر: 2.0.21–2.0.22. لا يثبت CodeWalk خادمك أو يغيره.';
+      'شغّل opencode upgrade على الخادم. الحد الأدنى: 2.0.20. لا يثبت CodeWalk خادمك أو يغيره.';
 
   @override
   String get hostsLegacyDownload => 'تنزيل CodeWalk 1';
 
   @override
   String get hostsUpgradeRequired => 'يلزم تحديث الخادم';
-
-  @override
-  String get hostsUntested => 'إصدار غير مختبر';
 
   @override
   String get hostsTransportHelp =>
@@ -1687,6 +1684,9 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get statusDelayed => 'متأخر';
+
+  @override
+  String get statusChecking => 'جارٍ التحقق…';
 
   @override
   String get statusOffline => 'غير متصل';

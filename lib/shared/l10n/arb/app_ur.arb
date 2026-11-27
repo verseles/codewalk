@@ -178,7 +178,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "سرور پر opencode upgrade چلائیں۔ کم از کم: 2.0.20؛ آزمودہ: 2.0.21–2.0.22۔ CodeWalk سرور نصب یا تبدیل نہیں کرتا۔",
+  "hostsUpgradeInstructions": "سرور پر opencode upgrade چلائیں۔ کم از کم: 2.0.20۔ CodeWalk سرور نصب یا تبدیل نہیں کرتا۔",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -188,10 +188,6 @@
   },
   "hostsUpgradeRequired": "سرور اپ گریڈ درکار ہے",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "غیر آزمودہ ورژن",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "سرور تک رسائی نہیں ہو سکی۔ URL، TLS اور VPN کنکشن دیکھیں۔",
@@ -1460,6 +1456,7 @@
   "serversSearchActiveHint": "فعال سرور تلاش کریں",
   "serversSetActive": "ایکٹو سیٹ کریں۔",
   "statusDelayed": "تاخیر شدہ",
+  "statusChecking": "جانچ ہو رہی ہے…",
   "statusOffline": "آف لائن",
   "statusOnline": "آن لائن",
   "healthCredentialMissing": "اس سرور کی محفوظ اسناد موجود نہیں۔ دوبارہ پیئر کریں یا پاس ورڈ درج کریں۔",

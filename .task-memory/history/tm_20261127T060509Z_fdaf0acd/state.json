@@ -1,0 +1,594 @@
+{
+  "artifact_seq": 8,
+  "artifacts": {
+    "A0001": {
+      "active": false,
+      "bytes": 5978,
+      "created_at": "2026-11-27T06:07:47Z",
+      "evidence": "issues 511/510/509/525; app_indeterminate_progress.dart; ADR.md:3718; flutter/flutter#191171 #191234 PR #191379; git merge-base em ~/flutter 3.47.9; compare 3.50.x",
+      "id": "A0001",
+      "impact": "Plano executável por item + 3 perguntas",
+      "origin": "orquestrador: leitura das issues, código, ADR-056, Flutter git/GitHub",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0001.md",
+      "purpose": "Permitir iniciar o flow do grupo 5 numa nova conversa só com 'flow'",
+      "rerun_when": "Flutter pin mudar, ADR-056 mudar ou issues do grupo 5 forem editadas",
+      "retired": true,
+      "sha256": "014bd6ae2bdbf9a94466f74662de2055ceb3c5f36017dcace29a438a75c0d795",
+      "stage": "S1",
+      "supersedes": null,
+      "title": "ART-PRE-EVALUATION grupo 5 (#511 #510 #509 #525)"
+    },
+    "A0002": {
+      "active": false,
+      "bytes": 1160,
+      "created_at": "2026-11-27T06:49:53Z",
+      "evidence": "9 delivered + 1 invalid-delivery raw files in /tmp/opencode/group5-511-510-20261127T063846Z-a6da/r1_*.out",
+      "id": "A0002",
+      "impact": "Two candidate findings to verify (ADR-061 collision; nullable LinearProgressIndicator bypass in updater views) plus rung-1 invalid-delivery recovery for Ernie",
+      "origin": "review-batch-1-r1 (10 helpers)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0002.md",
+      "purpose": "Preserve ledger and reports from Review Batch 1 (#511+#510, 5bcf1744..a08d7883) round 1",
+      "rerun_when": "Fixes committed for #511/#510 or Ernie recovery completes",
+      "retired": true,
+      "sha256": "f120b6248aee55707c9834239db8ef33001de7bc389cbd99d8fdc4438f286cf7",
+      "stage": "S3",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 1 (#511+#510) R1"
+    },
+    "A0003": {
+      "active": false,
+      "bytes": 373,
+      "created_at": "2026-11-27T06:50:48Z",
+      "evidence": "/tmp/opencode/group5-511-510-20261127T063846Z-a6da/r1_helperErnie-55-flash-high_rung1.out",
+      "id": "A0003",
+      "impact": "Completes 10/10 delivered reports for Review Batch 1 R1 before judgment",
+      "origin": "helperErnie-55-flash-high (rung-1 invalid-delivery recovery)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0003.md",
+      "purpose": "Preserve recovered pure-YAML report from helperErnie-55-flash-high for Review Batch 1 R1",
+      "rerun_when": "Only if Review Batch 1 requires a re-review round",
+      "retired": true,
+      "sha256": "dcf4127c3546cc1f00fb1173fbbee0301d8f1d0a78751ccf1996c6360df4d3b6",
+      "stage": "S3",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 1 (#511+#510) R1 (Ernie recovered)"
+    },
+    "A0004": {
+      "active": false,
+      "bytes": 1228,
+      "created_at": "2026-11-27T07:22:03Z",
+      "evidence": "10 delivered YAML files in /tmp/opencode/group5-509-20261127T070926Z-e752/r1_*.out",
+      "id": "A0004",
+      "impact": "Caught critical Android Gradle/AGP/KGP hard-floor breakage plus AST guard regression and liveRegion sibling bug before release",
+      "origin": "review-batch-2-r1 (10 helpers)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0004.md",
+      "purpose": "Preserve ledger and reports from Review Batch 2 (#509 Flutter 3.50.1, 32a2b9d5..6b810f68) round 1",
+      "rerun_when": "Fixes committed for #509 or re-review round starts",
+      "retired": true,
+      "sha256": "26760780e3ef033d4031c1e1426ecedd9f3d7aa77098d6c29cf3eed0cc732b68",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 2 (#509) R1"
+    },
+    "A0005": {
+      "active": false,
+      "bytes": 793,
+      "created_at": "2026-11-27T07:36:18Z",
+      "evidence": "Raw files in /tmp/opencode/group5-509-20261127T070926Z-e752/r2_*.out and .err",
+      "id": "A0005",
+      "impact": "Run GLM rung-1 repair + Claude haiku/opus step-2 retries before R2 judgment and 1-test fix",
+      "origin": "review-batch-2-r2 (10 helpers)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0005.md",
+      "purpose": "Preserve ledger and reports from Review Batch 2 (#509, 32a2b9d5..67387297) round 2 re-review",
+      "rerun_when": "Recovery turns complete",
+      "retired": true,
+      "sha256": "f83ba05cd8093b9a69c56d8fae00f00e858fdf794cd66166ae1a5d14597d7bc9",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 2 (#509) R2"
+    },
+    "A0006": {
+      "active": false,
+      "bytes": 374,
+      "created_at": "2026-11-27T07:37:21Z",
+      "evidence": "/tmp/opencode/group5-509-20261127T070926Z-e752/r2_*_{rung1,retry}.*",
+      "id": "A0006",
+      "impact": "Completes Review Batch 2 R2 before final judgment",
+      "origin": "Batch 2 R2 recovery (GLM rung-1 + Claude haiku/opus retry)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0006.md",
+      "purpose": "Preserve recovery outcomes for Review Batch 2 R2 before judgment",
+      "rerun_when": "Only if another review round were opened",
+      "retired": true,
+      "sha256": "9d3784a55c8a01c302b280ce19f4a5c6273fec42231803fc86c7ee06d6f01964",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 2 (#509) R2 recovery"
+    },
+    "A0007": {
+      "active": false,
+      "bytes": 1117,
+      "created_at": "2026-11-27T08:01:45Z",
+      "evidence": "git show 2ca07aa2; logs em /tmp/opencode/group5-525-20261127T074838Z-a41c/r1_*.out",
+      "id": "A0007",
+      "impact": "7/7 entregues aprovam sem achados; 1 recuperação rung 1 pendente para helperGLM-53-high antes do julgamento final",
+      "origin": "review-batch-3-r1",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0007.md",
+      "purpose": "Preservar ledger e relatórios da rodada inicial do #525 (boundary 2ca07aa2)",
+      "rerun_when": "Mudança de código no #525",
+      "retired": true,
+      "sha256": "6ac42db82dd09cce2dbdc13741d0486fc50e1a9c77a8b136d633a77fe141f761",
+      "stage": "S5",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER & ART-REVIEW-REPORTS Batch 3 (#525) R1"
+    },
+    "A0008": {
+      "active": false,
+      "bytes": 754,
+      "created_at": "2026-11-27T09:03:21Z",
+      "evidence": "/tmp/opencode/rvw/r1_*.out",
+      "id": "A0008",
+      "impact": "Decide se precisa dry run antes do tag e se há fix de código",
+      "origin": "10 helpers (reviewer R1)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0008.md",
+      "purpose": "Review 09039135..57cd96c9 AGP 9.3.1->9.3.3",
+      "rerun_when": "boundary muda",
+      "sha256": "faf39e4e1305befda324c850bc5b96c4dc9f406809218e5df70ec556ddf321bb",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS R1 agp-933-release-lint-fix"
+    }
+  },
+  "checklist": [
+    {
+      "depends": [],
+      "id": "S1",
+      "label": "Avaliação prévia do grupo 5 (issues, código, ADR-056, plano)",
+      "outcome": "Avaliação prévia em A0001; owner respondeu #510 A, #509 A, #525 A",
+      "status": "done",
+      "validation": "issues, código, ADR-056 e Flutter #191171/#191234/PR #191379 conferidos; 3.47.9 sem o fix, 3.50.x com"
+    },
+    {
+      "depends": [
+        "S1"
+      ],
+      "id": "S2",
+      "label": "#511 double_arrow no item em andamento do to-do",
+      "outcome": "#511 implementado: Symbols.double_arrow no cabeçalho recolhido e linhas inProgress do to-do com RTL nativo (matchTextDirection) e testes; review será agrupado com #510",
+      "status": "done",
+      "validation": "format, analyze e 8/8 testes de session_task_list_test verdes"
+    },
+    {
+      "depends": [
+        "S2"
+      ],
+      "id": "S3",
+      "label": "#510 animação em passos no desktop/Linux (ADR-056)",
+      "outcome": "#510 implementado e revisado com #511 (10/10 helpers, 2 achados aceitos e corrigidos: ADR-062 + updater AppIndeterminateBar + guard)",
+      "status": "done",
+      "validation": "make check verde antes dos micro-fixes + 33/33 testes focados e format/analyze verdes após os fixes"
+    },
+    {
+      "depends": [
+        "S3"
+      ],
+      "id": "S4",
+      "label": "#509 círculos serrilhados no Linux 5K",
+      "outcome": "#509 implementado e revisado em 2 rounds (R1 10/10, R2 8/10 + 2 falhas técnicas Claude): Flutter 3.50.1 (ae9b586f34), Gradle 9.5.0/AGP 9.3.1/KGP 2.4.20, AST analyzer 14.7.0 + functionTypedSuffix guard + teste get-it-boundary, container:true nas live regions, ignores escopados em material.dart e v2_localizations.dart",
+      "status": "done",
+      "validation": "analyze 4<=4, v2 strict analyze 0, tool/ci analyze 0, packages/* 4/4, l10n --check ok, session_live_page+compaction 79/79, permission+health 43/43, import_rules_test verde"
+    },
+    {
+      "depends": [
+        "S4"
+      ],
+      "id": "S5",
+      "label": "#525 efeito de atividade na cápsula de subagentes/shells",
+      "outcome": "#525 entregue em 2ca07aa2: borda SweepGradient (~2s) na SessionSubagentCapsule quando count>0, estática com movimento reduzido, pausa por TickerMode; revisão 8/8 unânime sem achados (3 Claude em quota 5h)",
+      "status": "done",
+      "validation": "make check TEST_JOBS=4 verde em 2ca07aa2; 29/29 testes focados + goldens locais verdes"
+    },
+    {
+      "depends": [
+        "S5"
+      ],
+      "id": "S6",
+      "label": "Avaliar helpers, BEHAVIOR.md, issues e #527",
+      "outcome": "BEHAVIOR.md atualizado e enviado (d434b85a); issues #511/#510/#509/#525 fechadas no GitHub com SHAs e marcadas na #527; avaliação dos helpers consolidada (4 rodadas, 3 batches)",
+      "status": "done",
+      "validation": "gh issue close #511/#510/#509/#525 ok; #527 atualizado; Goldens 45962828547 concluído (30/36 idênticos, 6 ativos inspecionados)"
+    },
+    {
+      "depends": [
+        "S6"
+      ],
+      "id": "S7",
+      "label": "Goldens x86, gate final, release notes, push e release minor",
+      "outcome": "6 goldens x86_64 atualizados (52625c04), release-notes/v2.11.0.md (839f0077), gate local verde em 839f0077, release minor v2.11.0 cortado (cd22fdd6) e watch-release iniciado",
+      "status": "done",
+      "validation": "make check TEST_JOBS=4 exit 0 em 839f0077; cut_stable.py cortou e publicou v2.11.0 atomicamente"
+    },
+    {
+      "depends": [],
+      "id": "CONT1",
+      "label": "Atualizar Known pitfalls no AGENTS.md e fechar #460 se build-android verde",
+      "outcome": "Adicionados os 2 pitfalls aprovados em Known pitfalls do AGENTS.md; #460 aguarda confirmação verde do build-android no release v2.11.0 (45964510426)",
+      "status": "done",
+      "validation": "docs-only (isento de gate e revisão); git diff conferido"
+    },
+    {
+      "depends": [],
+      "id": "CONT2",
+      "label": "Confirmar causa: JDK 17 nos workflows vs AGP 9.3.1/lint",
+      "outcome": "Causa confirmada: bug lint AGP 9.3.0/9.3.1 em JDK 17 (Google #522845800, fix em 9.3.2). Abordagem trocada: em vez de JDK 21, AGP 9.3.1->9.3.3 em android/settings.gradle.kts:21 (única referência de build).",
+      "status": "done",
+      "validation": "Release notes oficiais AGP 9.3 citam #522845800 em 9.3.2; Google Maven lista 9.3.2 e 9.3.3"
+    },
+    {
+      "depends": [],
+      "id": "CONT3",
+      "label": "Subir JDK dos workflows Android e validar build release Android",
+      "outcome": "Fix commitado 57cd96c9 (base 09039135): AGP 9.3.1->9.3.3; JDK 17 mantido nos workflows",
+      "status": "done",
+      "validation": "Diff 1 linha conferido; build Android local inviável em aarch64 (validado no Release)"
+    },
+    {
+      "depends": [],
+      "id": "CONT4",
+      "label": "Revisar a correção e commitar",
+      "outcome": "Review R1 convergido sem fix de código (10/10 approve no fix; dry run pré-tag aceito como validação); sessões fechadas",
+      "status": "done",
+      "validation": "Gate make check verde em f07508d1; metrics R1 recorded"
+    },
+    {
+      "depends": [],
+      "id": "CONT5",
+      "label": "Liberar patch v2.11.1",
+      "outcome": "v2.11.1 cortada: commit 2692ac1d, tag v2.11.1 push atômico",
+      "status": "done",
+      "validation": "cut_stable.py OK; gate f07508d1 verde; dry run 45970723349 verde"
+    },
+    {
+      "depends": [],
+      "id": "CONT6",
+      "label": "Monitorar Release v2.11.1 e fechar #460 se build-android verde",
+      "outcome": "make watch-release iniciado (detached, hey no resultado); #460 fechada como completed citando 57cd96c9, dry run 45970723349 e v2.11.1",
+      "status": "done",
+      "validation": "gh issue close 460 OK; watcher-started"
+    },
+    {
+      "depends": [],
+      "id": "CONT7",
+      "label": "Criar issue: CI Android testar build de release com lint",
+      "outcome": "Issue #528 criada (CI Android só debug; labels area:android, area:release, type:chore, v2; verbatim incluído)",
+      "status": "done",
+      "validation": "gh issue create OK"
+    },
+    {
+      "depends": [],
+      "id": "CONT8",
+      "label": "Adicionar regra de dry run em Known pitfalls do AGENTS.md, commitar e dar push",
+      "outcome": "Regra no AGENTS.md commitada e enviada (2f0dabd8)",
+      "status": "done",
+      "validation": "git push 2692ac1d..2f0dabd8 OK"
+    }
+  ],
+  "completion": {
+    "at": "2026-11-27T09:32:03Z",
+    "by": "agent",
+    "delivered": "Issue #528 criada (CI Android testar build de release com lint) e regra de dry run do Release antes da tag para mudanças de toolchain Android adicionada em Known pitfalls do AGENTS.md (2f0dabd8, push em main).",
+    "residual_risk": "Resultado final do Release v2.11.1 chega via hey do watch-release; #528 aguarda investigação e planejamento.",
+    "validation": "gh issue create OK; diff AGENTS.md conferido; docs-only isento de gate"
+  },
+  "contract": {
+    "complete_when": [
+      {
+        "evidence": "A0001 captured in S1 with #511/#510/#509/#525 plan and owner decisions A/A/A",
+        "id": "C1",
+        "text": "avaliação prévia salva",
+        "waived": false
+      },
+      {
+        "evidence": "#511 (4a0f313f), #510 (32a2b9d5), #509 (01b1a492), #525 (2ca07aa2), BEHAVIOR.md (d434b85a), goldens (52625c04) pushed; all 4 closed on GitHub and checked off in #527",
+        "id": "C2",
+        "text": "4 issues entregues e fechadas",
+        "waived": false
+      },
+      {
+        "evidence": "make check TEST_JOBS=$(nproc) exit 0 on 839f0077 (analyze 4<=4, python CI/release tests ok, full flutter test suite incl. refreshed x86_64 goldens green, /tmp/opencode/make_check_final_839f0077.log)",
+        "id": "C3",
+        "text": "gate verde no SHA do release",
+        "waived": false
+      },
+      {
+        "evidence": "make release V=stable cut v2.11.0 at cd22fdd6 (atomic push main+tag); make watch-release started detached",
+        "id": "C4",
+        "text": "release minor cortado",
+        "waived": false
+      },
+      {
+        "evidence": "Evaluated all helpers across 3 batches / 4 rounds (Top 2: Codex-6.2-sol-F, Gemini-4-hydrogen; Bottom 2: Claude-opus-5-low, Ernie-55-flash; mentions: Haiku-5, Grok-47-F, Kimi-K31, Hungerg, GLM-53) and sent full paragraph via hey",
+        "id": "C5",
+        "text": "relatório com melhores/piores helpers",
+        "waived": false
+      }
+    ],
+    "constraints": [
+      "mesmo padrão do grupo 4: commit por item, review por commit (agrupar commits próximos), push só antes do release, release minor único",
+      "goldens só no x86 via workflow",
+      "relatório final com melhores e piores helpers"
+    ],
+    "delivery_boundary": "Avaliação salva no TM agora; no flow, origin/main com release minor publicado",
+    "expected_results": [
+      "artefato de avaliação prévia com plano por item",
+      "perguntas de produto com recomendação",
+      "next_action apontando o início do flow"
+    ],
+    "objective": "Deixar no Task Memory uma avaliação prévia completa do grupo 5 da #527 (#511, #510, #509, #525) para que uma nova conversa execute o flow só com a palavra 'flow'; depois, no flow, entregar os 4 itens com um commit e uma revisão por item, push só antes do release e um release minor único.",
+    "scope_in": [
+      "avaliação prévia: issues, código, ADR-056, referências oficiais, causas prováveis, plano por item, perguntas de produto",
+      "flow posterior: #511, #510, #509, #525, BEHAVIOR.md, issues, #527, release minor"
+    ],
+    "scope_out": [
+      "outros grupos da #527",
+      "implementação nesta conversa (só avaliação)",
+      "v1"
+    ]
+  },
+  "decisions": [
+    {
+      "at": "2026-11-27T06:07:54Z",
+      "text": "Avaliação prévia do grupo 5 salva em A0001 (tm show-artifact --id A0001). Recomendações: #510 A (superseder ADR-056: animação nativa contínua, estático só com movimento reduzido); #509 A (Flutter 3.47.9 → 3.50.1, que contém o fix de MSAA do Linux #191379); #525 A (brilho percorrendo a borda da cápsula). #511 sem pergunta (double_arrow, espelhar em RTL). Não executar nada antes de o owner pedir 'flow'. favicon.png na raiz é de outra sessão (tarefa favicon), não é deste grupo."
+    },
+    {
+      "at": "2026-11-27T06:09:10Z",
+      "text": "Owner respondeu Q1 (#510): A — animação nativa suave e contínua em todas as plataformas; superseder ADR-056 por ADR novo; remover AppIndeterminateClock/_Stepped/bounded e o glifo estático ≤20dp; estático só com movimento reduzido. Pendentes: Q2 (#509), Q3 (#525)."
+    },
+    {
+      "at": "2026-11-27T06:10:40Z",
+      "text": "Owner respondeu Q2 (#509): A — atualizar Flutter 3.47.9 → 3.50.1 (contém PR #191379, MSAA no embedder Linux); atualizar todos os pins (goldens.yml, release.yml incl. commit da tag, demais workflows/Makefile), regerar goldens no x86; manter Impeller. Pendente: Q3 (#525)."
+    },
+    {
+      "at": "2026-11-27T06:11:38Z",
+      "text": "Owner respondeu Q3 (#525): A — brilho percorrendo a borda da cápsula (SweepGradient no contorno StadiumBorder, ~2 s por volta), só com count>0; parado (borda primary estática) com movimento reduzido; para com TickerMode/count==0. Todas as perguntas do grupo 5 respondidas: #510 A, #509 A, #525 A, #511 sem pergunta."
+    },
+    {
+      "at": "2026-11-27T06:38:47Z",
+      "text": "Review Batch 1 (#511+#510) iniciado: base=5bcf1744 head=a08d7883 job_key=group5-511-510-20261127T063846Z-a6da metrics=rvw_20261127T063846Z_cb4dd1ac; 10 helpers elegíveis (helperClaude-haiku-5-max, helperClaude-opus-5-low, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high); helperDeepSeek-41-flash-high excluído (pico Seg-Sex 06:00-10:00 UTC)."
+    },
+    {
+      "at": "2026-11-27T06:40:15Z",
+      "text": "Handshakes READY (10/10) dir=/home/ubuntu/MEGA/WORK/codewalk job_key=group5-511-510-20261127T063846Z-a6da: helperClaude-haiku-5-max=READY, helperClaude-opus-5-low=READY, helperCodex-6-luna-max=READY, helperCodex-6.2-sol-xhigh-F=READY, helperErnie-55-flash-high=READY, helperGLM-53-high=READY, helperGemini-4-hydrogen-xhigh=READY, helperGrok-47-high-F=READY, helperHungerg-free=READY, helperKimi-K31-pro-high=READY (DeepSeek excluído por pico UTC)"
+    },
+    {
+      "at": "2026-11-27T06:51:14Z",
+      "text": "ART-REVIEW-JUDGMENT Batch 1 (#511+#510) R1 (10/10 entregues, Ernie recuperado no rung 1): ACEITOS 2 achados: (1) Renumerar ADR-061 -> ADR-062 (ADR-061 reservado em v2-plan.md:1139 e issue #335 V21-012) [haiku, hungerg, gemini-4-hydrogen]; (2) Trocar LinearProgressIndicator(value: cond ? p : null) por AppIndeterminateBar nos ramos indeterminados de linux_update_panel.dart:25 e updates_settings_page.dart:296 + apertar guard de teste para rejeitar null em value: [codex-6.2-sol-F, glm-53]. Zero posições Frontier (-F) rejeitadas. Sem re-review necessário após estes 2 ajustes locais simples (docs/comentários + 2 ramos de barra + regex de teste, sem tocar concorrência/segurança/interfaces/persistência/arquitetura)."
+    },
+    {
+      "at": "2026-11-27T07:09:26Z",
+      "text": "Review Batch 2 (#509 Flutter 3.50.1) iniciado: base=32a2b9d5 head=6b810f68 job_key=group5-509-20261127T070926Z-e752 metrics=rvw_20261127T070926Z_c574ab8e; 10 helpers elegíveis (DeepSeek excluído por pico Seg-Sex 06:00-10:00 UTC)."
+    },
+    {
+      "at": "2026-11-27T07:10:50Z",
+      "text": "Handshakes READY Batch 2 #509 (10/10) dir=/home/ubuntu/MEGA/WORK/codewalk job_key=group5-509-20261127T070926Z-e752: helperClaude-haiku-5-max=READY, helperClaude-opus-5-low=READY, helperCodex-6-luna-max=READY, helperCodex-6.2-sol-xhigh-F=READY, helperErnie-55-flash-high=READY, helperGLM-53-high=READY, helperGemini-4-hydrogen-xhigh=READY, helperGrok-47-high-F=READY, helperHungerg-free=READY, helperKimi-K31-pro-high=READY (DeepSeek excluído por pico UTC)"
+    },
+    {
+      "at": "2026-11-27T07:24:45Z",
+      "text": "ART-REVIEW-JUDGMENT Batch 2 (#509) R1 (10/10 entregues): ACEITOS 5 achados: (1) CRITICAL Android toolchain Gradle 8.14.3->9.5.0, AGP 8.11.1->9.3.1, KGP 2.4.20, compilerOptions/JvmTarget.JVM_17 e remover enableJetifier [codex-6.2-sol-F, grok-47-F]; (2) WARNING RegularFormalParameter.functionTypedSuffix==null em ast_rules.dart e locator_values.dart + teste de regressão [codex-6.2-sol-F]; (3) WARNING container:true em SessionStopNotice (e auditar demais liveRegions) + teste semântico [gemini-4-hydrogen, haiku]; (4) WARNING restaurar deprecated_member_use em analysis_options.yaml e escopar ignores nos imports/delegates [codex-6.2-sol-F, opus, ernie, glm, gemini-4-hydrogen]; (5) SUGGESTION README.md Dart 3.14.0 [codex-6.2-sol-F, ernie, hungerg]. Zero posições Frontier rejeitadas. Re-review R2 obrigatório (toca build Android e guard arquitetural); sessões mantidas abertas."
+    },
+    {
+      "at": "2026-11-27T07:28:35Z",
+      "text": "Review Batch 2 (#509) R2 preparado: fix_commit=67387297 (range 32a2b9d5..67387297), mesmos 10 helpers elegíveis na job_key=group5-509-20261127T070926Z-e752 (DeepSeek ainda excluído por pico UTC)."
+    },
+    {
+      "at": "2026-11-27T07:37:21Z",
+      "text": "ART-REVIEW-JUDGMENT Batch 2 (#509) R2 (8/10 entregues, GLM recuperado rung 1, Claude haiku/opus failed por SESSION_CLAUDE_ERROR): todos os 5 ajustes de produção validados sem regressões. ACEITO 1 achado de teste [codex-6.2-sol-F (warning), kimi-k31 (suggestion)]: corrigir tool/ci/test/import_rules_test.dart:1285 para testar leak via arquivo não-widget (lib/main_v2.dart) esperando get-it-boundary, exercitando LocatorValues.escapes diretamente. Zero posições Frontier rejeitadas. Sem R3: correção estritamente em 1 caso de teste unitário, validada localmente."
+    },
+    {
+      "at": "2026-11-27T07:49:32Z",
+      "text": "Review Batch 3 (#525) R1 iniciado: boundary=2ca07aa2 (base=01b1a492, range 01b1a492..2ca07aa2), review_id=rvw_20261127T074838Z_7d4dee0d, job_key=group5-525-20261127T074838Z-a41c, dir=/home/ubuntu/MEGA/WORK/codewalk. Pool elegível (11): helperCC-opus-5.5-xhigh-F, helperClaude-haiku-5-max, helperClaude-opus-5-low, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high. Excluído: helperDeepSeek-41-flash-high (pico UTC Sex 07:48 dentro de 06:00-10:00)."
+    },
+    {
+      "at": "2026-11-27T07:52:23Z",
+      "text": "Handshakes Batch 3 (#525) dir=/home/ubuntu/MEGA/WORK/codewalk job_key=group5-525-20261127T074838Z-a41c: READY (8): helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high. FAILED após 1 retry (3): helperCC-opus-5.5-xhigh-F (5h quota limit resets 08:50 UTC), helperClaude-haiku-5-max (SESSION_CLAUDE_ERROR), helperClaude-opus-5-low (SESSION_CLAUDE_ERROR)."
+    },
+    {
+      "at": "2026-11-27T08:02:35Z",
+      "text": "ART-REVIEW-JUDGMENT Batch 3 (#525) R1 (rvw_20261127T074838Z_7d4dee0d, boundary 2ca07aa2): 8/11 aprovam por unanimidade (overall_risk=low, confidence=high, findings=[]); helperGLM-53-high (invalid-delivery, outcome=recovered, attempts=2, relay_bytes=3472) recuperado rung 1 com approve/findings=[]; 3 Claude failed no handshake (quota 5h resets 08:50 UTC). Zero achados aceitos, zero dissenso Frontier, make check verde -> #525 aprovado sem R2."
+    },
+    {
+      "at": "2026-11-27T08:23:52Z",
+      "text": "Completed milestone preserved at 2026-11-27T08:17:21Z by agent: delivered=Grupo 5 da #527 concluído e publicado em v2.11.0 (cd22fdd6): #511 (4a0f313f), #510/ADR-062 (32a2b9d5), #509 Flutter 3.50.1 + Android Gradle 9.5.0/AGP 9.3.1/KGP 2.4.20 (01b1a492), #525 borda SweepGradient na cápsula (2ca07aa2), BEHAVIOR.md (d434b85a), 6 goldens x86_64 (52625c04) e release-notes/v2.11.0.md (839f0077). Issues #511/#510/#509/#525 fechadas e marcadas na #527; avaliação de helpers enviada via hey. | validation=C1-C5 validados; gate local make check TEST_JOBS=$(nproc) verde no SHA exato pré-release 839f0077; 3 batches / 4 rodadas de revisão convergidos com métricas registradas; watch-release ativo em background. | residual_risk=Validação visual em tela real do #509 (MSAA Linux 5K), #510 (CPU/GPU desktop) e #525 (efeito visual) e build Android do workflow de release (ARM64 local sem Android SDK/Java) ficam para confirmação após publicação do v2.11.0."
+    },
+    {
+      "at": "2026-11-27T08:23:52Z",
+      "text": "Continuation request: a (adicionar sugestões 1 e 2 em Known pitfalls do AGENTS.md e fechar #460 se build-android do v2.11.0 já tiver concluído) | reason: Follow-up direto do encerramento do flow do Grupo 5"
+    },
+    {
+      "at": "2026-11-27T08:49:46Z",
+      "text": "Completed milestone preserved at 2026-11-27T08:24:38Z by agent: delivered=2 regras evergreen adicionadas em Known pitfalls no AGENTS.md (material.dart ignore no Flutter 3.50.1 e timing de make check vs startup paralelo de helpers no ARM64) e enviadas para origin/main; aprovação registrada para fechar #460 assim que build-android do v2.11.0 concluir. | validation=git diff AGENTS.md conferido; docs-only isento de gate/revisão; todas as etapas e critérios C1-C5 validados. | residual_risk=Issue #460 segue aberta até a confirmação verde do job build-android no workflow Release 45964510426 (v2.11.0)."
+    },
+    {
+      "at": "2026-11-27T08:49:46Z",
+      "text": "Continuation request: Olha no TM o que causou a falha e corrige. dai libera um patch | reason: Correção direta da entrega v2.11.0 deste task: o Release 45964510426 falhou em build-android (lint NoSuchMethodError List.removeLast) após o bump AGP 9.3.1/Gradle 9.5.0 da #509, e o fechamento da #460 dependia desse job verde"
+    },
+    {
+      "at": "2026-11-27T08:50:46Z",
+      "text": "Causa v2.11.0 build-android: bug AGP 9.3.0/9.3.1 lint (intellij-core JavaDocParser usa List.removeLast, API Java 21) crasha em JDK 17 -> Google #522845800, corrigido em AGP 9.3.2 (release notes oficiais). Origem: achado CRITICAL aceito no review #509 (01b1a492) subiu AGP 8.11.1->9.3.1 sem build release Android local (host ARM sem JDK). Correção escolhida: AGP 9.3.1->9.3.3 (patch mais recente, mantém JDK 17 mínimo oficial); validar via dry-run workflow_dispatch do release.yml em main antes do tag."
+    },
+    {
+      "at": "2026-11-27T08:52:03Z",
+      "text": "Review R1 iniciado: work_item=agp-933-release-lint-fix boundary 09039135..57cd96c9 (AGP 9.3.1->9.3.3), review_id=rvw_20261127T085155Z_e5231412, job_key=agp-933-release-lint-fix-20261127T085155Z-902b, dir=/home/ubuntu/MEGA/WORK/codewalk. Pool elegível (10): helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high. helperDeepSeek-41-flash-high excluído (pico Sex 08:51 UTC). Saída esperada: YAML de review por helper."
+    },
+    {
+      "at": "2026-11-27T08:53:19Z",
+      "text": "Handshakes R1 agp-933-release-lint-fix dir=/home/ubuntu/MEGA/WORK/codewalk job_key=agp-933-release-lint-fix-20261127T085155Z-902b: READY (10/10): helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high."
+    },
+    {
+      "at": "2026-11-27T08:54:28Z",
+      "text": "Release notes v2.11.1 commitadas em f07508d1 (📣 266 chars, sem ##, inclui itens da 2.11.0 nunca publicada). Gate make check TEST_JOBS=4 iniciado em background no SHA f07508d1 (log /tmp/opencode/rvw/gate.log). Review R1 op_aee3490a147c em andamento (dispatch 08:54 UTC)."
+    },
+    {
+      "at": "2026-11-27T09:04:27Z",
+      "text": "ART-REVIEW-JUDGMENT R1 agp-933-release-lint-fix (rvw_20261127T085155Z_e5231412, 57cd96c9, 10/10): fix AGP 9.3.3 aprovado por todos. REJEITADO F1 haiku CRITICAL pubspec 2.11.0: cut_stable.py --bump patch faz pubspec+CHANGELOG+tag (AGENTS.md:157). ACEITO F2 haiku WARNING + opus-F SUGGESTION: dry run release.yml dry_run_version=2.11.1 em main antes do tag (R8/minify/packaging nunca rodaram em AGP 9.x; tag imutável); vs regra CI never watch: falha reportada e validação só no CI; espera via background do harness, sem cimonitor/gh run watch. ADIADO GLM SUGGESTION lintVitalRelease no ci.yml (follow-up). Sem fix de código -> sem re-review. Sem posição Frontier rejeitada -> sem dissent. Identity: 5 wrappers binding mismatch, omitidos. Metrics R1 recorded: high-value haiku, opus-F; useful-common demais 8."
+    },
+    {
+      "at": "2026-11-27T09:05:09Z",
+      "text": "Push main 09039135..f07508d1 feito. Dry run Release workflow_dispatch dry_run_version=2.11.1 run 45970723349 em f07508d1 (09:04:57Z), aguardando em background."
+    },
+    {
+      "at": "2026-11-27T09:14:36Z",
+      "text": "Cut v2.11.1 autorizado pelo owner ('libera um patch'): cut_stable.py --bump patch em f07508d1 (gate verde + dry run 45970723349 verde); 2.11.0+1795769439 -> 2.11.1+1795772873."
+    },
+    {
+      "at": "2026-11-27T09:31:24Z",
+      "text": "Completed milestone preserved at 2026-11-27T09:15:01Z by agent: delivered=Causa da falha v2.11.0 (lint AGP 9.3.1 em JDK 17, Google #522845800) corrigida com AGP 9.3.3 (57cd96c9); release notes v2.11.1 (f07508d1); review R1 10/10; gate verde; dry run Release verde; v2.11.1 cortada e enviada (2692ac1d, tag v2.11.1); watch-release iniciado; #460 fechada. | validation=make check verde em f07508d1; dry run 45970723349 build-android+verify verdes; cut_stable.py push atômico OK | residual_risk=Resultado final do Release v2.11.1 (tag) chega via hey do watch-release; follow-up sugerido: check lintVitalRelease no CI Android (GLM R1)."
+    },
+    {
+      "at": "2026-11-27T09:31:24Z",
+      "text": "Continuation request: sim | reason: Aprovação direta das 2 recomendações pós-release v2.11.1: regra de dry run no AGENTS.md e issue para o CI Android testar o build de release"
+    }
+  ],
+  "generation": 84,
+  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
+  "pending_operation": null,
+  "queued_followups": [],
+  "request": {
+    "bytes": 104,
+    "path": "requests/tm_20261127T060509Z_fdaf0acd.txt",
+    "sha256": "3ef6830c6e8eb3b07d458854dbe194004a5e37dd7a6cf9e7e449430ea8969ebf"
+  },
+  "risks": [],
+  "schema": 1,
+  "started_at": "2026-11-27T06:05:09Z",
+  "status": "completed",
+  "task_id": "tm_20261127T060509Z_fdaf0acd",
+  "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
+  "updated_at": "2026-11-27T09:32:03Z",
+  "validations": [
+    {
+      "at": "2026-11-27T06:36:22Z",
+      "check": "#511 format, analyze and session_task_list_test",
+      "criterion": null,
+      "evidence": "dart format (0 changed), flutter analyze (0 issues), flutter test test/v2/sessions/session_task_list_test.dart (8/8 passed)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T06:38:11Z",
+      "check": "#510 format, analyze and related tests",
+      "criterion": null,
+      "evidence": "dart format ok, flutter analyze 0 issues, 74/74 tests passed across app_indeterminate_progress + context_usage + selection_chip + compaction_note + rich_rendering + task_list",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T06:47:52Z",
+      "check": "make check on #511+#510 (a08d7883)",
+      "criterion": null,
+      "evidence": "make check TEST_JOBS=$(nproc) exit 0; analyze issues 4<=4; python CI/release tests ok; full flutter test suite green (/tmp/opencode/make_check_511_510.log)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T06:52:36Z",
+      "check": "Batch 1 (#511+#510) review fixes validated",
+      "criterion": null,
+      "evidence": "ADR-062 renumbered, linux_update_panel & updates_settings_page use AppIndeterminateBar for null progress, source guard tightened; format/analyze 0 issues, 33/33 focused tests green",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T07:08:48Z",
+      "check": "#509 Flutter 3.50.1 upgrade validation",
+      "criterion": null,
+      "evidence": "Flutter 3.50.1 (ae9b586f34, MSAA PR #191379 present), analyze 4<=4, v2 strict analyze 0 issues, packages/* 4/4 green, architecture tests 186/186, session_live_page+status+no_branch 81/81, python tests 19+25+93 green",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T07:28:35Z",
+      "check": "#509 R1 review fixes validated",
+      "criterion": null,
+      "evidence": "Android Gradle 9.5.0/AGP 9.3.1/KGP 2.4.20 + compilerOptions; functionTypedSuffix==null + new AST test passed; container:true on 4 liveRegions + liveStopIdle semantics assertion (79/79 + 43/43); deprecated_member_use restored in analysis_options with 201 scoped ignores + generate_v2_localizations --check ok; analyze 4<=4, v2 strict analyze 0, tool/ci analyze 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T07:37:55Z",
+      "check": "#509 R2 test fix validated",
+      "criterion": null,
+      "evidence": "import_rules_test exercises get-it-boundary from non-widget lib/main_v2.dart; format, analyze, and dart test green",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T07:48:37Z",
+      "check": "#525 format, analyze and focused capsule tests",
+      "criterion": null,
+      "evidence": "format 0 changed; analyze 0 issues (incl. tool/goldens/subagent_capsule_test.dart); 29/29 passed across session_subagent_capsule_test, session_capsule_shells_test, subagent_capsule_golden_test; subconversation_navigation_test + session_live_execution_test green",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:02:35Z",
+      "check": "make check on #525 (2ca07aa2)",
+      "criterion": null,
+      "evidence": "make check TEST_JOBS=$(nproc) exit 0; analyze 4<=4; python CI/release tests 191/191 ok; full flutter test suite green (/tmp/opencode/make_check_525_retry.log)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:16:44Z",
+      "check": "Pre-evaluation saved in A0001",
+      "criterion": "C1",
+      "evidence": "A0001 captured in S1 with #511/#510/#509/#525 plan and owner decisions A/A/A",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:16:45Z",
+      "check": "4 issues delivered, documented, closed, and checked in #527",
+      "criterion": "C2",
+      "evidence": "#511 (4a0f313f), #510 (32a2b9d5), #509 (01b1a492), #525 (2ca07aa2), BEHAVIOR.md (d434b85a), goldens (52625c04) pushed; all 4 closed on GitHub and checked off in #527",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:16:45Z",
+      "check": "Final local gate green on pre-release SHA 839f0077",
+      "criterion": "C3",
+      "evidence": "make check TEST_JOBS=$(nproc) exit 0 on 839f0077 (analyze 4<=4, python CI/release tests ok, full flutter test suite incl. refreshed x86_64 goldens green, /tmp/opencode/make_check_final_839f0077.log)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:17:20Z",
+      "check": "Minor release v2.11.0 cut and pushed",
+      "criterion": "C4",
+      "evidence": "make release V=stable cut v2.11.0 at cd22fdd6 (atomic push main+tag); make watch-release started detached",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:17:20Z",
+      "check": "Helper evaluation report compiled and sent via hey",
+      "criterion": "C5",
+      "evidence": "Evaluated all helpers across 3 batches / 4 rounds (Top 2: Codex-6.2-sol-F, Gemini-4-hydrogen; Bottom 2: Claude-opus-5-low, Ernie-55-flash; mentions: Haiku-5, Grok-47-F, Kimi-K31, Hungerg, GLM-53) and sent full paragraph via hey",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:51:38Z",
+      "check": "Build release Android local",
+      "criterion": null,
+      "evidence": "Não executável em mercury (aarch64, sem JDK; AGENTS.md: APKs não buildam de forma confiável em ARM64). Validação real fica no job build-android do Release v2.11.1. Única referência de build ao AGP: android/settings.gradle.kts:21 (9.3.1->9.3.3); 9.3.3 presente no Google Maven.",
+      "outcome": "info"
+    },
+    {
+      "at": "2026-11-27T09:04:37Z",
+      "check": "Gate local make check TEST_JOBS=4",
+      "criterion": null,
+      "evidence": "SHA f07508d1, 08:54-09:04 UTC, GATE_RC=0, analyze 4<=4; log /tmp/opencode/rvw/gate.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T09:14:25Z",
+      "check": "Dry run Release dry_run_version=2.11.1 (run 45970723349, f07508d1)",
+      "criterion": null,
+      "evidence": "conclusion=success: plan, Windows x64, Linux arm64/x64, macOS arm64, build-android (09:05:46-09:12:36Z), verify ok; publish skipped (dry run)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T09:31:57Z",
+      "check": "AGENTS.md Known pitfalls: regra dry run pré-tag",
+      "criterion": null,
+      "evidence": "1 bullet adicionado após a linha 170, referencia #528 e a exceção a CI never watch it; docs-only, isento de gate/revisão",
+      "outcome": "pass"
+    }
+  ]
+}

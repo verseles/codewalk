@@ -177,7 +177,7 @@
   "@hostsLegacyExplanation": {
     "description": "V2 endpoint profile and compatibility UI"
   },
-  "hostsUpgradeInstructions": "شغّل opencode upgrade على الخادم. الحد الأدنى: 2.0.20؛ المختبر: 2.0.21–2.0.22. لا يثبت CodeWalk خادمك أو يغيره.",
+  "hostsUpgradeInstructions": "شغّل opencode upgrade على الخادم. الحد الأدنى: 2.0.20. لا يثبت CodeWalk خادمك أو يغيره.",
   "@hostsUpgradeInstructions": {
     "description": "V2 endpoint profile and compatibility UI"
   },
@@ -187,10 +187,6 @@
   },
   "hostsUpgradeRequired": "يلزم تحديث الخادم",
   "@hostsUpgradeRequired": {
-    "description": "V2 endpoint profile and compatibility UI"
-  },
-  "hostsUntested": "إصدار غير مختبر",
-  "@hostsUntested": {
     "description": "V2 endpoint profile and compatibility UI"
   },
   "hostsTransportHelp": "تعذر الوصول إلى الخادم. تحقق من عنوان URL وTLS واتصال VPN.",
@@ -1459,6 +1455,7 @@
   "serversSearchActiveHint": "ابحث في الخادم النشط",
   "serversSetActive": "تعيين كنشط",
   "statusDelayed": "متأخر",
+  "statusChecking": "جارٍ التحقق…",
   "statusOffline": "غير متصل",
   "statusOnline": "متصل",
   "healthCredentialMissing": "لا توجد بيانات اعتماد محفوظة لهذا الخادم. أعد الإقران أو أدخل كلمة مروره.",

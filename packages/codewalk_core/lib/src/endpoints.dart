@@ -2,7 +2,6 @@ import 'authentication.dart';
 
 enum EndpointStatus {
   compatible,
-  untested,
   belowMinimum,
   legacyServer,
   authenticationRequired,
@@ -27,8 +26,7 @@ final class EndpointAssessment {
   final String? version;
   final DateTime? retryAt;
   final bool retryDeferred;
-  bool get canUse =>
-      status == EndpointStatus.compatible || status == EndpointStatus.untested;
+  bool get canUse => status == EndpointStatus.compatible;
 }
 
 /// No credential, native DTO, server-published URL, or port rewrite is stored.

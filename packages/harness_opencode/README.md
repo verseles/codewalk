@@ -40,8 +40,8 @@ adopting server-published URLs, PID or ports. The limited legacy fallback checks
 healthy OpenCode 1 JSON from `GET /global/health`; HTML success responses and
 authentication failures never authorize profile creation.
 
-The minimum is `2.0.20`; tested versions are `2.0.21` and `2.0.22`. Other valid
-versions at or above the minimum are explicitly untested. Complete SemVer syntax
+The minimum is `2.0.20`; every valid stable `2.x` version at or above it is
+compatible, with no separate tested window (#507). Complete SemVer syntax
 is validated before build metadata is ignored for compatibility precedence.
 Retry hints inform manual checks only: there is no automatic HTTP replay, and
 delays beyond the one-day presentation budget stay deferred rather than clamped.

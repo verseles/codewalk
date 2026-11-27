@@ -138,7 +138,7 @@ final class OpenCodePromptClient {
     );
     OpenCodePromptRefused unavailable(String reason) =>
         OpenCodePromptRefused._(_unavailable(command, messageId, reason));
-    // Later v2 versions are usable but remain marked untested.
+    // Later stable v2 versions are usable.
     if (!OpenCodeCompatibility.supportsV2(connectedVersion)) {
       return unavailable('unverifiedVersion');
     }

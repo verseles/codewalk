@@ -22,6 +22,10 @@ class AppSurfaceTokens extends ThemeExtension<AppSurfaceTokens> {
     required this.focusedBorderWidth,
     required this.enabledBorderWidth,
     required this.composerShadow,
+    required this.statusOnline,
+    required this.statusDelayed,
+    required this.statusOffline,
+    required this.statusChecking,
   });
 
   factory AppSurfaceTokens.fromScheme(
@@ -76,6 +80,16 @@ class AppSurfaceTokens extends ThemeExtension<AppSurfaceTokens> {
           offset: const Offset(0, 1),
         ),
       ],
+      // Server health keeps fixed meanings under dynamic color, where
+      // primary may be any hue (#514).
+      statusOnline: brightness == Brightness.dark
+          ? const Color(0xFF6DD58C)
+          : const Color(0xFF1E8E3E),
+      statusDelayed: brightness == Brightness.dark
+          ? const Color(0xFFFFB74D)
+          : const Color(0xFFB26A00),
+      statusOffline: colorScheme.error,
+      statusChecking: colorScheme.onSurfaceVariant,
     );
   }
 
@@ -97,6 +111,10 @@ class AppSurfaceTokens extends ThemeExtension<AppSurfaceTokens> {
   final double focusedBorderWidth;
   final double enabledBorderWidth;
   final List<BoxShadow> composerShadow;
+  final Color statusOnline;
+  final Color statusDelayed;
+  final Color statusOffline;
+  final Color statusChecking;
 
   @override
   AppSurfaceTokens copyWith({
@@ -118,6 +136,10 @@ class AppSurfaceTokens extends ThemeExtension<AppSurfaceTokens> {
     double? focusedBorderWidth,
     double? enabledBorderWidth,
     List<BoxShadow>? composerShadow,
+    Color? statusOnline,
+    Color? statusDelayed,
+    Color? statusOffline,
+    Color? statusChecking,
   }) {
     return AppSurfaceTokens(
       cardRadius: cardRadius ?? this.cardRadius,
@@ -139,6 +161,10 @@ class AppSurfaceTokens extends ThemeExtension<AppSurfaceTokens> {
       focusedBorderWidth: focusedBorderWidth ?? this.focusedBorderWidth,
       enabledBorderWidth: enabledBorderWidth ?? this.enabledBorderWidth,
       composerShadow: composerShadow ?? this.composerShadow,
+      statusOnline: statusOnline ?? this.statusOnline,
+      statusDelayed: statusDelayed ?? this.statusDelayed,
+      statusOffline: statusOffline ?? this.statusOffline,
+      statusChecking: statusChecking ?? this.statusChecking,
     );
   }
 
@@ -191,6 +217,10 @@ class AppSurfaceTokens extends ThemeExtension<AppSurfaceTokens> {
       composerShadow:
           BoxShadow.lerpList(composerShadow, other.composerShadow, t) ??
           composerShadow,
+      statusOnline: Color.lerp(statusOnline, other.statusOnline, t)!,
+      statusDelayed: Color.lerp(statusDelayed, other.statusDelayed, t)!,
+      statusOffline: Color.lerp(statusOffline, other.statusOffline, t)!,
+      statusChecking: Color.lerp(statusChecking, other.statusChecking, t)!,
     );
   }
 }

@@ -477,16 +477,13 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get hostsUpgradeInstructions =>
-      '서버에서 opencode upgrade를 실행하세요. 최소: 2.0.20, 테스트됨: 2.0.21–2.0.22. CodeWalk는 서버를 설치하거나 변경하지 않습니다.';
+      '서버에서 opencode upgrade를 실행하세요. 최소: 2.0.20. CodeWalk는 서버를 설치하거나 변경하지 않습니다.';
 
   @override
   String get hostsLegacyDownload => 'CodeWalk 1 다운로드';
 
   @override
   String get hostsUpgradeRequired => '서버 업그레이드 필요';
-
-  @override
-  String get hostsUntested => '테스트되지 않은 버전';
 
   @override
   String get hostsTransportHelp => '서버에 연결할 수 없습니다. URL, TLS 및 VPN 연결을 확인하세요.';
@@ -1623,6 +1620,9 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get statusDelayed => '지연됨';
+
+  @override
+  String get statusChecking => '확인 중…';
 
   @override
   String get statusOffline => '오프라인';

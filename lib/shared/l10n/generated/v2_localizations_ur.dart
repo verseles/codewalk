@@ -490,16 +490,13 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get hostsUpgradeInstructions =>
-      'سرور پر opencode upgrade چلائیں۔ کم از کم: 2.0.20؛ آزمودہ: 2.0.21–2.0.22۔ CodeWalk سرور نصب یا تبدیل نہیں کرتا۔';
+      'سرور پر opencode upgrade چلائیں۔ کم از کم: 2.0.20۔ CodeWalk سرور نصب یا تبدیل نہیں کرتا۔';
 
   @override
   String get hostsLegacyDownload => 'CodeWalk 1 ڈاؤن لوڈ کریں';
 
   @override
   String get hostsUpgradeRequired => 'سرور اپ گریڈ درکار ہے';
-
-  @override
-  String get hostsUntested => 'غیر آزمودہ ورژن';
 
   @override
   String get hostsTransportHelp =>
@@ -1703,6 +1700,9 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get statusDelayed => 'تاخیر شدہ';
+
+  @override
+  String get statusChecking => 'جانچ ہو رہی ہے…';
 
   @override
   String get statusOffline => 'آف لائن';

@@ -468,16 +468,13 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get hostsUpgradeInstructions =>
-      '请在服务器上运行 opencode upgrade。最低版本：2.0.20；已测试：2.0.21–2.0.22。CodeWalk 不会安装或更改服务器。';
+      '请在服务器上运行 opencode upgrade。最低版本：2.0.20。CodeWalk 不会安装或更改服务器。';
 
   @override
   String get hostsLegacyDownload => '下载 CodeWalk 1';
 
   @override
   String get hostsUpgradeRequired => '需要升级服务器';
-
-  @override
-  String get hostsUntested => '未经测试的版本';
 
   @override
   String get hostsTransportHelp => '无法连接服务器。请检查 URL、TLS 和 VPN 连接。';
@@ -1595,6 +1592,9 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get statusDelayed => '延迟';
+
+  @override
+  String get statusChecking => '检查中…';
 
   @override
   String get statusOffline => '离线';

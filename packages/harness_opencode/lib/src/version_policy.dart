@@ -1,10 +1,10 @@
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:pub_semver/pub_semver.dart';
 
-/// Approved compatibility table; a supported minimum is not proof of testing.
+/// Approved compatibility table: every stable v2 release from the minimum on
+/// is usable, so the app never argues about newer server versions (#507).
 final class OpenCodeCompatibility {
   static final minimum = Version(2, 0, 20);
-  static const tested = ['2.0.21', '2.0.22'];
   static const knownBad = <String>[];
 
   static Version? parse(String value) {
@@ -37,7 +37,7 @@ final class OpenCodeCompatibility {
     }
   }
 
-  /// Permits the v2 protocol with an untested-version warning when applicable.
+  /// Permits the v2 protocol for every stable release from the minimum on.
   static bool supportsV2(String value) {
     final version = parse(value);
     return version != null &&
@@ -58,11 +58,6 @@ final class OpenCodeCompatibility {
     if (!supportsV2(value)) {
       return EndpointAssessment(EndpointStatus.unrecognized, version: value);
     }
-    return EndpointAssessment(
-      tested.contains(version.toString())
-          ? EndpointStatus.compatible
-          : EndpointStatus.untested,
-      version: value,
-    );
+    return EndpointAssessment(EndpointStatus.compatible, version: value);
   }
 }

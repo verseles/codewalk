@@ -10,7 +10,7 @@ PORT_KEYS = {
 }
 NEW_KEYS = (
     "hostsLegacyExplanation", "hostsUpgradeInstructions", "hostsLegacyDownload",
-    "hostsUpgradeRequired", "hostsUntested", "hostsTransportHelp",
+    "hostsUpgradeRequired", "hostsTransportHelp",
     "hostsNativeOnly", "hostsAuthRequired", "hostsProfileStorageError",
     "hostsRetryLater", "hostsCheckConnection",
     "hostsEditInvalidLabel",
@@ -20,8 +20,8 @@ NEW_KEYS = (
 COPY = {
     "en": (
         "This server runs OpenCode 1. CodeWalk 2 needs OpenCode 2.",
-        "Run opencode upgrade on your server. Minimum: 2.0.20; tested: 2.0.21–2.0.22. CodeWalk does not install or change your server.",
-        "Download CodeWalk 1", "Server upgrade required", "Untested version",
+        "Run opencode upgrade on your server. Minimum: 2.0.20. CodeWalk does not install or change your server.",
+        "Download CodeWalk 1", "Server upgrade required",
         "Could not reach the server. Check the URL, TLS and VPN connection.",
         "Endpoint detection is available on native Android and Linux in this MVP.",
         "Check the server password or pairing credentials.",
@@ -34,8 +34,8 @@ COPY = {
     ),
     "pt": (
         "Este servidor executa OpenCode 1. O CodeWalk 2 precisa do OpenCode 2.",
-        "Execute opencode upgrade no servidor. Mínimo: 2.0.20; testado: 2.0.21–2.0.22. O CodeWalk não instala nem altera seu servidor.",
-        "Baixar CodeWalk 1", "Atualização do servidor necessária", "Versão não testada",
+        "Execute opencode upgrade no servidor. Mínimo: 2.0.20. O CodeWalk não instala nem altera seu servidor.",
+        "Baixar CodeWalk 1", "Atualização do servidor necessária",
         "Não foi possível alcançar o servidor. Confira a URL, o TLS e a conexão VPN.",
         "Neste MVP, a detecção de endpoints está disponível no Android e Linux nativos.",
         "Confira a senha do servidor ou as credenciais de pareamento.",
@@ -48,8 +48,8 @@ COPY = {
     ),
     "es": (
         "Este servidor ejecuta OpenCode 1. CodeWalk 2 necesita OpenCode 2.",
-        "Ejecuta opencode upgrade en el servidor. Mínimo: 2.0.20; probado: 2.0.21–2.0.22. CodeWalk no instala ni modifica el servidor.",
-        "Descargar CodeWalk 1", "Se requiere actualizar el servidor", "Versión no probada",
+        "Ejecuta opencode upgrade en el servidor. Mínimo: 2.0.20. CodeWalk no instala ni modifica el servidor.",
+        "Descargar CodeWalk 1", "Se requiere actualizar el servidor",
         "No se pudo alcanzar el servidor. Comprueba la URL, TLS y la conexión VPN.",
         "En este MVP, la detección está disponible en Android y Linux nativos.",
         "Comprueba la contraseña o las credenciales de emparejamiento.",
@@ -61,8 +61,8 @@ COPY = {
     ),
     "fr": (
         "Ce serveur utilise OpenCode 1. CodeWalk 2 nécessite OpenCode 2.",
-        "Exécutez opencode upgrade sur le serveur. Minimum : 2.0.20 ; testé : 2.0.21–2.0.22. CodeWalk ne modifie ni n’installe votre serveur.",
-        "Télécharger CodeWalk 1", "Mise à niveau du serveur requise", "Version non testée",
+        "Exécutez opencode upgrade sur le serveur. Minimum : 2.0.20. CodeWalk ne modifie ni n’installe votre serveur.",
+        "Télécharger CodeWalk 1", "Mise à niveau du serveur requise",
         "Serveur inaccessible. Vérifiez l’URL, TLS et la connexion VPN.",
         "Dans ce MVP, la détection est disponible sur Android et Linux natifs.",
         "Vérifiez le mot de passe ou les identifiants d’appairage.",
@@ -74,8 +74,8 @@ COPY = {
     ),
     "de": (
         "Dieser Server verwendet OpenCode 1. CodeWalk 2 benötigt OpenCode 2.",
-        "Führen Sie opencode upgrade auf dem Server aus. Minimum: 2.0.20; getestet: 2.0.21–2.0.22. CodeWalk installiert oder verändert Ihren Server nicht.",
-        "CodeWalk 1 herunterladen", "Server-Upgrade erforderlich", "Ungetestete Version",
+        "Führen Sie opencode upgrade auf dem Server aus. Minimum: 2.0.20. CodeWalk installiert oder verändert Ihren Server nicht.",
+        "CodeWalk 1 herunterladen", "Server-Upgrade erforderlich",
         "Server nicht erreichbar. Prüfen Sie URL, TLS und VPN-Verbindung.",
         "In diesem MVP ist die Erkennung auf nativem Android und Linux verfügbar.",
         "Prüfen Sie das Serverpasswort oder die Kopplungsdaten.",
@@ -87,8 +87,8 @@ COPY = {
     ),
     "it": (
         "Questo server usa OpenCode 1. CodeWalk 2 richiede OpenCode 2.",
-        "Esegui opencode upgrade sul server. Minimo: 2.0.20; testato: 2.0.21–2.0.22. CodeWalk non installa né modifica il server.",
-        "Scarica CodeWalk 1", "Aggiornamento del server necessario", "Versione non testata",
+        "Esegui opencode upgrade sul server. Minimo: 2.0.20. CodeWalk non installa né modifica il server.",
+        "Scarica CodeWalk 1", "Aggiornamento del server necessario",
         "Server non raggiungibile. Controlla URL, TLS e connessione VPN.",
         "In questo MVP il rilevamento è disponibile su Android e Linux nativi.",
         "Controlla la password o le credenziali di abbinamento.",
@@ -100,8 +100,8 @@ COPY = {
     ),
     "ru": (
         "Этот сервер использует OpenCode 1. CodeWalk 2 нужен OpenCode 2.",
-        "Запустите opencode upgrade на сервере. Минимум: 2.0.20; проверено: 2.0.21–2.0.22. CodeWalk не устанавливает и не изменяет сервер.",
-        "Скачать CodeWalk 1", "Нужно обновить сервер", "Непроверенная версия",
+        "Запустите opencode upgrade на сервере. Минимум: 2.0.20. CodeWalk не устанавливает и не изменяет сервер.",
+        "Скачать CodeWalk 1", "Нужно обновить сервер",
         "Сервер недоступен. Проверьте URL, TLS и подключение VPN.",
         "В этом MVP обнаружение доступно на нативных Android и Linux.",
         "Проверьте пароль сервера или данные сопряжения.",
@@ -113,8 +113,8 @@ COPY = {
     ),
     "ar": (
         "يعمل هذا الخادم باستخدام OpenCode 1. يحتاج CodeWalk 2 إلى OpenCode 2.",
-        "شغّل opencode upgrade على الخادم. الحد الأدنى: 2.0.20؛ المختبر: 2.0.21–2.0.22. لا يثبت CodeWalk خادمك أو يغيره.",
-        "تنزيل CodeWalk 1", "يلزم تحديث الخادم", "إصدار غير مختبر",
+        "شغّل opencode upgrade على الخادم. الحد الأدنى: 2.0.20. لا يثبت CodeWalk خادمك أو يغيره.",
+        "تنزيل CodeWalk 1", "يلزم تحديث الخادم",
         "تعذر الوصول إلى الخادم. تحقق من عنوان URL وTLS واتصال VPN.",
         "يتوفر الكشف في هذا MVP على Android وLinux الأصليين.",
         "تحقق من كلمة مرور الخادم أو بيانات الاقتران.",
@@ -126,8 +126,8 @@ COPY = {
     ),
     "ur": (
         "یہ سرور OpenCode 1 چلاتا ہے۔ CodeWalk 2 کو OpenCode 2 درکار ہے۔",
-        "سرور پر opencode upgrade چلائیں۔ کم از کم: 2.0.20؛ آزمودہ: 2.0.21–2.0.22۔ CodeWalk سرور نصب یا تبدیل نہیں کرتا۔",
-        "CodeWalk 1 ڈاؤن لوڈ کریں", "سرور اپ گریڈ درکار ہے", "غیر آزمودہ ورژن",
+        "سرور پر opencode upgrade چلائیں۔ کم از کم: 2.0.20۔ CodeWalk سرور نصب یا تبدیل نہیں کرتا۔",
+        "CodeWalk 1 ڈاؤن لوڈ کریں", "سرور اپ گریڈ درکار ہے",
         "سرور تک رسائی نہیں ہو سکی۔ URL، TLS اور VPN کنکشن دیکھیں۔",
         "اس MVP میں شناخت نیٹو Android اور Linux پر دستیاب ہے۔",
         "سرور کا پاس ورڈ یا پیئرنگ کی اسناد دیکھیں۔",
@@ -139,8 +139,8 @@ COPY = {
     ),
     "hi": (
         "यह सर्वर OpenCode 1 चलाता है। CodeWalk 2 को OpenCode 2 चाहिए।",
-        "सर्वर पर opencode upgrade चलाएँ। न्यूनतम: 2.0.20; जाँचा गया: 2.0.21–2.0.22। CodeWalk आपके सर्वर को इंस्टॉल या बदलता नहीं है।",
-        "CodeWalk 1 डाउनलोड करें", "सर्वर अपग्रेड आवश्यक", "अपरिक्षित संस्करण",
+        "सर्वर पर opencode upgrade चलाएँ। न्यूनतम: 2.0.20। CodeWalk आपके सर्वर को इंस्टॉल या बदलता नहीं है।",
+        "CodeWalk 1 डाउनलोड करें", "सर्वर अपग्रेड आवश्यक",
         "सर्वर तक नहीं पहुँच सके। URL, TLS और VPN कनेक्शन जाँचें।",
         "इस MVP में पहचान नेटिव Android और Linux पर उपलब्ध है।",
         "सर्वर पासवर्ड या पेयरिंग क्रेडेंशियल जाँचें।",
@@ -152,8 +152,8 @@ COPY = {
     ),
     "bn": (
         "এই সার্ভার OpenCode 1 চালায়। CodeWalk 2-এর জন্য OpenCode 2 দরকার।",
-        "সার্ভারে opencode upgrade চালান। সর্বনিম্ন: 2.0.20; পরীক্ষিত: 2.0.21–2.0.22। CodeWalk সার্ভার ইনস্টল বা পরিবর্তন করে না।",
-        "CodeWalk 1 ডাউনলোড করুন", "সার্ভার আপগ্রেড প্রয়োজন", "অপরীক্ষিত সংস্করণ",
+        "সার্ভারে opencode upgrade চালান। সর্বনিম্ন: 2.0.20। CodeWalk সার্ভার ইনস্টল বা পরিবর্তন করে না।",
+        "CodeWalk 1 ডাউনলোড করুন", "সার্ভার আপগ্রেড প্রয়োজন",
         "সার্ভারে পৌঁছানো যায়নি। URL, TLS ও VPN সংযোগ পরীক্ষা করুন।",
         "এই MVP-তে শনাক্তকরণ নেটিভ Android ও Linux-এ উপলব্ধ।",
         "সার্ভারের পাসওয়ার্ড বা পেয়ারিং শংসাপত্র পরীক্ষা করুন।",
@@ -165,8 +165,8 @@ COPY = {
     ),
     "zh": (
         "此服务器运行 OpenCode 1。CodeWalk 2 需要 OpenCode 2。",
-        "请在服务器上运行 opencode upgrade。最低版本：2.0.20；已测试：2.0.21–2.0.22。CodeWalk 不会安装或更改服务器。",
-        "下载 CodeWalk 1", "需要升级服务器", "未经测试的版本",
+        "请在服务器上运行 opencode upgrade。最低版本：2.0.20。CodeWalk 不会安装或更改服务器。",
+        "下载 CodeWalk 1", "需要升级服务器",
         "无法连接服务器。请检查 URL、TLS 和 VPN 连接。",
         "此 MVP 的端点检测仅适用于原生 Android 和 Linux。",
         "请检查服务器密码或配对凭据。",
@@ -178,8 +178,8 @@ COPY = {
     ),
     "ja": (
         "このサーバーは OpenCode 1 を実行しています。CodeWalk 2 には OpenCode 2 が必要です。",
-        "サーバーで opencode upgrade を実行してください。最低：2.0.20、テスト済み：2.0.21–2.0.22。CodeWalk はサーバーをインストールまたは変更しません。",
-        "CodeWalk 1 をダウンロード", "サーバーの更新が必要", "未テストのバージョン",
+        "サーバーで opencode upgrade を実行してください。最低：2.0.20。CodeWalk はサーバーをインストールまたは変更しません。",
+        "CodeWalk 1 をダウンロード", "サーバーの更新が必要",
         "サーバーに接続できません。URL、TLS、VPN 接続を確認してください。",
         "この MVP の検出はネイティブ Android と Linux で利用できます。",
         "サーバーのパスワードまたはペアリング認証情報を確認してください。",
@@ -191,8 +191,8 @@ COPY = {
     ),
     "ko": (
         "이 서버는 OpenCode 1을 실행합니다. CodeWalk 2에는 OpenCode 2가 필요합니다.",
-        "서버에서 opencode upgrade를 실행하세요. 최소: 2.0.20, 테스트됨: 2.0.21–2.0.22. CodeWalk는 서버를 설치하거나 변경하지 않습니다.",
-        "CodeWalk 1 다운로드", "서버 업그레이드 필요", "테스트되지 않은 버전",
+        "서버에서 opencode upgrade를 실행하세요. 최소: 2.0.20. CodeWalk는 서버를 설치하거나 변경하지 않습니다.",
+        "CodeWalk 1 다운로드", "서버 업그레이드 필요",
         "서버에 연결할 수 없습니다. URL, TLS 및 VPN 연결을 확인하세요.",
         "이 MVP의 감지는 네이티브 Android와 Linux에서 사용할 수 있습니다.",
         "서버 비밀번호 또는 페어링 인증 정보를 확인하세요.",

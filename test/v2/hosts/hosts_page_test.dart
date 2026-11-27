@@ -135,7 +135,7 @@ void main() {
   });
   for (final size in [const Size(390, 844), const Size(1280, 800)]) {
     testWidgets(
-      'persistent authored profile and untested chip at ${size.width}',
+      'persistent authored profile on a newer version at ${size.width}',
       (tester) async {
         tester.view.physicalSize = size;
         tester.view.devicePixelRatio = 1;
@@ -144,7 +144,7 @@ void main() {
         final repo = MemoryProfiles();
         final probe = FakeProber()
           ..assessment = const EndpointAssessment(
-            EndpointStatus.untested,
+            EndpointStatus.compatible,
             version: '2.0.23',
           );
         final graph = createAppDependencies(
@@ -157,7 +157,8 @@ void main() {
         await openForm(tester);
         await tester.tap(find.byKey(const ValueKey('probe-endpoint')));
         await tester.pumpAndSettle();
-        expect(find.text('Untested version · 2.0.23'), findsOneWidget);
+        expect(find.text('Ready · 2.0.23'), findsOneWidget);
+        expect(find.textContaining('Untested'), findsNothing);
         await tester.tap(find.byKey(const ValueKey('save-endpoint')));
         await tester.pumpAndSettle();
         expect(repo.profiles.single.endpoint.port, 4096);
