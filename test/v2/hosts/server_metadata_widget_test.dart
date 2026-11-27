@@ -2,6 +2,7 @@ import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_test/flutter_test.dart';
 

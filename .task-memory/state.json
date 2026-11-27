@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 3,
+  "artifact_seq": 6,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -50,6 +50,57 @@
       "stage": "S3",
       "supersedes": null,
       "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 1 (#511+#510) R1 (Ernie recovered)"
+    },
+    "A0004": {
+      "active": false,
+      "bytes": 1228,
+      "created_at": "2026-11-27T07:22:03Z",
+      "evidence": "10 delivered YAML files in /tmp/opencode/group5-509-20261127T070926Z-e752/r1_*.out",
+      "id": "A0004",
+      "impact": "Caught critical Android Gradle/AGP/KGP hard-floor breakage plus AST guard regression and liveRegion sibling bug before release",
+      "origin": "review-batch-2-r1 (10 helpers)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0004.md",
+      "purpose": "Preserve ledger and reports from Review Batch 2 (#509 Flutter 3.50.1, 32a2b9d5..6b810f68) round 1",
+      "rerun_when": "Fixes committed for #509 or re-review round starts",
+      "retired": true,
+      "sha256": "26760780e3ef033d4031c1e1426ecedd9f3d7aa77098d6c29cf3eed0cc732b68",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 2 (#509) R1"
+    },
+    "A0005": {
+      "active": false,
+      "bytes": 793,
+      "created_at": "2026-11-27T07:36:18Z",
+      "evidence": "Raw files in /tmp/opencode/group5-509-20261127T070926Z-e752/r2_*.out and .err",
+      "id": "A0005",
+      "impact": "Run GLM rung-1 repair + Claude haiku/opus step-2 retries before R2 judgment and 1-test fix",
+      "origin": "review-batch-2-r2 (10 helpers)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0005.md",
+      "purpose": "Preserve ledger and reports from Review Batch 2 (#509, 32a2b9d5..67387297) round 2 re-review",
+      "rerun_when": "Recovery turns complete",
+      "retired": true,
+      "sha256": "f83ba05cd8093b9a69c56d8fae00f00e858fdf794cd66166ae1a5d14597d7bc9",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 2 (#509) R2"
+    },
+    "A0006": {
+      "active": false,
+      "bytes": 374,
+      "created_at": "2026-11-27T07:37:21Z",
+      "evidence": "/tmp/opencode/group5-509-20261127T070926Z-e752/r2_*_{rung1,retry}.*",
+      "id": "A0006",
+      "impact": "Completes Review Batch 2 R2 before final judgment",
+      "origin": "Batch 2 R2 recovery (GLM rung-1 + Claude haiku/opus retry)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0006.md",
+      "purpose": "Preserve recovery outcomes for Review Batch 2 R2 before judgment",
+      "rerun_when": "Only if another review round were opened",
+      "retired": true,
+      "sha256": "9d3784a55c8a01c302b280ce19f4a5c6273fec42231803fc86c7ee06d6f01964",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 2 (#509) R2 recovery"
     }
   },
   "checklist": [
@@ -87,9 +138,9 @@
       ],
       "id": "S4",
       "label": "#509 círculos serrilhados no Linux 5K",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "#509 implementado e revisado em 2 rounds (R1 10/10, R2 8/10 + 2 falhas técnicas Claude): Flutter 3.50.1 (ae9b586f34), Gradle 9.5.0/AGP 9.3.1/KGP 2.4.20, AST analyzer 14.7.0 + functionTypedSuffix guard + teste get-it-boundary, container:true nas live regions, ignores escopados em material.dart e v2_localizations.dart",
+      "status": "done",
+      "validation": "analyze 4<=4, v2 strict analyze 0, tool/ci analyze 0, packages/* 4/4, l10n --check ok, session_live_page+compaction 79/79, permission+health 43/43, import_rules_test verde"
     },
     {
       "depends": [
@@ -98,7 +149,7 @@
       "id": "S5",
       "label": "#525 efeito de atividade na cápsula de subagentes/shells",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -206,10 +257,30 @@
     {
       "at": "2026-11-27T06:51:14Z",
       "text": "ART-REVIEW-JUDGMENT Batch 1 (#511+#510) R1 (10/10 entregues, Ernie recuperado no rung 1): ACEITOS 2 achados: (1) Renumerar ADR-061 -> ADR-062 (ADR-061 reservado em v2-plan.md:1139 e issue #335 V21-012) [haiku, hungerg, gemini-4-hydrogen]; (2) Trocar LinearProgressIndicator(value: cond ? p : null) por AppIndeterminateBar nos ramos indeterminados de linux_update_panel.dart:25 e updates_settings_page.dart:296 + apertar guard de teste para rejeitar null em value: [codex-6.2-sol-F, glm-53]. Zero posições Frontier (-F) rejeitadas. Sem re-review necessário após estes 2 ajustes locais simples (docs/comentários + 2 ramos de barra + regex de teste, sem tocar concorrência/segurança/interfaces/persistência/arquitetura)."
+    },
+    {
+      "at": "2026-11-27T07:09:26Z",
+      "text": "Review Batch 2 (#509 Flutter 3.50.1) iniciado: base=32a2b9d5 head=6b810f68 job_key=group5-509-20261127T070926Z-e752 metrics=rvw_20261127T070926Z_c574ab8e; 10 helpers elegíveis (DeepSeek excluído por pico Seg-Sex 06:00-10:00 UTC)."
+    },
+    {
+      "at": "2026-11-27T07:10:50Z",
+      "text": "Handshakes READY Batch 2 #509 (10/10) dir=/home/ubuntu/MEGA/WORK/codewalk job_key=group5-509-20261127T070926Z-e752: helperClaude-haiku-5-max=READY, helperClaude-opus-5-low=READY, helperCodex-6-luna-max=READY, helperCodex-6.2-sol-xhigh-F=READY, helperErnie-55-flash-high=READY, helperGLM-53-high=READY, helperGemini-4-hydrogen-xhigh=READY, helperGrok-47-high-F=READY, helperHungerg-free=READY, helperKimi-K31-pro-high=READY (DeepSeek excluído por pico UTC)"
+    },
+    {
+      "at": "2026-11-27T07:24:45Z",
+      "text": "ART-REVIEW-JUDGMENT Batch 2 (#509) R1 (10/10 entregues): ACEITOS 5 achados: (1) CRITICAL Android toolchain Gradle 8.14.3->9.5.0, AGP 8.11.1->9.3.1, KGP 2.4.20, compilerOptions/JvmTarget.JVM_17 e remover enableJetifier [codex-6.2-sol-F, grok-47-F]; (2) WARNING RegularFormalParameter.functionTypedSuffix==null em ast_rules.dart e locator_values.dart + teste de regressão [codex-6.2-sol-F]; (3) WARNING container:true em SessionStopNotice (e auditar demais liveRegions) + teste semântico [gemini-4-hydrogen, haiku]; (4) WARNING restaurar deprecated_member_use em analysis_options.yaml e escopar ignores nos imports/delegates [codex-6.2-sol-F, opus, ernie, glm, gemini-4-hydrogen]; (5) SUGGESTION README.md Dart 3.14.0 [codex-6.2-sol-F, ernie, hungerg]. Zero posições Frontier rejeitadas. Re-review R2 obrigatório (toca build Android e guard arquitetural); sessões mantidas abertas."
+    },
+    {
+      "at": "2026-11-27T07:28:35Z",
+      "text": "Review Batch 2 (#509) R2 preparado: fix_commit=67387297 (range 32a2b9d5..67387297), mesmos 10 helpers elegíveis na job_key=group5-509-20261127T070926Z-e752 (DeepSeek ainda excluído por pico UTC)."
+    },
+    {
+      "at": "2026-11-27T07:37:21Z",
+      "text": "ART-REVIEW-JUDGMENT Batch 2 (#509) R2 (8/10 entregues, GLM recuperado rung 1, Claude haiku/opus failed por SESSION_CLAUDE_ERROR): todos os 5 ajustes de produção validados sem regressões. ACEITO 1 achado de teste [codex-6.2-sol-F (warning), kimi-k31 (suggestion)]: corrigir tool/ci/test/import_rules_test.dart:1285 para testar leak via arquivo não-widget (lib/main_v2.dart) esperando get-it-boundary, exercitando LocatorValues.escapes diretamente. Zero posições Frontier rejeitadas. Sem R3: correção estritamente em 1 caso de teste unitário, validada localmente."
     }
   ],
-  "generation": 22,
-  "next_action": "Implementar #509: atualizar ~/flutter e todos os pins do repositório de 3.47.9 para 3.50.1 (commit ae9b586f34a8443573f82ef57c3bf914a908cbf7)",
+  "generation": 38,
+  "next_action": "Implementar #525: brilho SweepGradient percorrendo a borda StadiumBorder da SessionSubagentCapsule quando count>0",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -223,7 +294,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T06:52:36Z",
+  "updated_at": "2026-11-27T07:37:55Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
@@ -251,6 +322,27 @@
       "check": "Batch 1 (#511+#510) review fixes validated",
       "criterion": null,
       "evidence": "ADR-062 renumbered, linux_update_panel & updates_settings_page use AppIndeterminateBar for null progress, source guard tightened; format/analyze 0 issues, 33/33 focused tests green",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T07:08:48Z",
+      "check": "#509 Flutter 3.50.1 upgrade validation",
+      "criterion": null,
+      "evidence": "Flutter 3.50.1 (ae9b586f34, MSAA PR #191379 present), analyze 4<=4, v2 strict analyze 0 issues, packages/* 4/4 green, architecture tests 186/186, session_live_page+status+no_branch 81/81, python tests 19+25+93 green",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T07:28:35Z",
+      "check": "#509 R1 review fixes validated",
+      "criterion": null,
+      "evidence": "Android Gradle 9.5.0/AGP 9.3.1/KGP 2.4.20 + compilerOptions; functionTypedSuffix==null + new AST test passed; container:true on 4 liveRegions + liveStopIdle semantics assertion (79/79 + 43/43); deprecated_member_use restored in analysis_options with 201 scoped ignores + generate_v2_localizations --check ok; analyze 4<=4, v2 strict analyze 0, tool/ci analyze 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T07:37:55Z",
+      "check": "#509 R2 test fix validated",
+      "criterion": null,
+      "evidence": "import_rules_test exercises get-it-boundary from non-widget lib/main_v2.dart; format, analyze, and dart test green",
       "outcome": "pass"
     }
   ]

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:codewalk/app/app_preferences_controller.dart';
 import 'package:codewalk/app/workspace_chrome.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';

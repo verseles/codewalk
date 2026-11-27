@@ -4,6 +4,7 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/session_history_page.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../hosts/fakes.dart';

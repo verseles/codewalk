@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/gestures.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
 import '../shared/l10n/l10n_context.dart';

@@ -11,6 +11,7 @@ import 'package:codewalk/shared/theme/chat_appearance.dart';
 import 'package:codewalk/shared/theme/theme_preferences.dart';
 import 'package:codewalk/shared/widgets/searchable_picker.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

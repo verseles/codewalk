@@ -17,6 +17,7 @@ import 'package:codewalk/shared/theme/app_theme.dart';
 import 'package:codewalk/shared/theme/chat_appearance.dart';
 import 'package:codewalk/shared/widgets/app_indeterminate_progress.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -211,6 +212,7 @@ class _SessionCompactionNoteState extends State<SessionCompactionNote> {
             ),
           )
         : Semantics(
+            container: isRunning,
             liveRegion: isRunning,
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),

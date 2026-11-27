@@ -6,6 +6,7 @@ import 'package:codewalk/features/sessions/session_live_scroll.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/gestures.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';

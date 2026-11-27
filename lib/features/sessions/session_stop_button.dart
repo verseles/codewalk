@@ -1,3 +1,4 @@
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -73,6 +74,7 @@ class SessionStopNotice extends StatelessWidget {
     return text == null
         ? const SizedBox.shrink()
         : Semantics(
+            container: true,
             liveRegion: true,
             child: Text(text, key: const ValueKey('live-stop-notice')),
           );

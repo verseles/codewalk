@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/main_v2.dart' as entry_point;
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

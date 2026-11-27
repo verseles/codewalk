@@ -7,6 +7,7 @@ import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_selection.dart';
 import 'package:codewalk/shared/sessions/session_stop.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -442,6 +443,10 @@ void main() {
           await tester.pumpAndSettle();
           expect(handle.stops, hasLength(1));
           expect(find.text(l10n.liveStopIdle), findsOneWidget);
+          expect(
+            tester.getSemantics(find.text(l10n.liveStopIdle)),
+            matchesSemantics(label: l10n.liveStopIdle, isLiveRegion: true),
+          );
           expect(find.textContaining('Bold body'), findsWidgets);
 
           // A set-aside session keeps its resident state visible, marked stale.

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';

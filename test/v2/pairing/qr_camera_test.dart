@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codewalk/platform/pairing/qr_camera_page.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';

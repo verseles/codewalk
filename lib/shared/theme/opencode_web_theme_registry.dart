@@ -7,6 +7,7 @@
 // - https://raw.githubusercontent.com/anomalyco/opencode/dev/packages/ui/src/theme/default-themes.ts
 // - packages/ui/src/theme/themes/<theme-id>.json
 
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
 @immutable

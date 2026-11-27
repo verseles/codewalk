@@ -1283,6 +1283,16 @@ dependencies:
   });
 
   test(
+    'function-typed parameter returning GetIt still catches a leaked locator argument',
+    () => reject('get-it-boundary', {
+      'lib/app/composition_root.dart':
+          "import 'package:get_it/get_it.dart'; Object leak(GetIt factory(GetIt input)) => factory(GetIt.I);\n",
+      'lib/main_v2.dart':
+          "import 'app/composition_root.dart'; void main() { final exposed = leak((locator) => locator); }\n",
+    }),
+  );
+
+  test(
     'ordinary composition wiring, display labels and comments are valid',
     () async {
       final result = await run(

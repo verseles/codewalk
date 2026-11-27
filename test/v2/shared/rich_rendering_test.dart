@@ -4,6 +4,7 @@ import 'package:codewalk/shared/rendering/canonical_message_body.dart';
 import 'package:codewalk/shared/rendering/markdown_content.dart';
 import 'package:codewalk/shared/rendering/message_render_budget.dart';
 import 'package:codewalk/shared/rendering/render_basic_html.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

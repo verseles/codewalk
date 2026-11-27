@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND.
 // Frozen port of the v1 palette; the generators stayed on the v1 branch.
 
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
 /// Brand color presets for the color picker when dynamic color is disabled.

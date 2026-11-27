@@ -13,6 +13,7 @@ import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/shared/sessions/permission_mode.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';

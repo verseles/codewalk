@@ -5,6 +5,7 @@ import 'package:codewalk/features/sessions/project_icon_view.dart';
 import 'package:codewalk/features/sessions/session_tab_icon_picker.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/project_icon_data.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';

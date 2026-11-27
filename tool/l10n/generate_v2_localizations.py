@@ -236,6 +236,22 @@ def generate(check: bool) -> int:
         shutil.copytree(SOURCE / "arb", project / "lib/l10n/arb")
         subprocess.run([flutter, "gen-l10n"], cwd=project, check=True)
         generated = project / "lib/l10n/generated"
+        # Flutter 3.50 deprecated GlobalMaterialLocalizations and
+        # GlobalCupertinoLocalizations in favor of material_ui/cupertino_ui,
+        # which cannot replace flutter/material.dart until third-party widget
+        # dependencies migrate. Scope the ignore to those two generated lines.
+        main_generated = generated / "v2_localizations.dart"
+        if main_generated.is_file():
+            text = main_generated.read_text(encoding="utf-8")
+            for delegate in (
+                "GlobalMaterialLocalizations.delegate,",
+                "GlobalCupertinoLocalizations.delegate,",
+            ):
+                target = f"        {delegate}\n"
+                replacement = f"        // ignore: deprecated_member_use\n{target}"
+                if target in text and replacement not in text:
+                    text = text.replace(target, replacement, 1)
+            main_generated.write_text(text, encoding="utf-8")
         actual = {path.name for path in generated.iterdir() if path.is_file()}
         if actual != OUTPUT_NAMES:
             raise ValueError(f"Unexpected generated files: {sorted(actual ^ OUTPUT_NAMES)}")

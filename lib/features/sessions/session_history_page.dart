@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codewalk_core/codewalk_core.dart'
     show ItemId, resolveTurnTokensPerSecondByAnswer;
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/markdown_link_opener.dart';

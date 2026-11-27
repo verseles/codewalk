@@ -4,6 +4,7 @@ library;
 import 'package:codewalk/features/sessions/composer_input.dart';
 import 'package:codewalk/features/sessions/session_agent_color.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../../support/symbols_font.dart';

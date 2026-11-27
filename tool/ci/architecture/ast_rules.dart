@@ -30,7 +30,7 @@ final class AstRules extends RecursiveAstVisitor<void> {
   final List<VariableDeclaration> _variables = [];
   final List<FunctionDeclaration> _functions = [];
   final List<MethodDeclaration> _methods = [];
-  final List<SimpleFormalParameter> _parameters = [];
+  final List<RegularFormalParameter> _parameters = [];
   final Set<int> _reported = {};
   int _widgetDepth = 0;
 
@@ -41,7 +41,7 @@ final class AstRules extends RecursiveAstVisitor<void> {
     _functions.addAll(declarations.functions);
     _methods.addAll(declarations.methods);
     _parameters.addAll(
-      declarations.parameters.whereType<SimpleFormalParameter>(),
+      declarations.parameters.whereType<RegularFormalParameter>(),
     );
     _lookupHelpers.addAll(importedLookupHelpers);
     var changed = true;
@@ -395,7 +395,11 @@ final class AstRules extends RecursiveAstVisitor<void> {
       }
       scope = scope?.parent;
       if (scope != null && _contains(scope, identifier)) {
-        candidates.add((scope, null, _isGetItType(parameter.type)));
+        candidates.add((
+          scope,
+          null,
+          parameter.functionTypedSuffix == null && _isGetItType(parameter.type),
+        ));
       }
     }
     if (candidates.isEmpty) return null;
@@ -438,9 +442,9 @@ final class _DeclarationCollector extends RecursiveAstVisitor<void> {
   }
 
   @override
-  void visitSimpleFormalParameter(SimpleFormalParameter node) {
+  void visitRegularFormalParameter(RegularFormalParameter node) {
     parameters.add(node);
-    super.visitSimpleFormalParameter(node);
+    super.visitRegularFormalParameter(node);
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -450,6 +451,7 @@ class _PermissionCardState extends State<_PermissionCard> {
               ),
             if (notice != null)
               Semantics(
+                container: true,
                 liveRegion: true,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 4),

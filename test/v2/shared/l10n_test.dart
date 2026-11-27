@@ -1,6 +1,7 @@
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/l10n/l10n_bridge.dart';
 import 'package:codewalk/shared/l10n/l10n_context.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

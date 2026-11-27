@@ -8,6 +8,7 @@ import 'package:codewalk/platform/sessions/project_icon_loader_io.dart';
 import 'package:codewalk/platform/sessions/project_icon_loader_stub.dart'
     as stub;
 import 'package:codewalk/shared/sessions/project_icon_data.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';

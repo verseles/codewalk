@@ -108,7 +108,7 @@ final class LocatorValues {
       return value(node.function) || node.argumentList.arguments.any(value);
     }
     if (node is AssignmentExpression) return value(node.rightHandSide);
-    if (node is NamedExpression) return value(node.expression);
+    if (node is NamedArgument) return value(node.argumentExpression);
     if (node is AsExpression) {
       return _getIt(node.type) || value(node.expression);
     }
@@ -117,7 +117,9 @@ final class LocatorValues {
     }
     if (node is ListLiteral) return node.elements.any(value);
     if (node is SetOrMapLiteral) return node.elements.any(value);
-    if (node is RecordLiteral) return node.fields.any(value);
+    if (node is RecordLiteral) {
+      return node.fields.any((field) => value(field.fieldExpression));
+    }
     if (node is MapLiteralEntry) return value(node.key) || value(node.value);
     if (node is SpreadElement) return value(node.expression);
     if (node is NullAwareElement) return value(node.value);
@@ -193,7 +195,11 @@ final class LocatorValues {
       }
       scope = scope?.parent;
       if (scope != null && _contains(scope, identifier)) {
-        candidates.add((scope, null, _getIt(parameter.type)));
+        candidates.add((
+          scope,
+          null,
+          parameter.functionTypedSuffix == null && _getIt(parameter.type),
+        ));
       }
     }
     if (candidates.isEmpty) return null;
@@ -290,7 +296,7 @@ final class LocatorValues {
 final class _Bindings extends RecursiveAstVisitor<void> {
   final List<VariableDeclaration> variables = [];
   final List<FunctionDeclaration> functions = [];
-  final List<SimpleFormalParameter> parameters = [];
+  final List<RegularFormalParameter> parameters = [];
 
   @override
   void visitVariableDeclaration(VariableDeclaration node) {
@@ -305,9 +311,9 @@ final class _Bindings extends RecursiveAstVisitor<void> {
   }
 
   @override
-  void visitSimpleFormalParameter(SimpleFormalParameter node) {
+  void visitRegularFormalParameter(RegularFormalParameter node) {
     parameters.add(node);
-    super.visitSimpleFormalParameter(node);
+    super.visitRegularFormalParameter(node);
   }
 }
 

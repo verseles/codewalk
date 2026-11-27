@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
@@ -491,6 +492,7 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
                             constraints.maxWidth - 21,
                           );
                       final label = Semantics(
+                        container: true,
                         liveRegion: announced,
                         child: countdown
                             ? RetryCountdown(

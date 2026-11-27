@@ -7,6 +7,7 @@ import 'package:codewalk/shared/theme/opencode_theme_preferences.dart';
 import 'package:codewalk/shared/theme/opencode_theme_presets.dart';
 import 'package:codewalk/shared/theme/theme_preferences.dart';
 import 'package:crypto/crypto.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart' as mui;

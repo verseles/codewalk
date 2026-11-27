@@ -4,6 +4,7 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/diagnostics/diagnostics_controller.dart';
 import 'package:codewalk/shared/releases/release_source.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

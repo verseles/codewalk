@@ -16,6 +16,7 @@ import 'package:codewalk/shared/sessions/session_turn_actions.dart';
 import 'package:codewalk/shared/theme/app_surface_tokens.dart';
 import 'package:codewalk/shared/widgets/app_indeterminate_progress.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:harness_opencode/harness_opencode.dart';

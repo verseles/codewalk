@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/gestures.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';

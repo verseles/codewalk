@@ -8,6 +8,7 @@ import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/platform/window/desktop_window_port.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

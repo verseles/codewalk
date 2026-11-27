@@ -4,6 +4,7 @@ import 'package:codewalk/app/app_preferences_controller.dart';
 import 'package:codewalk/app/app_shell.dart';
 import 'package:codewalk/app/desktop_window_band.dart';
 import 'package:flutter/foundation.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

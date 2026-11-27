@@ -1,6 +1,7 @@
 import 'package:codewalk/features/sessions/project_context_list.dart';
 import 'package:codewalk/features/sessions/project_icon_view.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

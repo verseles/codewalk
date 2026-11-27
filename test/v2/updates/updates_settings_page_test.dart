@@ -11,6 +11,7 @@ import 'package:codewalk/shared/releases/apk_integrity.dart';
 import 'package:codewalk/shared/releases/apk_update.dart';
 import 'package:codewalk/shared/releases/release_source.dart';
 import 'package:codewalk/shared/releases/update_selector.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

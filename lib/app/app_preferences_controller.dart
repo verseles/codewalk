@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
 import '../platform/storage/metadata_store.dart';

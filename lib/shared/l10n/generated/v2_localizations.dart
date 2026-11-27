@@ -100,7 +100,9 @@ abstract class V2Localizations {
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
       <LocalizationsDelegate<dynamic>>[
         delegate,
+        // ignore: deprecated_member_use
         GlobalMaterialLocalizations.delegate,
+        // ignore: deprecated_member_use
         GlobalCupertinoLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ];

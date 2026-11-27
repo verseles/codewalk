@@ -5,6 +5,7 @@ import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/theme/opencode_theme_preferences.dart';
 import 'package:codewalk/shared/theme/theme_preferences.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

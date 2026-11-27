@@ -4,6 +4,7 @@ import 'package:codewalk/app/app_preferences_controller.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/features/hosts/hosts_controller.dart';
 import 'package:codewalk/shared/l10n/l10n_bridge.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';

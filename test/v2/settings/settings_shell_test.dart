@@ -11,6 +11,7 @@ import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/shortcuts/shortcut_action.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

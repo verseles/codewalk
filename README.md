@@ -140,7 +140,7 @@ Tags inside code blocks stay literal, and copying a message preserves its origin
 
 ### Prerequisites
 
-- Flutter SDK (`3.47.9`, Dart `>=3.8.1`)
+- Flutter SDK (`3.50.1`, Dart `3.14.0`)
 - An OpenCode 2 server instance
 - Platform toolchain:
   - Linux: `clang`, `cmake`, `ninja`, `pkg-config`, `libgtk-3-dev`, `libsecret-1-dev`

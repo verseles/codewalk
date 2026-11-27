@@ -1,4 +1,5 @@
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
 /// The default agent's color when its harness names none (#484): green.
