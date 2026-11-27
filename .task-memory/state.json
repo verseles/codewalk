@@ -197,20 +197,26 @@
       "depends": [],
       "id": "CONT1",
       "label": "Adicionar ao AGENTS.md as 3 regras aprovadas (goldens no flow, catálogos l10n, suíte sem fail-fast)",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "AGENTS.md: 3 regras (goldens no flow, suíte sem fail-fast, catálogos l10n) em 791e6123, pushed",
+      "status": "done",
+      "validation": "docs-only; git diff conferido"
     },
     {
       "depends": [],
       "id": "CONT2",
       "label": "Explicar os órfãos do tm doctor --strict e propor correção",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "tm doctor --prune-orphans criado (67 testes), instalado e documentado; 149 órfãos e 5 pastas removidos; doctor --strict ok",
+      "status": "done",
+      "validation": "tm doctor --strict ok=true; test_task_memory.py 67 OK"
     }
   ],
-  "completion": null,
+  "completion": {
+    "at": "2026-11-27T05:10:22Z",
+    "by": "agent",
+    "delivered": "3 regras no AGENTS.md (791e6123); tm doctor --prune-orphans criado, instalado e usado: 149 órfãos de 7 tarefas de 02–05/nov removidos; doctor --strict limpo.",
+    "residual_risk": "Causa exata dos órfãos não confirmada (hipótese: cópia antiga reintroduzida por sync/commit em a6a04f41).",
+    "validation": "test_task_memory.py 67 OK; doctor --strict ok"
+  },
   "contract": {
     "complete_when": [
       {
@@ -359,10 +365,18 @@
     {
       "at": "2026-11-27T05:06:19Z",
       "text": "Continuation request: Todos. E sobre o TM qual o problema que o doctor encontrou? | reason: Fim do flow do grupo 4: owner aprovou as 3 sugestões evergreen para o AGENTS.md e pergunta sobre o achado do tm doctor --strict"
+    },
+    {
+      "at": "2026-11-27T05:06:42Z",
+      "text": "Órfãos do tm doctor --strict: 149 arquivos (~890 KB) de 7 tarefas antigas (02–05/nov) em .task-memory/artifacts/ e requests/, fora do state ativo e do history (10 mais recentes são de 20–25/nov). Entraram no git em a6a04f41 (09/nov), dias depois das tarefas; hipótese: cópia antiga devolvida por sync/commit depois que o tm já tinha arquivado/podado. Inertes (tm doctor normal ok). Proposta ao owner: A) novo tm doctor --prune-orphans (recomendado), B) deixar, C) apagar à mão (viola a regra do tm)."
+    },
+    {
+      "at": "2026-11-27T05:08:26Z",
+      "text": "Owner escolheu A: implementar tm doctor --prune-orphans e limpar os 149 órfãos com ele."
     }
   ],
-  "generation": 59,
-  "next_action": "Editar AGENTS.md (seções flow, Validation e Known pitfalls)",
+  "generation": 65,
+  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
   "pending_operation": null,
   "queued_followups": [
     {
@@ -378,10 +392,10 @@
   "risks": [],
   "schema": 1,
   "started_at": "2026-11-27T02:58:25Z",
-  "status": "in_progress",
+  "status": "completed",
   "task_id": "tm_20261127T025825Z_6ddaec3e",
   "title": "Grupo 4 da #527 — seletor de modelos (flow)",
-  "updated_at": "2026-11-27T05:06:19Z",
+  "updated_at": "2026-11-27T05:10:22Z",
   "validations": [
     {
       "at": "2026-11-27T03:32:10Z",
@@ -472,6 +486,13 @@
       "check": "Relatório com melhores/piores helpers",
       "criterion": "C4",
       "evidence": "Avaliação no relatório final e no hey (Sol-F e Haiku melhores; Luna e Gemini piores)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T05:10:22Z",
+      "check": "tm doctor --strict após prune",
+      "criterion": null,
+      "evidence": "pruned_files=149, pruned_directories=5, orphans=0; doctor --strict ok=true",
       "outcome": "pass"
     }
   ]
