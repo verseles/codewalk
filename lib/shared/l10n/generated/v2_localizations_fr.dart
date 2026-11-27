@@ -509,6 +509,15 @@ class V2LocalizationsFr extends V2Localizations {
       'Le serveur est enregistré hors ligne et revérifié automatiquement.';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'Le serveur a demandé d’attendre jusqu’à $time.';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      'Le serveur a demandé d’attendre plus d’un jour. Il sera vérifié de nouveau au redémarrage de CodeWalk.';
+
+  @override
   String get serversNoServersFound => 'Aucun serveur trouvé';
 
   @override

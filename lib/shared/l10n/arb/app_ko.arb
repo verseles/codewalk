@@ -178,6 +178,8 @@
   "serversMethodManual": "수동",
   "hostsSaveAnyway": "그래도 저장",
   "hostsSaveAnywayHint": "서버가 오프라인으로 저장되고 자동으로 다시 확인됩니다.",
+  "serversWaitUntil": "서버가 {time}까지 기다리도록 요청했습니다.",
+  "serversWaitNoEnd": "서버가 하루 넘게 기다리도록 요청했습니다. CodeWalk를 다시 시작하면 다시 확인합니다.",
   "serversNoServersFound": "서버를 찾을 수 없음",
   "hostsLegacyExplanation": "이 서버는 OpenCode 1을 실행합니다. CodeWalk 2에는 OpenCode 2가 필요합니다.",
   "@hostsLegacyExplanation": {

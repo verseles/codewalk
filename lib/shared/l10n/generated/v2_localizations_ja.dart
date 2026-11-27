@@ -486,6 +486,14 @@ class V2LocalizationsJa extends V2Localizations {
   String get hostsSaveAnywayHint => 'サーバーはオフラインとして保存され、自動的に再確認されます。';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'サーバーは $time まで待つよう求めています。';
+  }
+
+  @override
+  String get serversWaitNoEnd => 'サーバーは 1 日以上待つよう求めています。CodeWalk の再起動時に再確認します。';
+
+  @override
   String get serversNoServersFound => 'サーバーが見つかりません';
 
   @override

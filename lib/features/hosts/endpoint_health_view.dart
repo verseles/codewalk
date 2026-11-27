@@ -43,8 +43,19 @@ Color healthStatusColor(BuildContext context, EndpointHealthStatus status) {
 }
 
 class EndpointHealthIndicator extends StatelessWidget {
-  const EndpointHealthIndicator({required this.view, super.key});
+  const EndpointHealthIndicator({
+    required this.view,
+    this.detail,
+    this.maxLines = 1,
+    super.key,
+  });
   final EndpointHealthView view;
+
+  /// Shown after the status, such as the harness and its version.
+  final String? detail;
+
+  /// Null lets the line wrap as far as it needs.
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -58,9 +69,12 @@ class EndpointHealthIndicator extends StatelessWidget {
       const SizedBox(width: 4),
       Flexible(
         child: Text(
-          healthStatusText(context.v2L10n, view.status),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
+          [healthStatusText(context.v2L10n, view.status), ?detail].join(' · '),
+          maxLines: maxLines,
+          // An ellipsis without a line limit would cut the text to one line.
+          overflow: maxLines == null
+              ? TextOverflow.visible
+              : TextOverflow.ellipsis,
         ),
       ),
     ],

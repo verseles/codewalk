@@ -503,6 +503,15 @@ class V2LocalizationsRu extends V2Localizations {
       'Сервер сохраняется как офлайн и автоматически проверяется снова.';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'Сервер попросил подождать до $time.';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      'Сервер попросил подождать больше суток. Он будет проверен снова после перезапуска CodeWalk.';
+
+  @override
   String get serversNoServersFound => 'Серверы не найдены';
 
   @override

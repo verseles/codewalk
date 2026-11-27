@@ -498,6 +498,15 @@ class V2LocalizationsHi extends V2Localizations {
       'सर्वर ऑफ़लाइन के रूप में सहेजा जाता है और अपने आप फिर से जाँचा जाता है।';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'सर्वर ने $time तक इंतज़ार करने को कहा है।';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      'सर्वर ने एक दिन से ज़्यादा इंतज़ार करने को कहा है। CodeWalk फिर से शुरू होने पर इसे दोबारा जाँचा जाएगा।';
+
+  @override
   String get serversNoServersFound => 'कोई सर्वर नहीं मिला';
 
   @override

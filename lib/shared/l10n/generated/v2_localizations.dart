@@ -1013,6 +1013,18 @@ abstract class V2Localizations {
   /// **'The server is saved as Offline and checked again automatically.'**
   String get hostsSaveAnywayHint;
 
+  /// V2 server list: a saved server asked to wait until a time
+  ///
+  /// In en, this message translates to:
+  /// **'The server asked to wait until {time}.'**
+  String serversWaitUntil(String time);
+
+  /// V2 server list: a saved server asked to wait more than a day
+  ///
+  /// In en, this message translates to:
+  /// **'The server asked to wait more than a day. It is checked again when CodeWalk restarts.'**
+  String get serversWaitNoEnd;
+
   /// CodeWalk UI string — serversNoServersFound
   ///
   /// In en, this message translates to:

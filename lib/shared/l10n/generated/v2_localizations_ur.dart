@@ -498,6 +498,15 @@ class V2LocalizationsUr extends V2Localizations {
       'سرور آف لائن کے طور پر محفوظ ہوتا ہے اور خودبخود دوبارہ جانچا جاتا ہے۔';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'سرور نے $time تک انتظار کرنے کو کہا ہے۔';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      'سرور نے ایک دن سے زیادہ انتظار کرنے کو کہا ہے۔ CodeWalk دوبارہ شروع ہونے پر اسے دوبارہ جانچا جائے گا۔';
+
+  @override
   String get serversNoServersFound => 'کوئی سرور نہیں ملا';
 
   @override

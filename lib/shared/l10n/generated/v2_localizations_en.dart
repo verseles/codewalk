@@ -499,6 +499,15 @@ class V2LocalizationsEn extends V2Localizations {
       'The server is saved as Offline and checked again automatically.';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'The server asked to wait until $time.';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      'The server asked to wait more than a day. It is checked again when CodeWalk restarts.';
+
+  @override
   String get serversNoServersFound => 'No servers found';
 
   @override

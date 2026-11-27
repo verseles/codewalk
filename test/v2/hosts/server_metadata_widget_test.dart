@@ -73,6 +73,12 @@ void main() {
       final selected = graph.sessions!.selectedProfile!.id;
       expect(selected, a.id);
       expect(find.byKey(ValueKey('server-active-${a.id}')), findsOneWidget);
+      // Only the active server's card takes the selected surface.
+      Color? surface(EndpointProfile p) => tester
+          .widget<Card>(find.byKey(ValueKey('saved-server-${p.id}')))
+          .color;
+      expect(surface(a), isNotNull);
+      expect(surface(b), isNull);
 
       Future<void> action(EndpointProfile p, String title) async {
         final menu = find.byKey(ValueKey('endpoint-actions-${p.id}'));

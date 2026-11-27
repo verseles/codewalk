@@ -178,6 +178,8 @@
   "serversMethodManual": "ম্যানুয়াল",
   "hostsSaveAnyway": "তবুও সংরক্ষণ করুন",
   "hostsSaveAnywayHint": "সার্ভারটি অফলাইন হিসেবে সংরক্ষিত হয় এবং স্বয়ংক্রিয়ভাবে আবার যাচাই হয়।",
+  "serversWaitUntil": "সার্ভার {time} পর্যন্ত অপেক্ষা করতে বলেছে।",
+  "serversWaitNoEnd": "সার্ভার এক দিনের বেশি অপেক্ষা করতে বলেছে। CodeWalk আবার চালু হলে এটি আবার যাচাই করা হবে।",
   "serversNoServersFound": "কোনো সার্ভার পাওয়া যায়নি",
   "hostsLegacyExplanation": "এই সার্ভার OpenCode 1 চালায়। CodeWalk 2-এর জন্য OpenCode 2 দরকার।",
   "@hostsLegacyExplanation": {

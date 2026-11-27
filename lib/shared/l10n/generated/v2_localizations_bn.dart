@@ -498,6 +498,15 @@ class V2LocalizationsBn extends V2Localizations {
       'সার্ভারটি অফলাইন হিসেবে সংরক্ষিত হয় এবং স্বয়ংক্রিয়ভাবে আবার যাচাই হয়।';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'সার্ভার $time পর্যন্ত অপেক্ষা করতে বলেছে।';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      'সার্ভার এক দিনের বেশি অপেক্ষা করতে বলেছে। CodeWalk আবার চালু হলে এটি আবার যাচাই করা হবে।';
+
+  @override
   String get serversNoServersFound => 'কোনো সার্ভার পাওয়া যায়নি';
 
   @override

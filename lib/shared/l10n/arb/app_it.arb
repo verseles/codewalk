@@ -178,6 +178,8 @@
   "serversMethodManual": "Manuale",
   "hostsSaveAnyway": "Salva comunque",
   "hostsSaveAnywayHint": "Il server viene salvato offline e ricontrollato automaticamente.",
+  "serversWaitUntil": "Il server ha chiesto di attendere fino a {time}.",
+  "serversWaitNoEnd": "Il server ha chiesto di attendere più di un giorno. Verrà controllato di nuovo al riavvio di CodeWalk.",
   "serversNoServersFound": "Nessun server trovato",
   "hostsLegacyExplanation": "Questo server usa OpenCode 1. CodeWalk 2 richiede OpenCode 2.",
   "@hostsLegacyExplanation": {

@@ -597,6 +597,19 @@
   "@hostsSaveAnywayHint": {
     "description": "V2 add-server flow"
   },
+  "serversWaitUntil": "The server asked to wait until {time}.",
+  "@serversWaitUntil": {
+    "description": "V2 server list: a saved server asked to wait until a time",
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "serversWaitNoEnd": "The server asked to wait more than a day. It is checked again when CodeWalk restarts.",
+  "@serversWaitNoEnd": {
+    "description": "V2 server list: a saved server asked to wait more than a day"
+  },
   "serversNoServersFound": "No servers found",
   "@serversNoServersFound": {
     "description": "CodeWalk UI string — serversNoServersFound"

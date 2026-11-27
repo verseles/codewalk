@@ -178,6 +178,8 @@
   "serversMethodManual": "Вручную",
   "hostsSaveAnyway": "Всё равно сохранить",
   "hostsSaveAnywayHint": "Сервер сохраняется как офлайн и автоматически проверяется снова.",
+  "serversWaitUntil": "Сервер попросил подождать до {time}.",
+  "serversWaitNoEnd": "Сервер попросил подождать больше суток. Он будет проверен снова после перезапуска CodeWalk.",
   "serversNoServersFound": "Серверы не найдены",
   "hostsLegacyExplanation": "Этот сервер использует OpenCode 1. CodeWalk 2 нужен OpenCode 2.",
   "@hostsLegacyExplanation": {

@@ -11,6 +11,22 @@ enum EndpointHealthStatus { checking, online, delayed, offline }
 
 enum EndpointCredentialFailure { missing, unreadable, expired }
 
+/// The one rule for a saved server's credential, shared by the health lane
+/// and the server list.
+EndpointCredentialFailure? endpointCredentialFailure({
+  required bool unreadable,
+  required EndpointCredential? credential,
+  required DateTime now,
+}) {
+  if (unreadable) return EndpointCredentialFailure.unreadable;
+  if (credential == null) return EndpointCredentialFailure.missing;
+  final expiresAt = credential.expiresAt;
+  if (expiresAt != null && !expiresAt.isAfter(now)) {
+    return EndpointCredentialFailure.expired;
+  }
+  return null;
+}
+
 /// Endpoint reachability stays separate from a conversation's stream state.
 final class EndpointHealthView {
   const EndpointHealthView({
@@ -185,17 +201,11 @@ final class EndpointHealthController extends ChangeNotifier {
   EndpointCredentialFailure? _credentialFailure(
     EndpointProfile profile,
     EndpointCredential? credential,
-  ) {
-    if (hosts.credentialUnreadable(profile)) {
-      return EndpointCredentialFailure.unreadable;
-    }
-    if (credential == null) return EndpointCredentialFailure.missing;
-    final expiresAt = credential.expiresAt;
-    if (expiresAt != null && !expiresAt.isAfter(now)) {
-      return EndpointCredentialFailure.expired;
-    }
-    return null;
-  }
+  ) => endpointCredentialFailure(
+    unreadable: hosts.credentialUnreadable(profile),
+    credential: credential,
+    now: now,
+  );
 
   bool _matches(
     _HealthRecord record,

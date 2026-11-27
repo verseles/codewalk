@@ -177,6 +177,8 @@
   "serversMethodManual": "يدوي",
   "hostsSaveAnyway": "احفظ على أي حال",
   "hostsSaveAnywayHint": "يُحفظ الخادم غير متصل ويُفحص مجددًا تلقائيًا.",
+  "serversWaitUntil": "طلب الخادم الانتظار حتى {time}.",
+  "serversWaitNoEnd": "طلب الخادم الانتظار أكثر من يوم. سيُفحص مجددًا عند إعادة تشغيل CodeWalk.",
   "serversNoServersFound": "لم يتم العثور على خوادم",
   "hostsLegacyExplanation": "يعمل هذا الخادم باستخدام OpenCode 1. يحتاج CodeWalk 2 إلى OpenCode 2.",
   "@hostsLegacyExplanation": {

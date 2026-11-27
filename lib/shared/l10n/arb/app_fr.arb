@@ -178,6 +178,8 @@
   "serversMethodManual": "Manuel",
   "hostsSaveAnyway": "Enregistrer quand même",
   "hostsSaveAnywayHint": "Le serveur est enregistré hors ligne et revérifié automatiquement.",
+  "serversWaitUntil": "Le serveur a demandé d’attendre jusqu’à {time}.",
+  "serversWaitNoEnd": "Le serveur a demandé d’attendre plus d’un jour. Il sera vérifié de nouveau au redémarrage de CodeWalk.",
   "serversNoServersFound": "Aucun serveur trouvé",
   "hostsLegacyExplanation": "Ce serveur utilise OpenCode 1. CodeWalk 2 nécessite OpenCode 2.",
   "@hostsLegacyExplanation": {

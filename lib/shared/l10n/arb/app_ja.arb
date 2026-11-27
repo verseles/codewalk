@@ -178,6 +178,8 @@
   "serversMethodManual": "手動",
   "hostsSaveAnyway": "このまま保存",
   "hostsSaveAnywayHint": "サーバーはオフラインとして保存され、自動的に再確認されます。",
+  "serversWaitUntil": "サーバーは {time} まで待つよう求めています。",
+  "serversWaitNoEnd": "サーバーは 1 日以上待つよう求めています。CodeWalk の再起動時に再確認します。",
   "serversNoServersFound": "サーバーが見つかりません",
   "hostsLegacyExplanation": "このサーバーは OpenCode 1 を実行しています。CodeWalk 2 には OpenCode 2 が必要です。",
   "@hostsLegacyExplanation": {

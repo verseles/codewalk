@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 14,
+  "artifact_seq": 18,
   "artifacts": {
     "A0001": {
       "active": false,
@@ -237,6 +237,74 @@
       "stage": "CONT4",
       "supersedes": null,
       "title": "U3 re-review R5"
+    },
+    "A0015": {
+      "active": false,
+      "bytes": 665,
+      "created_at": "2026-11-27T14:18:17Z",
+      "evidence": "/tmp/opencode/g6u4/r1_*.out",
+      "id": "A0015",
+      "impact": "Fix round 1 U4",
+      "origin": "8 helpers (key group6-u4-server-list-20261127T140314Z-fd9f)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0015.md",
+      "purpose": "Review 302fd180 (#505)",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "196d5f19c428ced3733c0bf7e309dc17c1c8bfe6f1dabe0723ddddcb3851806a",
+      "stage": "CONT5",
+      "supersedes": null,
+      "title": "U4 review R1"
+    },
+    "A0016": {
+      "active": false,
+      "bytes": 584,
+      "created_at": "2026-11-27T14:36:04Z",
+      "evidence": "/tmp/opencode/g6u4/r2_*.out",
+      "id": "A0016",
+      "impact": "Fix round 2 U4 pequeno",
+      "origin": "8 helpers (key group6-u4-server-list-20261127T140314Z-fd9f)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0016.md",
+      "purpose": "Re-review ddf66811",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "2c41aab212403fe7dfedfe757561325d8ecad22a6280c2c2a8b0402f21b924da",
+      "stage": "CONT5",
+      "supersedes": null,
+      "title": "U4 re-review R2"
+    },
+    "A0017": {
+      "active": false,
+      "bytes": 740,
+      "created_at": "2026-11-27T14:51:58Z",
+      "evidence": "/tmp/opencode/g6u4/r3_*.out",
+      "id": "A0017",
+      "impact": "Fix round 3 U4",
+      "origin": "8 helpers (key group6-u4-server-list-20261127T140314Z-fd9f)",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0017.md",
+      "purpose": "Re-review fb96caf6",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "ec08609dfff9e6532f76051704138d601cf2557a79220631d63ad7b4e3914d7a",
+      "stage": "CONT5",
+      "supersedes": null,
+      "title": "U4 re-review R3"
+    },
+    "A0018": {
+      "active": false,
+      "bytes": 415,
+      "created_at": "2026-11-27T15:07:16Z",
+      "evidence": "/tmp/opencode/g6u4/r4_*.out",
+      "id": "A0018",
+      "impact": "Ajuste final de texto e teste; convergido",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0018.md",
+      "purpose": "Re-review 86e840fa",
+      "rerun_when": "novo commit",
+      "retired": true,
+      "sha256": "d0abb943d5e4c0ed9bf2b2bc6143115a7e2d3efb4188fcaab8e5550bd613f633",
+      "stage": "CONT5",
+      "supersedes": null,
+      "title": "U4 re-review R4"
     }
   },
   "checklist": [
@@ -315,16 +383,16 @@
       "depends": [],
       "id": "CONT5",
       "label": "#505: redesenho da listagem de servidores",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "U4 (#505) aceita: cartões com nome+Ativo+menu, linha de status com harness e versão (quebra em texto grande), URL LTR, metadados discretos com expiração datada, motivo em vermelho com notas de upgrade/espera; 4 rodadas convergidas (7/8 approve).",
+      "status": "done",
+      "validation": "make check verde em 46ffc67d (gate-r4.log); testes focados 140; l10n --check"
     },
     {
       "depends": [],
       "id": "CONT6",
       "label": "Avaliar helpers, docs, #527, push e release minor",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     }
   ],
@@ -507,10 +575,22 @@
     {
       "at": "2026-11-27T13:50:52Z",
       "text": "R5: 4 approve; Luna+Hungerg acharam o mesmo (tentativa iniciada após prepareLink e antes do rebuild usa revisão viva). Corrigido usando _ownedRevision + checagem no início, teste que falha sem a correção. Re-review R6 dispensada: correção de 1 linha exatamente como sugerida pelos dois revisores, coberta por teste com mutação verificada; os demais revisores (incluindo Sol-F) aprovaram o resto. Métricas R5 gravadas."
+    },
+    {
+      "at": "2026-11-27T14:10:30Z",
+      "text": "U4 implementada (302fd180): cartão com nome+Ativo+menu, linha de status com harness e versão, URL LTR 1 linha, metadados discretos, motivo em vermelho; gate verde. Handshakes U4: 8 READY (Claude-haiku, Claude-opus-F, Luna, Sol-F, DeepSeek, Ernie, Gemini, Hungerg); Grok-F falhou (sem créditos Grok, falha técnica, sem retry útil)."
+    },
+    {
+      "at": "2026-11-27T14:20:25Z",
+      "text": "U4 R1 julgado, todos aceitos: largura do nome (Expanded+Row interno), notas de upgrade e de atraso pedido com hora sob o motivo (regressão da remoção do EndpointStatusView), data com ano e hora no formato 24h do usuário, linha de status com até 2 linhas, view de fallback sem health lane. DeepSeek entregou fora do YAML: conteúdo usado como evidência, omitido das métricas. Métricas R1 gravadas."
+    },
+    {
+      "at": "2026-11-27T14:55:23Z",
+      "text": "U4 R3 julgado: aceitos E1 (overflow visível com maxLines null), E2 (serversWaitUntil/serversWaitNoEnd em 14 idiomas), E3 (arredondamento em UTC com microssegundos), E4 (comentário), E5 (testes sem tocar Check desabilitado); rejeitado E6 do Haiku (catálogo: mesmo padrão PORT_KEYS dos keys da U3, --check passa). Fix commitado 86e840fa; métricas R3 gravadas."
     }
   ],
-  "generation": 94,
-  "next_action": "Squash 00befeaa..HEAD, push, fechar #506/#504, marcar #527; depois implementar U4 (#505).",
+  "generation": 112,
+  "next_action": "Squash 7173abf0..HEAD, push, fechar #505, marcar #527; avaliação dos helpers; release-notes v2.12.0; gate no SHA; make release V=stable; make watch-release.",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -533,7 +613,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T094158Z_6862cb28",
   "title": "Pesquisa prévia do grupo 6 da #527 (servidores)",
-  "updated_at": "2026-11-27T13:58:52Z",
+  "updated_at": "2026-11-27T15:14:34Z",
   "validations": [
     {
       "at": "2026-11-27T09:42:17Z",
@@ -659,6 +739,41 @@
       "check": "make check TEST_JOBS=4 @1b22bc4a",
       "criterion": null,
       "evidence": "/tmp/opencode/g6u3/gate-r4.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T14:10:30Z",
+      "check": "make check TEST_JOBS=4 @302fd180 (U4)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u3/gate-u4.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T14:27:17Z",
+      "check": "make check TEST_JOBS=4 @ddf66811 (U4 fix R1)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u4/gate-r1.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T14:45:12Z",
+      "check": "make check TEST_JOBS=4 @fb96caf6 (U4 fix R2)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u4/gate-r2.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T15:01:50Z",
+      "check": "make check TEST_JOBS=4 @86e840fa (U4 fix R3)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u4/gate-r3.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T15:14:34Z",
+      "check": "make check TEST_JOBS=4 @46ffc67d (U4 final)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g6u4/gate-r4.log exit 0",
       "outcome": "pass"
     }
   ]

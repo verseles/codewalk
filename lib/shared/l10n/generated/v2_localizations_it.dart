@@ -505,6 +505,15 @@ class V2LocalizationsIt extends V2Localizations {
       'Il server viene salvato offline e ricontrollato automaticamente.';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'Il server ha chiesto di attendere fino a $time.';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      'Il server ha chiesto di attendere più di un giorno. Verrà controllato di nuovo al riavvio di CodeWalk.';
+
+  @override
   String get serversNoServersFound => 'Nessun server trovato';
 
   @override

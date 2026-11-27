@@ -504,6 +504,15 @@ class V2LocalizationsEs extends V2Localizations {
       'El servidor se guarda como Offline y se vuelve a comprobar automáticamente.';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'El servidor pidió esperar hasta $time.';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      'El servidor pidió esperar más de un día. Se volverá a comprobar cuando CodeWalk se reinicie.';
+
+  @override
   String get serversNoServersFound => 'No se encontraron servidores';
 
   @override

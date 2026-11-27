@@ -178,6 +178,8 @@
   "serversMethodManual": "मैन्युअल",
   "hostsSaveAnyway": "फिर भी सहेजें",
   "hostsSaveAnywayHint": "सर्वर ऑफ़लाइन के रूप में सहेजा जाता है और अपने आप फिर से जाँचा जाता है।",
+  "serversWaitUntil": "सर्वर ने {time} तक इंतज़ार करने को कहा है।",
+  "serversWaitNoEnd": "सर्वर ने एक दिन से ज़्यादा इंतज़ार करने को कहा है। CodeWalk फिर से शुरू होने पर इसे दोबारा जाँचा जाएगा।",
   "serversNoServersFound": "कोई सर्वर नहीं मिला",
   "hostsLegacyExplanation": "यह सर्वर OpenCode 1 चलाता है। CodeWalk 2 को OpenCode 2 चाहिए।",
   "@hostsLegacyExplanation": {

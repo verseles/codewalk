@@ -178,6 +178,8 @@
   "serversMethodManual": "手动",
   "hostsSaveAnyway": "仍然保存",
   "hostsSaveAnywayHint": "服务器将以离线状态保存，并会自动重新检查。",
+  "serversWaitUntil": "服务器要求等待至 {time}。",
+  "serversWaitNoEnd": "服务器要求等待超过一天。CodeWalk 重新启动时会再次检查。",
   "serversNoServersFound": "未找到服务器",
   "hostsLegacyExplanation": "此服务器运行 OpenCode 1。CodeWalk 2 需要 OpenCode 2。",
   "@hostsLegacyExplanation": {

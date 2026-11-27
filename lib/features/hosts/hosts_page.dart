@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/workspace_controller.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/theme/app_surface_tokens.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/modal_primary_action_shortcuts.dart';
@@ -212,6 +213,219 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
     );
   }
 
+  /// A local date with its year and the time in the user's clock format.
+  /// [roundUp] moves an instant within a minute to the next whole minute,
+  /// rounded in UTC so a daylight-saving change cannot shift it.
+  String _dateTime(DateTime value, {bool roundUp = false}) {
+    var instant = value.toUtc();
+    if (roundUp &&
+        (instant.second > 0 ||
+            instant.millisecond > 0 ||
+            instant.microsecond > 0)) {
+      instant = DateTime.utc(
+        instant.year,
+        instant.month,
+        instant.day,
+        instant.hour,
+        instant.minute + 1,
+      );
+    }
+    final local = instant.toLocal();
+    final material = MaterialLocalizations.of(context);
+    final time = material.formatTimeOfDay(
+      TimeOfDay.fromDateTime(local),
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
+    return '${material.formatCompactDate(local)} $time';
+  }
+
+  /// One saved server (#505): the name with Active and the menu, the health
+  /// with harness and version, the URL, then default, credential and expiry
+  /// in one quiet line; a failure reason only when there is one.
+  Widget _serverCard(
+    HostsController hosts,
+    EndpointHealthController? health,
+    SessionsController? catalog,
+    WorkspaceController? workspace,
+    EndpointProfile profile,
+  ) {
+    final l = context.v2L10n;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final text = theme.textTheme;
+    final active = catalog?.selectedProfile?.id == profile.id;
+    final credential = hosts.credentialFor(profile);
+    final unreadable = hosts.credentialUnreadable(profile);
+    final now = DateTime.now().toUtc();
+    // The saved check: it gates Check connection and backs the lane's view.
+    final saved = hosts.assessments[profile.id];
+    // Without the health lane the card reads the saved check and applies the
+    // lane's shared credential rule; while the list loads it shows no
+    // credential failure, as the lane holds them until it is ready.
+    final view =
+        health?.view(profile) ??
+        EndpointHealthView(
+          assessment: saved,
+          credentialFailure: hosts.loading
+              ? null
+              : endpointCredentialFailure(
+                  unreadable: unreadable,
+                  credential: credential,
+                  now: now,
+                ),
+        );
+    final version = view.assessment?.version ?? saved?.version;
+    final harness = hosts.harnesses?.resolve(profile.harnessKind)?.displayName;
+    final detail = [?harness, ?version].join(' ');
+    final reason = endpointHealthReason(l, view);
+    final quiet = text.bodySmall?.copyWith(color: scheme.onSurfaceVariant);
+    final expiry = credential?.kind == EndpointAuthKind.paired
+        ? credential?.expiresAt
+        : null;
+    final retryAt = saved?.retryAt;
+    // Why Check connection is held, and what an upgrade needs, stay visible
+    // beside the reason they explain.
+    final notes = [
+      if ((view.assessment ?? saved)?.status == EndpointStatus.belowMinimum)
+        l.hostsUpgradeInstructions,
+      if (saved?.retryDeferred == true)
+        l.serversWaitNoEnd
+      else if (retryAt != null && retryAt.isAfter(now))
+        // Rounded up, so the time shown is never one Check is still held at.
+        l.serversWaitUntil(_dateTime(retryAt, roundUp: true)),
+    ];
+    final metadata = <Widget?>[
+      if (workspace?.defaultProfile == profile.id)
+        Text(
+          l.serversDefault,
+          key: ValueKey('server-default-${profile.id}'),
+          style: quiet,
+        ),
+      if (!hosts.loading && !unreadable)
+        switch (credential?.kind) {
+          EndpointAuthKind.password => Text(l.onboardingPassword, style: quiet),
+          EndpointAuthKind.paired => Text(l.pairingPaired, style: quiet),
+          null => null,
+        },
+      if (expiry != null)
+        Text('${l.pairingExpires}: ${_dateTime(expiry)}', style: quiet),
+    ].nonNulls.toList();
+    return Card(
+      key: ValueKey('saved-server-${profile.id}'),
+      color: active ? theme.surfaceTokens.selectedSurface : null,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: catalog == null || workspace?.switchingServer == true
+            ? null
+            : () => selectWorkspaceServer(context, profile),
+        child: Semantics(
+          selected: active,
+          child: Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 4, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      // The name takes all the room the menu leaves; the
+                      // badge stays right after it.
+                      child: Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              profile.label,
+                              style: text.titleMedium,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (active) ...[
+                            const SizedBox(width: 8),
+                            DecoratedBox(
+                              key: ValueKey('server-active-${profile.id}'),
+                              decoration: BoxDecoration(
+                                color: scheme.primaryContainer,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                child: Text(
+                                  l.serversActive,
+                                  style: text.labelSmall?.copyWith(
+                                    color: scheme.onPrimaryContainer,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    _actions(hosts, profile),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(end: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      EndpointHealthIndicator(
+                        key: ValueKey('server-health-${profile.id}'),
+                        view: view,
+                        detail: detail.isEmpty ? null : detail,
+                        // Large text wraps rather than hiding the version.
+                        maxLines: null,
+                      ),
+                      const SizedBox(height: 4),
+                      SelectableText(
+                        profile.endpoint.toString(),
+                        maxLines: 1,
+                        textDirection: TextDirection.ltr,
+                        style: quiet,
+                      ),
+                      if (metadata.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Wrap(
+                          key: ValueKey('server-metadata-${profile.id}'),
+                          children: [
+                            for (final (index, item) in metadata.indexed) ...[
+                              if (index > 0) Text(' · ', style: quiet),
+                              item,
+                            ],
+                          ],
+                        ),
+                      ],
+                      if (reason != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          reason,
+                          key: ValueKey('server-reason-${profile.id}'),
+                          style: text.bodySmall?.copyWith(color: scheme.error),
+                        ),
+                      ],
+                      for (final note in notes) Text(note, style: quiet),
+                      if (hosts.isChecking(profile)) ...[
+                        const SizedBox(height: 8),
+                        AppIndeterminateBar(
+                          key: ValueKey('endpoint-check-${profile.id}'),
+                          semanticsLabel: l.hostsCheckConnection,
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = context.v2L10n;
@@ -326,101 +540,7 @@ class _HostsPageState extends State<HostsPage> with WidgetsBindingObserver {
             if (profiles.isEmpty && hosts.profiles.isNotEmpty)
               Text(l.settingsNavigationNoResults),
             for (final profile in profiles)
-              Card(
-                key: ValueKey('saved-server-${profile.id}'),
-                child: InkWell(
-                  onTap: catalog == null || workspace?.switchingServer == true
-                      ? null
-                      : () => selectWorkspaceServer(context, profile),
-                  child: Semantics(
-                    selected: catalog?.selectedProfile?.id == profile.id,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  profile.label,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
-                                ),
-                              ),
-                              _actions(hosts, profile),
-                            ],
-                          ),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 4,
-                            children: [
-                              if (catalog?.selectedProfile?.id == profile.id)
-                                Chip(
-                                  key: ValueKey('server-active-${profile.id}'),
-                                  label: Text(l.serversActive),
-                                ),
-                              if (workspace?.defaultProfile == profile.id)
-                                Chip(
-                                  key: ValueKey('server-default-${profile.id}'),
-                                  label: Text(l.serversDefault),
-                                ),
-                              if (!hosts.loading)
-                                Chip(
-                                  label: Text(
-                                    hosts.credentialUnreadable(profile)
-                                        ? l.healthCredentialUnreadable
-                                        : switch (hosts
-                                              .credentialFor(profile)
-                                              ?.kind) {
-                                            EndpointAuthKind.password =>
-                                              l.onboardingPassword,
-                                            EndpointAuthKind.paired =>
-                                              l.pairingPaired,
-                                            null => l.healthCredentialMissing,
-                                          },
-                                  ),
-                                ),
-                            ],
-                          ),
-                          EndpointHealthIndicator(
-                            view:
-                                health?.view(profile) ??
-                                const EndpointHealthView(),
-                          ),
-                          SelectableText(profile.endpoint.toString()),
-                          if (hosts.credentialUnreadable(profile))
-                            Text(l.hostsProfileStorageError),
-                          if (hosts.credentialFor(profile)?.kind ==
-                              EndpointAuthKind.paired) ...[
-                            if (hosts.credentialFor(profile)?.expiresAt
-                                case final expiry?)
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${l.pairingExpires}: ${expiry.toLocal()}',
-                                  ),
-                                  if (!expiry.isAfter(DateTime.now().toUtc()))
-                                    Text(l.hostsAuthRequired),
-                                ],
-                              ),
-                          ],
-                          if (hosts.assessments[profile.id]
-                              case final assessment?)
-                            EndpointStatusView(assessment: assessment),
-                          if (hosts.isChecking(profile))
-                            AppIndeterminateBar(
-                              key: ValueKey('endpoint-check-${profile.id}'),
-                              semanticsLabel: l.hostsCheckConnection,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              _serverCard(hosts, health, catalog, workspace, profile),
           ],
         ),
       ),

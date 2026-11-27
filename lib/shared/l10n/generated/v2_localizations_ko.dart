@@ -484,6 +484,15 @@ class V2LocalizationsKo extends V2Localizations {
   String get hostsSaveAnywayHint => '서버가 오프라인으로 저장되고 자동으로 다시 확인됩니다.';
 
   @override
+  String serversWaitUntil(String time) {
+    return '서버가 $time까지 기다리도록 요청했습니다.';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      '서버가 하루 넘게 기다리도록 요청했습니다. CodeWalk를 다시 시작하면 다시 확인합니다.';
+
+  @override
   String get serversNoServersFound => '서버를 찾을 수 없음';
 
   @override

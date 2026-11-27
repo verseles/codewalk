@@ -498,6 +498,15 @@ class V2LocalizationsAr extends V2Localizations {
       'يُحفظ الخادم غير متصل ويُفحص مجددًا تلقائيًا.';
 
   @override
+  String serversWaitUntil(String time) {
+    return 'طلب الخادم الانتظار حتى $time.';
+  }
+
+  @override
+  String get serversWaitNoEnd =>
+      'طلب الخادم الانتظار أكثر من يوم. سيُفحص مجددًا عند إعادة تشغيل CodeWalk.';
+
+  @override
   String get serversNoServersFound => 'لم يتم العثور على خوادم';
 
   @override

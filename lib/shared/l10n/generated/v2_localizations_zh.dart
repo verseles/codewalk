@@ -475,6 +475,14 @@ class V2LocalizationsZh extends V2Localizations {
   String get hostsSaveAnywayHint => '服务器将以离线状态保存，并会自动重新检查。';
 
   @override
+  String serversWaitUntil(String time) {
+    return '服务器要求等待至 $time。';
+  }
+
+  @override
+  String get serversWaitNoEnd => '服务器要求等待超过一天。CodeWalk 重新启动时会再次检查。';
+
+  @override
   String get serversNoServersFound => '未找到服务器';
 
   @override

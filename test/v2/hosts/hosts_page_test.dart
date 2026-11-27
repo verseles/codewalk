@@ -7,6 +7,7 @@ import 'package:codewalk/features/pairing/pairing_page.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes.dart';
@@ -180,12 +181,223 @@ void main() {
         expect(repo.profiles.single.endpoint.port, 4096);
         expect(repo.profiles.single.harnessKind, 'opencode');
         expect(find.text('http://127.0.0.1:4096/proxy/'), findsOneWidget);
+        // One status line with harness and version; no second status chip.
+        expect(find.text('Online · OpenCode 2.0.23'), findsOneWidget);
+        expect(find.byType(EndpointStatusView), findsNothing);
+        expect(find.byType(Chip), findsNothing);
         expect(find.text('fake-test-secret'), findsNothing);
         expect(tester.takeException(), isNull);
         await tester.pumpWidget(const SizedBox.shrink());
       },
     );
   }
+
+  testWidgets('a server card stays tidy in RTL with enlarged text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final profile = EndpointProfile(
+      id: 'endpoint_long',
+      label: 'A rather long server name that needs more than one line',
+      endpoint: Uri.parse(
+        'https://a-very-long-host-name.example.internal:4096/some/deep/proxy/path/',
+      ),
+    );
+    final repo = MemoryProfiles()..profiles.add(profile);
+    repo.credentials[profile.id] = EndpointCredential(
+      kind: EndpointAuthKind.paired,
+      secret: 'fake-paired',
+      expiresAt: DateTime.now().toUtc().add(const Duration(days: 30)),
+    );
+    final graph = createAppDependencies(
+      initialLink: Uri(path: '/hosts'),
+      profileRepository: repo,
+      endpointProber: FakeProber()
+        ..assessment = const EndpointAssessment(
+          EndpointStatus.compatible,
+          version: '2.0.23',
+        ),
+    );
+    graph.preferences.setLocale(const Locale('ar'));
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+        child: CodeWalkV2Bootstrap(dependencies: graph),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final url = tester.widget<SelectableText>(
+      find.descendant(
+        of: find.byKey(const ValueKey('saved-server-endpoint_long')),
+        matching: find.byType(SelectableText),
+      ),
+    );
+    // The URL keeps its left-to-right order on one line.
+    expect(url.textDirection, TextDirection.ltr);
+    expect(url.maxLines, 1);
+    expect(
+      find.byKey(const ValueKey('server-metadata-endpoint_long')),
+      findsOneWidget,
+    );
+    // The name uses the room the menu leaves, not half of it.
+    final card = tester.getSize(
+      find.byKey(const ValueKey('saved-server-endpoint_long')),
+    );
+    final name = tester.getSize(find.text(profile.label));
+    expect(name.width, greaterThan(card.width * 0.6));
+    expect(
+      find.byKey(const ValueKey('server-reason-endpoint_long')),
+      findsNothing,
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('a paired expiry shows its year and the time', (tester) async {
+    final profile = EndpointProfile(
+      id: 'endpoint_paired',
+      label: 'Paired',
+      endpoint: Uri.parse('http://127.0.0.1:4096/'),
+    );
+    final repo = MemoryProfiles()..profiles.add(profile);
+    final expiry = DateTime.now().add(const Duration(days: 400));
+    repo.credentials[profile.id] = EndpointCredential(
+      kind: EndpointAuthKind.paired,
+      secret: 'fake-paired',
+      expiresAt: expiry.toUtc(),
+    );
+    final graph = createAppDependencies(
+      initialLink: Uri(path: '/hosts'),
+      profileRepository: repo,
+      endpointProber: FakeProber(),
+    );
+    await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: graph));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Declared token expiry: '), findsOneWidget);
+    expect(find.textContaining('${expiry.year}'), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  // An instant one microsecond into a minute two hours ahead, shown as the
+  // next minute.
+  final ahead = DateTime.now().toUtc().add(const Duration(hours: 2));
+  final minute = DateTime.utc(
+    ahead.year,
+    ahead.month,
+    ahead.day,
+    ahead.hour,
+    ahead.minute,
+  );
+  final waitUntil = minute.add(const Duration(microseconds: 1));
+  for (final (name, assessment, note) in [
+    (
+      'an upgrade',
+      const EndpointAssessment(EndpointStatus.belowMinimum, version: '2.0.10'),
+      'Run opencode upgrade on your server. Minimum: 2.0.20. '
+          'CodeWalk does not install or change your server.',
+    ),
+    (
+      'a requested delay',
+      EndpointAssessment(EndpointStatus.serviceUnavailable, retryAt: waitUntil),
+      null,
+    ),
+    (
+      'a delay with no end',
+      const EndpointAssessment(
+        EndpointStatus.serviceUnavailable,
+        retryDeferred: true,
+      ),
+      'The server asked to wait more than a day. '
+          'It is checked again when CodeWalk restarts.',
+    ),
+  ]) {
+    testWidgets('a server card explains $name beside its reason', (
+      tester,
+    ) async {
+      final profile = EndpointProfile(
+        id: 'endpoint_note',
+        label: 'Server',
+        endpoint: Uri.parse('http://127.0.0.1:4096/'),
+      );
+      final repo = MemoryProfiles()
+        ..profiles.add(profile)
+        ..secrets[profile.id] = 'fake-secret';
+      final graph = createAppDependencies(
+        initialLink: Uri(path: '/hosts'),
+        profileRepository: repo,
+        endpointProber: FakeProber()..assessment = assessment,
+      );
+      await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: graph));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('server-reason-endpoint_note')),
+        findsOneWidget,
+      );
+      var expected = note;
+      if (expected == null) {
+        final context = tester.element(find.byType(HostsPage));
+        final material = MaterialLocalizations.of(context);
+        final local = minute.add(const Duration(minutes: 1)).toLocal();
+        final time = material.formatTimeOfDay(
+          TimeOfDay.fromDateTime(local),
+          alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+        );
+        expected =
+            'The server asked to wait until '
+            '${material.formatCompactDate(local)} $time.';
+      }
+      expect(find.text(expected), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
+
+  testWidgets('a long version wraps instead of being cut on large text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const version = '2.0.23-beta.20261127+build.0123456789abcdef';
+    final profile = EndpointProfile(
+      id: 'endpoint_version',
+      label: 'Server',
+      endpoint: Uri.parse('http://127.0.0.1:4096/'),
+    );
+    final repo = MemoryProfiles()
+      ..profiles.add(profile)
+      ..secrets[profile.id] = 'fake-secret';
+    final graph = createAppDependencies(
+      initialLink: Uri(path: '/hosts'),
+      profileRepository: repo,
+      endpointProber: FakeProber()
+        ..assessment = const EndpointAssessment(
+          EndpointStatus.compatible,
+          version: version,
+        ),
+    );
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+        child: CodeWalkV2Bootstrap(dependencies: graph),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Online · OpenCode $version'), findsOneWidget);
+    final line = tester.renderObject<RenderParagraph>(
+      find.descendant(
+        of: find.text('Online · OpenCode $version'),
+        matching: find.byType(RichText),
+      ),
+    );
+    expect(line.didExceedMaxLines, isFalse);
+    expect(line.size.height, greaterThan(60));
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('on compact windows the OpenCode 1 explainer covers the shell', (
     tester,
@@ -330,7 +542,20 @@ void main() {
     expect(find.byKey(const ValueKey('endpoint-url')), findsNothing);
     expect(repo.profiles, hasLength(1));
     expect(repo.secrets.values.single, 'fake-other');
-    expect(find.text('Offline'), findsWidgets);
+    final id = repo.profiles.single.id;
+    // The card reads Offline with its harness and gives the reason in red.
+    expect(find.text('Offline · OpenCode'), findsOneWidget);
+    final reason = tester.widget<Text>(
+      find.byKey(ValueKey('server-reason-$id')),
+    );
+    expect(
+      reason.data,
+      'Could not reach the server. Check the URL, TLS and VPN connection.',
+    );
+    expect(
+      reason.style?.color,
+      Theme.of(tester.element(find.byType(HostsPage))).colorScheme.error,
+    );
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
