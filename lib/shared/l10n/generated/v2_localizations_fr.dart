@@ -1831,7 +1831,10 @@ class V2LocalizationsFr extends V2Localizations {
       'Ouvrez un projet pour charger les conversations.';
 
   @override
-  String get chatRecentSessions => 'Sessions récentes';
+  String get chatProjectShowMoreSessions => 'Afficher plus';
+
+  @override
+  String get chatProjectShowFewerSessions => 'Afficher moins';
 
   @override
   String get chatSearchConversations => 'Rechercher des conversations';
@@ -2331,13 +2334,6 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get settingsAppearanceSessionTabsDescription =>
       'Afficher la barre d’onglets au-dessus du chat. Chaque onglet a son menu.';
-
-  @override
-  String get settingsAppearanceRecentSessions => 'Sessions récentes';
-
-  @override
-  String get settingsAppearanceRecentSessionsDescription =>
-      'Afficher les sessions récentes au-dessus de la liste des projets.';
 
   @override
   String get chatDisplayMenu => 'Affichage';

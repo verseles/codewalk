@@ -1717,7 +1717,10 @@ class V2LocalizationsJa extends V2Localizations {
   String get chatOpenProjectToLoad => 'プロジェクトを開いて会話を読み込んでください。';
 
   @override
-  String get chatRecentSessions => '最近のセッション';
+  String get chatProjectShowMoreSessions => 'さらに表示';
+
+  @override
+  String get chatProjectShowFewerSessions => '表示を減らす';
 
   @override
   String get chatSearchConversations => '会話を検索';
@@ -2190,13 +2193,6 @@ class V2LocalizationsJa extends V2Localizations {
   @override
   String get settingsAppearanceSessionTabsDescription =>
       'チャットの上にタブバーを表示します。各タブには独自のメニューがあります。';
-
-  @override
-  String get settingsAppearanceRecentSessions => '最近のセッション';
-
-  @override
-  String get settingsAppearanceRecentSessionsDescription =>
-      'プロジェクト一覧の上に最近のセッションを表示します。';
 
   @override
   String get chatDisplayMenu => '表示';

@@ -1510,7 +1510,8 @@
   "chatFilterSessions": "تصفية الجلسات",
   "chatNoConversationsInProject": "لا توجد محادثات في هذا المشروع.",
   "chatOpenProjectToLoad": "افتح المشروع لتحميل المحادثات.",
-  "chatRecentSessions": "الجلسات الأخيرة",
+  "chatProjectShowMoreSessions": "عرض المزيد",
+  "chatProjectShowFewerSessions": "عرض أقل",
   "chatSearchConversations": "البحث في المحادثات",
   "chatSortOldest": "الأقدم",
   "chatSortRecent": "الأخيرة",
@@ -1687,14 +1688,6 @@
   "settingsAppearanceSessionTabsDescription": "أظهر شريط التبويبات فوق الدردشة. لكل تبويب قائمته الخاصة.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
-  },
-  "settingsAppearanceRecentSessions": "الجلسات الأخيرة",
-  "@settingsAppearanceRecentSessions": {
-    "description": "Appearance toggle that shows the Recent sessions section"
-  },
-  "settingsAppearanceRecentSessionsDescription": "أظهر الجلسات الأخيرة فوق قائمة المشاريع.",
-  "@settingsAppearanceRecentSessionsDescription": {
-    "description": "Explains the Recent sessions toggle"
   },
   "chatDisplayMenu": "العرض",
   "@chatDisplayMenu": {

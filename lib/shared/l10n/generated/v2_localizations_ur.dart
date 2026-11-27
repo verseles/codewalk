@@ -1801,7 +1801,10 @@ class V2LocalizationsUr extends V2Localizations {
   String get chatOpenProjectToLoad => 'گفتگو لوڈ کرنے کے لیے پروجیکٹ کھولیں۔';
 
   @override
-  String get chatRecentSessions => 'حالیہ سیشنز';
+  String get chatProjectShowMoreSessions => 'مزید دکھائیں';
+
+  @override
+  String get chatProjectShowFewerSessions => 'کم دکھائیں';
 
   @override
   String get chatSearchConversations => 'مکالمات تلاش کریں۔';
@@ -2289,13 +2292,6 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String get settingsAppearanceSessionTabsDescription =>
       'چیٹ کے اوپر ٹیب پٹی دکھائیں۔ ہر ٹیب کا اپنا مینو ہے۔';
-
-  @override
-  String get settingsAppearanceRecentSessions => 'حالیہ سیشنز';
-
-  @override
-  String get settingsAppearanceRecentSessionsDescription =>
-      'پروجیکٹ فہرست کے اوپر حالیہ سیشنز دکھائیں۔';
 
   @override
   String get chatDisplayMenu => 'ظاہری شکل';

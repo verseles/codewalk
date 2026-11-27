@@ -3347,11 +3347,17 @@ abstract class V2Localizations {
   /// **'Open project to load conversations.'**
   String get chatOpenProjectToLoad;
 
-  /// CodeWalk UI string — chatRecentSessions
+  /// Project drawer: lists every conversation of the shown project (#534)
   ///
   /// In en, this message translates to:
-  /// **'Recent sessions'**
-  String get chatRecentSessions;
+  /// **'Show more'**
+  String get chatProjectShowMoreSessions;
+
+  /// Project drawer: back to the shown project's first five conversations (#534)
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get chatProjectShowFewerSessions;
 
   /// CodeWalk UI string — chatSearchConversations
   ///
@@ -4137,18 +4143,6 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Show the tab strip above the chat. Each tab has its own menu.'**
   String get settingsAppearanceSessionTabsDescription;
-
-  /// Appearance toggle that shows the Recent sessions section
-  ///
-  /// In en, this message translates to:
-  /// **'Recent sessions'**
-  String get settingsAppearanceRecentSessions;
-
-  /// Explains the Recent sessions toggle
-  ///
-  /// In en, this message translates to:
-  /// **'Show Recent sessions above the project list.'**
-  String get settingsAppearanceRecentSessionsDescription;
 
   /// Chat overflow entry that opens the display choices
   ///

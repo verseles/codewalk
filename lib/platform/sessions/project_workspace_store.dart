@@ -20,8 +20,8 @@ final class SessionListPreferences {
 }
 
 /// The project contexts of one server: the open ones in their order, the
-/// active one, the closed history (most recent first) and the pinned
-/// sessions of each open context.
+/// active one, the closed history (most recent first), the pinned sessions
+/// of each open context and when each open context was last in use.
 @immutable
 final class ProjectWorkspace {
   const ProjectWorkspace({
@@ -29,6 +29,7 @@ final class ProjectWorkspace {
     this.active,
     this.closed = const [],
     this.pins = const {},
+    this.shown = const {},
   });
   static const empty = ProjectWorkspace();
 
@@ -39,6 +40,12 @@ final class ProjectWorkspace {
 
   /// The pinned session storage keys of each open directory.
   final Map<String, Set<String>> pins;
+
+  /// When each open directory was last shown, in milliseconds since the
+  /// epoch on the device clock: stamped when the active context changes,
+  /// the one left and the one shown. Only the drawer's order reads it
+  /// (#534); a directory never stamped has no entry.
+  final Map<String, int> shown;
 
   bool isPinned(String directory, String storageKey) =>
       pins[directory]?.contains(storageKey) ?? false;
@@ -121,36 +128,75 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
   }
 
   /// Opens [directory] for [profile], or reopens it from the history, and
-  /// makes it active unless [activate] is false.
+  /// makes it active unless [activate] is false. With [nowMs], a change of
+  /// the active context stamps when the contexts were shown.
   Future<ProjectStoreResult> open(
     String profile,
     String directory, {
     bool activate = true,
+    int? nowMs,
   }) => _change(profile, (state) {
     if (!_validPath(directory)) return ProjectStoreResult.unavailable;
     final opened = state.open.contains(directory);
     if (!opened && state.open.length >= maxOpen) {
       return ProjectStoreResult.capacity;
     }
+    final open = opened ? state.open : [...state.open, directory];
+    final active = activate || state.active == null ? directory : state.active;
     return ProjectWorkspace(
-      open: opened ? state.open : [...state.open, directory],
-      active: activate || state.active == null ? directory : state.active,
+      open: open,
+      active: active,
       closed: [...state.closed.where((d) => d != directory)],
       pins: state.pins,
+      shown: _stamped(state, open, active, nowMs),
     );
   });
 
-  /// Makes the open [directory] the active context of [profile].
-  Future<ProjectStoreResult> activate(String profile, String directory) =>
-      _change(profile, (state) {
-        if (!state.open.contains(directory)) return ProjectStoreResult.notOpen;
-        return ProjectWorkspace(
-          open: state.open,
-          active: directory,
-          closed: state.closed,
-          pins: state.pins,
-        );
-      });
+  /// Makes the open [directory] the active context of [profile]. With
+  /// [nowMs], a change of the active context stamps when the contexts were
+  /// shown.
+  Future<ProjectStoreResult> activate(
+    String profile,
+    String directory, {
+    int? nowMs,
+  }) => _change(profile, (state) {
+    if (!state.open.contains(directory)) return ProjectStoreResult.notOpen;
+    return ProjectWorkspace(
+      open: state.open,
+      active: directory,
+      closed: state.closed,
+      pins: state.pins,
+      shown: _stamped(state, state.open, directory, nowMs),
+    );
+  });
+
+  /// The stamps after [active] replaces the state's active context: the
+  /// context left keeps the moment it stopped being shown and [active]
+  /// comes right after, both later than every stamp already kept, so a
+  /// coarse or rewound clock never ties or inverts them. Without a clock, or
+  /// when the active context does not change, the stamps stay.
+  static Map<String, int> _stamped(
+    ProjectWorkspace state,
+    List<String> open,
+    String? active,
+    int? nowMs,
+  ) {
+    final kept = {
+      for (final MapEntry(:key, :value) in state.shown.entries)
+        if (open.contains(key)) key: value,
+    };
+    if (nowMs == null || active == null || active == state.active) {
+      return kept;
+    }
+    final latest = kept.values.fold<int>(-1, (a, b) => a > b ? a : b);
+    final at = nowMs > latest ? nowMs : latest + 1;
+    final left = state.active;
+    return {
+      ...kept,
+      if (left != null && open.contains(left)) left: at,
+      active: at + 1,
+    };
+  }
 
   /// Closes [directory] and drops its pins in the same write. A closed
   /// active context hands over to the first remaining open one.
@@ -167,6 +213,7 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
             ...state.closed.where((d) => d != directory),
           ].take(maxClosed).toList(),
           pins: Map.of(state.pins)..remove(directory),
+          shown: Map.of(state.shown)..remove(directory),
         );
       });
 
@@ -181,6 +228,7 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
           active: state.active,
           closed: [...state.closed.where((d) => d != directory)],
           pins: state.pins,
+          shown: state.shown,
         );
       });
 
@@ -213,6 +261,7 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
       active: state.active,
       closed: state.closed,
       pins: pins,
+      shown: state.shown,
     );
   });
 
@@ -332,6 +381,7 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
               for (final MapEntry(:key, :value) in state.pins.entries)
                 key: value.toList(),
             },
+            'shown': state.shown,
           },
       },
     });
@@ -413,7 +463,20 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
       active: active as String?,
       closed: List.unmodifiable(closed),
       pins: Map.unmodifiable(pins),
+      shown: Map.unmodifiable(_shown(value['shown'], open)),
     );
+  }
+
+  /// The shown stamps of the open directories. Unlike the pins, a bad entry
+  /// is dropped rather than making the record unreadable: they only order
+  /// the drawer, and an older build that closes a project leaves its stamp
+  /// behind.
+  static Map<String, int> _shown(Object? value, List<String> open) {
+    if (value is! Map<String, Object?>) return const {};
+    return {
+      for (final MapEntry(:key, :value) in value.entries)
+        if (open.contains(key) && value is int && value >= 0) key: value,
+    };
   }
 
   static List<String> _paths(Object? value, int limit) {

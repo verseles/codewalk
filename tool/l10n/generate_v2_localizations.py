@@ -104,8 +104,6 @@ APPEARANCE_KEYS = {
     "settingsAppearanceComposerTipsDescription",
     "settingsAppearanceSessionTabs",
     "settingsAppearanceSessionTabsDescription",
-    "settingsAppearanceRecentSessions",
-    "settingsAppearanceRecentSessionsDescription",
     "chatDisplayMenu",
     "sessionTabsGestureHint",
     "sessionTabsGestureHintDismiss",

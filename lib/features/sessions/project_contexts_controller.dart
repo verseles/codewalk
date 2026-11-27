@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import '../../platform/sessions/project_workspace_store.dart';
 import '../../platform/sessions/workspace_store.dart';
 import '../../shared/sessions/server_path.dart';
+import 'session_list_projection.dart';
 import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
 import 'workspace_draft_controller.dart';
@@ -104,6 +105,33 @@ class ProjectContextsController extends ChangeNotifier {
   String? get active => workspace.active;
   List<String> get closed => workspace.closed;
 
+  /// The open contexts in the drawer's order (#534): the active one first,
+  /// then the others by what happened last in each, a reply (the latest
+  /// update of the conversations read for it) or the moment it was last
+  /// shown. [open] keeps the opening order.
+  List<String> get ordered {
+    final shown = workspace.shown;
+    return projectDrawerOrder(
+      open,
+      active: active,
+      activity: (directory) {
+        final replied = latestSessionUpdate(
+          catalog.contextRows(directory) ?? const [],
+        );
+        final at = shown[directory];
+        final seen = at == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(at, isUtc: true);
+        if (replied == null) return seen;
+        if (seen == null) return replied;
+        return replied.isAfter(seen) ? replied : seen;
+      },
+    );
+  }
+
+  /// The catalog's clock, which stamps when a context was shown.
+  int get _nowMs => catalog.now.millisecondsSinceEpoch;
+
   /// What the list shows: the latest change asked for ahead of its saved
   /// copy, so overlapping changes never undo one another.
   SessionListPreferences get preferences =>
@@ -144,7 +172,7 @@ class ProjectContextsController extends ChangeNotifier {
   /// project that was not open gets a tab once its sessions are read.
   Future<bool> openContext(String directory) => _transition((profile) async {
     final opening = !_store.workspace(profile).open.contains(directory);
-    final result = await _store.open(profile, directory);
+    final result = await _store.open(profile, directory, nowMs: _nowMs);
     if (opening && result == ProjectStoreResult.saved) {
       _tabs?.requestFallback(profile, directory);
     }
@@ -152,8 +180,9 @@ class ProjectContextsController extends ChangeNotifier {
   });
 
   /// Shows the open context at [directory].
-  Future<bool> activate(String directory) =>
-      _transition((profile) => _store.activate(profile, directory));
+  Future<bool> activate(String directory) => _transition(
+    (profile) => _store.activate(profile, directory, nowMs: _nowMs),
+  );
 
   /// Closes [directory]: its pins leave with it in the same write, and its
   /// tabs, rows and remembered view are dropped locally. The server keeps

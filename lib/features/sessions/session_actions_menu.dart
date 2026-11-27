@@ -46,6 +46,7 @@ class SessionActionsMenu extends StatefulWidget {
     this.child,
     this.offset = Offset.zero,
     this.commands = true,
+    this.buttonSize,
     super.key,
   });
 
@@ -71,6 +72,10 @@ class SessionActionsMenu extends StatefulWidget {
   final String? closeProjectReason;
   final Widget? child;
   final Offset offset;
+
+  /// A square button of this size instead of the default 48 dp, as the
+  /// project row's menu: 40 on a phone and 32 beside the chat (#534).
+  final double? buttonSize;
 
   /// Whether the row is in the shown list, the only rows a server command can
   /// run on; a row of another project offers only its local entries.
@@ -106,6 +111,22 @@ class _SessionActionsMenuState extends State<SessionActionsMenu> {
         key: widget.menuKey,
         icon: widget.child == null ? const Icon(Symbols.more_vert) : null,
         offset: widget.offset,
+        padding: widget.buttonSize == null
+            ? const EdgeInsets.all(8)
+            : EdgeInsets.zero,
+        style: switch (widget.buttonSize) {
+          final size? => IconButton.styleFrom(
+            fixedSize: Size.square(size),
+            minimumSize: Size.square(size),
+            padding: EdgeInsets.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          null => null,
+        },
+        iconSize: switch (widget.buttonSize) {
+          final size? => size >= 40 ? 22 : 18,
+          null => null,
+        },
         tooltip: l10n.sessionsActionsMenu,
         enabled: !pending || widget.onChangeIcon != null,
         onSelected: (action) => _run(context, action),

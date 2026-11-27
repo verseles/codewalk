@@ -2224,9 +2224,13 @@
   "@chatOpenProjectToLoad": {
     "description": "CodeWalk UI string — chatOpenProjectToLoad"
   },
-  "chatRecentSessions": "Recent sessions",
-  "@chatRecentSessions": {
-    "description": "CodeWalk UI string — chatRecentSessions"
+  "chatProjectShowMoreSessions": "Show more",
+  "@chatProjectShowMoreSessions": {
+    "description": "Project drawer: lists every conversation of the shown project (#534)"
+  },
+  "chatProjectShowFewerSessions": "Show less",
+  "@chatProjectShowFewerSessions": {
+    "description": "Project drawer: back to the shown project's first five conversations (#534)"
   },
   "chatSearchConversations": "Search conversations",
   "@chatSearchConversations": {
@@ -2833,14 +2837,6 @@
   "settingsAppearanceSessionTabsDescription": "Show the tab strip above the chat. Each tab has its own menu.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
-  },
-  "settingsAppearanceRecentSessions": "Recent sessions",
-  "@settingsAppearanceRecentSessions": {
-    "description": "Appearance toggle that shows the Recent sessions section"
-  },
-  "settingsAppearanceRecentSessionsDescription": "Show Recent sessions above the project list.",
-  "@settingsAppearanceRecentSessionsDescription": {
-    "description": "Explains the Recent sessions toggle"
   },
   "chatDisplayMenu": "Display",
   "@chatDisplayMenu": {

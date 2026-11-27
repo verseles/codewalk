@@ -1511,7 +1511,8 @@
   "chatFilterSessions": "Filtrar sesiones",
   "chatNoConversationsInProject": "No hay conversaciones en este proyecto.",
   "chatOpenProjectToLoad": "Abra un proyecto para cargar conversaciones.",
-  "chatRecentSessions": "Sesiones recientes",
+  "chatProjectShowMoreSessions": "Mostrar más",
+  "chatProjectShowFewerSessions": "Mostrar menos",
   "chatSearchConversations": "Buscar conversaciones",
   "chatSortOldest": "Más Antiguas",
   "chatSortRecent": "Recientes",
@@ -1688,14 +1689,6 @@
   "settingsAppearanceSessionTabsDescription": "Mostrar la barra de pestañas sobre el chat. Cada pestaña tiene su menú.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
-  },
-  "settingsAppearanceRecentSessions": "Sesiones recientes",
-  "@settingsAppearanceRecentSessions": {
-    "description": "Appearance toggle that shows the Recent sessions section"
-  },
-  "settingsAppearanceRecentSessionsDescription": "Mostrar las sesiones recientes sobre la lista de proyectos.",
-  "@settingsAppearanceRecentSessionsDescription": {
-    "description": "Explains the Recent sessions toggle"
   },
   "chatDisplayMenu": "Visualización",
   "@chatDisplayMenu": {

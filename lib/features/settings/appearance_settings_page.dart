@@ -261,15 +261,6 @@ class AppearanceSettingsPage extends StatelessWidget {
                 onChanged: p.setShowSessionTabs,
               ),
             ]),
-            _card(context, l.settingsAppearanceRecentSessions, [
-              SwitchListTile.adaptive(
-                key: const ValueKey('settings_toggle_recent_sessions'),
-                contentPadding: EdgeInsets.zero,
-                title: Text(l.settingsAppearanceRecentSessionsDescription),
-                value: p.showRecentSessions,
-                onChanged: p.setShowRecentSessions,
-              ),
-            ]),
           ],
         ),
       ),

@@ -9,7 +9,6 @@ import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:provider/provider.dart';
 
-import '../../app/app_preferences_controller.dart';
 import '../../app/workspace_chrome.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -55,6 +54,14 @@ class _SessionsPageState extends State<SessionsPage> {
   /// it; showing another project drops the fold, and a search shows the rows
   /// while it lasts.
   String? _folded;
+
+  // The project whose "Show more" lists every conversation (#534).
+  String? _expanded;
+
+  // Where each keyed row of the project list sits in this build, so a row
+  // that moves when the projects reorder keeps its element, focus included
+  // (#534).
+  final _rowIndex = <Key, int>{};
 
   /// Rebuilds the list when the first unread emphasis ends.
   Timer? _emphasis;
@@ -160,6 +167,7 @@ class _SessionsPageState extends State<SessionsPage> {
           controller.sessions.isEmpty)
         scoped ? l10n.chatNoConversationsInProject : l10n.sessionsEmpty,
     ];
+    _rowIndex.clear();
     final rows = scoped
         ? _scopedRows(context, controller, contexts, available, compact)
         : _serverRows(context, controller, available, compact);
@@ -183,6 +191,7 @@ class _SessionsPageState extends State<SessionsPage> {
             compact ? 16 : 8,
           ),
           itemCount: rows.length + 1,
+          findChildIndexCallback: (key) => _rowIndex[key],
           itemBuilder: (context, index) =>
               index == 0 ? header : rows[index - 1](context),
         ),
@@ -256,9 +265,9 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
-  /// The list of one project context: Recent across the open projects,
-  /// then the open projects, the shown one followed by its conversations
-  /// and the others by a preview of their last read.
+  /// The list of one project context: the open projects, the shown one
+  /// first with up to five of its conversations and the others below it by
+  /// what happened last in each, with a preview of their last read (#534).
   List<WidgetBuilder> _scopedRows(
     BuildContext context,
     SessionsController controller,
@@ -267,8 +276,6 @@ class _SessionsPageState extends State<SessionsPage> {
     bool compact,
   ) {
     final l10n = context.v2L10n;
-    final preferences = context.watch<AppPreferencesController?>();
-    final showRecent = preferences?.showRecentSessions ?? true;
     final shown = controller.directory!;
     final now = controller.now;
     final current = contexts.viewOf(shown);
@@ -280,45 +287,22 @@ class _SessionsPageState extends State<SessionsPage> {
       for (final row in everything)
         if (isPrimarySummary(row)) row,
     ];
-    // Attention is the header badge's own test (failed, waiting for the
-    // user, or an unread reply); the shown session never needs it.
-    final recent = recentSessions(
-      everything,
-      needsAttention: (row) =>
-          row.info.ref != current &&
-          (row.execution?.lastOutcome?.kind.known ==
-                  ExecutionOutcomeKind.failed ||
-              controller
-                  .activityMarks(row)
-                  .any(
-                    (mark) =>
-                        mark == SessionActivityMark.needsYou ||
-                        mark == SessionActivityMark.unread,
-                  )),
-    );
-    // Every emphasized row ends its hour, Recent's included.
-    _scheduleEmphasis(nextEmphasisEnd([...visible, ...recent], now: now));
-    final builders = <WidgetBuilder>[
-      if (recent.isNotEmpty && showRecent) ...[
-        (context) => _sectionTitle(context, l10n.chatRecentSessions),
-        for (final row in recent)
-          (context) => RecentSessionRow(
-            row: row,
-            current: row.info.ref == current,
-            running: controller
-                .activityMarks(row)
-                .contains(SessionActivityMark.running),
-            emphasized: unreadEmphasized(row, now: now, current: current),
-            onTap: available ? () => _openLive(context, controller, row) : null,
-          ),
-      ],
-    ];
-    // A fold belongs to the project shown when it was made: the page builds
-    // again on every switch, so another project shown by any route (a tap,
-    // Recent, a preview, a link) drops it.
+    // Every emphasized row ends its hour.
+    _scheduleEmphasis(nextEmphasisEnd(visible, now: now));
+    final builders = <WidgetBuilder>[];
+    // A keyed row is found again after a reorder; the header is index 0.
+    void add(Key key, WidgetBuilder build) {
+      builders.add((context) => KeyedSubtree(key: key, child: build(context)));
+      _rowIndex[key] = builders.length;
+    }
+
+    // A fold and a "Show more" belong to the project shown when they were
+    // made: the page builds again on every switch, so another project shown
+    // by any route (a tap, a preview, a link) drops them.
     if (_folded != shown) _folded = null;
+    if (_expanded != shown) _expanded = null;
     final searching = contexts.query.isNotEmpty;
-    for (final directory in contexts.open) {
+    for (final directory in contexts.ordered) {
       final active = directory == shown;
       // A search always shows the rows it filters.
       final folded = active && _folded == directory && !searching;
@@ -334,7 +318,8 @@ class _SessionsPageState extends State<SessionsPage> {
               ],
               null => null,
             };
-      builders.add(
+      add(
+        ValueKey('drawer-project-$directory'),
         (context) => ProjectContextRow(
           key: ValueKey('project-row-$directory'),
           directory: directory,
@@ -388,8 +373,15 @@ class _SessionsPageState extends State<SessionsPage> {
           query: contexts.query,
           pinned: contexts.isPinned,
         );
-        for (final item in listed) {
-          builders.add(
+        // Five conversations, pins first and the one on screen always among
+        // them; "Show more" lists every row read, and a search every match
+        // (#534).
+        final window = activeProjectWindow(listed, current: current);
+        final expanded = _expanded == directory;
+        final whole = searching || expanded || window.hidden == 0;
+        for (final item in whole ? listed : window.shown) {
+          add(
+            ValueKey('drawer-session-${item.session.info.ref.storageKey}'),
             (context) => _sessionRow(
               context,
               controller,
@@ -406,15 +398,39 @@ class _SessionsPageState extends State<SessionsPage> {
             ),
           );
         }
-        builders.add((context) => _more(context, controller, available));
+        if (!searching && window.hidden > 0) {
+          add(
+            ValueKey('drawer-reveal-$directory'),
+            (context) => _reveal(context, directory, expanded: expanded),
+          );
+        }
+        // Load more reads the next page into the full list, which opens so
+        // the page shows.
+        if (whole) {
+          add(
+            ValueKey('drawer-more-$directory'),
+            (context) => _more(
+              context,
+              controller,
+              available,
+              onLoad: searching
+                  ? null
+                  : () => setState(() => _expanded = directory),
+            ),
+          );
+        }
       } else if (rows == null) {
-        builders.add((context) => _hint(context, l10n.chatOpenProjectToLoad));
+        add(
+          ValueKey('drawer-hint-$directory'),
+          (context) => _hint(context, l10n.chatOpenProjectToLoad),
+        );
       } else {
         for (final row
             in rows
                 .where((row) => row.info.lineage.parent == null)
                 .take(_previewRows)) {
-          builders.add(
+          add(
+            ValueKey('drawer-preview-${row.info.ref.storageKey}'),
             (context) => _preview(context, controller, available, row),
           );
         }
@@ -456,18 +472,28 @@ class _SessionsPageState extends State<SessionsPage> {
     ];
   }
 
-  Widget _sectionTitle(BuildContext context, String text) => Padding(
-    padding: const EdgeInsetsDirectional.fromSTEB(12, 16, 12, 4),
-    child: Semantics(
-      header: true,
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+  /// Shows every conversation the shown project read, or its first five
+  /// again (#534).
+  Widget _reveal(
+    BuildContext context,
+    String directory, {
+    required bool expanded,
+  }) {
+    final l10n = context.v2L10n;
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: TextButton(
+        key: const ValueKey('sessions-reveal'),
+        onPressed: () =>
+            setState(() => _expanded = expanded ? null : directory),
+        child: Text(
+          expanded
+              ? l10n.chatProjectShowFewerSessions
+              : l10n.chatProjectShowMoreSessions,
         ),
       ),
-    ),
-  );
+    );
+  }
 
   Widget _hint(BuildContext context, String text) => Padding(
     padding: const EdgeInsetsDirectional.fromSTEB(24, 0, 12, 8),
@@ -508,8 +534,9 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget _more(
     BuildContext context,
     SessionsController controller,
-    bool available,
-  ) {
+    bool available, {
+    VoidCallback? onLoad,
+  }) {
     final l10n = context.v2L10n;
     return Align(
       alignment: AlignmentDirectional.centerStart,
@@ -520,7 +547,10 @@ class _SessionsPageState extends State<SessionsPage> {
                 controller.hasMore &&
                 !controller.loading &&
                 !controller.stale
-            ? controller.loadMore
+            ? () {
+                onLoad?.call();
+                controller.loadMore();
+              }
             : null,
         child: Text(l10n.chatLoadMore),
       ),
@@ -794,14 +824,15 @@ class _SessionsPageState extends State<SessionsPage> {
                     : null,
                 onLongPress: openMenu,
                 child: Padding(
+                  // Denser than before #534: the menu's button no longer sets
+                  // the height, and a title wraps to two lines at most.
                   padding: EdgeInsetsDirectional.fromSTEB(
                     12,
-                    compact ? 12 : 6,
+                    compact ? 8 : 4,
                     4,
-                    compact ? 12 : 6,
+                    compact ? 8 : 4,
                   ),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
                         child: Column(
@@ -829,7 +860,7 @@ class _SessionsPageState extends State<SessionsPage> {
                                     row.info.title.trim().isEmpty
                                         ? l10n.sessionExportUntitled
                                         : row.info.title,
-                                    maxLines: compact ? 3 : 2,
+                                    maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style:
                                         (compact
@@ -873,6 +904,7 @@ class _SessionsPageState extends State<SessionsPage> {
                       SessionActionsMenu(
                         controller: controller,
                         row: row,
+                        buttonSize: compact ? 40 : 32,
                         menuKey: _menuKey(row.info.ref),
                         pinned: pinned,
                         onPin: onPin,

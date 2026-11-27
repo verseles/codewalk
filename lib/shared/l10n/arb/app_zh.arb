@@ -1511,7 +1511,8 @@
   "chatFilterSessions": "筛选会话",
   "chatNoConversationsInProject": "此项目中没有会话。",
   "chatOpenProjectToLoad": "打开项目以加载会话。",
-  "chatRecentSessions": "最近会话",
+  "chatProjectShowMoreSessions": "显示更多",
+  "chatProjectShowFewerSessions": "显示更少",
   "chatSearchConversations": "搜索会话",
   "chatSortOldest": "最早",
   "chatSortRecent": "最近",
@@ -1688,14 +1689,6 @@
   "settingsAppearanceSessionTabsDescription": "在聊天上方显示标签栏。每个标签页都有自己的菜单。",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
-  },
-  "settingsAppearanceRecentSessions": "最近会话",
-  "@settingsAppearanceRecentSessions": {
-    "description": "Appearance toggle that shows the Recent sessions section"
-  },
-  "settingsAppearanceRecentSessionsDescription": "在项目列表上方显示最近会话。",
-  "@settingsAppearanceRecentSessionsDescription": {
-    "description": "Explains the Recent sessions toggle"
   },
   "chatDisplayMenu": "显示",
   "@chatDisplayMenu": {

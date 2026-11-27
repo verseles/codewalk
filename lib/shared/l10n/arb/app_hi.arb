@@ -1511,7 +1511,8 @@
   "chatFilterSessions": "सत्र फ़िल्टर करें",
   "chatNoConversationsInProject": "इस प्रोजेक्ट में कोई बातचीत नहीं है।",
   "chatOpenProjectToLoad": "बातचीत लोड करने के लिए प्रोजेक्ट खोलें।",
-  "chatRecentSessions": "हाल के सत्र",
+  "chatProjectShowMoreSessions": "और दिखाएँ",
+  "chatProjectShowFewerSessions": "कम दिखाएँ",
   "chatSearchConversations": "बातचीत खोजें",
   "chatSortOldest": "सबसे पुराना",
   "chatSortRecent": "हालिया",
@@ -1688,14 +1689,6 @@
   "settingsAppearanceSessionTabsDescription": "चैट के ऊपर टैब पट्टी दिखाएँ। हर टैब का अपना मेन्यू है।",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
-  },
-  "settingsAppearanceRecentSessions": "हाल के सत्र",
-  "@settingsAppearanceRecentSessions": {
-    "description": "Appearance toggle that shows the Recent sessions section"
-  },
-  "settingsAppearanceRecentSessionsDescription": "प्रोजेक्ट सूची के ऊपर हाल के सत्र दिखाएँ।",
-  "@settingsAppearanceRecentSessionsDescription": {
-    "description": "Explains the Recent sessions toggle"
   },
   "chatDisplayMenu": "दिखावट",
   "@chatDisplayMenu": {

@@ -1511,7 +1511,8 @@
   "chatFilterSessions": "فلٹر سیشنز",
   "chatNoConversationsInProject": "اس پروجیکٹ میں کوئی گفتگو نہیں ہے۔",
   "chatOpenProjectToLoad": "گفتگو لوڈ کرنے کے لیے پروجیکٹ کھولیں۔",
-  "chatRecentSessions": "حالیہ سیشنز",
+  "chatProjectShowMoreSessions": "مزید دکھائیں",
+  "chatProjectShowFewerSessions": "کم دکھائیں",
   "chatSearchConversations": "مکالمات تلاش کریں۔",
   "chatSortOldest": "قدیم ترین",
   "chatSortRecent": "حالیہ",
@@ -1688,14 +1689,6 @@
   "settingsAppearanceSessionTabsDescription": "چیٹ کے اوپر ٹیب پٹی دکھائیں۔ ہر ٹیب کا اپنا مینو ہے۔",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
-  },
-  "settingsAppearanceRecentSessions": "حالیہ سیشنز",
-  "@settingsAppearanceRecentSessions": {
-    "description": "Appearance toggle that shows the Recent sessions section"
-  },
-  "settingsAppearanceRecentSessionsDescription": "پروجیکٹ فہرست کے اوپر حالیہ سیشنز دکھائیں۔",
-  "@settingsAppearanceRecentSessionsDescription": {
-    "description": "Explains the Recent sessions toggle"
   },
   "chatDisplayMenu": "ظاہری شکل",
   "@chatDisplayMenu": {

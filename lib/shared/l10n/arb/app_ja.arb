@@ -1511,7 +1511,8 @@
   "chatFilterSessions": "セッションをフィルター",
   "chatNoConversationsInProject": "このプロジェクトには会話がありません。",
   "chatOpenProjectToLoad": "プロジェクトを開いて会話を読み込んでください。",
-  "chatRecentSessions": "最近のセッション",
+  "chatProjectShowMoreSessions": "さらに表示",
+  "chatProjectShowFewerSessions": "表示を減らす",
   "chatSearchConversations": "会話を検索",
   "chatSortOldest": "古い順",
   "chatSortRecent": "最近",
@@ -1688,14 +1689,6 @@
   "settingsAppearanceSessionTabsDescription": "チャットの上にタブバーを表示します。各タブには独自のメニューがあります。",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
-  },
-  "settingsAppearanceRecentSessions": "最近のセッション",
-  "@settingsAppearanceRecentSessions": {
-    "description": "Appearance toggle that shows the Recent sessions section"
-  },
-  "settingsAppearanceRecentSessionsDescription": "プロジェクト一覧の上に最近のセッションを表示します。",
-  "@settingsAppearanceRecentSessionsDescription": {
-    "description": "Explains the Recent sessions toggle"
   },
   "chatDisplayMenu": "表示",
   "@chatDisplayMenu": {

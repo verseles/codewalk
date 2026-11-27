@@ -1813,7 +1813,10 @@ class V2LocalizationsRu extends V2Localizations {
   String get chatOpenProjectToLoad => 'Открыть проект для загрузки бесед.';
 
   @override
-  String get chatRecentSessions => 'Недавние сессии';
+  String get chatProjectShowMoreSessions => 'Показать ещё';
+
+  @override
+  String get chatProjectShowFewerSessions => 'Показать меньше';
 
   @override
   String get chatSearchConversations => 'Поиск бесед';
@@ -2310,13 +2313,6 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get settingsAppearanceSessionTabsDescription =>
       'Показывать полосу вкладок над чатом. У каждой вкладки есть своё меню.';
-
-  @override
-  String get settingsAppearanceRecentSessions => 'Недавние сессии';
-
-  @override
-  String get settingsAppearanceRecentSessionsDescription =>
-      'Показывать недавние сессии над списком проектов.';
 
   @override
   String get chatDisplayMenu => 'Отображение';

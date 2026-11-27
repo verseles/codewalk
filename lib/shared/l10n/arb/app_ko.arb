@@ -1511,7 +1511,8 @@
   "chatFilterSessions": "세션 필터",
   "chatNoConversationsInProject": "이 프로젝트에 대화가 없습니다.",
   "chatOpenProjectToLoad": "대화를 로드하려면 프로젝트를 여십시오.",
-  "chatRecentSessions": "최근 세션",
+  "chatProjectShowMoreSessions": "더 보기",
+  "chatProjectShowFewerSessions": "간단히 보기",
   "chatSearchConversations": "대화 검색",
   "chatSortOldest": "오래된 순",
   "chatSortRecent": "최근 순",
@@ -1699,14 +1700,6 @@
   "settingsAppearanceSessionTabsDescription": "채팅 위에 탭 표시줄을 표시합니다. 각 탭에는 자체 메뉴가 있습니다.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
-  },
-  "settingsAppearanceRecentSessions": "최근 세션",
-  "@settingsAppearanceRecentSessions": {
-    "description": "Appearance toggle that shows the Recent sessions section"
-  },
-  "settingsAppearanceRecentSessionsDescription": "프로젝트 목록 위에 최근 세션을 표시합니다.",
-  "@settingsAppearanceRecentSessionsDescription": {
-    "description": "Explains the Recent sessions toggle"
   },
   "chatDisplayMenu": "표시",
   "@chatDisplayMenu": {

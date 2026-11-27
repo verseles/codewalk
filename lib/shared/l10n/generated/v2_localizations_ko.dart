@@ -1718,7 +1718,10 @@ class V2LocalizationsKo extends V2Localizations {
   String get chatOpenProjectToLoad => '대화를 로드하려면 프로젝트를 여십시오.';
 
   @override
-  String get chatRecentSessions => '최근 세션';
+  String get chatProjectShowMoreSessions => '더 보기';
+
+  @override
+  String get chatProjectShowFewerSessions => '간단히 보기';
 
   @override
   String get chatSearchConversations => '대화 검색';
@@ -2191,13 +2194,6 @@ class V2LocalizationsKo extends V2Localizations {
   @override
   String get settingsAppearanceSessionTabsDescription =>
       '채팅 위에 탭 표시줄을 표시합니다. 각 탭에는 자체 메뉴가 있습니다.';
-
-  @override
-  String get settingsAppearanceRecentSessions => '최근 세션';
-
-  @override
-  String get settingsAppearanceRecentSessionsDescription =>
-      '프로젝트 목록 위에 최근 세션을 표시합니다.';
 
   @override
   String get chatDisplayMenu => '표시';

@@ -55,9 +55,10 @@ for _locale, _copy in _CREDENTIAL_COPY.items():
     COPY[_locale] += _copy
 
 # The project drawer (#453 S4): the list of the open project contexts, its
-# search, filter and sort, Recent and context-scoped pins.
+# search, filter and sort, "Show more" (#534) and context-scoped pins.
 PORT_KEYS |= {
-    "chatSearchConversations", "chatRecentSessions", "workspaceOpenProjects",
+    "chatSearchConversations", "chatProjectShowMoreSessions",
+    "chatProjectShowFewerSessions", "workspaceOpenProjects",
     "chatOpenProjectToLoad", "chatCloseProject",
     "projectProviderErrorAtLeastOneContext", "chatSortSessions",
     "chatSortRecent", "chatSortOldest", "chatSortTitle", "chatFilterSessions",

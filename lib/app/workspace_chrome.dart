@@ -596,12 +596,6 @@ class _WorkspaceDisplaySheet extends StatelessWidget {
                 value: preferences.showSessionTabs,
                 onChanged: preferences.setShowSessionTabs,
               ),
-              SwitchListTile.adaptive(
-                key: const ValueKey('display-toggle-recent-sessions'),
-                title: Text(l.settingsAppearanceRecentSessions),
-                value: preferences.showRecentSessions,
-                onChanged: preferences.setShowRecentSessions,
-              ),
             ],
           ),
         ),

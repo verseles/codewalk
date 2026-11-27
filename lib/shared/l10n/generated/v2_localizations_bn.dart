@@ -1795,7 +1795,10 @@ class V2LocalizationsBn extends V2Localizations {
   String get chatOpenProjectToLoad => 'কথোপকথন লোড করতে প্রজেক্ট খুলুন।';
 
   @override
-  String get chatRecentSessions => 'সাম্প্রতিক সেশন';
+  String get chatProjectShowMoreSessions => 'আরও দেখান';
+
+  @override
+  String get chatProjectShowFewerSessions => 'কম দেখান';
 
   @override
   String get chatSearchConversations => 'কথোপকথন অনুসন্ধান করুন';
@@ -2284,13 +2287,6 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get settingsAppearanceSessionTabsDescription =>
       'চ্যাটের উপরে ট্যাব স্ট্রিপ দেখান। প্রতিটি ট্যাবের নিজের মেনু আছে।';
-
-  @override
-  String get settingsAppearanceRecentSessions => 'সাম্প্রতিক সেশন';
-
-  @override
-  String get settingsAppearanceRecentSessionsDescription =>
-      'প্রকল্প তালিকার উপরে সাম্প্রতিক সেশন দেখান।';
 
   @override
   String get chatDisplayMenu => 'প্রদর্শন';

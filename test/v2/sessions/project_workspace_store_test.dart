@@ -188,6 +188,76 @@ void main() {
     expect((await _open(failing)).unreadable, isTrue);
   });
 
+  test('a change of project stamps when each was shown (#534)', () async {
+    final backend = _MemoryBackend();
+    final store = await _open(backend);
+    // Without a clock nothing is stamped.
+    expect(await store.open(_a, '/one'), ProjectStoreResult.saved);
+    expect(store.workspace(_a).shown, isEmpty);
+    expect(await store.open(_a, '/two', nowMs: 1000), ProjectStoreResult.saved);
+    // The project left keeps the moment it stopped being shown; the one
+    // shown comes right after.
+    expect(store.workspace(_a).shown, {'/one': 1000, '/two': 1001});
+    // Showing the shown project again writes nothing.
+    final writes = backend.writes;
+    expect(
+      await store.activate(_a, '/two', nowMs: 5000),
+      ProjectStoreResult.unchanged,
+    );
+    expect(backend.writes, writes);
+    // A clock that went back still orders the stamps.
+    expect(
+      await store.activate(_a, '/one', nowMs: 10),
+      ProjectStoreResult.saved,
+    );
+    expect(store.workspace(_a).shown, {'/one': 1003, '/two': 1002});
+    // Opening in the background stamps nothing; a close drops its stamp.
+    expect(
+      await store.open(_a, '/three', activate: false, nowMs: 9000),
+      ProjectStoreResult.saved,
+    );
+    expect(store.workspace(_a).shown.containsKey('/three'), isFalse);
+    expect(await store.close(_a, '/two'), ProjectStoreResult.saved);
+    expect(store.workspace(_a).shown, {'/one': 1003});
+    final reloaded = (await _open(backend)).workspace(_a);
+    expect(reloaded.shown, {'/one': 1003});
+  });
+
+  test('a bad shown stamp is dropped, never unreadable (#534)', () async {
+    final backend = _MemoryBackend()
+      ..values[ProjectWorkspaceStore.key] = jsonEncode({
+        'v': 1,
+        'servers': {
+          _a: {
+            'open': ['/a', '/b'],
+            'active': '/a',
+            'shown': {'/a': 7, '/b': -1, '/closed': 9, '/x': 'late'},
+          },
+          'profile_b': {
+            'open': ['/c'],
+            'active': '/c',
+            'shown': ['not', 'a', 'map'],
+          },
+        },
+      });
+    final store = await _open(backend);
+    expect(store.unreadable, isFalse);
+    expect(store.workspace(_a).shown, {'/a': 7});
+    expect(store.workspace('profile_b').shown, isEmpty);
+    // A record from before the stamps reads as none.
+    final legacy = _MemoryBackend()
+      ..values[ProjectWorkspaceStore.key] = jsonEncode({
+        'v': 1,
+        'servers': {
+          _a: {
+            'open': ['/a'],
+            'active': '/a',
+          },
+        },
+      });
+    expect((await _open(legacy)).workspace(_a).shown, isEmpty);
+  });
+
   test('unknown fields of the record and of a server are kept', () async {
     final backend = _MemoryBackend()
       ..values[ProjectWorkspaceStore.key] = jsonEncode({

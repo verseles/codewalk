@@ -1511,7 +1511,8 @@
   "chatFilterSessions": "Фильтровать сессии",
   "chatNoConversationsInProject": "В этом проекте нет бесед.",
   "chatOpenProjectToLoad": "Открыть проект для загрузки бесед.",
-  "chatRecentSessions": "Недавние сессии",
+  "chatProjectShowMoreSessions": "Показать ещё",
+  "chatProjectShowFewerSessions": "Показать меньше",
   "chatSearchConversations": "Поиск бесед",
   "chatSortOldest": "Сначала старые",
   "chatSortRecent": "Недавние",
@@ -1688,14 +1689,6 @@
   "settingsAppearanceSessionTabsDescription": "Показывать полосу вкладок над чатом. У каждой вкладки есть своё меню.",
   "@settingsAppearanceSessionTabsDescription": {
     "description": "Explains the session tab strip toggle"
-  },
-  "settingsAppearanceRecentSessions": "Недавние сессии",
-  "@settingsAppearanceRecentSessions": {
-    "description": "Appearance toggle that shows the Recent sessions section"
-  },
-  "settingsAppearanceRecentSessionsDescription": "Показывать недавние сессии над списком проектов.",
-  "@settingsAppearanceRecentSessionsDescription": {
-    "description": "Explains the Recent sessions toggle"
   },
   "chatDisplayMenu": "Отображение",
   "@chatDisplayMenu": {

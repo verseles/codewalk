@@ -13,13 +13,12 @@ void main() {
   AppPreferencesController controller(FakeMetadataBackend backend) =>
       AppPreferencesController(store: V2MetadataStore(backend: backend));
 
-  test('display defaults show tabs and recent sessions, hint unseen', () async {
+  test('display defaults show tabs, hint unseen', () async {
     final backend = FakeMetadataBackend();
     final preferences = controller(backend);
     addTearDown(preferences.dispose);
     await preferences.initialize();
     expect(preferences.showSessionTabs, isTrue);
-    expect(preferences.showRecentSessions, isTrue);
     expect(preferences.tabsGestureHintDismissed, isFalse);
     expect(backend.writes, ['cw2.schema']);
   });
@@ -30,7 +29,6 @@ void main() {
     addTearDown(first.dispose);
     await first.initialize();
     first.setShowSessionTabs(false);
-    first.setShowRecentSessions(false);
     first.setTabsGestureHintDismissed(true);
     await first.flush();
 
@@ -38,8 +36,24 @@ void main() {
     addTearDown(second.dispose);
     await second.initialize();
     expect(second.showSessionTabs, isFalse);
-    expect(second.showRecentSessions, isFalse);
     expect(second.tabsGestureHintDismissed, isTrue);
+  });
+
+  test('a stored Recent sessions choice is left alone (#534)', () async {
+    final backend = FakeMetadataBackend();
+    backend.values['cw2.settings.showRecentSessions'] = false;
+    final preferences = controller(backend);
+    addTearDown(preferences.dispose);
+    await preferences.initialize();
+    preferences.setShowSessionTabs(false);
+    await preferences.flush();
+    // The choice is gone: never read back, never written again.
+    expect(backend.writes, isNot(contains('cw2.settings.showRecentSessions')));
+    expect(
+      backend.removals,
+      isNot(contains('cw2.settings.showRecentSessions')),
+    );
+    expect(backend.writes, contains('cw2.settings.showSessionTabs'));
   });
 
   testWidgets('Settings > Appearance toggles the tab strip', (tester) async {

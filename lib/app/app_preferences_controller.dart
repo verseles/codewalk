@@ -237,25 +237,18 @@ class AppPreferencesController extends ChangeNotifier {
     _changed('composerSpellCheck');
   }
 
-  /// Whether the session tab strip and the Recent sessions section show;
-  /// both are on by default.
+  /// Whether the session tab strip shows; on by default. The Recent
+  /// sessions choice is gone (#534): its stored value is no longer read or
+  /// written.
   bool _showSessionTabs = true;
-  bool _showRecentSessions = true;
   bool _tabsGestureHintDismissed = false;
   bool get showSessionTabs => _showSessionTabs;
-  bool get showRecentSessions => _showRecentSessions;
   bool get tabsGestureHintDismissed => _tabsGestureHintDismissed;
 
   void setShowSessionTabs(bool value) {
     if (_disposed || _showSessionTabs == value) return;
     _showSessionTabs = value;
     _changed('showSessionTabs');
-  }
-
-  void setShowRecentSessions(bool value) {
-    if (_disposed || _showRecentSessions == value) return;
-    _showRecentSessions = value;
-    _changed('showRecentSessions');
   }
 
   /// The first-use hint explains the tab gestures once; dismissing it is kept.
@@ -415,7 +408,6 @@ class AppPreferencesController extends ChangeNotifier {
     'composerTips': _composerTips ? null : false,
     'composerQueue': _composerQueue ? true : null,
     'showSessionTabs': _showSessionTabs ? null : false,
-    'showRecentSessions': _showRecentSessions ? null : false,
     'tabsGestureHintDismissed': _tabsGestureHintDismissed ? true : null,
     'integratedWindowChrome': _integratedWindowChrome ? null : false,
     'windowCloseAction': _windowCloseAction == WindowCloseAction.close
@@ -535,8 +527,6 @@ class AppPreferencesController extends ChangeNotifier {
       if (queue is bool) _composerQueue = queue;
       final tabs = value('showSessionTabs');
       if (tabs is bool) _showSessionTabs = tabs;
-      final recent = value('showRecentSessions');
-      if (recent is bool) _showRecentSessions = recent;
       final hint = value('tabsGestureHintDismissed');
       if (hint is bool) _tabsGestureHintDismissed = hint;
       final chrome = value('integratedWindowChrome');

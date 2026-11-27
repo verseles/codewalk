@@ -1784,7 +1784,10 @@ class V2LocalizationsAr extends V2Localizations {
   String get chatOpenProjectToLoad => 'افتح المشروع لتحميل المحادثات.';
 
   @override
-  String get chatRecentSessions => 'الجلسات الأخيرة';
+  String get chatProjectShowMoreSessions => 'عرض المزيد';
+
+  @override
+  String get chatProjectShowFewerSessions => 'عرض أقل';
 
   @override
   String get chatSearchConversations => 'البحث في المحادثات';
@@ -2270,13 +2273,6 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get settingsAppearanceSessionTabsDescription =>
       'أظهر شريط التبويبات فوق الدردشة. لكل تبويب قائمته الخاصة.';
-
-  @override
-  String get settingsAppearanceRecentSessions => 'الجلسات الأخيرة';
-
-  @override
-  String get settingsAppearanceRecentSessionsDescription =>
-      'أظهر الجلسات الأخيرة فوق قائمة المشاريع.';
 
   @override
   String get chatDisplayMenu => 'العرض';

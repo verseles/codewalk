@@ -1,4 +1,3 @@
-import 'package:codewalk_core/codewalk_core.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -7,7 +6,6 @@ import 'package:material_symbols_icons/symbols.dart';
 
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/server_path.dart';
-import '../../shared/theme/app_surface_tokens.dart';
 import 'project_icon_view.dart';
 
 /// The width of the accent that marks the selected project or highlighted row.
@@ -326,116 +324,6 @@ class _ProjectContextRowState extends State<ProjectContextRow> {
                   ),
                 ),
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// One quick-access row of Recent: the session title on one line and a
-/// chip with its project, a running mark while it works and a subtle
-/// contrasted background when it is the session shown.
-class RecentSessionRow extends StatelessWidget {
-  const RecentSessionRow({
-    super.key,
-    required this.row,
-    required this.current,
-    required this.running,
-    required this.emphasized,
-    required this.onTap,
-  });
-
-  final SessionSummary row;
-  final bool current;
-  final bool running;
-
-  /// A completed reply not seen yet, within its hour of emphasis.
-  final bool emphasized;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.v2L10n;
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-    final directory = row.info.project?.canonicalDirectory;
-    final title = row.info.title.trim().isEmpty
-        ? l10n.sessionExportUntitled
-        : row.info.title;
-    const radius = BorderRadius.all(Radius.circular(8));
-    return Semantics(
-      selected: current,
-      child: Material(
-        key: ValueKey('recent-surface-${row.info.ref.storageKey}'),
-        color: current
-            ? theme.surfaceTokens.selectedSurface
-            : Colors.transparent,
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          key: ValueKey('recent-${row.info.ref.storageKey}'),
-          borderRadius: radius,
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(12, 6, 8, 6),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: current || emphasized ? scheme.primary : null,
-                      fontWeight: current || emphasized
-                          ? FontWeight.w600
-                          : null,
-                    ),
-                  ),
-                ),
-                if (running)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 6),
-                    child: Icon(
-                      Symbols.sync,
-                      key: ValueKey(
-                        'recent-running-${row.info.ref.storageKey}',
-                      ),
-                      size: 14,
-                      color: scheme.secondary,
-                      semanticLabel: l10n.liveRunning,
-                    ),
-                  ),
-                if (directory != null)
-                  Padding(
-                    padding: const EdgeInsetsDirectional.only(start: 6),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 96),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: scheme.outlineVariant),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          child: Text(
-                            serverPathName(directory),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
             ),
           ),
         ),

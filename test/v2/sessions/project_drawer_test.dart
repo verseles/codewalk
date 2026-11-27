@@ -4,6 +4,7 @@ import 'package:codewalk/app/v2_bootstrap.dart';
 import 'package:codewalk/features/sessions/project_context_list.dart';
 import 'package:codewalk/features/sessions/project_contexts_controller.dart';
 import 'package:codewalk/features/sessions/project_picker_dialog.dart';
+import 'package:codewalk/features/sessions/session_list_projection.dart';
 import 'package:codewalk/features/sessions/sessions_page.dart';
 import 'package:codewalk/platform/sessions/project_workspace_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
@@ -375,7 +376,7 @@ void main() {
       'TASK',
     );
     await tester.pumpAndSettle();
-    // Recent stays as it is; the project's rows follow the query.
+    // The project's rows follow the query.
     expect(_row(rig, 'b'), findsNothing);
     expect(_row(rig, 'a'), findsOneWidget);
     // Escape clears the query and collapses the field.
@@ -421,7 +422,7 @@ void main() {
     await _closeApp(tester);
   });
 
-  testWidgets('recent roots, the current accent and unread emphasis', (
+  testWidgets('an unread reply emphasizes its root, never a child', (
     tester,
   ) async {
     final idle = DateTime.now().toUtc().subtract(const Duration(minutes: 5));
@@ -444,12 +445,11 @@ void main() {
         ),
       ],
     );
-    expect(find.text(l10n.chatRecentSessions), findsOneWidget);
     final done = rig.sources.single.row('done').info.ref.storageKey;
     final kid = rig.sources.single.row('kid').info.ref.storageKey;
-    expect(find.byKey(ValueKey('recent-$done')), findsOneWidget);
-    // Only roots are recent.
-    expect(find.byKey(ValueKey('recent-$kid')), findsNothing);
+    // Recent sessions is gone (#534).
+    expect(find.byKey(ValueKey('recent-$done')), findsNothing);
+    expect(find.text(l10n.chatProjectShowMoreSessions), findsNothing);
     final scheme = Theme.of(
       tester.element(find.byType(SessionsPage)),
     ).colorScheme;
@@ -464,48 +464,137 @@ void main() {
     await _closeApp(tester);
   });
 
-  testWidgets('recent shows at most two roots per open project (#512)', (
+  testWidgets('the other projects follow the shown one by recency (#534)', (
     tester,
   ) async {
-    SessionSummary timed(
-      CatalogSource source,
-      String id,
-      String directory,
-      int hour,
-    ) => SessionSummary(
-      info: source.row(id, directory: directory, title: id).info,
-      updatedAt: DateTime.utc(2026, 10, 12, hour),
-    );
-    final (_, rig, _) = await _open(
+    final reply = DateTime.now().toUtc().add(const Duration(days: 1));
+    final (_, _, _) = await _open(
       tester,
       rows: (source) => [
-        timed(source, 'a3', '/work/alpha', 9),
-        timed(source, 'a2', '/work/alpha', 8),
-        timed(source, 'a1', '/work/alpha', 7),
-        timed(source, 'b3', '/work/beta', 6),
-        timed(source, 'b2', '/work/beta', 5),
-        timed(source, 'b1', '/work/beta', 4),
-        timed(source, 'c3', '/work/gamma', 3),
-        timed(source, 'c2', '/work/gamma', 2),
-        timed(source, 'c1', '/work/gamma', 1),
+        source.row('a', directory: '/work/alpha', title: 'A'),
+        source.row('b', directory: '/work/beta', title: 'B'),
+        source.row('c', directory: '/work/gamma', title: 'C'),
       ],
     );
     final contexts = _contexts(tester);
     expect(await contexts.openContext('/work/beta'), isTrue);
     expect(await contexts.openContext('/work/gamma'), isTrue);
+    expect(await contexts.activate('/work/alpha'), isTrue);
     await tester.pumpAndSettle();
+    double top(String directory) =>
+        tester.getTopLeft(find.byKey(ValueKey('project-row-$directory'))).dy;
+    // The shown project leads; the one left last comes next; the opening
+    // order is kept.
+    expect(contexts.open, ['/work/alpha', '/work/beta', '/work/gamma']);
+    expect(contexts.ordered, ['/work/alpha', '/work/gamma', '/work/beta']);
+    expect(top('/work/alpha'), lessThan(top('/work/gamma')));
+    expect(top('/work/gamma'), lessThan(top('/work/beta')));
 
-    String keyOf(String id) =>
-        'recent-${rig.sources.single.row(id).info.ref.storageKey}';
-    for (final kept in ['a3', 'a2', 'b3', 'b2', 'c3', 'c2']) {
-      expect(find.byKey(ValueKey(keyOf(kept))), findsOneWidget, reason: kept);
-    }
-    for (final omitted in ['a1', 'b1', 'c1']) {
-      expect(find.byKey(ValueKey(keyOf(omitted))), findsNothing, reason: omitted);
-    }
+    // A project that moves keeps its row: focus and state go with it.
+    final gamma = find.byKey(const ValueKey('project-row-/work/gamma'));
+    final before = tester.element(gamma);
+    expect(await contexts.activate('/work/beta'), isTrue);
+    await tester.pumpAndSettle();
+    expect(contexts.ordered, ['/work/beta', '/work/alpha', '/work/gamma']);
+    expect(identical(tester.element(gamma), before), isTrue);
+
+    // A reply read for a project moves it up.
+    final source = contexts.catalog.contextRows('/work/beta');
+    expect(source, isNotNull);
+    expect(
+      contexts.workspace.shown.keys,
+      containsAll(['/work/alpha', '/work/beta', '/work/gamma']),
+    );
+    expect(
+      projectDrawerOrder(
+        contexts.open,
+        active: '/work/alpha',
+        activity: (directory) => directory == '/work/beta' ? reply : null,
+      ),
+      ['/work/alpha', '/work/beta', '/work/gamma'],
+    );
     expect(tester.takeException(), isNull);
     await _closeApp(tester);
   });
+
+  testWidgets('the shown project lists five, then Show more (#534)', (
+    tester,
+  ) async {
+    final (dependencies, rig, l10n) = await _open(
+      tester,
+      rows: (source) => [
+        for (var i = 0; i < 8; i++)
+          SessionSummary(
+            info: source
+                .row('s$i', directory: '/work/alpha', title: 'S$i')
+                .info,
+            updatedAt: DateTime.utc(2026, 10, 12, 20 - i),
+          ),
+      ],
+    );
+    Finder rows() => find.byWidgetPredicate(
+      (widget) =>
+          widget.key is ValueKey<String> &&
+          (widget.key! as ValueKey<String>).value.startsWith('live-open-'),
+    );
+    final reveal = find.byKey(const ValueKey('sessions-reveal'));
+    expect(rows(), findsNWidgets(5));
+    expect(_row(rig, 's5'), findsNothing);
+    expect(find.text(l10n.chatProjectShowMoreSessions), findsOneWidget);
+    // Load more waits behind Show more, so two "more" never stack.
+    expect(find.byKey(const ValueKey('sessions-more')), findsNothing);
+
+    await tester.tap(reveal);
+    await tester.pumpAndSettle();
+    expect(rows(), findsNWidgets(8));
+    expect(find.text(l10n.chatProjectShowFewerSessions), findsOneWidget);
+    expect(find.byKey(const ValueKey('sessions-more')), findsOneWidget);
+    await tester.tap(reveal);
+    await tester.pumpAndSettle();
+    expect(rows(), findsNWidgets(5));
+
+    // The conversation on screen takes the fifth place instead of hiding.
+    final far = rig.sources.single.row('s7').info.ref;
+    dependencies.router.go('/s/profile_a/${far.nativeId}');
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await showSessionList(tester);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(rows(), findsNWidgets(5));
+    expect(_row(rig, 's7'), findsOneWidget);
+    expect(_row(rig, 's4'), findsNothing);
+
+    // A search lists every match, with no Show more.
+    await tester.tap(find.byKey(const ValueKey('sessions-search')));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.enterText(
+      find.byKey(const ValueKey('sessions-search-field')),
+      's',
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(rows(), findsNWidgets(8));
+    expect(reveal, findsNothing);
+    expect(tester.takeException(), isNull);
+    await _closeApp(tester);
+  });
+
+  for (final width in [390.0, 1280.0]) {
+    testWidgets('a one-line row is denser than before at $width (#534)', (
+      tester,
+    ) async {
+      final (_, rig, _) = await _open(tester, size: Size(width, 844));
+      final height = tester.getSize(_row(rig, 'one')).height;
+      // Today's rows were 72 dp on a phone and 60 beside the chat: the menu
+      // button set the height. A one-line title now fits 56 and 40.
+      expect(height, lessThanOrEqualTo(width < 600 ? 56 : 40));
+      expect(height, greaterThanOrEqualTo(width < 600 ? 48 : 32));
+      expect(tester.takeException(), isNull);
+      await _closeApp(tester);
+    });
+  }
 
   for (final mode in [ThemeMode.light, ThemeMode.dark]) {
     testWidgets(
@@ -521,9 +610,6 @@ void main() {
         final three = rig.sources.single.row('three').info.ref;
         final oneInkBefore = tester.element(
           find.byKey(ValueKey('live-open-${one.storageKey}')),
-        );
-        final recentOneInkBefore = tester.element(
-          find.byKey(ValueKey('recent-${one.storageKey}')),
         );
         dependencies.router.go('/s/profile_a/${one.nativeId}');
         await tester.pump();
@@ -571,35 +657,7 @@ void main() {
         );
         expect(oneSurface, findsOneWidget);
         expect(tester.widget<Material>(oneSurface).color, expectedBg);
-        expect(
-          tester.widget<Material>(threeSurface).color,
-          Colors.transparent,
-        );
-
-        // Selected RecentSessionRow also uses the subtle background fill
-        // without an AccentedRow left bar or InkWell remount.
-        final recentOne = find.byKey(ValueKey('recent-${one.storageKey}'));
-        expect(recentOne, findsOneWidget);
-        expect(
-          find.ancestor(of: recentOne, matching: find.byType(AccentedRow)),
-          findsNothing,
-        );
-        expect(
-          identical(tester.element(recentOne), recentOneInkBefore),
-          isTrue,
-        );
-        final recentOneSurface = find.byKey(
-          ValueKey('recent-surface-${one.storageKey}'),
-        );
-        final recentThreeSurface = find.byKey(
-          ValueKey('recent-surface-${three.storageKey}'),
-        );
-        expect(recentOneSurface, findsOneWidget);
-        expect(tester.widget<Material>(recentOneSurface).color, expectedBg);
-        expect(
-          tester.widget<Material>(recentThreeSurface).color,
-          Colors.transparent,
-        );
+        expect(tester.widget<Material>(threeSurface).color, Colors.transparent);
 
         // Switching sessions inside the same project updates the highlight,
         // and returning to /sessions clears it.
@@ -607,27 +665,12 @@ void main() {
         await tester.pump();
         await tester.pump(const Duration(seconds: 1));
         await tester.pump();
-        expect(
-          tester.widget<Material>(oneSurface).color,
-          Colors.transparent,
-        );
+        expect(tester.widget<Material>(oneSurface).color, Colors.transparent);
         expect(tester.widget<Material>(threeSurface).color, expectedBg);
-        expect(
-          tester.widget<Material>(recentOneSurface).color,
-          Colors.transparent,
-        );
-        expect(tester.widget<Material>(recentThreeSurface).color, expectedBg);
         dependencies.router.go('/sessions');
         await tester.pump();
         await tester.pump(const Duration(seconds: 1));
-        expect(
-          tester.widget<Material>(threeSurface).color,
-          Colors.transparent,
-        );
-        expect(
-          tester.widget<Material>(recentThreeSurface).color,
-          Colors.transparent,
-        );
+        expect(tester.widget<Material>(threeSurface).color, Colors.transparent);
         expect(tester.takeException(), isNull);
         await _closeApp(tester);
       },

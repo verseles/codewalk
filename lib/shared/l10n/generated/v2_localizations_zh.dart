@@ -1682,7 +1682,10 @@ class V2LocalizationsZh extends V2Localizations {
   String get chatOpenProjectToLoad => '打开项目以加载会话。';
 
   @override
-  String get chatRecentSessions => '最近会话';
+  String get chatProjectShowMoreSessions => '显示更多';
+
+  @override
+  String get chatProjectShowFewerSessions => '显示更少';
 
   @override
   String get chatSearchConversations => '搜索会话';
@@ -2150,12 +2153,6 @@ class V2LocalizationsZh extends V2Localizations {
   @override
   String get settingsAppearanceSessionTabsDescription =>
       '在聊天上方显示标签栏。每个标签页都有自己的菜单。';
-
-  @override
-  String get settingsAppearanceRecentSessions => '最近会话';
-
-  @override
-  String get settingsAppearanceRecentSessionsDescription => '在项目列表上方显示最近会话。';
 
   @override
   String get chatDisplayMenu => '显示';

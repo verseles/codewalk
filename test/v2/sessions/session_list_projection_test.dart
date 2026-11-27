@@ -1,3 +1,4 @@
+import 'package:codewalk/features/sessions/session_grouping.dart';
 import 'package:codewalk/features/sessions/session_list_projection.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -71,81 +72,69 @@ void main() {
     expect(_ids(sortSessionsByRecent(rows)), ['z', 'x', 'y', 'w']);
   });
 
-  test('recent caps at two roots per project without a global limit of five', () {
-    final rows = [
-      // Project /a has 4 roots (plus a duplicate of a3, a child, and a timeless row).
-      _row('a0', directory: '/a', updated: 10),
-      _row('a1', directory: '/a', updated: 20),
-      _row('a2', directory: '/a', updated: 30),
-      _row('a3', directory: '/a', updated: 40),
-      _row('a3', directory: '/a', updated: 35),
-      _row('a-child', directory: '/a', parent: 'a3', updated: 99),
-      _row('a-timeless', directory: '/a'),
-      // Project /b has 3 roots.
-      _row('b0', directory: '/b', updated: 15),
-      _row('b1', directory: '/b', updated: 25),
-      _row('b2', directory: '/b', updated: 35),
-      // Project /c has 3 roots.
-      _row('c0', directory: '/c', updated: 12),
-      _row('c1', directory: '/c', updated: 22),
-      _row('c2', directory: '/c', updated: 32),
-      // Project /d has 1 root.
-      _row('d0', directory: '/d', updated: 5),
-    ];
-    final recent = recentSessions(rows);
-    expect(_ids(recent), ['a3', 'b2', 'c2', 'a2', 'b1', 'c1', 'd0']);
-    expect(recentSessions(rows, perProjectLimit: 0), isEmpty);
+  test('the latest update counts children too (#534)', () {
+    expect(latestSessionUpdate(const []), isNull);
+    expect(latestSessionUpdate([_row('a')]), isNull);
+    final latest = latestSessionUpdate([
+      _row('a', updated: 10),
+      _row('b', updated: 30),
+      _row('child', parent: 'a', updated: 99),
+      _row('c'),
+    ]);
+    // A child at work is activity in its project.
+    expect(latest, DateTime.fromMillisecondsSinceEpoch(99, isUtc: true));
   });
 
-  test(
-    'roots that need attention lead Recent, honoring the per-project cap',
-    () {
-      final rows = [
-        _row(
-          'p-older-waiting',
-          directory: '/p',
-          updated: DateTime.utc(2026, 10, 26, 8).millisecondsSinceEpoch,
-        ),
-        _row(
-          'p-newest',
-          directory: '/p',
-          updated: DateTime.utc(2026, 10, 26, 12).millisecondsSinceEpoch,
-        ),
-        _row(
-          'p-second',
-          directory: '/p',
-          updated: DateTime.utc(2026, 10, 26, 11).millisecondsSinceEpoch,
-        ),
-        _row(
-          'q-recent-waiting',
-          directory: '/q',
-          updated: DateTime.utc(2026, 10, 26, 10).millisecondsSinceEpoch,
-        ),
-        _row(
-          'q-middle',
-          directory: '/q',
-          updated: DateTime.utc(2026, 10, 26, 9).millisecondsSinceEpoch,
-        ),
-        _row(
-          'q-oldest',
-          directory: '/q',
-          updated: DateTime.utc(2026, 10, 26, 7).millisecondsSinceEpoch,
-        ),
-      ];
-      final recent = recentSessions(
-        rows,
-        needsAttention: (row) => row.info.ref.nativeId.endsWith('waiting'),
-      );
-      // Both projects keep at most 2 rows: their waiting root plus their
-      // newest remaining root, ordered attention-first then by update time.
-      expect(_ids(recent), [
-        'q-recent-waiting',
-        'p-older-waiting',
-        'p-newest',
-        'q-middle',
-      ]);
-    },
-  );
+  test('the drawer lists the active project first, then by activity', () {
+    DateTime at(int ms) => DateTime.fromMillisecondsSinceEpoch(ms, isUtc: true);
+    final activity = <String, DateTime?>{
+      '/a': at(10),
+      '/b': at(30),
+      '/c': null,
+      '/d': at(30),
+      '/e': at(20),
+      '/f': null,
+    };
+    final order = projectDrawerOrder(
+      ['/a', '/b', '/c', '/d', '/e', '/f'],
+      active: '/e',
+      activity: (directory) => activity[directory],
+    );
+    // The active one leads whatever its activity; a tie keeps the opening
+    // order, and the projects without activity close the list in it too.
+    expect(order, ['/e', '/b', '/d', '/a', '/c', '/f']);
+    expect(
+      projectDrawerOrder(['/a', '/b'], active: null, activity: (_) => null),
+      ['/a', '/b'],
+    );
+    expect(projectDrawerOrder(['/a'], active: '/gone', activity: (_) => null), [
+      '/a',
+    ]);
+  });
+
+  test('the active project shows five rows and the current one', () {
+    List<SessionRow> rows(int count) => [
+      for (var i = 0; i < count; i++) SessionRow(_row('r$i', updated: 100 - i)),
+    ];
+    List<String> ids(List<SessionRow> rows) => _ids(rows.map((r) => r.session));
+
+    final eight = activeProjectWindow(rows(8));
+    expect(ids(eight.shown), ['r0', 'r1', 'r2', 'r3', 'r4']);
+    expect(eight.hidden, 3);
+
+    final five = activeProjectWindow(rows(5));
+    expect(five.shown, hasLength(5));
+    expect(five.hidden, 0);
+
+    // The conversation on screen takes the last place, never a sixth.
+    final current = activeProjectWindow(rows(8), current: _ref('r6'));
+    expect(ids(current.shown), ['r0', 'r1', 'r2', 'r3', 'r6']);
+    expect(current.hidden, 3);
+    final within = activeProjectWindow(rows(8), current: _ref('r2'));
+    expect(ids(within.shown), ['r0', 'r1', 'r2', 'r3', 'r4']);
+    final absent = activeProjectWindow(rows(8), current: _ref('gone'));
+    expect(absent.shown, hasLength(5));
+  });
 
   test('a completed unread root is emphasized for one hour after idle', () {
     final idle = DateTime.utc(2026, 10, 26, 12);
