@@ -30,6 +30,7 @@ class MemoryProfiles implements EndpointProfileRepository {
           (EndpointProfile.validateEndpoint(endpoint) == expected.endpoint
               ? 0
               : 1),
+      harnessKind: profiles[index].harnessKind,
     );
     profiles[index] = next;
     return next;

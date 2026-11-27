@@ -1,8 +1,8 @@
 {
-  "artifact_seq": 5,
+  "artifact_seq": 9,
   "artifacts": {
     "A0001": {
-      "active": true,
+      "active": false,
       "bytes": 630,
       "created_at": "2026-11-27T10:24:15Z",
       "evidence": "/tmp/opencode/g6plan/r1_*.out, r1_*.rc, r1_*.err",
@@ -12,13 +12,14 @@
       "path": "artifacts/tm_20261127T094158Z_6862cb28/A0001.md",
       "purpose": "Plano implementável grupo 6 (#514,#507,#506,#504,#505)",
       "rerun_when": "payload ou decisões Q1-Q5 mudarem",
+      "retired": true,
       "sha256": "d3499b57cae16d142b15a5e3782623608539bb2b77685c2b48ed794fad9b3bef",
       "stage": "CONT1",
       "supersedes": null,
       "title": "ART-PLANNER-LEDGER + ART-CANDIDATE-PLANS R1 group6-servers-plan"
     },
     "A0002": {
-      "active": true,
+      "active": false,
       "bytes": 273,
       "created_at": "2026-11-27T10:24:49Z",
       "evidence": "/tmp/opencode/g6plan/r1b_opus.err",
@@ -28,6 +29,7 @@
       "path": "artifacts/tm_20261127T094158Z_6862cb28/A0002.md",
       "purpose": "Retomada única após SESSION_CLAUDE_ERROR",
       "rerun_when": "nova rodada de planejamento",
+      "retired": true,
       "sha256": "4a417825357b3b6ef993d36c846dffd9c8157259b31308830fd54dde8fe80276",
       "stage": "CONT1",
       "supersedes": null,
@@ -50,7 +52,7 @@
       "title": "ART-EXECUTION-HANDOFF + ART-PLANNER-ASSESSMENT grupo 6 (#514 #507 #506 #504 #505)"
     },
     "A0004": {
-      "active": true,
+      "active": false,
       "bytes": 684,
       "created_at": "2026-11-27T10:42:04Z",
       "evidence": "/tmp/opencode/g6u1/r1_*.out",
@@ -60,13 +62,14 @@
       "path": "artifacts/tm_20261127T094158Z_6862cb28/A0004.md",
       "purpose": "Review 2f0dabd8..a9ccf58f",
       "rerun_when": "boundary mudar",
+      "retired": true,
       "sha256": "90637445d317c65b227d0ba4f26798c56760c7ecadc9179e7e46ded0bf3c59a6",
       "stage": "CONT3",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS U1 R1 group6-u1-health"
     },
     "A0005": {
-      "active": true,
+      "active": false,
       "bytes": 236,
       "created_at": "2026-11-27T11:02:58Z",
       "evidence": "/tmp/opencode/g6u1/r2_*.out",
@@ -76,10 +79,75 @@
       "path": "artifacts/tm_20261127T094158Z_6862cb28/A0005.md",
       "purpose": "Re-review fix round U1",
       "rerun_when": "boundary mudar",
+      "retired": true,
       "sha256": "5b9ff43d30c56aa5bf8de6601e635c0bb5dcd700a8ea9f8c3f9b68f1bda1c5a0",
       "stage": "CONT3",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS U1 R2 (re-review 3ddb47ed)"
+    },
+    "A0006": {
+      "active": true,
+      "bytes": 1084,
+      "created_at": "2026-11-27T11:20:10Z",
+      "evidence": "/tmp/opencode/g6u2/r1_*.out; /tmp/opencode/g6u2/gate.log:1289",
+      "id": "A0006",
+      "impact": "Fix round obrigatório + re-review",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0006.md",
+      "purpose": "Review f4f1e630..2e718bf9",
+      "rerun_when": "boundary mudar",
+      "sha256": "defb77321932169b94fabb38db74007a0f19457a03e4880917ef509d1a343327",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U2 R1 group6-u2-harness"
+    },
+    "A0007": {
+      "active": true,
+      "bytes": 684,
+      "created_at": "2026-11-27T11:29:44Z",
+      "evidence": "/tmp/opencode/g6u2/r2_*.out",
+      "id": "A0007",
+      "impact": "Fail-closed via credentialFor null gera diagnóstico errado em vários consumidores",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0007.md",
+      "purpose": "Re-review fix round U2",
+      "rerun_when": "boundary mudar",
+      "sha256": "63f73e27e13514e45292b7464133bb7af01b396ce236838450a39e9bd8575c84",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U2 R2 (re-review f0d09e9c)"
+    },
+    "A0008": {
+      "active": true,
+      "bytes": 656,
+      "created_at": "2026-11-27T11:39:01Z",
+      "evidence": "/tmp/opencode/g6u2/r3_*.out",
+      "id": "A0008",
+      "impact": "3ª rodada no mesmo problema -> replanejar (regra de 3 tentativas)",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0008.md",
+      "purpose": "Re-review fix round 2 U2",
+      "rerun_when": "boundary mudar",
+      "sha256": "503d35667acb3254dbebdc50ad16d146ffdb675e267c1b6ad399e7b71cda696b",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U2 R3 (re-review 0e420d07)"
+    },
+    "A0009": {
+      "active": true,
+      "bytes": 451,
+      "created_at": "2026-11-27T11:46:09Z",
+      "evidence": "/tmp/opencode/g6u2/r4_*.out, r4b_*.err",
+      "id": "A0009",
+      "impact": "U2 convergida com 2 ajustes simples (docs/teste)",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T094158Z_6862cb28/A0009.md",
+      "purpose": "Re-review após replan U2",
+      "rerun_when": "boundary mudar",
+      "sha256": "bee426abfcaa8d3079a73f831497a1993ccc5978f137e95981a30ee5bdd63647",
+      "stage": "CONT4",
+      "supersedes": null,
+      "title": "ART-REVIEW-REPORTS U2 R4 (re-plan 9fe4a99f)"
     }
   },
   "checklist": [
@@ -142,16 +210,16 @@
       "depends": [],
       "id": "CONT3",
       "label": "#514/#507: Online sem 'não testada' e Verificando/Atrasado após 5 s",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "U1 entregue f4f1e630 (squash), push 2f0dabd8..f4f1e630; #514/#507 fechadas e marcadas na #527; review R1 8/8 (4 achados aceitos) + R2 8/8 approve; watch-ci iniciado",
+      "status": "done",
+      "validation": "make check + v2-native-check verdes em a9ccf58f; make check verde em f4f1e630"
     },
     {
       "depends": [],
       "id": "CONT4",
       "label": "#506/#504: tela única de adicionar servidor (harness, Link|Manual, salvar verificando)",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -286,10 +354,38 @@
     {
       "at": "2026-11-27T11:03:05Z",
       "text": "ART-REVIEW-JUDGMENT U1 R2 (rereview, 3ddb47ed, 8/8 approve): F1-F4 resolvidos. ACEITO ernie+hungerg SUGGESTION v2-plan.md:1349 'Pinned tested window' -> 'Minimum + known-bad' (docs-only, sem re-review). U1 convergida. Sem posição Frontier rejeitada."
+    },
+    {
+      "at": "2026-11-27T11:03:24Z",
+      "text": "U1 squash: 2f0dabd8..HEAD -> f4f1e630 (árvore idêntica a 8ff0fc8e; nada publicado). Gate make check rerodando em f4f1e630 porque o fix round tocou l10n/gerados (log /tmp/opencode/g6u1/gate2.log)."
+    },
+    {
+      "at": "2026-11-27T11:13:59Z",
+      "text": "Review U2 R1: work_item=group6-u2-harness boundary f4f1e630..2e718bf9, review_id=rvw_20261127T111352Z_f67656c2, job_key=group6-u2-harness-20261127T111352Z-0b24, dir=/home/ubuntu/MEGA/WORK/codewalk; pool 11 redescoberto."
+    },
+    {
+      "at": "2026-11-27T11:14:59Z",
+      "text": "Handshakes U2 job_key=group6-u2-harness-20261127T111352Z-0b24 dir=/home/ubuntu/MEGA/WORK/codewalk: READY 8 (helperCodex-6-luna-max helperCodex-6.2-sol-xhigh-F helperDeepSeek-41-flash-high helperErnie-55-flash-high helperGLM-53-high helperGemini-4-hydrogen-xhigh helperHungerg-free helperKimi-K31-pro-high ). FAILED após retry: helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F (SESSION_CLAUDE_ERROR), helperGrok-47-high-F (sem créditos)."
+    },
+    {
+      "at": "2026-11-27T11:24:02Z",
+      "text": "ART-REVIEW-JUDGMENT U2 R1 (2e718bf9, 8/8): ACEITOS todos (verificados): A intenção sem 'harness' (build antigo) compara id/url/revisão em _finishRemoval/_finishCreation (sol-F: comparação completa mantida p/ intenções novas); B credentialFor null p/ harness inutilizável + SessionsController._ready falha 'unavailable' antes de credencial; C repair() guarda + menu senha/parear desabilitados + botão parear da recuperação oculto; D health decide harness antes de reload/credencial; E sem HarnessOptions não grava kind; F HarnessOptions valida kinds. Gate: renomeado platform harness_options.dart -> connect_options.dart (scripted_screens_no_branch_test veta 'harness_' em imports de lib/app). Sem posição Frontier rejeitada. Re-review necessário (persistência/interfaces)."
+    },
+    {
+      "at": "2026-11-27T11:32:45Z",
+      "text": "ART-REVIEW-JUDGMENT U2 R2 (rereview f0d09e9c, 8/8, 6 fix_required): ACEITO A' (luna, sol-F) marcador intentFormat=2 em toda intenção nova; strict p/ marcadas, legado só p/ não marcadas (+teste). B'/C' (6 helpers) ACEITOS com correção alternativa menor: perfis de harness inutilizável ficam ESCONDIDOS no HostsController (_usable filtra todo load) e intactos na store; reverte remendos de R1 (credentialFor null, gate em sessions, menu/recovery, health special-case), que geravam diagnóstico 'credencial ausente/auth'. D' (sol-F, deepseek) ACEITO: renew e confirm recusam perfil alvo não listado. Escolha alternativa resolve o defeito apontado por sol-F (não rejeita a posição); será verificada na R3. Gate anterior inválido (árvore editada durante o run)."
+    },
+    {
+      "at": "2026-11-27T11:40:11Z",
+      "text": "ART-REVIEW-JUDGMENT U2 R3 (0e420d07): REPLAN após 3 rodadas no mesmo problema. Decisão: harnessKind persistido só no item, FORA do sameBinding; remover intentFormat/matching legado, ocultação (_usable) e casos de kind desconhecido; HarnessOptions só no fluxo de add. Achados R3 (estado de workspace/abas de oculto, marcador futuro, capacidade, cofre dos ocultos) ficam sem objeto. Dissent Sol-F: agree a/b/c, residual none (sugere: tarefa Codex exige teste com leitor antigo antes da 1ª gravação de outro harness). Dissent Grok-F (planning: kind desconhecido nunca sondado): unavailable (sem créditos); objeção não credível p/ bloquear (builds pré-U2 já tratam tudo como OpenCode; nenhuma build grava outro kind). Follow-up: issue de compatibilidade de schema antes do Codex."
+    },
+    {
+      "at": "2026-11-27T11:46:09Z",
+      "text": "ART-REVIEW-JUDGMENT U2 R4 (9fe4a99f, 5/8 approve, 3 failed por cota OpenCode Go): ACEITOS v2-plan §17 sem 'creation/removal intents' na abertura; fakes.dart updateProfile copia harness do perfil armazenado + store test confere 'harness' do item após edição. Simples/locais -> sem re-review (rationale: docs + teste). Sem posição Frontier rejeitada."
     }
   ],
-  "generation": 43,
-  "next_action": "record metrics R2, commit docs, squash 2f0dabd8..HEAD, push, fechar #514/#507 e marcar #527",
+  "generation": 65,
+  "next_action": "Após gate4: aplicar 2 ajustes, testes focados, commit, squash U2, gate final, push",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -297,13 +393,22 @@
     "path": "requests/tm_20261127T094158Z_6862cb28.txt",
     "sha256": "33205934aab592ae135500b33bd8b79b35f426448a4c42b5a6848da02656945f"
   },
-  "risks": [],
+  "risks": [
+    {
+      "at": "2026-11-27T11:39:01Z",
+      "id": "R0001",
+      "mitigation": "Replanejar: harnessKind persistido fora do sameBinding, sem marcador/ocultação/fail-closed; issue de follow-up para compatibilidade de schema antes do Codex; dissent exchange com Sol-F (frontier) e Grok-F registrado indisponível; avisar owner via hey.",
+      "stage": "CONT4",
+      "status": "open",
+      "text": "U2: 3 rodadas de review no mesmo problema (perfis de harness desconhecido vindos de build mais novo). Suposição duvidosa: esta build precisa tratar kinds desconhecidos; nenhuma build atual grava kind != opencode e builds pré-U2 já tratariam tudo como OpenCode."
+    }
+  ],
   "schema": 1,
   "started_at": "2026-11-27T09:41:58Z",
   "status": "in_progress",
   "task_id": "tm_20261127T094158Z_6862cb28",
   "title": "Pesquisa prévia do grupo 6 da #527 (servidores)",
-  "updated_at": "2026-11-27T11:03:05Z",
+  "updated_at": "2026-11-27T12:05:16Z",
   "validations": [
     {
       "at": "2026-11-27T09:42:17Z",
@@ -352,6 +457,34 @@
       "check": "U1 fix round F1-F4 focused checks",
       "criterion": null,
       "evidence": "l10n --check ok (COPY 13=NEW_KEYS 13); analyze hosts 0; test/v2/hosts 99 ok; novo teste reload->recheck falha sem fix (rc=1) e passa com fix",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T11:09:56Z",
+      "check": "Gate U1 make check em f4f1e630 (pós-squash)",
+      "criterion": null,
+      "evidence": "CHECK_RC=0; log /tmp/opencode/g6u1/gate2.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T11:13:46Z",
+      "check": "U2 focused checks",
+      "criterion": null,
+      "evidence": "flutter analyze lib + core 0; dart test codewalk_core endpoints_test 4 ok; flutter test test/v2/hosts + test/v2/pairing 120 ok (1 skip pré-existente); dart format aplicado só em testes tocados",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T11:42:12Z",
+      "check": "U2 replan focused checks",
+      "criterion": null,
+      "evidence": "analyze lib+core+test/v2/hosts 0; dart test codewalk_core endpoints ok; flutter test hosts+pairing+sessions_controller+scripted_screens 164 ok (1 skip pré-existente); follow-up #530 criada",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T12:05:16Z",
+      "check": "Gate U2 make check + v2-native-check em 9fe4a99f",
+      "criterion": null,
+      "evidence": "CHECK_RC=0 NATIVE_RC=0; log /tmp/opencode/g6u2/gate4.log",
       "outcome": "pass"
     }
   ]

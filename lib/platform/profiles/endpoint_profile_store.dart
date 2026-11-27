@@ -61,7 +61,11 @@ final class EndpointProfileStore implements EndpointProfileRepository {
             (json['bindingRevision'] is! int ||
                 (json['bindingRevision'] as int) < 0 ||
                 (json['bindingRevision'] as int) >
-                    EndpointProfile.maxBindingRevision))) {
+                    EndpointProfile.maxBindingRevision)) ||
+        // Absent means a profile saved before the harness choice (#504).
+        (json.containsKey('harness') &&
+            (json['harness'] is! String ||
+                !EndpointProfile.isHarnessKind(json['harness'] as String)))) {
       throw const FormatException('Unreadable profile.');
     }
     return EndpointProfile(
@@ -69,6 +73,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
       label: json['label'] as String,
       endpoint: Uri.parse(json['url'] as String),
       bindingRevision: json['bindingRevision'] as int? ?? 0,
+      harnessKind: json['harness'] as String?,
     );
   }
 
@@ -107,6 +112,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
       endpoint: validated,
       bindingRevision:
           stored.bindingRevision + (stored.endpoint == validated ? 0 : 1),
+      harnessKind: stored.harnessKind,
     );
     final patch = jsonDecode(raw! as String) as Map<String, Object?>;
     patch['label'] = next.label;
@@ -260,6 +266,7 @@ final class EndpointProfileStore implements EndpointProfileRepository {
           'id': profile.id,
           'label': profile.label,
           'url': profile.endpoint.toString(),
+          'harness': ?profile.harnessKind,
           'compatibility': 'needsOpenCode2Check',
         }),
       );

@@ -87,6 +87,64 @@ class UnknownCommitProfiles extends MemoryProfiles {
 }
 
 void main() {
+  final harnessOptions = HarnessOptions(const [
+    HarnessOption(
+      kind: 'alpha',
+      displayName: 'Alpha',
+      availability: HarnessAvailability.available,
+      methods: {HarnessConnectMethod.manualPassword},
+    ),
+    HarnessOption(
+      kind: 'beta',
+      displayName: 'Beta',
+      availability: HarnessAvailability.comingSoon,
+    ),
+  ], defaultKind: 'alpha');
+
+  test(
+    'a new server keeps its harness and a coming-soon one is refused',
+    () async {
+      final repository = MemoryProfiles();
+      final prober = FakeProber()
+        ..assessment = const EndpointAssessment(EndpointStatus.compatible);
+      final hosts = HostsController(
+        repository: repository,
+        prober: prober,
+        harnesses: harnessOptions,
+      );
+      addTearDown(hosts.dispose);
+      await hosts.load();
+      final url = Uri.parse('http://127.0.0.1:4096/');
+      var assessment = (await hosts.probe(url, 'secret'))!;
+      expect(
+        await hosts.add(url, 'Beta', 'secret', assessment, harnessKind: 'beta'),
+        isFalse,
+      );
+      expect(repository.profiles, isEmpty);
+      assessment = (await hosts.probe(url, 'secret'))!;
+      expect(await hosts.add(url, 'Alpha', 'secret', assessment), isTrue);
+      expect(repository.profiles.single.harnessKind, 'alpha');
+    },
+  );
+
+  test('without harness options no kind is recorded', () async {
+    final repository = MemoryProfiles();
+    final hosts = HostsController(
+      repository: repository,
+      prober: FakeProber()
+        ..assessment = const EndpointAssessment(EndpointStatus.compatible),
+    );
+    addTearDown(hosts.dispose);
+    await hosts.load();
+    final url = Uri.parse('http://127.0.0.1:4096/');
+    final assessment = (await hosts.probe(url, 'secret'))!;
+    expect(
+      await hosts.add(url, 'X', 'secret', assessment, harnessKind: 'alpha'),
+      isTrue,
+    );
+    expect(repository.profiles.single.harnessKind, isNull);
+  });
+
   final endpoint = Uri.parse('http://127.0.0.1:4096/');
   test(
     'local rename tolerates unreadable credentials and URL edit drops the old scope',

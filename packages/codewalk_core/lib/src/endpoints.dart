@@ -36,16 +36,22 @@ final class EndpointProfile {
     required this.label,
     required Uri endpoint,
     this.bindingRevision = 0,
+    this.harnessKind,
   }) : endpoint = validateEndpoint(endpoint) {
     if (!RegExp(r'^[A-Za-z0-9_-]{8,64}$').hasMatch(id) ||
         label.trim().isEmpty ||
         label.length > 160 ||
         label.runes.any((c) => c < 32 || c == 127) ||
         bindingRevision < 0 ||
-        bindingRevision > maxBindingRevision) {
+        bindingRevision > maxBindingRevision ||
+        (harnessKind != null && !isHarnessKind(harnessKind!))) {
       throw const FormatException('Invalid profile identity or label.');
     }
   }
+
+  /// A stable harness key such as the adapter id; never a display name.
+  static bool isHarnessKind(String value) =>
+      RegExp(r'^[a-z][a-z0-9_-]{0,31}$').hasMatch(value);
   final String id;
   final String label;
   final Uri endpoint;
@@ -53,6 +59,12 @@ final class EndpointProfile {
 
   /// Changes only when the saved endpoint URL changes, including A–B–A.
   final int bindingRevision;
+
+  /// The harness chosen when the server was added, fixed for its lifetime
+  /// and so not part of [sameBinding]. Null marks a profile saved before that
+  /// choice existed; the app's
+  /// `HarnessOptions.defaultKind` resolves it (#504).
+  final String? harnessKind;
 
   bool sameBinding(EndpointProfile other) =>
       id == other.id &&

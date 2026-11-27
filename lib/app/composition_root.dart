@@ -21,6 +21,7 @@ import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../features/settings/update_scheduler.dart';
 import '../platform/connectivity/network_changes.dart';
+import '../platform/endpoints/connect_options.dart';
 import '../platform/endpoints/pairing_factory.dart';
 import '../platform/endpoints/probe_factory.dart';
 import '../platform/media/attachment_picker_factory.dart';
@@ -159,6 +160,7 @@ AppDependencies createAppDependencies({
       prober: prober,
       diagnostics: locator<DiagnosticsController>(),
       now: sessionClock,
+      harnesses: createConnectOptions(),
     ),
   );
   locator.registerSingleton(

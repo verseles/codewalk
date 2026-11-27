@@ -888,6 +888,7 @@ description of this code.
 - **Given** the user opens `/hosts` in the explicit v2 app
 - **When** native profile storage is available
 - **Then** saved servers retain their labels, authored URLs, proxy paths and ports across restarts; passwords remain in the origin/profile-scoped credential vault, never in profile metadata
+- **Then** each saved server keeps the harness chosen when it was added (OpenCode today); servers saved before that choice read as OpenCode, the kind is fixed when the server is added and never changes its binding (#504)
 - **Then** compact and wide layouts expose localized add, check and delete actions; an in-flight saved-server check shows progress and disables repeated checks
 - **Then** a catalog read failure displays a retry action rather than claiming there are no saved servers; malformed records and future schemas are preserved
 

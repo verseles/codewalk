@@ -13,12 +13,17 @@ class HostsController extends ChangeNotifier {
     String Function()? createId,
     DateTime Function()? now,
     DiagnosticsController? diagnostics,
+    this.harnesses,
   }) : _createId = createId ?? _id,
        _now = now ?? DateTime.now,
        _diagnostics = diagnostics;
   final DiagnosticsController? _diagnostics;
   final EndpointProfileRepository repository;
   final EndpointProber prober;
+
+  /// The harnesses the add flow offers. Without it new profiles are saved
+  /// without a harness kind.
+  final HarnessOptions? harnesses;
   final String Function() _createId;
   List<EndpointProfile> _profiles = const [];
   List<EndpointProfile> get profiles => _profiles;
@@ -51,6 +56,7 @@ class HostsController extends ChangeNotifier {
   final Set<String> _credentialErrors = {};
   bool credentialUnreadable(EndpointProfile profile) =>
       isCurrentProfile(profile) && _credentialErrors.contains(profile.id);
+
   EndpointCredential? credentialFor(EndpointProfile profile) =>
       isCurrentProfile(profile) ? _credentials[profile.id] : null;
 
@@ -174,7 +180,12 @@ class HostsController extends ChangeNotifier {
     final Uri validated;
     try {
       validated = EndpointProfile.validateEndpoint(endpoint);
-      EndpointProfile(id: expected.id, label: label, endpoint: validated);
+      EndpointProfile(
+        id: expected.id,
+        label: label,
+        endpoint: validated,
+        harnessKind: expected.harnessKind,
+      );
     } on FormatException {
       return false;
     }
@@ -294,22 +305,32 @@ class HostsController extends ChangeNotifier {
     Uri endpoint,
     String label,
     String secret,
-    EndpointAssessment assessment,
-  ) => addCredential(
+    EndpointAssessment assessment, {
+    String? harnessKind,
+  }) => addCredential(
     endpoint,
     label,
     EndpointCredential(kind: EndpointAuthKind.password, secret: secret),
     assessment,
+    harnessKind: harnessKind,
   );
 
   Future<bool> addCredential(
     Uri endpoint,
     String label,
     EndpointCredential credential,
-    EndpointAssessment assessment,
-  ) async {
+    EndpointAssessment assessment, {
+    String? harnessKind,
+  }) async {
     final secret = credential.secret;
+    // Only a build that offers harnesses records one.
+    final kind = harnesses == null
+        ? null
+        : harnessKind ?? harnesses!.defaultKind;
     if (_disposed || _adding || loading || !assessment.canUse) return false;
+    if (harnesses != null && !(harnesses!.resolve(kind)?.selectable ?? false)) {
+      return false;
+    }
     if (_verifiedEndpoint != EndpointProfile.validateEndpoint(endpoint) ||
         _verifiedSecret != secret ||
         !identical(_verifiedAssessment, assessment)) {
@@ -327,7 +348,8 @@ class HostsController extends ChangeNotifier {
         final loaded = await repository.load();
         final matches = loaded.where((p) => p.id == pending.id);
         if (matches.isNotEmpty) {
-          if (matches.single.endpoint != pending.endpoint) {
+          if (matches.single.endpoint != pending.endpoint ||
+              matches.single.harnessKind != pending.harnessKind) {
             throw const FormatException(
               'Uncertain profile identity; preserved.',
             );
@@ -341,6 +363,7 @@ class HostsController extends ChangeNotifier {
           _pendingCreation = null;
           _pendingCreationSecret = null;
           if (pending.endpoint == EndpointProfile.validateEndpoint(endpoint) &&
+              pending.harnessKind == kind &&
               storedSecret == secret) {
             if (!_disposed && revision == _catalogRevision) {
               _profiles = loaded;
@@ -364,6 +387,7 @@ class HostsController extends ChangeNotifier {
         id: _createId(),
         label: label.trim().isEmpty ? endpoint.host : label.trim(),
         endpoint: endpoint,
+        harnessKind: kind,
       );
       _pendingCreation = profile;
       _pendingCreationSecret = secret;

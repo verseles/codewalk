@@ -94,6 +94,66 @@ void main() {
     store = openStore(backend);
   });
 
+  test('the harness kind is stored and kept on edit and removal', () async {
+    final original = EndpointProfile(
+      id: 'endpoint_kind',
+      label: 'Server',
+      endpoint: Uri.parse('http://127.0.0.1:4096/'),
+      harnessKind: 'opencode',
+    );
+    await store.save(original, 'fake-secret');
+    final key = EndpointProfileStore.itemKey(original.id);
+    expect(jsonDecode(backend.values[key]! as String)['harness'], 'opencode');
+    expect((await store.load()).single.harnessKind, 'opencode');
+    final moved = await store.updateProfile(
+      original,
+      label: 'Renamed',
+      endpoint: Uri.parse('http://127.0.0.1:4097/'),
+    );
+    expect(moved.harnessKind, 'opencode');
+    expect(jsonDecode(backend.values[key]! as String)['harness'], 'opencode');
+    expect((await store.load()).single.sameBinding(moved), isTrue);
+    await store.remove(moved);
+    expect(await store.load(), isEmpty);
+    expect(backend.values[EndpointProfileStore.removalKey], isNull);
+  });
+
+  test(
+    'a profile saved before the harness choice reads without a kind',
+    () async {
+      final legacy = profile('endpoint_legacy');
+      await store.save(legacy, 'fake-secret');
+      final key = EndpointProfileStore.itemKey(legacy.id);
+      expect(
+        (jsonDecode(backend.values[key]! as String) as Map).containsKey(
+          'harness',
+        ),
+        isFalse,
+      );
+      final loaded = (await store.load()).single;
+      expect(loaded.harnessKind, isNull);
+      expect(loaded.sameBinding(legacy), isTrue);
+      await store.remove(loaded);
+      expect(await store.load(), isEmpty);
+    },
+  );
+
+  test('a malformed harness kind keeps the record unreadable', () async {
+    final original = profile('endpoint_bad_kind');
+    await store.save(original, 'fake-secret');
+    final key = EndpointProfileStore.itemKey(original.id);
+    final raw =
+        jsonDecode(backend.values[key]! as String) as Map<String, dynamic>;
+    for (final bad in <Object>[42, 'Open Code', '']) {
+      raw['harness'] = bad;
+      backend.values[key] = jsonEncode(raw);
+      await expectLater(store.load(), throwsFormatException);
+    }
+    raw['harness'] = 'future-harness';
+    backend.values[key] = jsonEncode(raw);
+    expect((await store.load()).single.harnessKind, 'future-harness');
+  });
+
   test(
     'rename preserves binding and unknown fields without reading the vault',
     () async {
