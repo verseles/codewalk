@@ -173,9 +173,9 @@
       ],
       "id": "S8",
       "label": "Avaliar helpers, BEHAVIOR.md, issues, #527 e squash",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "Push d3a798e5 + goldens 7166a075 (run 45940050918); issues fechadas; #527 marcada; squash não aplicável (um commit por item, fixes não adjacentes)",
+      "status": "done",
+      "validation": "goldens: só os 3 model_picker diferiam, inspecionados"
     },
     {
       "depends": [
@@ -184,7 +184,7 @@
       "id": "S9",
       "label": "Gate final, release notes, push e release minor",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     }
   ],
@@ -331,8 +331,8 @@
       "text": "Push d3a798e5 (12 commits); goldens.yml run 45940050918 em main; issues #515 #517 #526 #516 #518 #524 fechadas com commits; #527 grupo 4 todo marcado. Squash não feito: owner pediu um commit por alteração e as correções não são adjacentes aos commits de origem (exigiria rebase interativo, proibido). Avaliação de helpers (4 rodadas de review + plano): melhores Sol-F e Haiku (high-value em 4/5 e 4/5), Grok-F forte no plano; piores Luna (aprovou tudo sem achados em 4 rodadas) e Gemini (acima do envelope no plano, achados só repetidos); DeepSeek útil na 1ª rodada que entrou."
     }
   ],
-  "generation": 49,
-  "next_action": "Notas do release, push, workflow Goldens, commit PNGs",
+  "generation": 51,
+  "next_action": "Gate final em 7166a075, depois make release V=stable + make watch-release",
   "pending_operation": null,
   "queued_followups": [
     {
@@ -351,7 +351,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T025825Z_6ddaec3e",
   "title": "Grupo 4 da #527 — seletor de modelos (flow)",
-  "updated_at": "2026-11-27T04:28:14Z",
+  "updated_at": "2026-11-27T04:53:25Z",
   "validations": [
     {
       "at": "2026-11-27T03:32:10Z",
@@ -408,6 +408,13 @@
       "criterion": null,
       "evidence": "2541 pass, 4 skip, 3 fail = só goldens model_picker_{desktop_light,mobile_ar_rtl,mobile_light} (x86 pendente). Log /tmp/opencode/g4/fullsuite.log",
       "outcome": "info"
+    },
+    {
+      "at": "2026-11-27T04:53:25Z",
+      "check": "Gate final 7166a075",
+      "criterion": null,
+      "evidence": "make check TEST_JOBS=nproc rc=0; make v2-native-check rc=0 (2543 pass, 4 skip). main == origin/main == 7166a075",
+      "outcome": "pass"
     }
   ]
 }

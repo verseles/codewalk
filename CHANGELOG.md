@@ -2,6 +2,23 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.10.0 - 2026-11-27
+
+> 📣 CodeWalk 2.10.0 reworks the model picker: models ordered and searched like the official OpenCode clients, older releases out of the way, effort-level icons, favorites by long press on phones, a shorter auto-approve switch and short model names in the composer chip.
+
+### Model picker
+
+- Lists Favorites, then Recent, then each provider's models, every model once (`#515`). Providers follow the official Web client's order (OpenCode Go, OpenCode, Anthropic, GitHub Copilot, OpenAI, Google, OpenRouter, Vercel), then the rest by name; inside a provider free models come first, then the newest release.
+- Keeps only the newest release of each model family in the list; older releases and the same model in other regions at the same date stay one search away, and favorites, recents and the current model always show (`#515`). Retired models leave the picker and `mod+m` unless the session runs them.
+- Ranks search results in one list, best match first, with each row naming its provider; case, punctuation and spacing no longer matter, so "gpt 6" finds "GPT-6.2" and "githubcopilot" finds GitHub Copilot (`#515`).
+- Writes the variant choice that leaves the effort to the server as "Auto" in every language, like the variant names beside it (`#517`), and shows an effort-level icon before each known level in the open variant menu (`#526`).
+- On phones and narrow windows the favorite star leaves the row: a long press adds or removes a favorite, a yellow bar marks favorites, and a short toast confirms (`#516`). A screen reader gets the same action; wider windows keep the star.
+- Titles the permission switch simply "Auto-approve" in each language, without the server explanation below it (`#518`); errors and the count of waiting requests still show.
+
+### Composer
+
+- Shortens long model names in the composer's chip only, such as "Claude Opus 5.5" to "Opus 5.5", "GPT-6.2 Sol" to "6.2 Sol" and "DeepSeek V4 Pro" to "DS V4 Pro", and shows a no-cost icon in place of "Free" (`#524`). The tooltip, the screen reader, search and the picker keep the full name.
+
 ## v2.9.0 - 2026-11-26
 
 > 📣 CodeWalk 2.9.0 smooths the composer and the return to the app: waiting messages sit at the end of the conversation, the mic takes the idle Send's place on phones, shell commands leave the status bar, and coming back no longer flashes a reconnect.
