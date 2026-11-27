@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 6,
+  "artifact_seq": 7,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -101,6 +101,23 @@
       "stage": "S4",
       "supersedes": null,
       "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 2 (#509) R2 recovery"
+    },
+    "A0007": {
+      "active": false,
+      "bytes": 1117,
+      "created_at": "2026-11-27T08:01:45Z",
+      "evidence": "git show 2ca07aa2; logs em /tmp/opencode/group5-525-20261127T074838Z-a41c/r1_*.out",
+      "id": "A0007",
+      "impact": "7/7 entregues aprovam sem achados; 1 recuperação rung 1 pendente para helperGLM-53-high antes do julgamento final",
+      "origin": "review-batch-3-r1",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0007.md",
+      "purpose": "Preservar ledger e relatórios da rodada inicial do #525 (boundary 2ca07aa2)",
+      "rerun_when": "Mudança de código no #525",
+      "retired": true,
+      "sha256": "6ac42db82dd09cce2dbdc13741d0486fc50e1a9c77a8b136d633a77fe141f761",
+      "stage": "S5",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER & ART-REVIEW-REPORTS Batch 3 (#525) R1"
     }
   },
   "checklist": [
@@ -148,9 +165,9 @@
       ],
       "id": "S5",
       "label": "#525 efeito de atividade na cápsula de subagentes/shells",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "#525 entregue em 2ca07aa2: borda SweepGradient (~2s) na SessionSubagentCapsule quando count>0, estática com movimento reduzido, pausa por TickerMode; revisão 8/8 unânime sem achados (3 Claude em quota 5h)",
+      "status": "done",
+      "validation": "make check TEST_JOBS=4 verde em 2ca07aa2; 29/29 testes focados + goldens locais verdes"
     },
     {
       "depends": [
@@ -159,7 +176,7 @@
       "id": "S6",
       "label": "Avaliar helpers, BEHAVIOR.md, issues e #527",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -277,10 +294,22 @@
     {
       "at": "2026-11-27T07:37:21Z",
       "text": "ART-REVIEW-JUDGMENT Batch 2 (#509) R2 (8/10 entregues, GLM recuperado rung 1, Claude haiku/opus failed por SESSION_CLAUDE_ERROR): todos os 5 ajustes de produção validados sem regressões. ACEITO 1 achado de teste [codex-6.2-sol-F (warning), kimi-k31 (suggestion)]: corrigir tool/ci/test/import_rules_test.dart:1285 para testar leak via arquivo não-widget (lib/main_v2.dart) esperando get-it-boundary, exercitando LocatorValues.escapes diretamente. Zero posições Frontier rejeitadas. Sem R3: correção estritamente em 1 caso de teste unitário, validada localmente."
+    },
+    {
+      "at": "2026-11-27T07:49:32Z",
+      "text": "Review Batch 3 (#525) R1 iniciado: boundary=2ca07aa2 (base=01b1a492, range 01b1a492..2ca07aa2), review_id=rvw_20261127T074838Z_7d4dee0d, job_key=group5-525-20261127T074838Z-a41c, dir=/home/ubuntu/MEGA/WORK/codewalk. Pool elegível (11): helperCC-opus-5.5-xhigh-F, helperClaude-haiku-5-max, helperClaude-opus-5-low, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high. Excluído: helperDeepSeek-41-flash-high (pico UTC Sex 07:48 dentro de 06:00-10:00)."
+    },
+    {
+      "at": "2026-11-27T07:52:23Z",
+      "text": "Handshakes Batch 3 (#525) dir=/home/ubuntu/MEGA/WORK/codewalk job_key=group5-525-20261127T074838Z-a41c: READY (8): helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high. FAILED após 1 retry (3): helperCC-opus-5.5-xhigh-F (5h quota limit resets 08:50 UTC), helperClaude-haiku-5-max (SESSION_CLAUDE_ERROR), helperClaude-opus-5-low (SESSION_CLAUDE_ERROR)."
+    },
+    {
+      "at": "2026-11-27T08:02:35Z",
+      "text": "ART-REVIEW-JUDGMENT Batch 3 (#525) R1 (rvw_20261127T074838Z_7d4dee0d, boundary 2ca07aa2): 8/11 aprovam por unanimidade (overall_risk=low, confidence=high, findings=[]); helperGLM-53-high (invalid-delivery, outcome=recovered, attempts=2, relay_bytes=3472) recuperado rung 1 com approve/findings=[]; 3 Claude failed no handshake (quota 5h resets 08:50 UTC). Zero achados aceitos, zero dissenso Frontier, make check verde -> #525 aprovado sem R2."
     }
   ],
-  "generation": 39,
-  "next_action": "Implementar #525: brilho SweepGradient percorrendo a borda StadiumBorder da SessionSubagentCapsule quando count>0",
+  "generation": 47,
+  "next_action": "Atualizar BEHAVIOR.md, preparar avaliação dos helpers e avançar para push/goldens x86_64/release v2.11.0",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -294,7 +323,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T07:48:37Z",
+  "updated_at": "2026-11-27T08:02:38Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
@@ -350,6 +379,13 @@
       "check": "#525 format, analyze and focused capsule tests",
       "criterion": null,
       "evidence": "format 0 changed; analyze 0 issues (incl. tool/goldens/subagent_capsule_test.dart); 29/29 passed across session_subagent_capsule_test, session_capsule_shells_test, subagent_capsule_golden_test; subconversation_navigation_test + session_live_execution_test green",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:02:35Z",
+      "check": "make check on #525 (2ca07aa2)",
+      "criterion": null,
+      "evidence": "make check TEST_JOBS=$(nproc) exit 0; analyze 4<=4; python CI/release tests 191/191 ok; full flutter test suite green (/tmp/opencode/make_check_525_retry.log)",
       "outcome": "pass"
     }
   ]
