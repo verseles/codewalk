@@ -1,6 +1,7 @@
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/project_picker_dialog.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/platform/sessions/session_tabs_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
@@ -260,6 +261,54 @@ void main() {
     );
     await tester.pumpWidget(const SizedBox.shrink());
   });
+
+  for (final width in [390.0, 1280.0]) {
+    testWidgets('without tabs the toolbar names the session at $width', (
+      tester,
+    ) async {
+      final app = await _open(
+        tester,
+        '/s/profile_a/ses_far',
+        size: Size(width, 844),
+      );
+      final source = app.rig.sources.single;
+      source.respond([source.row('one')]);
+      await _settle(tester);
+      source.reads.single.$2.completion.complete(
+        source.row('far', title: 'Far away'),
+      );
+      await _settle(tester);
+      // With tabs on, the toolbar keeps the project.
+      expect(
+        find.byKey(const ValueKey('workspace-project-title')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('workspace-session-title')),
+        findsNothing,
+      );
+
+      // Without tabs, the session is the title and its project's icon leads
+      // it; the icon switches projects (#535).
+      app.dependencies.preferences.setShowSessionTabs(false);
+      await _settle(tester);
+      expect(
+        find.byKey(const ValueKey('workspace-project-title')),
+        findsNothing,
+      );
+      final title = find.byKey(const ValueKey('workspace-session-title'));
+      expect(tester.widget<Text>(title).data, 'Far away');
+      final icon = find.byKey(const ValueKey('workspace-project-icon'));
+      expect(
+        tester.getRect(icon).right,
+        lessThanOrEqualTo(tester.getRect(title).left),
+      );
+      await tester.tap(icon);
+      await _settle(tester);
+      expect(find.byType(ProjectPickerDialog), findsOneWidget);
+      await tester.pumpWidget(const SizedBox.shrink());
+    });
+  }
 
   testWidgets('a late direct read cannot open the previous endpoint binding', (
     tester,

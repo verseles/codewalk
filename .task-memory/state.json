@@ -335,9 +335,13 @@
     {
       "at": "2026-11-27T22:14:49Z",
       "text": "u1 r1 judgment: F1 (haiku warning) accepted: with catalog.failure set, row actions and draft show sessionCatalogFailureText instead of the sync promise; F3 (sol-F) accepted: test asserts createReason=listNotCurrent and no sidebar text after the 400 ms pump; F2 (haiku, opus-F) accepted for the docs step: BEHAVIOR.md 307/312 rewrite. All frontier positions accepted, no dissent needed. Fix commit 2 in fix round; re-review skipped: local text selection + tests, no concurrency/interface/persistence change; focused suites 105 pass, analyze clean, mutation fails as expected."
+    },
+    {
+      "at": "2026-11-27T22:19:40Z",
+      "text": "#535 implemented ahead of #534 while its planners run (no file overlap): base 986bd8b1f55aa559179b10a929833e78d929df31; _ToolbarProjectTitle shows, when showSessionTabs is false and a session is shown, a project IconButton (ProjectIconView, opens pickWorkspaceProject) + the session title (open view summary > loaded row > tab title; unknown title keeps the project title). Test in session_route_test at 390 and 1280. Suites route/desktop/tab_strip 80 pass."
     }
   ],
-  "generation": 15,
+  "generation": 16,
   "next_action": "Squash 170e8de5..HEAD into one commit, comment+close #532/#533, check them in #527; #534 planners running (op_a89edfeeb7df); meanwhile implement #535",
   "pending_operation": {
     "expected_bytes": 120000,
@@ -359,6 +363,6 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-27T22:15:21Z",
+  "updated_at": "2026-11-27T22:19:40Z",
   "validations": []
 }

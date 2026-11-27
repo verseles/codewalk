@@ -13,7 +13,9 @@ import 'package:provider/provider.dart';
 import '../features/hosts/endpoint_health_controller.dart';
 import '../features/hosts/endpoint_health_view.dart';
 import '../features/sessions/project_contexts_controller.dart';
+import '../features/sessions/project_icon_view.dart';
 import '../features/sessions/project_picker_dialog.dart';
+import '../features/sessions/session_live_controller.dart';
 import '../features/sessions/session_tab_strip.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
@@ -36,6 +38,7 @@ import 'desktop_window_controller.dart';
 import 'resizable_session_pane.dart';
 import 'workspace_actions.dart';
 import 'workspace_chrome.dart';
+import 'workspace_chrome_controller.dart';
 import 'workspace_controller.dart';
 
 /// The workspace of the legacy client: the projects and their sessions on the
@@ -390,6 +393,8 @@ double _toolbarHeight(AppDensity density, {required bool compact}) {
 
 /// The toolbar title is the active project; tapping it opens the project
 /// picker (v1 `_buildProjectSelectorTitle`, chat_page_selector_flow.dart).
+/// Without session tabs, a shown session takes the title instead: its
+/// project's icon leads it and opens the picker (#535).
 class _ToolbarProjectTitle extends StatelessWidget {
   const _ToolbarProjectTitle({required this.compact});
 
@@ -402,6 +407,22 @@ class _ToolbarProjectTitle extends StatelessWidget {
     final active = contexts?.active;
     if (catalog == null || contexts == null) return const Text('CodeWalk');
     final theme = Theme.of(context);
+    final tabs = context.watch<AppPreferencesController?>()?.showSessionTabs;
+    if (tabs == false) {
+      final session = context
+          .watch<WorkspaceChromeController?>()
+          ?.currentSession;
+      final title = session == null
+          ? null
+          : _sessionTitle(
+              session,
+              catalog,
+              context.watch<SessionTabsController?>(),
+            );
+      if (title != null) {
+        return _sessionTitleRow(context, catalog, contexts, active, title);
+      }
+    }
     return Align(
       alignment: AlignmentDirectional.centerStart,
       child: Tooltip(
@@ -442,6 +463,72 @@ class _ToolbarProjectTitle extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  /// The shown session's title: its open view, else the list's row, else
+  /// its tab, never a guess. A session whose title is unknown keeps the
+  /// project title.
+  static String? _sessionTitle(
+    SessionRef session,
+    SessionsController catalog,
+    SessionTabsController? tabs,
+  ) {
+    String? named(String? title) =>
+        title == null || title.trim().isEmpty ? null : title;
+    for (final view in tabs?.warmViews ?? const <SessionLiveController>[]) {
+      if (!view.disposed && view.session == session) {
+        return named(view.summary.info.title);
+      }
+    }
+    for (final row in catalog.loadedSessions) {
+      if (row.info.ref == session) return named(row.info.title);
+    }
+    final tab = tabs
+        ?.projection(session.host)
+        .ordered
+        .where((tab) => tab.ref == session)
+        .firstOrNull;
+    return named(tab?.title);
+  }
+
+  Widget _sessionTitleRow(
+    BuildContext context,
+    SessionsController catalog,
+    ProjectContextsController contexts,
+    String? active,
+    String title,
+  ) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        IconButton(
+          key: const ValueKey('workspace-project-icon'),
+          tooltip: active == null
+              ? context.v2L10n.chatChooseDirectory
+              : '${serverPathTitle(active)} · '
+                    '${context.v2L10n.chatChooseDirectory}',
+          visualDensity: VisualDensity.compact,
+          onPressed: () => unawaited(
+            pickWorkspaceProject(context, catalog: catalog, contexts: contexts),
+          ),
+          icon: ProjectIconView(
+            source: active == null ? null : catalog.projects.iconAt(active),
+            size: 20,
+          ),
+        ),
+        Flexible(
+          child: Text(
+            title,
+            key: const ValueKey('workspace-session-title'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
