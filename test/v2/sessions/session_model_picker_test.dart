@@ -177,6 +177,10 @@ void main() {
     // A favorite is not repeated among the recents.
     expect(row('recent-opencode/zen'), findsNothing);
     expect(row('recent-other/gamma'), findsOneWidget);
+    // Nor are favorites and recents repeated in their provider's group
+    // (#515).
+    expect(row('model-opencode/zen'), findsNothing);
+    expect(row('model-other/gamma'), findsNothing);
     double top(Finder finder) => tester.getTopLeft(finder).dy;
     expect(
       top(find.text(l10n.liveModelFavorites)),
@@ -221,12 +225,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(switches(handle), isEmpty);
     expect(preferences.favorites(_server), ['prov/beta']);
-    expect(tester.widget<IconButton>(star).isSelected, isTrue);
+    // A favorite leaves its provider's group: each model shows once (#515).
+    expect(star, findsNothing);
+    expect(row('model-prov/beta'), findsNothing);
+    final starred = find.byKey(
+      const ValueKey('live-selection-star-favorite-prov/beta'),
+    );
+    expect(tester.widget<IconButton>(starred).isSelected, isTrue);
     // The star shows filled: a Material Symbols glyph is outlined unless it
     // is filled (#485).
     expect(
       find.descendant(
-        of: star,
+        of: starred,
         matching: find.byWidgetPredicate(
           (widget) =>
               widget is Icon && widget.icon == Symbols.star && widget.fill == 1,
@@ -235,13 +245,12 @@ void main() {
       findsOneWidget,
     );
     expect(row('favorite-prov/beta'), findsOneWidget);
-    // Unstarring from the favorites removes it again.
-    await tester.tap(
-      find.byKey(const ValueKey('live-selection-star-favorite-prov/beta')),
-    );
+    // Unstarring from the favorites returns it to its provider.
+    await tester.tap(starred);
     await tester.pumpAndSettle();
     expect(preferences.favorites(_server), isEmpty);
     expect(row('favorite-prov/beta'), findsNothing);
+    expect(row('model-prov/beta'), findsOneWidget);
     expect(switches(handle), isEmpty);
   });
 

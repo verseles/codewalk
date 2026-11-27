@@ -1,1 +1,0 @@
-olha como os aplicativos oficiais implementam anexos e vamos implementar no botao dedicado a isso que ja existe. Necessario implementar tambem a exibicao do anexo na timeline, seja imagem, arquivo, audio, e localizacao

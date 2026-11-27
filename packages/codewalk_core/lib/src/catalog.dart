@@ -71,7 +71,13 @@ final class ModelEntry {
     Iterable<String> variants = const [],
     Iterable<ModelCost>? cost,
     this.metadata,
+    String? family,
+    DateTime? released,
+    this.deprecated = false,
+    this.providerRank,
   }) : id = requireText(id),
+       family = family == null || family.trim().isEmpty ? null : family,
+       released = released?.toUtc(),
        providerId = requireText(providerId),
        inputModalities = immutableMap(inputModalities),
        variants = immutableList(variants.map(requireText)),
@@ -94,6 +100,21 @@ final class ModelEntry {
   /// The catalog's prices, or null when it did not state them readably.
   final List<ModelCost>? cost;
   final CanonicalValue? metadata;
+
+  /// The line this model belongs to, shared by its successive releases, when
+  /// the harness names one.
+  final String? family;
+
+  /// When the model was released (UTC), when the harness states it.
+  final DateTime? released;
+
+  /// The harness has retired the model; it is still known but not offered
+  /// for a new pick. Unstated means not deprecated.
+  final bool deprecated;
+
+  /// Where the harness's own clients place this model's provider among the
+  /// others, lower first; null when the harness does not rank it.
+  final int? providerRank;
 
   /// Free only when the catalog states one untiered price and it is zero:
   /// an unknown, empty or tiered price is not called free.

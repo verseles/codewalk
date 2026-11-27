@@ -30,13 +30,50 @@ ModelEntry? projectOpenCodeModelRow(Object? row) {
     // variant is not offered; the rest of the catalog still is.
     variants: [
       for (final variant in variants)
-        openCodeCatalogText(
-          openCodeCatalogObject(variant)['id'],
-          empty: true,
-        ),
+        openCodeCatalogText(openCodeCatalogObject(variant)['id'], empty: true),
     ].where((id) => id.isNotEmpty),
     cost: _catalogCost(model['cost']),
+    // Release facts only order and thin the pick: an unreadable one is
+    // unstated and never fails the catalog.
+    family: _catalogName(model['family']),
+    released: _catalogReleased(model['time']),
+    deprecated: model['status'] == 'deprecated',
+    providerRank: _providerRank(model['providerID']),
   );
+}
+
+/// The providers OpenCode's own Web client lists first, in its order
+/// (`packages/app/src/providers/catalog/order.ts`).
+const _rankedProviders = [
+  'opencode-go',
+  'opencode',
+  'anthropic',
+  'github-copilot',
+  'openai',
+  'google',
+  'openrouter',
+  'vercel',
+];
+
+int? _providerRank(Object? provider) {
+  final rank = _rankedProviders.indexOf(provider is String ? provider : '');
+  return rank < 0 ? null : rank;
+}
+
+String? _catalogName(Object? value) =>
+    value is String && value.trim().isNotEmpty && value.length <= 256
+    ? value
+    : null;
+
+/// `time.released` in epoch milliseconds, as OpenCode 2.0.22 states it.
+DateTime? _catalogReleased(Object? time) {
+  if (time is! Map<String, Object?>) return null;
+  final released = time['released'];
+  // Past the epoch and before year 3000: anything else is not a date.
+  if (released is! int || released <= 0 || released >= 32503680000000) {
+    return null;
+  }
+  return DateTime.fromMillisecondsSinceEpoch(released, isUtc: true);
 }
 
 Map<String, bool?> _modelInputModalities(Object? capabilities) {

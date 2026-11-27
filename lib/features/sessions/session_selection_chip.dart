@@ -13,6 +13,7 @@ import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'session_agent_color.dart';
 import 'session_live_controller.dart';
+import 'session_model_options.dart';
 import 'session_selection_host.dart';
 
 /// The live session's model and agent (V2-054A). The label is the server's
@@ -294,9 +295,9 @@ final class _Pick {
 }
 
 /// The pick (#485). Models come first: this server's favorites, then this
-/// project's recent models, then every model by provider, each offered by
-/// the session's location, with its variants in a compact menu on its row; a
-/// search narrows them by name, id or provider. A fixed footer holds the
+/// project's recent models, then the other models by provider, each listed
+/// once and offered by the session's location, with its variants in a
+/// compact menu on its row; a search lists them by relevance instead (#515). A fixed footer holds the
 /// agents, each on its color, and this session's permission mode with the
 /// count of requests waiting. A part the harness does not offer is not shown.
 class _SelectionPanel extends StatefulWidget {
@@ -391,30 +392,17 @@ class _SelectionPanelState extends State<_SelectionPanel> {
           offeredModel != null &&
           (currentVariant == null ||
               offeredModel.variants.contains(currentVariant));
-      final query = _search.text.trim().toLowerCase();
-      bool matches(ModelEntry model) =>
-          query.isEmpty ||
-          [
-            model.label,
-            model.id,
-            model.providerId,
-            ?state.providers[model.providerId],
-          ].any((text) => text.toLowerCase().contains(query));
-      final byKey = {
-        for (final model in state.models)
-          SessionLiveController.modelKey(model): model,
-      };
       final favoriteKeys = live.favoriteModels.toSet();
-      // Saved names the location does not offer are not shown.
-      final favorites = [for (final key in live.favoriteModels) ?byKey[key]];
-      final recents = [
-        for (final key in live.recentModels)
-          if (!favoriteKeys.contains(key)) ?byKey[key],
-      ];
-      final providers = <String, List<ModelEntry>>{};
-      for (final model in state.models.where(matches)) {
-        (providers[model.providerId] ??= []).add(model);
-      }
+      final options = modelPickOptions(
+        models: state.models,
+        keyOf: SessionLiveController.modelKey,
+        favoriteKeys: live.favoriteModels,
+        recentKeys: live.recentModels,
+        providerNames: state.providers,
+        query: _search.text,
+        current: offeredModel,
+      );
+      final matches = options.matches;
       void pick(_Pick pick) => Navigator.of(context).pop(pick);
       // The session's own value needs no switch: picking it again closes the
       // pick and sends nothing (#431); only an explicit Auto clears a
@@ -447,7 +435,11 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         subtitle: listed ? Text(l10n.liveSelectionNotOffered) : null,
         trailing: const Icon(Symbols.check),
       );
-      Widget model(ModelEntry model, {String? section}) {
+      Widget model(
+        ModelEntry model, {
+        String? section,
+        bool namesProvider = false,
+      }) {
         final key = SessionLiveController.modelKey(model);
         final selected = identical(model, offeredModel);
         final favorite = favoriteKeys.contains(key);
@@ -468,7 +460,7 @@ class _SelectionPanelState extends State<_SelectionPanel> {
             overflow: TextOverflow.ellipsis,
           ),
           // Outside its provider's group a model names its provider.
-          subtitle: section == null
+          subtitle: section == null && !namesProvider
               ? null
               : Text(
                   state.providers[model.providerId] ?? model.providerId,
@@ -686,22 +678,27 @@ class _SelectionPanelState extends State<_SelectionPanel> {
               leading: const Icon(Symbols.info),
               title: Text(l10n.liveModelPreferencesUnsaved),
             ),
-          // While searching, the matches show once, by provider.
-          if (query.isEmpty && favorites.isNotEmpty) ...[
+          // While searching, the matches show once, best first, each naming
+          // its provider.
+          if (matches != null) ...[
+            if (matches.isEmpty)
+              ListTile(
+                key: const ValueKey('live-selection-no-match'),
+                title: Text(l10n.liveModelNoMatch),
+              ),
+            for (final entry in matches) model(entry, namesProvider: true),
+          ],
+          if (matches == null && options.favorites.isNotEmpty) ...[
             header(l10n.liveModelFavorites),
-            for (final entry in favorites) model(entry, section: 'favorite'),
+            for (final entry in options.favorites)
+              model(entry, section: 'favorite'),
           ],
-          if (query.isEmpty && recents.isNotEmpty) ...[
+          if (matches == null && options.recents.isNotEmpty) ...[
             header(l10n.liveModelRecent),
-            for (final entry in recents) model(entry, section: 'recent'),
+            for (final entry in options.recents)
+              model(entry, section: 'recent'),
           ],
-          if (query.isNotEmpty && providers.isEmpty)
-            ListTile(
-              key: const ValueKey('live-selection-no-match'),
-              title: Text(l10n.liveModelNoMatch),
-            ),
-          for (final MapEntry(key: provider, value: models)
-              in providers.entries) ...[
+          for (final (provider, models) in options.groups) ...[
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 0),
               child: Text(

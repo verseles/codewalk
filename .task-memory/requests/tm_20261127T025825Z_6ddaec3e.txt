@@ -1,0 +1,6 @@
+Na verdade, eu vou querer o flow de todos os itens do grupo 4. Lista aí pra gente de novo.
+
+[resposta à pergunta de release]
+O release é único. Cada alteração tem seu commit, e o push é feito apenas antes do release.
+
+A revisão, de forma geral, é uma por commit. Mas se você identificar alterações muito próximas ou relevantes (ou seja, dois commits muito parecidos), pode mandar tudo junto para fazer os ajustes logo juntos em vez de separado, para não perder tempo. Flow. Não esquece de me dizer quais foram os melhores e os piores, porque preciso saber.

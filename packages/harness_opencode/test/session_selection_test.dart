@@ -454,6 +454,52 @@ void main() {
       ]);
     });
 
+    test('release facts order the pick; an unreadable one is unstated', () {
+      Future<ModelEntry> read(Map<String, Object?> changes) async {
+        final row = {..._modelFixture(), ...changes};
+        final transport = _Transport((_) => _response(_catalog([row])));
+        return (await _reader(transport).readModels('/work/app')).single;
+      }
+
+      return Future.wait([
+        // The observed 2.0.22 row: released in epoch milliseconds, active,
+        // no family, from a provider OpenCode's Web client lists second.
+        read(const {}).then((m) {
+          expect(m.released, DateTime.utc(2026, 10, 1));
+          expect(m.released!.isUtc, isTrue);
+          expect(m.deprecated, isFalse);
+          expect(m.family, isNull);
+          expect(m.providerRank, 1);
+        }),
+        read(const {
+          'family': 'fledge',
+          'status': 'deprecated',
+          'providerID': 'anthropic',
+        }).then((m) {
+          expect(m.family, 'fledge');
+          expect(m.deprecated, isTrue);
+          expect(m.providerRank, 2);
+        }),
+        for (final status in ['alpha', 'beta', 'active', 'retired', null])
+          read({'status': status}).then((m) => expect(m.deprecated, isFalse)),
+        read(const {
+          'providerID': 'someone-else',
+        }).then((m) => expect(m.providerRank, isNull)),
+        // A malformed fact leaves it unstated; the model is still offered.
+        for (final time in <Object?>[
+          null,
+          'soon',
+          {'released': '2026-10-01'},
+          {'released': -1},
+          {'released': 1.5},
+          {'released': 99999999999999},
+        ])
+          read({'time': time}).then((m) => expect(m.released, isNull)),
+        for (final family in <Object?>[7, '', '   ', 'x' * 257])
+          read({'family': family}).then((m) => expect(m.family, isNull)),
+      ]);
+    });
+
     test('a disabled model is not offered', () async {
       final transport = _Transport(
         (_) => _response(
