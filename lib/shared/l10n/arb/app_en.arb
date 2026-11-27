@@ -2848,10 +2848,6 @@
   "@modelChooseAgent": {
     "description": "CodeWalk UI string — modelChooseAgent"
   },
-  "liveSelectionAuto": "Auto",
-  "@liveSelectionAuto": {
-    "description": "V2 live session model and agent selection"
-  },
   "liveModelSearch": "Search model or provider",
   "@liveModelSearch": {
     "description": "V2 live session model and agent selection"

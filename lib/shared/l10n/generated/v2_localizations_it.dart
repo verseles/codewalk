@@ -2345,9 +2345,6 @@ class V2LocalizationsIt extends V2Localizations {
   String get modelChooseAgent => 'Scegli agente';
 
   @override
-  String get liveSelectionAuto => 'Auto';
-
-  @override
   String get liveModelSearch => 'Cerca modello o provider';
 
   @override

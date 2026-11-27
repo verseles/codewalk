@@ -1714,10 +1714,6 @@
   "chatPermissionAutoApproveOff": "Aprobación automática de permisos desactivada",
   "chatPermissionAutoApproveOn": "Aprobación automática de permisos activada",
   "modelChooseAgent": "Elegir agente",
-  "liveSelectionAuto": "Automático",
-  "@liveSelectionAuto": {
-    "description": "V2 live session model and agent selection"
-  },
   "liveModelSearch": "Buscar modelo o proveedor",
   "@liveModelSearch": {
     "description": "V2 live session model and agent selection"

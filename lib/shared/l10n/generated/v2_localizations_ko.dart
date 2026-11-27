@@ -2204,9 +2204,6 @@ class V2LocalizationsKo extends V2Localizations {
   String get modelChooseAgent => '에이전트 선택';
 
   @override
-  String get liveSelectionAuto => '자동';
-
-  @override
   String get liveModelSearch => '모델 또는 제공자 검색';
 
   @override

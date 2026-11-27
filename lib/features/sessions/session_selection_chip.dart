@@ -481,7 +481,6 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                     modelKey: key,
                     variants: model.variants,
                     current: variant,
-                    autoLabel: l10n.liveSelectionAuto,
                     enabled: enabled,
                     onPicked: (picked) => pickModel(model, picked),
                   ),
@@ -839,6 +838,10 @@ final class _SelectionShown extends ChangeNotifier {
   }
 }
 
+/// The choice that leaves the variant to the server. It reads "Auto" in
+/// every language, as the variant ids beside it are never translated (#517).
+const sessionAutoVariantLabel = 'Auto';
+
 /// A model's variants in a compact menu on its row (#485): Auto, which leaves
 /// the variant to the server, and each variant it lists; a chosen variant it
 /// no longer lists stays, so Auto can still clear it.
@@ -848,7 +851,6 @@ class _VariantMenu extends StatelessWidget {
     required this.modelKey,
     required this.variants,
     required this.current,
-    required this.autoLabel,
     required this.enabled,
     required this.onPicked,
   });
@@ -856,7 +858,6 @@ class _VariantMenu extends StatelessWidget {
   final String modelKey;
   final List<String> variants;
   final String? current;
-  final String autoLabel;
   final bool enabled;
   final void Function(String? variant) onPicked;
 
@@ -883,7 +884,7 @@ class _VariantMenu extends StatelessWidget {
             ),
             value: value,
             checked: (current ?? auto) == value,
-            child: Text(value.isEmpty ? autoLabel : value),
+            child: Text(value.isEmpty ? sessionAutoVariantLabel : value),
           ),
       ],
       child: Container(
@@ -898,7 +899,7 @@ class _VariantMenu extends StatelessWidget {
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 96),
               child: Text(
-                current ?? autoLabel,
+                current ?? sessionAutoVariantLabel,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.labelMedium,

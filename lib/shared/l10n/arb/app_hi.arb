@@ -1714,10 +1714,6 @@
   "chatPermissionAutoApproveOff": "अनुमति स्वतः-अनुमोदन बंद है",
   "chatPermissionAutoApproveOn": "अनुमति स्वतः-अनुमोदन चालू है",
   "modelChooseAgent": "एजेंट चुनें",
-  "liveSelectionAuto": "ऑटो",
-  "@liveSelectionAuto": {
-    "description": "V2 live session model and agent selection"
-  },
   "liveModelSearch": "मॉडल या प्रदाता खोजें",
   "@liveModelSearch": {
     "description": "V2 live session model and agent selection"

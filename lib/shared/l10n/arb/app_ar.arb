@@ -1713,10 +1713,6 @@
   "chatPermissionAutoApproveOff": "الموافقة التلقائية على الأذونات غير مفعلة",
   "chatPermissionAutoApproveOn": "الموافقة التلقائية على الأذونات مفعلة",
   "modelChooseAgent": "اختر الوكيل",
-  "liveSelectionAuto": "تلقائي",
-  "@liveSelectionAuto": {
-    "description": "V2 live session model and agent selection"
-  },
   "liveModelSearch": "البحث عن نموذج أو مزوّد",
   "@liveModelSearch": {
     "description": "V2 live session model and agent selection"

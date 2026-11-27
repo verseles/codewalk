@@ -1714,10 +1714,6 @@
   "chatPermissionAutoApproveOff": "অনুমতি স্বয়ংক্রিয়-অনুমোদন বন্ধ আছে",
   "chatPermissionAutoApproveOn": "অনুমতি স্বয়ংক্রিয়-অনুমোদন চালু আছে",
   "modelChooseAgent": "এজেন্ট নির্বাচন করুন",
-  "liveSelectionAuto": "অটো",
-  "@liveSelectionAuto": {
-    "description": "V2 live session model and agent selection"
-  },
   "liveModelSearch": "মডেল বা প্রদানকারী খুঁজুন",
   "@liveModelSearch": {
     "description": "V2 live session model and agent selection"

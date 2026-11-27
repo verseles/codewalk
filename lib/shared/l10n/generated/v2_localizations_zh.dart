@@ -2163,9 +2163,6 @@ class V2LocalizationsZh extends V2Localizations {
   String get modelChooseAgent => '选择智能体';
 
   @override
-  String get liveSelectionAuto => '自动';
-
-  @override
   String get liveModelSearch => '搜索模型或提供商';
 
   @override

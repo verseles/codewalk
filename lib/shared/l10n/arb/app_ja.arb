@@ -1714,10 +1714,6 @@
   "chatPermissionAutoApproveOff": "権限の自動承認がオフ",
   "chatPermissionAutoApproveOn": "権限の自動承認がオン",
   "modelChooseAgent": "エージェントを選択",
-  "liveSelectionAuto": "自動",
-  "@liveSelectionAuto": {
-    "description": "V2 live session model and agent selection"
-  },
   "liveModelSearch": "モデルまたはプロバイダーを検索",
   "@liveModelSearch": {
     "description": "V2 live session model and agent selection"

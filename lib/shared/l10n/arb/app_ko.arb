@@ -1725,10 +1725,6 @@
   "chatPermissionAutoApproveOff": "권한 자동 승인 꺼짐",
   "chatPermissionAutoApproveOn": "권한 자동 승인 켜짐",
   "modelChooseAgent": "에이전트 선택",
-  "liveSelectionAuto": "자동",
-  "@liveSelectionAuto": {
-    "description": "V2 live session model and agent selection"
-  },
   "liveModelSearch": "모델 또는 제공자 검색",
   "@liveModelSearch": {
     "description": "V2 live session model and agent selection"

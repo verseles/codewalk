@@ -1714,10 +1714,6 @@
   "chatPermissionAutoApproveOff": "权限自动批准已关闭",
   "chatPermissionAutoApproveOn": "权限自动批准已开启",
   "modelChooseAgent": "选择智能体",
-  "liveSelectionAuto": "自动",
-  "@liveSelectionAuto": {
-    "description": "V2 live session model and agent selection"
-  },
   "liveModelSearch": "搜索模型或提供商",
   "@liveModelSearch": {
     "description": "V2 live session model and agent selection"

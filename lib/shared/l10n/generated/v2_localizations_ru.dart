@@ -2325,9 +2325,6 @@ class V2LocalizationsRu extends V2Localizations {
   String get modelChooseAgent => 'Выбрать агента';
 
   @override
-  String get liveSelectionAuto => 'Авто';
-
-  @override
   String get liveModelSearch => 'Поиск модели или провайдера';
 
   @override

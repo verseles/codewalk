@@ -4163,12 +4163,6 @@ abstract class V2Localizations {
   /// V2 live session model and agent selection
   ///
   /// In en, this message translates to:
-  /// **'Auto'**
-  String get liveSelectionAuto;
-
-  /// V2 live session model and agent selection
-  ///
-  /// In en, this message translates to:
   /// **'Search model or provider'**
   String get liveModelSearch;
 

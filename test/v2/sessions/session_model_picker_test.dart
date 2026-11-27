@@ -543,6 +543,39 @@ void main() {
     expect(switches(handle), ['model:prov/alpha']);
   });
 
+  testWidgets('Auto reads the same in every language (#517)', (tester) async {
+    for (final locale in const [Locale('pt'), Locale('es'), Locale('ja')]) {
+      await open(
+        tester,
+        locale: locale,
+        state: SessionSelectionState(
+          selection: _selection(_alpha),
+          models: [_alpha, _beta],
+        ),
+      );
+      await openPicker(tester);
+      final menu = find.byKey(
+        const ValueKey('live-selection-variant-menu-model-prov/alpha'),
+      );
+      expect(
+        find.descendant(of: menu, matching: find.text('Auto')),
+        findsOneWidget,
+        reason: '$locale',
+      );
+      expect(find.text('Automático'), findsNothing);
+      await tester.tap(menu);
+      await tester.pumpAndSettle();
+      expect(
+        find.descendant(
+          of: find.byKey(const ValueKey('live-selection-auto-prov/alpha')),
+          matching: find.text('Auto'),
+        ),
+        findsOneWidget,
+      );
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
+  });
+
   testWidgets('the current model keeps its variant; only Auto clears it', (
     tester,
   ) async {
