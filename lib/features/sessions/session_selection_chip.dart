@@ -392,7 +392,8 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         favorite: !favorite,
       );
       if (!saved || !mounted) return;
-      _messenger.currentState?.hideCurrentSnackBar();
+      // Only the latest change is said, never a queue of them.
+      _messenger.currentState?.clearSnackBars();
       showAppSnackBar(
         _messenger.currentState,
         favorite ? l10n.liveModelFavoriteRemoved : l10n.liveModelFavoriteAdded,
@@ -551,11 +552,12 @@ class _SelectionPanelState extends State<_SelectionPanel> {
             ],
           ),
           onTap: () => pickModel(model, variant),
-          onLongPress: compact && canFavorite
-              ? () => unawaited(_toggleFavorite(model, favorite: favorite))
-              : null,
         );
         if (!compact) return tile;
+        // Favoriting depends on the record, not on whether the session can
+        // switch now: the long press sits outside the row, which a locked
+        // selection disables, as the dialog's star does.
+        void toggle() => unawaited(_toggleFavorite(model, favorite: favorite));
         return Semantics(
           customSemanticsActions: canFavorite
               ? {
@@ -563,26 +565,35 @@ class _SelectionPanelState extends State<_SelectionPanel> {
                     label: favorite
                         ? l10n.liveModelFavoriteRemove
                         : l10n.liveModelFavoriteAdd,
-                  ): () =>
-                      unawaited(_toggleFavorite(model, favorite: favorite)),
+                  ): toggle,
                 }
               : null,
-          child: DecoratedBox(
-            key: favorite
-                ? ValueKey('live-selection-favorite-${section ?? 'model'}-$key')
+          child: GestureDetector(
+            onLongPress: canFavorite
+                ? () {
+                    Feedback.forLongPress(context);
+                    toggle();
+                  }
                 : null,
-            position: DecorationPosition.foreground,
-            decoration: BoxDecoration(
-              border: favorite
-                  ? BorderDirectional(
-                      start: BorderSide(
-                        color: _favoriteMark(theme.colorScheme),
-                        width: 4,
-                      ),
+            child: DecoratedBox(
+              key: favorite
+                  ? ValueKey(
+                      'live-selection-favorite-${section ?? 'model'}-$key',
                     )
                   : null,
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                border: favorite
+                    ? BorderDirectional(
+                        start: BorderSide(
+                          color: _favoriteMark(theme.colorScheme),
+                          width: 4,
+                        ),
+                      )
+                    : null,
+              ),
+              child: tile,
             ),
-            child: tile,
           ),
         );
       }
@@ -842,13 +853,15 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         ),
       );
       if (!widget.fill) return panel;
+      // The route already keeps the sheet above the keyboard; the sheet's
+      // own insets pass through, so the Scaffold adds no bottom padding.
+      final media = MediaQuery.of(context);
       return ScaffoldMessenger(
         key: _messenger,
         child: Scaffold(
           backgroundColor: Colors.transparent,
-          // The route already keeps the sheet above the keyboard.
           resizeToAvoidBottomInset: false,
-          body: panel,
+          body: MediaQuery(data: media, child: panel),
         ),
       );
     },

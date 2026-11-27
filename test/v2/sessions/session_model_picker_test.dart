@@ -376,6 +376,28 @@ void main() {
       expect(switches(handle), ['model:prov/beta']);
     });
 
+    testWidgets('a long press still favorites while the switch is locked', (
+      tester,
+    ) async {
+      final (live, handle) = await open(tester, size: phone);
+      await openPicker(tester);
+      // The stream drops with the pick open: rows can no longer switch.
+      handle.emit(
+        SessionLiveView(
+          session: live.summary.info.ref,
+          phase: SessionLivePhase.reconnecting,
+          state: liveState(live.summary.info.ref),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(live.canChangeSelection, isFalse);
+      expect(tester.widget<ListTile>(row('model-prov/beta')).enabled, isFalse);
+      await tester.longPress(row('model-prov/beta'));
+      await tester.pumpAndSettle();
+      expect(preferences.favorites(_server), ['prov/beta']);
+      expect(switches(handle), isEmpty);
+    });
+
     testWidgets('a favorite that cannot be saved says nothing new', (
       tester,
     ) async {
