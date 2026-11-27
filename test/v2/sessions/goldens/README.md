@@ -7,10 +7,12 @@ Arabic RTL, and the landing on the newest rows. They use Flutter's
 deterministic Ahem test font, DPR 1 and VM-only widget tests, with no
 progress indicator on screen. Linux x86_64 Flutter 3.44.1 generated them; on
 2026-11-01 the `live_work_*` and `model_picker_*` goldens in this directory
-were regenerated with Linux x86_64 Flutter 3.47.9 (Dart 3.13.7), and the other
-goldens were verified byte-identical. CI pins the same architecture and Flutter
-version, so pixel parity is enforced rather than assumed. Canonical golden
-references must be generated on Linux x86_64 with Flutter 3.47.9; local
+were regenerated with Linux x86_64 Flutter 3.47.9 (Dart 3.13.7), and on
+2026-11-27 the active `subagents_*` goldens were regenerated with Linux x86_64
+Flutter 3.50.1 (Dart 3.14.0) while all other goldens were verified
+byte-identical. CI pins the same architecture and Flutter version, so pixel
+parity is enforced rather than assumed. Canonical golden references must be
+generated on Linux x86_64 with Flutter 3.50.1; local
 ARM hosts differ by 2–3 pixels due to architecture rasterization and must not
 overwrite these reference files.
 

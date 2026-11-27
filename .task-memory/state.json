@@ -175,9 +175,9 @@
       ],
       "id": "S6",
       "label": "Avaliar helpers, BEHAVIOR.md, issues e #527",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "BEHAVIOR.md atualizado e enviado (d434b85a); issues #511/#510/#509/#525 fechadas no GitHub com SHAs e marcadas na #527; avaliação dos helpers consolidada (4 rodadas, 3 batches)",
+      "status": "done",
+      "validation": "gh issue close #511/#510/#509/#525 ok; #527 atualizado; Goldens 45962828547 concluído (30/36 idênticos, 6 ativos inspecionados)"
     },
     {
       "depends": [
@@ -186,7 +186,7 @@
       "id": "S7",
       "label": "Goldens x86, gate final, release notes, push e release minor",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     }
   ],
@@ -308,8 +308,8 @@
       "text": "ART-REVIEW-JUDGMENT Batch 3 (#525) R1 (rvw_20261127T074838Z_7d4dee0d, boundary 2ca07aa2): 8/11 aprovam por unanimidade (overall_risk=low, confidence=high, findings=[]); helperGLM-53-high (invalid-delivery, outcome=recovered, attempts=2, relay_bytes=3472) recuperado rung 1 com approve/findings=[]; 3 Claude failed no handshake (quota 5h resets 08:50 UTC). Zero achados aceitos, zero dissenso Frontier, make check verde -> #525 aprovado sem R2."
     }
   ],
-  "generation": 47,
-  "next_action": "Atualizar BEHAVIOR.md, preparar avaliação dos helpers e avançar para push/goldens x86_64/release v2.11.0",
+  "generation": 49,
+  "next_action": "Commitar 6 goldens x86_64 + docs e release-notes/v2.11.0.md, push origin main, rodar gate final nesse SHA exato e cortar release minor v2.11.0",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -323,7 +323,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T08:02:38Z",
+  "updated_at": "2026-11-27T08:09:08Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
