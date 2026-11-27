@@ -2,6 +2,21 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.11.0 - 2026-11-27
+
+> 📣 CodeWalk 2.11.0 upgrades to Flutter 3.50.1 to fix jagged circles on Linux high-DPI screens, restores smooth indeterminate animations on desktop, adds a sweeping glow to the active sub-agent/shell capsule, and updates the in-progress task icon.
+
+### Sessions & activity indicators
+
+- Adds a luminous sweeping border glow around the floating sub-agent and shell activity capsule whenever active sub-agents or running shells are present (`#525`). The animation pauses automatically with `TickerMode`, disappears when the count drops to zero or the connection becomes stale, and falls back to a static primary outline under reduced motion.
+- Replaces the indeterminate ring on in-progress task list items (both the collapsed header and expanded rows) with a static RTL-aware double-arrow icon (`#511`).
+- Restores smooth native continuous indeterminate animations across all platforms and sizes, including compact desktop rings and updater progress bars (`#510`, ADR-062). Reduced motion continues to show static indicators with zero scheduled frames.
+
+### Platform & rendering
+
+- Upgrades the Flutter SDK from 3.47.9 to 3.50.1 (Dart 3.14.0) to bring in Linux Impeller MSAA rendering fixes for crisp circles and arcs on high-DPI Linux displays (`#509`).
+- Updates the Android Gradle toolchain (Gradle 9.5.0, AGP 9.3.1, KGP 2.4.20) to meet Flutter 3.50.1 requirements (`#509`).
+
 ## v2.10.0 - 2026-11-27
 
 > 📣 CodeWalk 2.10.0 reworks the model picker: models ordered and searched like the official OpenCode clients, older releases out of the way, effort-level icons, favorites by long press on phones, a shorter auto-approve switch and short model names in the composer chip.

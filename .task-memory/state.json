@@ -194,19 +194,19 @@
   "contract": {
     "complete_when": [
       {
-        "evidence": null,
+        "evidence": "A0001 captured in S1 with #511/#510/#509/#525 plan and owner decisions A/A/A",
         "id": "C1",
         "text": "avaliação prévia salva",
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "#511 (4a0f313f), #510 (32a2b9d5), #509 (01b1a492), #525 (2ca07aa2), BEHAVIOR.md (d434b85a), goldens (52625c04) pushed; all 4 closed on GitHub and checked off in #527",
         "id": "C2",
         "text": "4 issues entregues e fechadas",
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "make check TEST_JOBS=$(nproc) exit 0 on 839f0077 (analyze 4<=4, python CI/release tests ok, full flutter test suite incl. refreshed x86_64 goldens green, /tmp/opencode/make_check_final_839f0077.log)",
         "id": "C3",
         "text": "gate verde no SHA do release",
         "waived": false
@@ -308,7 +308,7 @@
       "text": "ART-REVIEW-JUDGMENT Batch 3 (#525) R1 (rvw_20261127T074838Z_7d4dee0d, boundary 2ca07aa2): 8/11 aprovam por unanimidade (overall_risk=low, confidence=high, findings=[]); helperGLM-53-high (invalid-delivery, outcome=recovered, attempts=2, relay_bytes=3472) recuperado rung 1 com approve/findings=[]; 3 Claude failed no handshake (quota 5h resets 08:50 UTC). Zero achados aceitos, zero dissenso Frontier, make check verde -> #525 aprovado sem R2."
     }
   ],
-  "generation": 49,
+  "generation": 52,
   "next_action": "Commitar 6 goldens x86_64 + docs e release-notes/v2.11.0.md, push origin main, rodar gate final nesse SHA exato e cortar release minor v2.11.0",
   "pending_operation": null,
   "queued_followups": [],
@@ -323,7 +323,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T08:09:08Z",
+  "updated_at": "2026-11-27T08:16:45Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
@@ -386,6 +386,27 @@
       "check": "make check on #525 (2ca07aa2)",
       "criterion": null,
       "evidence": "make check TEST_JOBS=$(nproc) exit 0; analyze 4<=4; python CI/release tests 191/191 ok; full flutter test suite green (/tmp/opencode/make_check_525_retry.log)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:16:44Z",
+      "check": "Pre-evaluation saved in A0001",
+      "criterion": "C1",
+      "evidence": "A0001 captured in S1 with #511/#510/#509/#525 plan and owner decisions A/A/A",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:16:45Z",
+      "check": "4 issues delivered, documented, closed, and checked in #527",
+      "criterion": "C2",
+      "evidence": "#511 (4a0f313f), #510 (32a2b9d5), #509 (01b1a492), #525 (2ca07aa2), BEHAVIOR.md (d434b85a), goldens (52625c04) pushed; all 4 closed on GitHub and checked off in #527",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T08:16:45Z",
+      "check": "Final local gate green on pre-release SHA 839f0077",
+      "criterion": "C3",
+      "evidence": "make check TEST_JOBS=$(nproc) exit 0 on 839f0077 (analyze 4<=4, python CI/release tests ok, full flutter test suite incl. refreshed x86_64 goldens green, /tmp/opencode/make_check_final_839f0077.log)",
       "outcome": "pass"
     }
   ]
