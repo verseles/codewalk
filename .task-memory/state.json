@@ -279,7 +279,7 @@
       "text": "ART-REVIEW-JUDGMENT Batch 2 (#509) R2 (8/10 entregues, GLM recuperado rung 1, Claude haiku/opus failed por SESSION_CLAUDE_ERROR): todos os 5 ajustes de produção validados sem regressões. ACEITO 1 achado de teste [codex-6.2-sol-F (warning), kimi-k31 (suggestion)]: corrigir tool/ci/test/import_rules_test.dart:1285 para testar leak via arquivo não-widget (lib/main_v2.dart) esperando get-it-boundary, exercitando LocatorValues.escapes diretamente. Zero posições Frontier rejeitadas. Sem R3: correção estritamente em 1 caso de teste unitário, validada localmente."
     }
   ],
-  "generation": 38,
+  "generation": 39,
   "next_action": "Implementar #525: brilho SweepGradient percorrendo a borda StadiumBorder da SessionSubagentCapsule quando count>0",
   "pending_operation": null,
   "queued_followups": [],
@@ -294,7 +294,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T07:37:55Z",
+  "updated_at": "2026-11-27T07:48:37Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
@@ -343,6 +343,13 @@
       "check": "#509 R2 test fix validated",
       "criterion": null,
       "evidence": "import_rules_test exercises get-it-boundary from non-widget lib/main_v2.dart; format, analyze, and dart test green",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T07:48:37Z",
+      "check": "#525 format, analyze and focused capsule tests",
+      "criterion": null,
+      "evidence": "format 0 changed; analyze 0 issues (incl. tool/goldens/subagent_capsule_test.dart); 29/29 passed across session_subagent_capsule_test, session_capsule_shells_test, subagent_capsule_golden_test; subconversation_navigation_test + session_live_execution_test green",
       "outcome": "pass"
     }
   ]

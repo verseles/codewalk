@@ -11,6 +11,7 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_shells.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'session_live_controller.dart';
 import 'session_shell_output_sheet.dart';
 import 'session_tool_details_dialog.dart';
@@ -598,31 +599,35 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
           child: Tooltip(
             key: _anchor,
             message: tooltip,
-            child: FilledButton.tonal(
-              key: const ValueKey('subagent-capsule'),
-              focusNode: _focus,
-              style: FilledButton.styleFrom(
-                backgroundColor: colors.secondaryContainer,
-                foregroundColor: colors.onSecondaryContainer,
-                elevation: 3,
-                shadowColor: colors.shadow,
-                minimumSize: const Size(48, 48),
-                shape: const StadiumBorder(),
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-              ),
-              onPressed: _show,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Symbols.smart_toy,
-                    semanticLabel: l10n.liveSubagentsTitle,
-                  ),
-                  if (count > 0) ...[
-                    const SizedBox(width: 8),
-                    Text('$count', key: const ValueKey('subagent-count')),
+            child: _CapsuleActivityBorder(
+              active: count > 0,
+              color: colors.primary,
+              child: FilledButton.tonal(
+                key: const ValueKey('subagent-capsule'),
+                focusNode: _focus,
+                style: FilledButton.styleFrom(
+                  backgroundColor: colors.secondaryContainer,
+                  foregroundColor: colors.onSecondaryContainer,
+                  elevation: 3,
+                  shadowColor: colors.shadow,
+                  minimumSize: const Size(48, 48),
+                  shape: const StadiumBorder(),
+                  padding: const EdgeInsets.symmetric(horizontal: 14),
+                ),
+                onPressed: _show,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Symbols.smart_toy,
+                      semanticLabel: l10n.liveSubagentsTitle,
+                    ),
+                    if (count > 0) ...[
+                      const SizedBox(width: 8),
+                      Text('$count', key: const ValueKey('subagent-count')),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -630,6 +635,185 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
       );
     },
   );
+}
+
+/// Luminous border sweeping around the capsule outline while work is active
+/// (#525):
+/// - inactive (`count == 0`): paints nothing and runs no ticker;
+/// - active with reduced motion: paints a static `primary` border;
+/// - active with motion enabled: sweeps a luminous `SweepGradient` arc around
+///   the `StadiumBorder` outline (~2 s per full turn), paused automatically by
+///   [TickerMode].
+class _CapsuleActivityBorder extends StatefulWidget {
+  const _CapsuleActivityBorder({
+    required this.active,
+    required this.color,
+    required this.child,
+  });
+
+  static const period = Duration(milliseconds: 2000);
+
+  final bool active;
+  final Color color;
+  final Widget child;
+
+  @override
+  State<_CapsuleActivityBorder> createState() => _CapsuleActivityBorderState();
+}
+
+class _CapsuleActivityBorderState extends State<_CapsuleActivityBorder>
+    with SingleTickerProviderStateMixin {
+  late final _controller = AnimationController(
+    vsync: this,
+    duration: _CapsuleActivityBorder.period,
+  );
+  bool _motion = true;
+
+  void _syncAnimation() {
+    if (widget.active && _motion) {
+      if (!_controller.isAnimating) {
+        _controller.repeat();
+      }
+    } else {
+      if (_controller.isAnimating) {
+        _controller.stop();
+      }
+      if (!widget.active && _controller.value != 0) {
+        _controller.value = 0;
+      }
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _motion = AppIndeterminate.motion(context);
+    _syncAnimation();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CapsuleActivityBorder oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.active != widget.active) {
+      _syncAnimation();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => RepaintBoundary(
+    child: CustomPaint(
+      key: const ValueKey('subagent-capsule-activity-border'),
+      foregroundPainter: widget.active
+          ? _CapsuleBorderPainter(
+              color: widget.color,
+              animate: _motion,
+              animation: _controller,
+            )
+          : null,
+      child: widget.child,
+    ),
+  );
+}
+
+class _CapsuleBorderPainter extends CustomPainter {
+  _CapsuleBorderPainter({
+    required this.color,
+    required this.animate,
+    required this.animation,
+  }) : super(repaint: animate ? animation : null);
+
+  final Color color;
+  final bool animate;
+  final Animation<double> animation;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    if (rect.isEmpty) return;
+    final outerRadius = rect.shortestSide / 2;
+
+    RRect insetStadium(double strokeWidth) {
+      final inset = min(strokeWidth / 2, outerRadius);
+      return RRect.fromRectAndRadius(
+        rect.deflate(inset),
+        Radius.circular(max(0.0, outerRadius - inset)),
+      );
+    }
+
+    if (!animate) {
+      canvas.drawRRect(
+        insetStadium(2.25),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.25
+          ..color = color.withValues(alpha: 0.9),
+      );
+      return;
+    }
+
+    final clear = color.withValues(alpha: 0);
+    final rotation = GradientRotation(animation.value * 2 * pi);
+
+    // Subtle continuous perimeter ring so the sweeping glow stays anchored.
+    canvas.drawRRect(
+      insetStadium(1.5),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5
+        ..color = color.withValues(alpha: 0.24),
+    );
+
+    // Soft inner-bounded halo around the active arc without MaskFilter.blur.
+    canvas.drawRRect(
+      insetStadium(4.5),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4.5
+        ..shader = SweepGradient(
+          colors: [
+            clear,
+            clear,
+            color.withValues(alpha: 0.16),
+            color.withValues(alpha: 0.34),
+            clear,
+          ],
+          stops: const [0.0, 0.44, 0.70, 0.88, 1.0],
+          transform: rotation,
+        ).createShader(rect),
+    );
+
+    // Crisp luminous core gliding around the StadiumBorder outline.
+    canvas.drawRRect(
+      insetStadium(2.5),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..shader = SweepGradient(
+          colors: [
+            clear,
+            clear,
+            color.withValues(alpha: 0.42),
+            color,
+            color.withValues(alpha: 0.6),
+            clear,
+          ],
+          stops: const [0.0, 0.50, 0.72, 0.89, 0.96, 1.0],
+          transform: rotation,
+        ).createShader(rect),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_CapsuleBorderPainter oldDelegate) =>
+      oldDelegate.color != color ||
+      oldDelegate.animate != animate ||
+      oldDelegate.animation != animation;
 }
 
 class _SubagentPopin extends StatefulWidget {

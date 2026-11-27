@@ -27,6 +27,8 @@ class SubagentCapsuleRig {
     bool fullPage = false,
     ThemeMode themeMode = ThemeMode.light,
     ThemeData? localTheme,
+    ValueNotifier<bool>? disableAnimations,
+    ValueNotifier<bool>? tickerEnabled,
   }) async {
     final catalog = CatalogRig();
     await catalog.save('a');
@@ -56,11 +58,34 @@ class SubagentCapsuleRig {
         themeMode: themeMode,
         localizationsDelegates: V2Localizations.localizationsDelegates,
         supportedLocales: V2Localizations.supportedLocales,
-        builder: (context, child) => MediaQuery.withClampedTextScaling(
-          minScaleFactor: scale,
-          maxScaleFactor: scale,
-          child: child!,
-        ),
+        builder: (context, child) {
+          var current = MediaQuery.withClampedTextScaling(
+            minScaleFactor: scale,
+            maxScaleFactor: scale,
+            child: child!,
+          );
+          if (disableAnimations != null) {
+            current = ValueListenableBuilder<bool>(
+              valueListenable: disableAnimations,
+              builder: (context, disabled, inner) => MediaQuery(
+                data: MediaQuery.of(
+                  context,
+                ).copyWith(disableAnimations: disabled),
+                child: inner!,
+              ),
+              child: current,
+            );
+          }
+          if (tickerEnabled != null) {
+            current = ValueListenableBuilder<bool>(
+              valueListenable: tickerEnabled,
+              builder: (context, enabled, inner) =>
+                  TickerMode(enabled: enabled, child: inner!),
+              child: current,
+            );
+          }
+          return current;
+        },
         home: Builder(
           builder: (context) {
             final page = fullPage

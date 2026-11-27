@@ -10,8 +10,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'live_fakes.dart';
 import 'subagent_capsule_support.dart';
 
+Future<void> _settle(WidgetTester tester) async {
+  await tester.pump();
+  for (var i = 0; i < 3; i++) {
+    await tester.pump(const Duration(milliseconds: 200));
+  }
+}
+
 void main() {
   final capsule = find.byKey(const ValueKey('subagent-capsule'));
+  final border = find.byKey(const ValueKey('subagent-capsule-activity-border'));
   final count = find.byKey(const ValueKey('subagent-count'));
   final popin = find.byKey(const ValueKey('subagent-popin'));
 
@@ -22,7 +30,7 @@ void main() {
     final timeline = find.byType(SessionLiveTimeline);
     final before = tester.getRect(timeline);
     rig.emit([rig.work('runner', WorkStatus.running)]);
-    await tester.pumpAndSettle();
+    await _settle(tester);
     expect(tester.getRect(timeline), before);
     final robot = tester.getRect(capsule);
     expect(before.contains(robot.topLeft), isTrue);
@@ -56,7 +64,7 @@ void main() {
             ),
         ],
       );
-      await tester.pumpAndSettle();
+      await _settle(tester);
       final capsuleState = tester.state(find.byType(SessionSubagentCapsule));
       final last = find.text('Message 29');
       expect(last, findsOneWidget);
@@ -67,7 +75,7 @@ void main() {
       final scroll = rig.live.scroll;
       scroll.markUserIntent();
       scroll.controller.jumpTo(scroll.controller.position.minScrollExtent);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       final jump = find.byKey(const ValueKey('live-jump-latest'));
       expect(jump, findsOneWidget);
       expect(
@@ -79,7 +87,7 @@ void main() {
         same(capsuleState),
       );
       await tester.tap(jump);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(
         tester.state(find.byType(SessionSubagentCapsule)),
         same(capsuleState),
@@ -89,10 +97,10 @@ void main() {
         lessThanOrEqualTo(tester.getTopLeft(capsule).dy),
       );
       tester.view.physicalSize = const Size(390, 240);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       scroll.markUserIntent();
       scroll.controller.jumpTo(scroll.controller.position.minScrollExtent);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       final viewport = tester.getRect(find.byType(SessionLiveTimeline));
       for (final control in [
         capsule,
@@ -119,7 +127,7 @@ void main() {
       );
       final rig = await SubagentCapsuleRig.mount(tester, localTheme: theme);
       rig.emit([rig.work('runner', WorkStatus.running)]);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       final button = tester.widget<FilledButton>(capsule);
       final context = tester.element(capsule);
       final style = button.style!;
@@ -133,7 +141,7 @@ void main() {
       );
       expect(Theme.of(context).brightness, brightness);
       await tester.tap(capsule);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       final row = find.byKey(
         ValueKey(
           'subagent-row-${rig.work('runner', WorkStatus.running).child!.storageKey}',
@@ -142,7 +150,7 @@ void main() {
       expect(Theme.of(tester.element(row)).colorScheme, theme.colorScheme);
       expect(tester.takeException(), isNull);
       await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-      await tester.pumpAndSettle();
+      await _settle(tester);
     });
   }
 
@@ -197,13 +205,13 @@ void main() {
       await tester.pump();
       expect(tester.widget<Text>(count).data, '3');
       await tester.tap(capsule);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(find.text('Waiting for your answer'), findsOneWidget);
       expect(find.text('Status unconfirmed'), findsOneWidget);
       expect(find.text('Queued'), findsOneWidget);
       expect(find.text('failed'), findsNothing);
       await tester.tap(find.text('Completed').first);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(find.text('Failed'), findsOneWidget);
       expect(find.text('Cancelled'), findsOneWidget);
       expect(find.text('unknown'), findsNothing);
@@ -219,7 +227,7 @@ void main() {
       await tester.pump();
       await tester.pump();
       await tester.tap(capsule);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       rig.emit([rig.work('runner', WorkStatus.completed)]);
       await tester.pump();
       await tester.pump();
@@ -333,12 +341,12 @@ void main() {
       );
       expect(robot.bottom, lessThanOrEqualTo(status.top));
       await tester.tap(capsule);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(popin, findsOneWidget);
       expect(tester.getBottomRight(popin).dy, lessThanOrEqualTo(robot.top));
       expect(tester.takeException(), isNull);
       await tester.binding.handlePopRoute();
-      await tester.pumpAndSettle();
+      await _settle(tester);
     });
 
     testWidgets(
@@ -346,9 +354,9 @@ void main() {
       (tester) async {
         final rig = await SubagentCapsuleRig.mount(tester, locale: locale);
         rig.emit([rig.work('runner', WorkStatus.running)]);
-        await tester.pumpAndSettle();
+        await _settle(tester);
         await tester.tap(capsule);
-        await tester.pumpAndSettle();
+        await _settle(tester);
         rig.emit([]);
         await tester.pumpAndSettle();
         expect(capsule, findsNothing);
@@ -378,10 +386,10 @@ void main() {
           scale: 2,
         );
         rig.emit([rig.work('runner', WorkStatus.running)]);
-        await tester.pumpAndSettle();
+        await _settle(tester);
         final robot = tester.getRect(capsule);
         await tester.tap(capsule);
-        await tester.pumpAndSettle();
+        await _settle(tester);
         expect(popin, findsOneWidget);
         expect(tester.takeException(), isNull);
         final viewport = find.descendant(
@@ -399,9 +407,114 @@ void main() {
           lessThanOrEqualTo(robot.top),
         );
         await tester.sendKeyEvent(LogicalKeyboardKey.escape);
-        await tester.pumpAndSettle();
+        await _settle(tester);
         expect(popin, findsNothing);
       },
     );
   }
+
+  testWidgets(
+    'activity border animates only while active count > 0 and stops when idle or stale (#525)',
+    (tester) async {
+      final rig = await SubagentCapsuleRig.mount(tester);
+
+      // Completed work (count == 0): no activity border and no ticking frames.
+      rig.emit([rig.work('done', WorkStatus.completed)]);
+      await tester.pumpAndSettle();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNull);
+      expect(tester.binding.hasScheduledFrame, isFalse);
+
+      // Active subagent (count == 1): border paints and sweeps continuously.
+      rig.emit([rig.work('runner', WorkStatus.running)]);
+      await tester.pump();
+      await tester.pump();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNotNull);
+      expect(tester.binding.hasScheduledFrame, isTrue);
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.binding.hasScheduledFrame, isTrue);
+
+      // Stale/reconnecting drops active count to 0: stops cleanly.
+      rig.emit(
+        [rig.work('runner', WorkStatus.running)],
+        phase: SessionLivePhase.reconnecting,
+        stale: true,
+      );
+      await tester.pumpAndSettle();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNull);
+      expect(tester.binding.hasScheduledFrame, isFalse);
+
+      // Back to live active: resumes sweeping cleanly.
+      rig.emit([rig.work('runner', WorkStatus.running)]);
+      await tester.pump();
+      await tester.pump();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNotNull);
+      expect(tester.binding.hasScheduledFrame, isTrue);
+
+      // Transition back to completed (count == 0): stops cleanly.
+      rig.emit([rig.work('runner', WorkStatus.completed)]);
+      await tester.pumpAndSettle();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNull);
+      expect(tester.binding.hasScheduledFrame, isFalse);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'reduced motion keeps a static primary border with zero scheduled frames (#525)',
+    (tester) async {
+      final disableAnimations = ValueNotifier<bool>(true);
+      addTearDown(disableAnimations.dispose);
+      final rig = await SubagentCapsuleRig.mount(
+        tester,
+        disableAnimations: disableAnimations,
+      );
+
+      rig.emit([rig.work('runner', WorkStatus.running)]);
+      await tester.pumpAndSettle();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNotNull);
+      expect(tester.binding.hasScheduledFrame, isFalse);
+
+      // Re-enabling motion resumes the sweeping animation.
+      disableAnimations.value = false;
+      await tester.pump();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNotNull);
+      expect(tester.binding.hasScheduledFrame, isTrue);
+
+      // Turning reduced motion back on halts frames while keeping the static border.
+      disableAnimations.value = true;
+      await tester.pumpAndSettle();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNotNull);
+      expect(tester.binding.hasScheduledFrame, isFalse);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'TickerMode pauses and resumes the capsule activity border (#525)',
+    (tester) async {
+      final tickerEnabled = ValueNotifier<bool>(true);
+      addTearDown(tickerEnabled.dispose);
+      final rig = await SubagentCapsuleRig.mount(
+        tester,
+        tickerEnabled: tickerEnabled,
+      );
+
+      rig.emit([rig.work('runner', WorkStatus.running)]);
+      await tester.pump();
+      await tester.pump();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNotNull);
+      expect(tester.binding.hasScheduledFrame, isTrue);
+
+      tickerEnabled.value = false;
+      await tester.pump();
+      await tester.pump();
+      expect(tester.widget<CustomPaint>(border).foregroundPainter, isNotNull);
+      expect(tester.binding.hasScheduledFrame, isFalse);
+
+      tickerEnabled.value = true;
+      await tester.pump();
+      expect(tester.binding.hasScheduledFrame, isTrue);
+      expect(tester.takeException(), isNull);
+    },
+  );
 }

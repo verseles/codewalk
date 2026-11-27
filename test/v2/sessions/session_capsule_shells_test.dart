@@ -172,6 +172,13 @@ ToolCall _shellTool(
   ),
 );
 
+Future<void> _settle(WidgetTester tester) async {
+  await tester.pump();
+  for (var i = 0; i < 3; i++) {
+    await tester.pump(const Duration(milliseconds: 200));
+  }
+}
+
 void main() {
   testWidgets(
     'unified capsule counts active subagents + running shells, deduplicates by shellId, ticks elapsed timer while open, and stops cleanly',
@@ -232,7 +239,7 @@ void main() {
         exitCode: 0,
       );
       emit(shells: [runningShell], items: [runningTwin, completedTool]);
-      await tester.pumpAndSettle();
+      await _settle(tester);
 
       // Badge counts 1 active subagent + 1 running shell = 2.
       expect(find.byKey(const ValueKey('subagent-capsule')), findsOneWidget);
@@ -243,7 +250,7 @@ void main() {
 
       // Open pop-in: Active shows both Analyzer and sh_1 with elapsed time + Stop.
       await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(find.text('Analyzer'), findsOneWidget);
       expect(find.byKey(const ValueKey('shell-row-sh_1')), findsOneWidget);
       expect(find.textContaining('10s'), findsOneWidget);
@@ -259,13 +266,13 @@ void main() {
         tester.element(find.byKey(const ValueKey('subagent-popin'))),
       );
       await tester.tap(find.text(l10n.liveSubagentsCompleted));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(find.byKey(const ValueKey('shell-row-sh_2')), findsOneWidget);
       expect(find.byKey(const ValueKey('shell-row-sh_1')), findsNothing);
 
       // Return to Active and tap Stop -> triggers single-flight stop on port.
       await tester.tap(find.text(l10n.liveSubagentsActive));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       await tester.tap(find.byKey(const ValueKey('shell-stop-sh_1')));
       await tester.pump();
       expect(port.stopCalls, ['sh_1']);
@@ -283,7 +290,7 @@ void main() {
         ],
         items: [runningTwin, completedTool],
       );
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(find.byKey(const ValueKey('shell-row-sh_1')), findsNothing);
       expect(
         tester.widget<Text>(find.byKey(const ValueKey('subagent-count'))).data,
@@ -333,12 +340,23 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await _settle(tester);
+
+      // Running shell alone activates the sweeping activity border (#525).
+      expect(
+        tester
+            .widget<CustomPaint>(
+              find.byKey(const ValueKey('subagent-capsule-activity-border')),
+            )
+            .foregroundPainter,
+        isNotNull,
+      );
+      expect(tester.binding.hasScheduledFrame, isTrue);
 
       await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       await tester.tap(find.byKey(const ValueKey('shell-row-sh_tail')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
 
       expect(
         find.byKey(const ValueKey('shell-output-dialog-sh_tail')),
@@ -351,7 +369,7 @@ void main() {
       // Tap Load more output -> fetches page 2 at raw cursor=32, shows
       // truncated notice, and hides Load more once cursor==size.
       await tester.tap(find.byKey(const ValueKey('shell-output-more-sh_tail')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(port.readCalls[1], ('sh_tail', 32, 16 * 1024));
       expect(find.textContaining('line 2'), findsOneWidget);
       expect(
@@ -369,7 +387,7 @@ void main() {
       );
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey('shell-output-close')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(port.cancellations.last.isCancelled, isTrue);
     },
   );
@@ -403,6 +421,14 @@ void main() {
       // Badge is absent because sh_hidden is omitted without shell.observe.
       expect(find.byKey(const ValueKey('subagent-capsule')), findsOneWidget);
       expect(find.byKey(const ValueKey('subagent-count')), findsNothing);
+      expect(
+        tester
+            .widget<CustomPaint>(
+              find.byKey(const ValueKey('subagent-capsule-activity-border')),
+            )
+            .foregroundPainter,
+        isNull,
+      );
 
       // Opens directly on Completed tab showing only timeline shell sh_hist.
       await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
@@ -449,9 +475,9 @@ void main() {
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    await _settle(tester);
     await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
-    await tester.pumpAndSettle();
+    await _settle(tester);
     expect(find.byKey(const ValueKey('shell-row-sh_rtl')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -523,7 +549,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await _settle(tester);
 
       // Badge counts streamingTimelineOnly + customWork = 2 (NOT settledBgTool, NOT unknownWork).
       expect(
@@ -532,7 +558,7 @@ void main() {
       );
 
       await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       final l10n = V2Localizations.of(
         tester.element(find.byKey(const ValueKey('subagent-popin'))),
       );
@@ -563,7 +589,7 @@ void main() {
 
       // Completed tab has sh_bg and NOT custom_shell_99 (deduplicated without sh_ prefix).
       await tester.tap(find.text(l10n.liveSubagentsCompleted));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(find.byKey(const ValueKey('shell-row-sh_bg')), findsOneWidget);
       expect(
         find.byKey(const ValueKey('shell-row-custom_shell_99')),
@@ -613,18 +639,18 @@ void main() {
         ),
       );
       emitShells([_shellWork(rig.parent, 'sh_dlg', command: 'long-cmd')]);
-      await tester.pumpAndSettle();
+      await _settle(tester);
 
       // Open pop-in and trigger rejected stop -> inline feedback in pop-in.
       await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       await tester.tap(find.byKey(const ValueKey('shell-stop-sh_dlg')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(find.byKey(const ValueKey('shell-stop-feedback')), findsOneWidget);
 
       // Open dialog for sh_dlg -> output capped strictly <= 64 KiB valid UTF-8.
       await tester.tap(find.byKey(const ValueKey('shell-row-sh_dlg')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       final textWidget = tester.widget<Text>(
         find.byKey(const ValueKey('shell-output-text-sh_dlg')),
       );
@@ -640,7 +666,7 @@ void main() {
       // Stop rejected/uncertain surfaces inline notice inside dialog.
       stopOutcome = SessionShellStopOutcome.uncertain;
       await tester.tap(find.byKey(const ValueKey('shell-output-stop-sh_dlg')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(
         find.byKey(const ValueKey('shell-output-stop-notice-sh_dlg')),
         findsOneWidget,
@@ -651,7 +677,7 @@ void main() {
       await tester.tap(
         find.byKey(const ValueKey('shell-output-refresh-sh_dlg')),
       );
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(
         find.byKey(const ValueKey('shell-output-text-sh_dlg')),
         findsOneWidget,
@@ -672,16 +698,16 @@ void main() {
       // Re-open on a fresh shell to verify reconnecting/stale phase disables
       // BOTH Stop and Refresh without prematurely marking unavailable.
       await tester.tap(find.byKey(const ValueKey('shell-output-close')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       readCount = 0;
       port.onReadOutput = (id, cursor, limit, cancel) async =>
           ShellOutputPage(output: 'ok\n', cursor: 3, size: 3, truncated: false);
       emitShells([_shellWork(rig.parent, 'sh_stale', command: 'watch')]);
-      await tester.pumpAndSettle();
+      await _settle(tester);
       await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       await tester.tap(find.byKey(const ValueKey('shell-row-sh_stale')));
-      await tester.pumpAndSettle();
+      await _settle(tester);
       expect(
         find.byKey(const ValueKey('shell-output-stop-sh_stale')),
         findsOneWidget,
@@ -792,7 +818,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await _settle(tester);
       rig.handle.emit(
         SessionLiveView(
           session: rig.parent,

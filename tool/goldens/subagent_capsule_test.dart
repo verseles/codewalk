@@ -2,6 +2,7 @@
 library;
 
 import 'package:codewalk_core/codewalk_core.dart';
+// ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -37,21 +38,40 @@ void registerSubagentGoldens({required String goldenDirectory}) {
         rig.work('A previous failure', WorkStatus.failed),
         rig.work('Interrupted work', WorkStatus.cancelled),
       ]);
-      await tester.pumpAndSettle();
+      if (completed) {
+        await tester.pumpAndSettle();
+      } else {
+        // Active capsules sweep continuously (#525): flush emit, mount, then hold a deterministic frame.
+        await tester.pump();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+      }
       expect(tester.takeException(), isNull);
       await expectLater(
         find.byType(Scaffold).first,
         matchesGoldenFile('$goldenDirectory/subagents_capsule_$name.png'),
       );
       await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
-      await tester.pumpAndSettle();
+      if (completed) {
+        await tester.pumpAndSettle();
+      } else {
+        // Settle the dialog fade and tap ink splash at a fixed sweep phase.
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+        await tester.pump(const Duration(milliseconds: 500));
+      }
       expect(tester.takeException(), isNull);
       await expectLater(
         find.byType(Overlay).first,
         matchesGoldenFile('$goldenDirectory/subagents_popin_$name.png'),
       );
       await tester.tapAt(const Offset(2, 2));
-      await tester.pumpAndSettle();
+      if (completed) {
+        await tester.pumpAndSettle();
+      } else {
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+      }
     });
   }
 }
