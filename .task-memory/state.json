@@ -2,7 +2,7 @@
   "artifact_seq": 3,
   "artifacts": {
     "A0001": {
-      "active": true,
+      "active": false,
       "bytes": 1071,
       "created_at": "2026-11-27T19:54:31Z",
       "evidence": "/tmp/opencode/g7/r1_<helper>.out",
@@ -18,7 +18,7 @@
       "title": "#519 review R1 reports (8 helpers)"
     },
     "A0002": {
-      "active": true,
+      "active": false,
       "bytes": 903,
       "created_at": "2026-11-27T20:23:09Z",
       "evidence": "/tmp/opencode/g7/r2_<helper>.out",
@@ -34,7 +34,7 @@
       "title": "#519 review R2 reports (8 helpers)"
     },
     "A0003": {
-      "active": true,
+      "active": false,
       "bytes": 707,
       "created_at": "2026-11-27T20:47:09Z",
       "evidence": "/tmp/opencode/g7/r3_<helper>.out",
@@ -95,16 +95,22 @@
       ],
       "id": "S5",
       "label": "Evaluate helpers, docs, #519/#527, squash, push and minor release",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "v2.13.0 cut (6ab5c1ce, tag pushed atomically), watch-release started, helper evaluation sent",
+      "status": "done",
+      "validation": "gate green on 55450f33; cut_stable ok; tag on origin"
     }
   ],
-  "completion": null,
+  "completion": {
+    "at": "2026-11-27T20:56:34Z",
+    "by": "agent",
+    "delivered": "#519: one Settings > Version and updates screen (updates first, release history below in one scroll; Changelog/About open at the history with an anchor released by any outside scroll; destination opens at top; primary scroll kept), smoke step 09 updated. Squashed 851747a3, docs 10e1154a, notes 01e64b32, release 6ab5c1ce (v2.13.0). #519 closed, #527 group 7 checked.",
+    "residual_risk": "Release workflow result pending (watch-release notifies); smoke steps 08b/09 proven locally only on a trimmed run, CI x64 confirms on this push; desktop compact Page Down with Back focused remains pre-existing. Group 8 collection queued as follow-ups (11 items) until the owner says terminei.",
+    "validation": "3 review rounds (8 helpers, Grok-F no credits) converged; mutations M1-M7 fail as expected; trimmed local Linux smoke passed 08b/09; make check green on 55450f33."
+  },
   "contract": {
     "complete_when": [
       {
-        "evidence": null,
+        "evidence": "851747a3; test/v2/settings/diagnostics_history_pages_test.dart 11 tests incl. page-level anchoring; focused suites 205 pass",
         "id": "C1",
         "text": "#519 behavior implemented and tested",
         "waived": false
@@ -116,13 +122,13 @@
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "R1-R3 judged (rvw_20261127T194247Z_cd3e20bb); R3 7/8 approve, Sol-F finding fixed exactly as suggested and mutation-tested",
         "id": "C3",
         "text": "review converged",
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "6ab5c1ce release: cut v2.13.0; tag v2.13.0 on origin; make watch-release started",
         "id": "C4",
         "text": "release cut and watcher started",
         "waived": false
@@ -181,8 +187,8 @@
       "text": "R3 judgment (#519): 7/8 approve. ACCEPT H1 (Sol-F warn, haiku sugg): outside scroll during the 250 ms reveal animation started no ScrollStart -> reveal is now an immediate jump (Sol-F's first option); test asserts the jump lands in one frame; mutation M7 (250 ms animation) fails it. REJECT H2 (haiku sugg) desktop Page Down with Back focused: pre-existing (desktop never inherits PrimaryScrollController; the old ListView page behaved the same), out of #519 scope. No -F position rejected. Fix commit (jump). Re-review skipped: one-line change exactly as Sol-F suggested, mutation-tested; gate reruns on the final SHA."
     }
   ],
-  "generation": 32,
-  "next_action": "Cut v2.13.0 with make release V=stable and start make watch-release",
+  "generation": 37,
+  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
   "pending_operation": null,
   "queued_followups": [
     {
@@ -242,10 +248,10 @@
   "risks": [],
   "schema": 1,
   "started_at": "2026-11-27T19:36:07Z",
-  "status": "in_progress",
+  "status": "completed",
   "task_id": "tm_20261127T193607Z_a313a05a",
   "title": "#527 group 7: one Settings screen for version, updates and release history (#519)",
-  "updated_at": "2026-11-27T20:56:12Z",
+  "updated_at": "2026-11-27T20:56:34Z",
   "validations": [
     {
       "at": "2026-11-27T20:21:36Z",
@@ -266,6 +272,27 @@
       "check": "make check TEST_JOBS=$(nproc) on final SHA 55450f33",
       "criterion": "C2",
       "evidence": "rc=0, log /tmp/opencode/g7/gate-final.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T20:56:34Z",
+      "check": "#519 behavior implemented and tested",
+      "criterion": "C1",
+      "evidence": "851747a3; test/v2/settings/diagnostics_history_pages_test.dart 11 tests incl. page-level anchoring; focused suites 205 pass",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T20:56:34Z",
+      "check": "Review converged",
+      "criterion": "C3",
+      "evidence": "R1-R3 judged (rvw_20261127T194247Z_cd3e20bb); R3 7/8 approve, Sol-F finding fixed exactly as suggested and mutation-tested",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T20:56:34Z",
+      "check": "Release cut and watcher started",
+      "criterion": "C4",
+      "evidence": "6ab5c1ce release: cut v2.13.0; tag v2.13.0 on origin; make watch-release started",
       "outcome": "pass"
     }
   ]
