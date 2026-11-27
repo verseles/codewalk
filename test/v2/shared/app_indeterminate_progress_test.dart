@@ -1,21 +1,29 @@
 import 'dart:io';
 import 'dart:ui' show SemanticsRole;
 
+import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/widgets/app_indeterminate_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
-/// Bounded indeterminate progress (#117): stepped or static on desktop,
-/// native on mobile, static with reduced motion.
+/// Indeterminate progress (ADR-062, #510): native smooth animation on every
+/// platform, static only with reduced motion, paused by TickerMode.
 void main() {
   Future<void> show(
     WidgetTester tester,
     Widget indicator, {
     bool reducedMotion = false,
+    bool withL10n = false,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: withL10n
+            ? V2Localizations.localizationsDelegates
+            : null,
+        supportedLocales: withL10n
+            ? V2Localizations.supportedLocales
+            : const [Locale('en')],
         home: MediaQuery(
           data: MediaQueryData(disableAnimations: reducedMotion),
           child: Scaffold(body: Center(child: indicator)),
@@ -24,76 +32,8 @@ void main() {
     );
   }
 
-  double? ringValue(WidgetTester tester) => tester
-      .widget<CircularProgressIndicator>(find.byType(CircularProgressIndicator))
-      .value;
-
   testWidgets(
-    'a desktop ring steps from one shared timer',
-    (tester) async {
-      await show(tester, const AppIndeterminateRing(size: 36));
-      expect(AppIndeterminateClock.instance.running, isTrue);
-      final first = ringValue(tester);
-      expect(first, isNotNull);
-      await tester.pump(AppIndeterminate.step);
-      expect(ringValue(tester), isNot(first));
-      // No vsync ticker: nothing is scheduled between steps.
-      expect(tester.binding.hasScheduledFrame, isFalse);
-      await tester.pumpWidget(const SizedBox());
-      expect(AppIndeterminateClock.instance.running, isFalse);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.linux),
-  );
-
-  testWidgets(
-    'a small desktop slot shows a static glyph',
-    (tester) async {
-      await show(tester, const AppIndeterminateRing(size: 16));
-      expect(find.byIcon(Symbols.progress_activity), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsNothing);
-      expect(AppIndeterminateClock.instance.running, isFalse);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.linux),
-  );
-
-  testWidgets(
-    'reduced motion is static on every platform',
-    (tester) async {
-      {
-        await show(
-          tester,
-          const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppIndeterminateRing(size: 48),
-              SizedBox(width: 200, child: AppIndeterminateBar()),
-            ],
-          ),
-          reducedMotion: true,
-        );
-        expect(find.byIcon(Symbols.progress_activity), findsOneWidget);
-        expect(
-          tester
-              .widget<LinearProgressIndicator>(
-                find.byType(LinearProgressIndicator),
-              )
-              .value,
-          0.35,
-        );
-        expect(AppIndeterminateClock.instance.running, isFalse);
-        // Nothing keeps drawing once the first frames are done.
-        await tester.pump(const Duration(seconds: 1));
-        expect(tester.binding.hasScheduledFrame, isFalse);
-      }
-    },
-    variant: const TargetPlatformVariant({
-      TargetPlatform.linux,
-      TargetPlatform.android,
-    }),
-  );
-
-  testWidgets(
-    'mobile keeps the native indeterminate animation',
+    'every platform uses native indeterminate rings (including compact) and bars',
     (tester) async {
       await show(
         tester,
@@ -101,11 +41,21 @@ void main() {
           mainAxisSize: MainAxisSize.min,
           children: [
             AppIndeterminateRing(size: 16),
+            AppIndeterminateRing(size: 36),
             SizedBox(width: 200, child: AppIndeterminateBar()),
           ],
         ),
       );
-      expect(ringValue(tester), isNull);
+      final rings = tester
+          .widgetList<CircularProgressIndicator>(
+            find.byType(CircularProgressIndicator),
+          )
+          .toList();
+      expect(rings, hasLength(2));
+      for (final ring in rings) {
+        expect(ring.value, isNull);
+      }
+      expect(find.byIcon(Symbols.progress_activity), findsNothing);
       expect(
         tester
             .widget<LinearProgressIndicator>(
@@ -114,14 +64,56 @@ void main() {
             .value,
         isNull,
       );
-      expect(AppIndeterminateClock.instance.running, isFalse);
+      expect(tester.binding.hasScheduledFrame, isTrue);
       await tester.pumpWidget(const SizedBox());
     },
-    variant: TargetPlatformVariant.only(TargetPlatform.android),
+    variant: const TargetPlatformVariant({
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    }),
   );
 
   testWidgets(
-    'a desktop bar steps and stops when hidden by TickerMode',
+    'reduced motion is static on every platform',
+    (tester) async {
+      await show(
+        tester,
+        const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppIndeterminateRing(size: 48),
+            SizedBox(width: 200, child: AppIndeterminateBar()),
+          ],
+        ),
+        reducedMotion: true,
+      );
+      expect(find.byIcon(Symbols.progress_activity), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(
+        tester
+            .widget<LinearProgressIndicator>(
+              find.byType(LinearProgressIndicator),
+            )
+            .value,
+        0.35,
+      );
+      // Nothing keeps drawing once the first frames are done.
+      await tester.pump(const Duration(seconds: 1));
+      expect(tester.binding.hasScheduledFrame, isFalse);
+    },
+    variant: const TargetPlatformVariant({
+      TargetPlatform.linux,
+      TargetPlatform.macOS,
+      TargetPlatform.windows,
+      TargetPlatform.android,
+    }),
+  );
+
+  testWidgets(
+    'TickerMode pauses native desktop animations when hidden and resumes them',
     (tester) async {
       final enabled = ValueNotifier(true);
       addTearDown(enabled.dispose);
@@ -131,79 +123,47 @@ void main() {
           valueListenable: enabled,
           builder: (context, on, child) =>
               TickerMode(enabled: on, child: child!),
-          child: const SizedBox(width: 200, child: AppIndeterminateBar()),
+          child: const Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              AppIndeterminateRing(size: 20),
+              SizedBox(width: 200, child: AppIndeterminateBar()),
+            ],
+          ),
         ),
       );
-      final bar = find.byType(LinearProgressIndicator);
-      final first = tester.widget<LinearProgressIndicator>(bar).value;
-      await tester.pump(AppIndeterminate.step);
-      expect(tester.widget<LinearProgressIndicator>(bar).value, isNot(first));
+      expect(tester.binding.hasScheduledFrame, isTrue);
       enabled.value = false;
       await tester.pump();
-      expect(AppIndeterminateClock.instance.running, isFalse);
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.linux),
-  );
-
-  testWidgets(
-    'a hidden indicator stops listening while another keeps the clock alive',
-    (tester) async {
-      final visible = ValueNotifier(true);
-      addTearDown(visible.dispose);
-      await show(
-        tester,
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const AppIndeterminateRing(),
-            ValueListenableBuilder<bool>(
-              valueListenable: visible,
-              builder: (context, enabled, child) =>
-                  TickerMode(enabled: enabled, child: child!),
-              child: const SizedBox(
-                key: ValueKey('hidden-progress'),
-                width: 200,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [AppIndeterminateRing(), AppIndeterminateBar()],
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-      final hiddenListeners = find.descendant(
-        of: find.byKey(const ValueKey('hidden-progress')),
-        matching: find.byType(ValueListenableBuilder<int>),
-      );
-      expect(hiddenListeners, findsNWidgets(2));
-      visible.value = false;
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(tester.binding.hasScheduledFrame, isFalse);
+      enabled.value = true;
       await tester.pump();
-      expect(AppIndeterminateClock.instance.running, isTrue);
-      expect(hiddenListeners, findsNothing);
-      visible.value = true;
-      await tester.pump();
-      expect(hiddenListeners, findsNWidgets(2));
+      expect(tester.binding.hasScheduledFrame, isTrue);
       await tester.pumpWidget(const SizedBox());
-      expect(AppIndeterminateClock.instance.running, isFalse);
     },
     variant: TargetPlatformVariant.only(TargetPlatform.linux),
   );
 
-  testWidgets(
-    'the ring is announced once, by its label',
-    (tester) async {
-      final semantics = tester.ensureSemantics();
+  testWidgets('the ring is announced once, by its explicit or default label', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    try {
       await show(
         tester,
         const AppIndeterminateRing(size: 36, semanticsLabel: 'Loading'),
       );
       expect(find.bySemanticsLabel('Loading'), findsOneWidget);
+      await show(tester, const AppIndeterminateRing(size: 16));
+      expect(find.bySemanticsLabel('In progress'), findsOneWidget);
+      await show(tester, const AppIndeterminateRing(size: 16), withL10n: true);
+      expect(find.bySemanticsLabel('In progress'), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
+    } finally {
       semantics.dispose();
-    },
-    variant: TargetPlatformVariant.only(TargetPlatform.linux),
-  );
+    }
+  }, variant: TargetPlatformVariant.only(TargetPlatform.linux));
 
   for (final reduced in [false, true]) {
     testWidgets(
@@ -211,29 +171,32 @@ void main() {
       '(reduced motion: $reduced)',
       (tester) async {
         final semantics = tester.ensureSemantics();
-        await show(
-          tester,
-          const Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppIndeterminateRing(size: 36, semanticsLabel: 'Loading ring'),
-              SizedBox(
-                width: 200,
-                child: AppIndeterminateBar(semanticsLabel: 'Loading bar'),
-              ),
-            ],
-          ),
-          reducedMotion: reduced,
-        );
-        for (final label in ['Loading ring', 'Loading bar']) {
-          final data = tester
-              .getSemantics(find.bySemanticsLabel(label))
-              .getSemanticsData();
-          expect(data.role, SemanticsRole.loadingSpinner);
-          expect(data.value, isEmpty);
+        try {
+          await show(
+            tester,
+            const Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppIndeterminateRing(size: 36, semanticsLabel: 'Loading ring'),
+                SizedBox(
+                  width: 200,
+                  child: AppIndeterminateBar(semanticsLabel: 'Loading bar'),
+                ),
+              ],
+            ),
+            reducedMotion: reduced,
+          );
+          for (final label in ['Loading ring', 'Loading bar']) {
+            final data = tester
+                .getSemantics(find.bySemanticsLabel(label))
+                .getSemanticsData();
+            expect(data.role, SemanticsRole.loadingSpinner);
+            expect(data.value, isEmpty);
+          }
+          await tester.pumpWidget(const SizedBox());
+        } finally {
+          semantics.dispose();
         }
-        await tester.pumpWidget(const SizedBox());
-        semantics.dispose();
       },
       variant: const TargetPlatformVariant({
         TargetPlatform.linux,
@@ -242,32 +205,58 @@ void main() {
     );
   }
 
-  test('every v2 indeterminate indicator is the bounded one', () {
-    final offenders = <String>[];
-    final start = RegExp(r'(?<![A-Za-z])(Circular|Linear)ProgressIndicator\(');
-    for (final root in [
-      'lib/app',
-      'lib/features',
-      'lib/shared',
-      'lib/platform',
-    ]) {
-      for (final file in Directory(root).listSync(recursive: true)) {
-        if (file is! File || !file.path.endsWith('.dart')) continue;
-        if (file.path.endsWith('app_indeterminate_progress.dart')) continue;
-        final source = file.readAsStringSync();
-        for (final match in start.allMatches(source)) {
-          // The call's own arguments, up to its closing parenthesis.
-          var depth = 0;
-          var end = match.end - 1;
-          for (; end < source.length; end++) {
-            if (source[end] == '(') depth++;
-            if (source[end] == ')' && --depth == 0) break;
+  test(
+    'every v2 indeterminate indicator routes through AppIndeterminateRing or AppIndeterminateBar',
+    () {
+      final offenders = <String>[];
+      final start = RegExp(
+        r'(?<![A-Za-z])(Circular|Linear)ProgressIndicator\(',
+      );
+      for (final root in [
+        'lib/app',
+        'lib/features',
+        'lib/shared',
+        'lib/platform',
+      ]) {
+        for (final file in Directory(root).listSync(recursive: true)) {
+          if (file is! File || !file.path.endsWith('.dart')) continue;
+          if (file.path.endsWith('app_indeterminate_progress.dart')) continue;
+          final source = file.readAsStringSync();
+          for (final match in start.allMatches(source)) {
+            // The call's own arguments, up to its closing parenthesis.
+            var depth = 0;
+            var end = match.end - 1;
+            for (; end < source.length; end++) {
+              if (source[end] == '(') depth++;
+              if (source[end] == ')' && --depth == 0) break;
+            }
+            final call = source.substring(match.start, end);
+            final valueMatch = RegExp(r'\bvalue\s*:').firstMatch(call);
+            if (valueMatch == null) {
+              offenders.add(file.path);
+              continue;
+            }
+            var argDepth = 0;
+            var argEnd = valueMatch.end;
+            for (; argEnd < call.length; argEnd++) {
+              final ch = call[argEnd];
+              if (ch == '(' || ch == '[' || ch == '{') {
+                argDepth++;
+              } else if (ch == ')' || ch == ']' || ch == '}') {
+                if (argDepth == 0) break;
+                argDepth--;
+              } else if (ch == ',' && argDepth == 0) {
+                break;
+              }
+            }
+            final valueExpr = call.substring(valueMatch.end, argEnd);
+            if (RegExp(r'\bnull\b').hasMatch(valueExpr)) {
+              offenders.add(file.path);
+            }
           }
-          final call = source.substring(match.start, end);
-          if (!call.contains('value:')) offenders.add(file.path);
         }
       }
-    }
-    expect(offenders, isEmpty);
-  });
+      expect(offenders, isEmpty);
+    },
+  );
 }

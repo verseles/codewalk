@@ -293,10 +293,13 @@ class UpdateCandidateCard extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            LinearProgressIndicator(
-              key: const ValueKey('updates_progress'),
-              value: install.progress > 0 ? install.progress : null,
-            ),
+            if (install.progress > 0)
+              LinearProgressIndicator(
+                key: const ValueKey('updates_progress'),
+                value: install.progress,
+              )
+            else
+              const AppIndeterminateBar(key: ValueKey('updates_progress')),
             const SizedBox(height: 8),
             Text(install.progress > 0 ? '$percent%' : l.updatesDownload),
             TextButton(

@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 1,
+  "artifact_seq": 3,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -16,6 +16,40 @@
       "stage": "S1",
       "supersedes": null,
       "title": "ART-PRE-EVALUATION grupo 5 (#511 #510 #509 #525)"
+    },
+    "A0002": {
+      "active": false,
+      "bytes": 1160,
+      "created_at": "2026-11-27T06:49:53Z",
+      "evidence": "9 delivered + 1 invalid-delivery raw files in /tmp/opencode/group5-511-510-20261127T063846Z-a6da/r1_*.out",
+      "id": "A0002",
+      "impact": "Two candidate findings to verify (ADR-061 collision; nullable LinearProgressIndicator bypass in updater views) plus rung-1 invalid-delivery recovery for Ernie",
+      "origin": "review-batch-1-r1 (10 helpers)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0002.md",
+      "purpose": "Preserve ledger and reports from Review Batch 1 (#511+#510, 5bcf1744..a08d7883) round 1",
+      "rerun_when": "Fixes committed for #511/#510 or Ernie recovery completes",
+      "retired": true,
+      "sha256": "f120b6248aee55707c9834239db8ef33001de7bc389cbd99d8fdc4438f286cf7",
+      "stage": "S3",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 1 (#511+#510) R1"
+    },
+    "A0003": {
+      "active": false,
+      "bytes": 373,
+      "created_at": "2026-11-27T06:50:48Z",
+      "evidence": "/tmp/opencode/group5-511-510-20261127T063846Z-a6da/r1_helperErnie-55-flash-high_rung1.out",
+      "id": "A0003",
+      "impact": "Completes 10/10 delivered reports for Review Batch 1 R1 before judgment",
+      "origin": "helperErnie-55-flash-high (rung-1 invalid-delivery recovery)",
+      "path": "artifacts/tm_20261127T060509Z_fdaf0acd/A0003.md",
+      "purpose": "Preserve recovered pure-YAML report from helperErnie-55-flash-high for Review Batch 1 R1",
+      "rerun_when": "Only if Review Batch 1 requires a re-review round",
+      "retired": true,
+      "sha256": "dcf4127c3546cc1f00fb1173fbbee0301d8f1d0a78751ccf1996c6360df4d3b6",
+      "stage": "S3",
+      "supersedes": null,
+      "title": "ART-REVIEWER-LEDGER + ART-REVIEW-REPORTS Batch 1 (#511+#510) R1 (Ernie recovered)"
     }
   },
   "checklist": [
@@ -43,9 +77,9 @@
       ],
       "id": "S3",
       "label": "#510 animação em passos no desktop/Linux (ADR-056)",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "#510 implementado e revisado com #511 (10/10 helpers, 2 achados aceitos e corrigidos: ADR-062 + updater AppIndeterminateBar + guard)",
+      "status": "done",
+      "validation": "make check verde antes dos micro-fixes + 33/33 testes focados e format/analyze verdes após os fixes"
     },
     {
       "depends": [
@@ -54,7 +88,7 @@
       "id": "S4",
       "label": "#509 círculos serrilhados no Linux 5K",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -160,10 +194,22 @@
     {
       "at": "2026-11-27T06:11:38Z",
       "text": "Owner respondeu Q3 (#525): A — brilho percorrendo a borda da cápsula (SweepGradient no contorno StadiumBorder, ~2 s por volta), só com count>0; parado (borda primary estática) com movimento reduzido; para com TickerMode/count==0. Todas as perguntas do grupo 5 respondidas: #510 A, #509 A, #525 A, #511 sem pergunta."
+    },
+    {
+      "at": "2026-11-27T06:38:47Z",
+      "text": "Review Batch 1 (#511+#510) iniciado: base=5bcf1744 head=a08d7883 job_key=group5-511-510-20261127T063846Z-a6da metrics=rvw_20261127T063846Z_cb4dd1ac; 10 helpers elegíveis (helperClaude-haiku-5-max, helperClaude-opus-5-low, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperErnie-55-flash-high, helperGLM-53-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free, helperKimi-K31-pro-high); helperDeepSeek-41-flash-high excluído (pico Seg-Sex 06:00-10:00 UTC)."
+    },
+    {
+      "at": "2026-11-27T06:40:15Z",
+      "text": "Handshakes READY (10/10) dir=/home/ubuntu/MEGA/WORK/codewalk job_key=group5-511-510-20261127T063846Z-a6da: helperClaude-haiku-5-max=READY, helperClaude-opus-5-low=READY, helperCodex-6-luna-max=READY, helperCodex-6.2-sol-xhigh-F=READY, helperErnie-55-flash-high=READY, helperGLM-53-high=READY, helperGemini-4-hydrogen-xhigh=READY, helperGrok-47-high-F=READY, helperHungerg-free=READY, helperKimi-K31-pro-high=READY (DeepSeek excluído por pico UTC)"
+    },
+    {
+      "at": "2026-11-27T06:51:14Z",
+      "text": "ART-REVIEW-JUDGMENT Batch 1 (#511+#510) R1 (10/10 entregues, Ernie recuperado no rung 1): ACEITOS 2 achados: (1) Renumerar ADR-061 -> ADR-062 (ADR-061 reservado em v2-plan.md:1139 e issue #335 V21-012) [haiku, hungerg, gemini-4-hydrogen]; (2) Trocar LinearProgressIndicator(value: cond ? p : null) por AppIndeterminateBar nos ramos indeterminados de linux_update_panel.dart:25 e updates_settings_page.dart:296 + apertar guard de teste para rejeitar null em value: [codex-6.2-sol-F, glm-53]. Zero posições Frontier (-F) rejeitadas. Sem re-review necessário após estes 2 ajustes locais simples (docs/comentários + 2 ramos de barra + regex de teste, sem tocar concorrência/segurança/interfaces/persistência/arquitetura)."
     }
   ],
-  "generation": 10,
-  "next_action": "Implementar #510 (remover AppIndeterminateClock/_Stepped/bounded e criar ADR-061 superseding ADR-056)",
+  "generation": 22,
+  "next_action": "Implementar #509: atualizar ~/flutter e todos os pins do repositório de 3.47.9 para 3.50.1 (commit ae9b586f34a8443573f82ef57c3bf914a908cbf7)",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -177,13 +223,34 @@
   "status": "in_progress",
   "task_id": "tm_20261127T060509Z_fdaf0acd",
   "title": "Grupo 5 da #527 — loading, animações e cápsula (avaliação prévia + flow)",
-  "updated_at": "2026-11-27T06:36:22Z",
+  "updated_at": "2026-11-27T06:52:36Z",
   "validations": [
     {
       "at": "2026-11-27T06:36:22Z",
       "check": "#511 format, analyze and session_task_list_test",
       "criterion": null,
       "evidence": "dart format (0 changed), flutter analyze (0 issues), flutter test test/v2/sessions/session_task_list_test.dart (8/8 passed)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T06:38:11Z",
+      "check": "#510 format, analyze and related tests",
+      "criterion": null,
+      "evidence": "dart format ok, flutter analyze 0 issues, 74/74 tests passed across app_indeterminate_progress + context_usage + selection_chip + compaction_note + rich_rendering + task_list",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T06:47:52Z",
+      "check": "make check on #511+#510 (a08d7883)",
+      "criterion": null,
+      "evidence": "make check TEST_JOBS=$(nproc) exit 0; analyze issues 4<=4; python CI/release tests ok; full flutter test suite green (/tmp/opencode/make_check_511_510.log)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T06:52:36Z",
+      "check": "Batch 1 (#511+#510) review fixes validated",
+      "criterion": null,
+      "evidence": "ADR-062 renumbered, linux_update_panel & updates_settings_page use AppIndeterminateBar for null progress, source guard tightened; format/analyze 0 issues, 33/33 focused tests green",
       "outcome": "pass"
     }
   ]

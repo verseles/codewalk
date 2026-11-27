@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/releases/linux_update.dart';
 import '../../shared/releases/update_selector.dart';
+import '../../shared/widgets/app_indeterminate_progress.dart';
 import 'linux_update_controller.dart';
 import 'update_failure_text.dart';
 
@@ -22,13 +23,11 @@ class LinuxUpdatePanel extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (controller.busy) ...[
-          LinearProgressIndicator(
-            value:
-                controller.status == LinuxUpdateStatus.downloading &&
-                    controller.progress > 0
-                ? controller.progress
-                : null,
-          ),
+          if (controller.status == LinuxUpdateStatus.downloading &&
+              controller.progress > 0)
+            LinearProgressIndicator(value: controller.progress)
+          else
+            const AppIndeterminateBar(),
           Text(
             controller.status == LinuxUpdateStatus.installing
                 ? l.appShellInstallingUpdate

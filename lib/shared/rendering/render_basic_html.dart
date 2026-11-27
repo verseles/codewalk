@@ -400,8 +400,9 @@ class BasicHtmlProgressBuilder extends MarkdownElementBuilder {
         width: double.infinity,
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
-          // A progress without a value is bounded like every indeterminate
-          // indicator (#117).
+          // A progress without a value routes through AppIndeterminateBar so
+          // reduced-motion fallback and loading semantics stay consistent
+          // (ADR-062).
           child: value == null
               ? AppIndeterminateBar(
                   minHeight: 6,

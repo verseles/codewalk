@@ -57,11 +57,13 @@ This document contains active architectural decisions for the current implementa
 - ADR-053: Client-Owned Configurable API Speech-to-Text (OpenAI / Groq / Custom OpenAI-Compatible)
 - ADR-054: Experimental Test-Only Android Auto Notification Messaging ⚠️ SUPERSEDED by ADR-055
 - ADR-055: Production Android Auto Notification Messaging for Sideloaded APK Distribution
-- ADR-056: Bounded Desktop Indeterminate Motion Policy
+- ADR-056: Bounded Desktop Indeterminate Motion Policy ⚠️ SUPERSEDED by ADR-062
 - ADR-057: Interaction-Frame Budget for Session Switching
 - ADR-058: CodeWalk v2 Harness-Neutral Architecture
 - ADR-059: Permission Modes in CodeWalk v2
 - ADR-060: CodeWalk v1 to v2 Transition
+- ADR-061: (Reserved for CodeWalk Host and CHP — V21-012 / #335)
+- ADR-062: Native Continuous Indeterminate Motion on All Platforms
 
 ---
 
@@ -3715,7 +3717,9 @@ This ADR is fully compliant with ADR-023 and is **not** an ADR-023 exception —
 - `test/unit/` — updated tests: descriptor/manifest presence in main source set, release activation without flag/toggle, encrypted store (process-death restore), notification/action shape, auth gating, dispatch worker, obsolete-preference ignored-on-load/dropped-on-persist, and `codewalk_agent` notification-channel reuse — same default importance/priority as standard completions, standard fallback retained unless a new car message is actually published.
 - Ref: issue #99
 
-## ADR-056: Bounded Desktop Indeterminate Motion Policy (2026-09-17)
+## ADR-056: Bounded Desktop Indeterminate Motion Policy (2026-09-17) ⚠️ SUPERSEDED by ADR-062
+
+**Status**: Superseded by ADR-062 (2026-11-27)
 
 ### Decision
 
@@ -3983,3 +3987,54 @@ CodeWalk 2 replaces CodeWalk 1 under the same application ID, `com.verseles.code
 This ADR is a documentary producer for `V2-020A`, `V2-027` and the bounded transition checkpoints above, not proof that their consumers or any release gate already pass. The new issues remain open/pending; no acceptance or release is conferred by this documentation change. GitHub Issues remain the evergreen acceptance and resume record; update this ADR at the accepted-MVP checkpoint if a transition decision changes.
 
 Related: V2-004 ([#238](https://github.com/verseles/codewalk/issues/238)); V1-02A (#359), V2-020CA (#356), V2-078A (#357), V2-008A (#358), V2-028D (#360), V2-076A (#361), V2-077A (#362); ADR-023; ADR-058; ADR-059 (imported permission preference); `v2-plan.md` D03/D04, §§9, 11.6, 12.1, V2-076–078 and V2-084–086; `AGENTS.md` version-line/publication rules. Applicable server/database contracts are routed through the [v2 server](ai-docs-for-opencode-v2/opencode_v2_server.md), [Web](ai-docs-for-opencode-v2/opencode_v2_web.md) and [model/agent](ai-docs-for-opencode-v2/opencode_v2_models.md) anchors; retained v1 paths continue using their legacy anchors under ADR-023.
+
+---
+
+## ADR-062: Native Continuous Indeterminate Motion on All Platforms (2026-11-27)
+
+**Status**: Accepted (supersedes ADR-056)
+
+### Context
+
+ADR-056 was adopted on 2026-09-17 for CodeWalk v1 after measuring high CPU/iGPU usage (~34% UI thread, ~9% raster, ~700 MHz iGPU) for a single 16px indeterminate ring on Linux under Skia/Mesa. To work around that cost, ADR-056 froze compact rings (`<= 20dp`) as static glyphs on desktop and stepped larger rings and bars at ~8 Hz via a shared timer (`AppIndeterminateClock`).
+
+In CodeWalk v2, that policy produced visibly jerky 8 Hz stepped spinners on high-refresh desktop displays (e.g., 240 Hz Linux) while mobile ran smooth native vsync animations (#510). Meanwhile, the underlying assumptions changed:
+
+1. Flutter 3.47+ switched desktop rendering on Linux, macOS, and Windows to Impeller by default (replacing the v1 Skia/Mesa path measured in ADR-056).
+2. CodeWalk v2 already runs smooth vsync-driven desktop animations (such as `_WaitingFill` in #502 and microphone pulse animations) without reported idle CPU/GPU regressions.
+3. The task list's long-running `inProgress` indicator moved to a static `Symbols.double_arrow` glyph (#511), removing the most persistent small spinner in active chats.
+
+### Decision
+
+Supersede ADR-056 and render native continuous indeterminate animations on every platform (Linux, macOS, Windows, Android, iOS, and Web):
+
+- All indeterminate progress indicators in v2 still route through `AppIndeterminateRing` and `AppIndeterminateBar` so reduced-motion handling and loading-spinner semantics remain uniform and enforceable.
+- When `AppIndeterminate.motion(context)` is `true` (`MediaQuery.maybeDisableAnimationsOf(context) != true`), `AppIndeterminateRing` renders a native indeterminate `CircularProgressIndicator` at all sizes (including `<= 20dp`) and `AppIndeterminateBar` renders a native indeterminate `LinearProgressIndicator`.
+- Remove `AppIndeterminateClock`, the `_Stepped` mixin, `AppIndeterminate.bounded`, `AppIndeterminate.step`, `AppIndeterminate.steps`, and `AppIndeterminate.compactSize`.
+- When reduced motion is enabled (`AppIndeterminate.motion(context) == false`), every platform keeps the static fallback (`Symbols.progress_activity` icon for rings, `0.35` determinate bar for bars) with zero animation frames.
+- Offscreen or hidden routes continue to pause native tickers automatically through Flutter's `TickerMode`.
+
+### Rationale
+
+- Native vsync animations deliver smooth motion on high-refresh desktop displays matching mobile quality and existing v2 animations (#502, #525).
+- Removing the custom timer and platform branching simplifies `app_indeterminate_progress.dart` to stateless widgets while keeping the central reduced-motion and accessibility seam intact.
+- Keeping the source guard test ensures raw indeterminate Material indicators cannot bypass reduced-motion or semantics rules.
+
+### Consequences
+
+- ✅ Smooth, display-refresh-rate indeterminate spinners and bars across Linux, macOS, Windows, Android, iOS, and Web, including compact indicators.
+- ✅ Less widget state and no global `Timer.periodic` clock to manage.
+- ✅ Reduced-motion users still receive static indicators with zero scheduled frames, and hidden indicators still pause under `TickerMode`.
+- ⚠️ Visible spinners on desktop now tick at display vsync; if future Linux/desktop telemetry shows unacceptable idle GPU/CPU cost, introduce a bounded frame-rate option rather than restoring the stepped 8 Hz timer.
+- ❌ Tests that mount an `AppIndeterminateRing` or `AppIndeterminateBar` on desktop without `disableAnimations: true` must use bounded `pump(...)` calls instead of `pumpAndSettle()`.
+
+### ADR-023 Compatibility
+
+Fully compliant, not an exception. Presentation-only change with no endpoint, schema, event, or lifecycle semantic impact.
+
+### Key Files
+
+- `lib/shared/widgets/app_indeterminate_progress.dart` — stateless `AppIndeterminateRing`, `AppIndeterminateBar`, and `AppIndeterminate.motion`.
+- `test/v2/shared/app_indeterminate_progress_test.dart` — cross-platform native animation, reduced-motion, `TickerMode`, semantics, and source guard tests.
+
+Related: #510, #511, #509, #525; supersedes ADR-056.
