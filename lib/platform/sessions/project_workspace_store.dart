@@ -94,6 +94,10 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
   static const maxQueryChars = 256;
   static const _maxPathBytes = 4096;
 
+  /// The latest stamp a [DateTime] can hold, in milliseconds (#534).
+  static const maxShownMs = 8640000000000000;
+  static const _clockSlackMs = Duration.millisecondsPerDay;
+
   final V2MetadataStore _store;
   final _executor = KeySerialExecutor();
   Map<String, Object?> _raw = {};
@@ -181,15 +185,22 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
     String? active,
     int? nowMs,
   ) {
+    // A stamp more than a day ahead of the clock came from a clock that
+    // jumped: it is dropped instead of carried into every later stamp.
+    final ahead = nowMs == null ? maxShownMs : nowMs + _clockSlackMs;
     final kept = {
       for (final MapEntry(:key, :value) in state.shown.entries)
-        if (open.contains(key)) key: value,
+        if (open.contains(key) && value <= ahead) key: value,
     };
-    if (nowMs == null || active == null || active == state.active) {
+    if (nowMs == null ||
+        active == null ||
+        active == state.active ||
+        nowMs < 0) {
       return kept;
     }
     final latest = kept.values.fold<int>(-1, (a, b) => a > b ? a : b);
     final at = nowMs > latest ? nowMs : latest + 1;
+    if (at + 1 > maxShownMs) return kept;
     final left = state.active;
     return {
       ...kept,
@@ -468,14 +479,19 @@ final class ProjectWorkspaceStore extends ChangeNotifier {
   }
 
   /// The shown stamps of the open directories. Unlike the pins, a bad entry
-  /// is dropped rather than making the record unreadable: they only order
-  /// the drawer, and an older build that closes a project leaves its stamp
-  /// behind.
+  /// (not an int, negative, past what a [DateTime] holds, or of a project
+  /// not open) is dropped rather than making the record unreadable: they
+  /// only order the drawer, and an older build that closes a project leaves
+  /// its stamp behind.
   static Map<String, int> _shown(Object? value, List<String> open) {
     if (value is! Map<String, Object?>) return const {};
     return {
       for (final MapEntry(:key, :value) in value.entries)
-        if (open.contains(key) && value is int && value >= 0) key: value,
+        if (open.contains(key) &&
+            value is int &&
+            value >= 0 &&
+            value <= maxShownMs)
+          key: value,
     };
   }
 

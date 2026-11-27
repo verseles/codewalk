@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
@@ -33,6 +35,7 @@ Future<(AppDependencies, CatalogRig, V2Localizations)> _open(
   Locale? locale,
   double scale = 1,
   List<SessionSummary> Function(CatalogSource source)? rows,
+  String? next,
 }) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
@@ -71,6 +74,7 @@ Future<(AppDependencies, CatalogRig, V2Localizations)> _open(
           source.row('two', directory: '/work/beta', title: 'Two'),
           source.row('three', directory: '/work/alpha', title: 'Three'),
         ],
+    next: next,
   );
   await tester.pumpAndSettle();
   await showSessionList(tester);
@@ -553,6 +557,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(rows(), findsNWidgets(5));
 
+    // Showing another project and coming back starts at five again.
+    await tester.tap(reveal);
+    await tester.pumpAndSettle();
+    expect(rows(), findsNWidgets(8));
+    final contexts = _contexts(tester);
+    expect(await contexts.openContext('/work/beta'), isTrue);
+    await tester.pumpAndSettle();
+    expect(await contexts.activate('/work/alpha'), isTrue);
+    await tester.pumpAndSettle();
+    expect(rows(), findsNWidgets(5));
+    expect(find.text(l10n.chatProjectShowMoreSessions), findsOneWidget);
+
     // The conversation on screen takes the fifth place instead of hiding.
     final far = rig.sources.single.row('s7').info.ref;
     dependencies.router.go('/s/profile_a/${far.nativeId}');
@@ -577,6 +593,69 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(rows(), findsNWidgets(8));
     expect(reveal, findsNothing);
+    expect(tester.takeException(), isNull);
+    await _closeApp(tester);
+  });
+
+  testWidgets('a reply read for a project ranks it above one shown later', (
+    tester,
+  ) async {
+    final reply = DateTime.now().toUtc().add(const Duration(days: 1));
+    await _open(
+      tester,
+      rows: (source) => [
+        source.row('a', directory: '/work/alpha', title: 'A'),
+        SessionSummary(
+          info: source.row('b', directory: '/work/beta', title: 'B').info,
+          updatedAt: reply,
+        ),
+        source.row('c', directory: '/work/gamma', title: 'C'),
+      ],
+    );
+    final contexts = _contexts(tester);
+    expect(await contexts.openContext('/work/beta'), isTrue);
+    expect(await contexts.openContext('/work/gamma'), isTrue);
+    expect(await contexts.activate('/work/alpha'), isTrue);
+    await tester.pumpAndSettle();
+    // Gamma was left last, but beta's reply is later still.
+    expect(contexts.ordered, ['/work/alpha', '/work/beta', '/work/gamma']);
+    double top(String directory) =>
+        tester.getTopLeft(find.byKey(ValueKey('project-row-$directory'))).dy;
+    expect(top('/work/beta'), lessThan(top('/work/gamma')));
+    expect(tester.takeException(), isNull);
+    await _closeApp(tester);
+  });
+
+  testWidgets('Load more opens the list so its page shows (#534)', (
+    tester,
+  ) async {
+    final (dependencies, rig, l10n) = await _open(
+      tester,
+      rows: (source) => [
+        for (var i = 0; i < 3; i++)
+          source.row('p$i', directory: '/work/alpha', title: 'P$i'),
+      ],
+    );
+    // The shown project's list is read by hand, with a next page.
+    final source = rig.sources.single..autoContexts = false;
+    unawaited(dependencies.sessions!.refresh());
+    await tester.pump();
+    source.respond([
+      for (var i = 0; i < 3; i++)
+        source.row('p$i', directory: '/work/alpha', title: 'P$i'),
+    ], next: 'page-2');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('sessions-reveal')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('sessions-more')));
+    await tester.pump();
+    source.respond([
+      for (var i = 3; i < 8; i++)
+        source.row('p$i', directory: '/work/alpha', title: 'P$i'),
+    ]);
+    await tester.pumpAndSettle();
+    // The page shows at once: the list opened when it was asked for.
+    expect(_row(rig, 'p7'), findsOneWidget);
+    expect(find.text(l10n.chatProjectShowFewerSessions), findsOneWidget);
     expect(tester.takeException(), isNull);
     await _closeApp(tester);
   });

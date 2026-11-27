@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 4,
+  "artifact_seq": 5,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -64,6 +64,22 @@
       "stage": "S4",
       "supersedes": null,
       "title": "u2 sol-F dissent on #535 overflow fix"
+    },
+    "A0005": {
+      "active": true,
+      "bytes": 1012,
+      "created_at": "2026-11-27T23:08:03Z",
+      "evidence": "/tmp/opencode/g8/rev/u3/r1_*.out",
+      "id": "A0005",
+      "impact": "Fix round for #534",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0005.md",
+      "purpose": "Review 4a0e9904",
+      "rerun_when": "sessions_page.dart, project_workspace_store.dart or project_contexts_controller.dart change",
+      "sha256": "0609a3a1d327d349e1d51a9a26b91af60e661234743bd67206d9d24412dcd5f7",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "u3 review r1 (#534 sidebar revamp)"
     }
   },
   "checklist": [
@@ -419,18 +435,15 @@
     {
       "at": "2026-11-27T22:53:38Z",
       "text": "Owner answered #537: A. 'Ferramentas expandidas' on = today's behavior (stretch open while running, summary once text arrives); off (default) = summary line even while running, tap expands."
+    },
+    {
+      "at": "2026-11-27T23:00:32Z",
+      "text": "#536 committed (12 dp phone margin; test in session_work_group_test). Mobile timeline goldens now stale (6% diff), accepted until the x86 Goldens workflow regenerates them together with the stale appearance goldens. #536 joins the next review boundary with #537/#538 (same timeline rendering)."
     }
   ],
-  "generation": 33,
+  "generation": 35,
   "next_action": "u3 handshakes, payload, gate, dispatch",
-  "pending_operation": {
-    "expected_bytes": 40000,
-    "expected_seconds": 1200,
-    "id": "op_775bd34c099a",
-    "kind": "subagent",
-    "prepared_at": "2026-11-27T22:50:39Z",
-    "purpose": "u3 review round 1 (#534, 8 helpers)"
-  },
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -452,7 +465,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-27T22:58:59Z",
+  "updated_at": "2026-11-27T23:08:03Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

@@ -223,15 +223,34 @@ void main() {
     expect(reloaded.shown, {'/one': 1003});
   });
 
+  test('a stamp from a clock that jumped ahead is dropped (#534)', () async {
+    final store = await _open(_MemoryBackend());
+    await store.open(_a, '/one');
+    // A clock a year ahead stamps the projects...
+    const year = 365 * Duration.millisecondsPerDay;
+    await store.open(_a, '/two', nowMs: year);
+    expect(store.workspace(_a).shown, {'/one': year, '/two': year + 1});
+    // ...and once it is right again, those stamps no longer rule.
+    await store.activate(_a, '/one', nowMs: 1000);
+    expect(store.workspace(_a).shown, {'/one': 1001, '/two': 1000});
+  });
+
   test('a bad shown stamp is dropped, never unreadable (#534)', () async {
     final backend = _MemoryBackend()
       ..values[ProjectWorkspaceStore.key] = jsonEncode({
         'v': 1,
         'servers': {
           _a: {
-            'open': ['/a', '/b'],
+            'open': ['/a', '/b', '/far'],
             'active': '/a',
-            'shown': {'/a': 7, '/b': -1, '/closed': 9, '/x': 'late'},
+            'shown': {
+              '/a': 7,
+              '/b': -1,
+              '/closed': 9,
+              '/x': 'late',
+              // Past what a DateTime holds: it would break the drawer.
+              '/far': 9000000000000000,
+            },
           },
           'profile_b': {
             'open': ['/c'],

@@ -58,6 +58,10 @@ class _SessionsPageState extends State<SessionsPage> {
   // The project whose "Show more" lists every conversation (#534).
   String? _expanded;
 
+  // The server and project the fold and the expansion were made for: another
+  // server showing the same directory starts over too.
+  (String?, String)? _scope;
+
   // Where each keyed row of the project list sits in this build, so a row
   // that moves when the projects reorder keeps its element, focus included
   // (#534).
@@ -298,9 +302,13 @@ class _SessionsPageState extends State<SessionsPage> {
 
     // A fold and a "Show more" belong to the project shown when they were
     // made: the page builds again on every switch, so another project shown
-    // by any route (a tap, a preview, a link) drops them.
-    if (_folded != shown) _folded = null;
-    if (_expanded != shown) _expanded = null;
+    // by any route (a tap, a preview, a link), or another server, drops them.
+    final scope = (controller.selectedProfile?.id, shown);
+    if (_scope != scope) {
+      _scope = scope;
+      _folded = null;
+      _expanded = null;
+    }
     final searching = contexts.query.isNotEmpty;
     for (final directory in contexts.ordered) {
       final active = directory == shown;
@@ -413,9 +421,7 @@ class _SessionsPageState extends State<SessionsPage> {
               context,
               controller,
               available,
-              onLoad: searching
-                  ? null
-                  : () => setState(() => _expanded = directory),
+              onLoad: () => setState(() => _expanded = directory),
             ),
           );
         }
