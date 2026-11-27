@@ -2172,6 +2172,9 @@ class V2LocalizationsEn extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => 'Tool call bubbles';
 
   @override
+  String get settingsAppearanceExpandedTools => 'Expanded tools';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'Show or hide tool execution cards in assistant messages.';
 

@@ -3928,6 +3928,12 @@ abstract class V2Localizations {
   /// **'Tool call bubbles'**
   String get settingsAppearanceToolCallBubbles;
 
+  /// Display menu: show each tool step while a stretch runs, instead of its summary (#537)
+  ///
+  /// In en, this message translates to:
+  /// **'Expanded tools'**
+  String get settingsAppearanceExpandedTools;
+
   /// CodeWalk UI string — settingsAppearanceToolCallBubblesDescription
   ///
   /// In en, this message translates to:

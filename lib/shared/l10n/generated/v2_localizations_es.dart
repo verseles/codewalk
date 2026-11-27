@@ -2195,6 +2195,9 @@ class V2LocalizationsEs extends V2Localizations {
       'Burbujas de llamada de herramienta';
 
   @override
+  String get settingsAppearanceExpandedTools => 'Herramientas expandidas';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'Mostrar u ocultar tarjetas de ejecución de herramientas.';
 

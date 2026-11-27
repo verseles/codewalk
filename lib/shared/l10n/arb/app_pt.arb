@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "Balões de pensamento",
   "settingsAppearanceThinkingBubblesDescription": "Mostrar ou ocultar blocos de raciocínio nas mensagens do assistente.",
   "settingsAppearanceToolCallBubbles": "Balões de chamada de ferramenta",
+  "settingsAppearanceExpandedTools": "Ferramentas expandidas",
   "settingsAppearanceToolCallBubblesDescription": "Mostrar ou ocultar cartões de execução de ferramentas nas mensagens do assistente.",
   "settingsBehaviorChatRenderMode": "Modo de renderização do chat",
   "settingsBehaviorChatRenderModeBlock": "Bloco",

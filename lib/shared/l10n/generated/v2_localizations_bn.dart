@@ -2161,6 +2161,9 @@ class V2LocalizationsBn extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => 'টুল কল বুদবুদ';
 
   @override
+  String get settingsAppearanceExpandedTools => 'প্রসারিত টুল';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'সহকারী বার্তাগুলিতে টুল এক্সিকিউশন কার্ড দেখান বা লুকান।';
 

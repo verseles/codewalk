@@ -1122,6 +1122,14 @@ void main() {
       find.byKey(const ValueKey('display-toggle-recent-sessions')),
       findsNothing,
     );
+    // Expanded tools, off by default, shows each step of the work (#537).
+    final expanded = find.byKey(
+      const ValueKey('display-toggle-expanded-tools'),
+    );
+    await tester.ensureVisible(expanded);
+    await tester.tap(expanded);
+    await _settle(tester);
+    expect(app.dependencies.preferences.expandedTools, isTrue);
     final tabs = find.byKey(const ValueKey('display-toggle-session-tabs'));
     await tester.ensureVisible(tabs);
     await tester.tap(tabs);

@@ -459,11 +459,22 @@
     {
       "at": "2026-11-27T23:11:40Z",
       "text": "u3 r1 judgment (#534): accepted F1 (stamp decode bound maxShownMs + increment guard), F3 (fold/expansion scoped by server+project), F4 (Load more expands during search), F5 opus-F (stamps >1 day ahead of now dropped when stamping), F6 tests; F2 docs accepted for the docs step; rejected F7 hungerg (deep-linked session outside loaded rows has no row: pre-existing, the list only shows loaded rows; not a #534 regression). No frontier position overridden. Fix commit 0e911541. Re-review required: persistence touched (store decode/stamping)."
+    },
+    {
+      "at": "2026-11-27T23:21:38Z",
+      "text": "u3 r2 judgment: accepted R1 (sol-F warning + haiku/deepseek/opus-F: stamps untouched unless written; ahead-filter only when stamping; doc fixed; backward jump >1 day drop documented as tradeoff), R2 haiku (scope reset at build start incl. server list), R3 tests (search+Load more, exact bound). Rejected haiku's two-server reset test: needs a second profile rig; the reset is a record comparison covered by the project-switch test. Fix 7122ddc7. Re-review r3 for the persistence change."
     }
   ],
-  "generation": 38,
+  "generation": 40,
   "next_action": "u3 handshakes, payload, gate, dispatch",
-  "pending_operation": null,
+  "pending_operation": {
+    "expected_bytes": 25000,
+    "expected_seconds": 600,
+    "id": "op_1acdd7ace0db",
+    "kind": "subagent",
+    "prepared_at": "2026-11-27T23:21:47Z",
+    "purpose": "u3 re-review round 3 (#534 fix 7122ddc7, 8 helpers)"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -485,7 +496,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-27T23:18:25Z",
+  "updated_at": "2026-11-27T23:21:47Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

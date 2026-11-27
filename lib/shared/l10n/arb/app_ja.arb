@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "思考プロセスバブル",
   "settingsAppearanceThinkingBubblesDescription": "アシスタントメッセージ内の推論ブロック（思考プロセス）の表示/非表示を切り替えます。",
   "settingsAppearanceToolCallBubbles": "ツール呼び出しバブル",
+  "settingsAppearanceExpandedTools": "ツールを展開表示",
   "settingsAppearanceToolCallBubblesDescription": "アシスタントメッセージ内のツール実行カードの表示/非表示を切り替えます。",
   "settingsBehaviorChatRenderMode": "チャット表示モード",
   "settingsBehaviorChatRenderModeBlock": "ブロック",

@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "Bulles de réflexion",
   "settingsAppearanceThinkingBubblesDescription": "Afficher ou masquer les blocs de raisonnement dans les messages de l''assistant.",
   "settingsAppearanceToolCallBubbles": "Bulles d''appel d''outil",
+  "settingsAppearanceExpandedTools": "Outils développés",
   "settingsAppearanceToolCallBubblesDescription": "Afficher ou masquer les cartes d''exécution d''outil dans les messages de l''assistant.",
   "settingsBehaviorChatRenderMode": "Mode de rendu de la discussion",
   "settingsBehaviorChatRenderModeBlock": "Bloc",

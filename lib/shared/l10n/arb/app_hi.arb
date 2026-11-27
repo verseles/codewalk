@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "विचार करने वाले बुलबुले (Thinking bubbles)",
   "settingsAppearanceThinkingBubblesDescription": "सहायक संदेशों में तर्क ब्लॉकों को दिखाएं या छिपाएं।",
   "settingsAppearanceToolCallBubbles": "टूल कॉल बुलबुले",
+  "settingsAppearanceExpandedTools": "विस्तृत टूल",
   "settingsAppearanceToolCallBubblesDescription": "सहायक संदेशों में टूल निष्पादन (tool execution) कार्ड दिखाएं या छिपाएं।",
   "settingsBehaviorChatRenderMode": "चैट रेंडर मोड",
   "settingsBehaviorChatRenderModeBlock": "ब्लॉक",

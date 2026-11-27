@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "思考气泡",
   "settingsAppearanceThinkingBubblesDescription": "在助手消息中显示或隐藏推理块。",
   "settingsAppearanceToolCallBubbles": "工具调用气泡",
+  "settingsAppearanceExpandedTools": "展开工具",
   "settingsAppearanceToolCallBubblesDescription": "在助手消息中显示或隐藏工具执行卡片。",
   "settingsBehaviorChatRenderMode": "聊天渲染模式",
   "settingsBehaviorChatRenderModeBlock": "块模式",

@@ -2183,6 +2183,9 @@ class V2LocalizationsRu extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => 'Вызовы инструментов';
 
   @override
+  String get settingsAppearanceExpandedTools => 'Развёрнутые инструменты';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'Показывать или скрывать карточки выполнения инструментов в сообщениях ассистента.';
 

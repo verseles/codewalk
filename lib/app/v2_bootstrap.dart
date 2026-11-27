@@ -249,6 +249,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
                   renderMode: preferences.chatRenderMode,
                   showReasoning: preferences.showReasoning,
                   showToolCalls: preferences.showToolCalls,
+                  expandedTools: preferences.expandedTools,
                   showTokensPerSecond: preferences.showTokensPerSecond,
                   composerSpellCheck: preferences.composerSpellCheck,
                   composerTips: preferences.composerTips,

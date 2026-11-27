@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "Размышления",
   "settingsAppearanceThinkingBubblesDescription": "Показывать или скрывать блоки рассуждений в сообщениях ассистента.",
   "settingsAppearanceToolCallBubbles": "Вызовы инструментов",
+  "settingsAppearanceExpandedTools": "Развёрнутые инструменты",
   "settingsAppearanceToolCallBubblesDescription": "Показывать или скрывать карточки выполнения инструментов в сообщениях ассистента.",
   "settingsBehaviorChatRenderMode": "Режим отображения чата",
   "settingsBehaviorChatRenderModeBlock": "Блок",

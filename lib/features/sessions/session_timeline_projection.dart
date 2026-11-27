@@ -174,9 +174,10 @@ final class SessionPendingRow extends SessionTimelineRow {
 }
 
 /// How the live and history timelines present their resident items:
-/// non-text activity stretches collapse into descriptive summaries as soon as
-/// following visible answer text arrives (or when settled), while every
-/// [AssistantText] stays visible forever.
+/// non-text activity stretches show as descriptive summaries from the start,
+/// or, with expanded tools, open while they run and collapse as soon as
+/// following visible answer text arrives (or when settled) (#537), while
+/// every [AssistantText] stays visible forever.
 ///
 /// Keeps what the reader opened and which trailing stretches settled for as
 /// long as the owning timeline is shown; reopening a session starts collapsed.
@@ -186,6 +187,10 @@ final class SessionTimelinePresentation {
   /// Trailing stretches already collapsed on settle, with their length, so a
   /// brief busy status pulse does not pop them back open until new items arrive.
   Map<String, int> _settledTrailing = {};
+
+  // Whether a stretch still at work shows its rows instead of its summary,
+  // as the last [project] was asked (#537).
+  bool _expandTools = true;
 
   bool isExpanded(String id) => _expanded.contains(id);
 
@@ -210,6 +215,8 @@ final class SessionTimelinePresentation {
 
   /// The rows of [items]. [settled] tells whether the session has no turn in
   /// flight, so a trailing stretch with no following text may also collapse.
+  /// Without [expandTools], every stretch is its summary from the start; a
+  /// tap still opens it.
   ///
   /// Reasoning and tool calls the reader hid are filtered out before grouping,
   /// so an emptied stretch emits no row (#108). In Block render mode, the turn
@@ -219,8 +226,10 @@ final class SessionTimelinePresentation {
     required bool settled,
     bool showReasoning = true,
     bool showToolCalls = true,
+    bool expandTools = true,
     ChatRenderMode renderMode = ChatRenderMode.live,
   }) {
+    _expandTools = expandTools;
     final original = items;
     items = sessionTimelineItems(items);
     final out = _Rows(
@@ -322,7 +331,7 @@ final class SessionTimelinePresentation {
           !hasFollowingAnswer &&
           activeCount == 0 &&
           (settled || _settledTrailing[id] == stretch.length);
-      final collapse = hasFollowingAnswer || settledTrailing;
+      final collapse = !_expandTools || hasFollowingAnswer || settledTrailing;
       if (collapse) {
         if (settledTrailing) latched[id] = stretch.length;
         out.stretch(

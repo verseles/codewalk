@@ -2191,6 +2191,9 @@ class V2LocalizationsPt extends V2Localizations {
       'Balões de chamada de ferramenta';
 
   @override
+  String get settingsAppearanceExpandedTools => 'Ferramentas expandidas';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'Mostrar ou ocultar cartões de execução de ferramentas nas mensagens do assistente.';
 

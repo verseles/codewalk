@@ -636,6 +636,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
       settled: widget.settled,
       showReasoning: display.reasoning,
       showToolCalls: display.tools,
+      expandTools: display.expanded,
       renderMode: display.mode,
     ),
     for (final prompt in widget.waiting)
@@ -669,6 +670,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     final display = (
       reasoning: appearance?.showReasoning ?? true,
       tools: appearance?.showToolCalls ?? true,
+      expanded: appearance?.expandedTools ?? true,
       mode: appearance?.renderMode ?? ChatRenderMode.live,
     );
     // What a new display choice shows or hides is not an arrival: the items
@@ -1167,7 +1169,12 @@ typedef _Memory = ({
 });
 
 /// What the reader chose to show: reasoning, tool calls and the render mode.
-typedef _Display = ({bool reasoning, bool tools, ChatRenderMode mode});
+typedef _Display = ({
+  bool reasoning,
+  bool tools,
+  bool expanded,
+  ChatRenderMode mode,
+});
 
 /// A signature of one item: its identity, its known status, the content it
 /// carries that can change and the outcome it carries, when it has one. A

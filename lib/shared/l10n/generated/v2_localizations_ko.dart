@@ -2079,6 +2079,9 @@ class V2LocalizationsKo extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => '도구 호출 말풍선';
 
   @override
+  String get settingsAppearanceExpandedTools => '도구 펼쳐 보기';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       '어시스턴트 메시지에서 도구 실행 카드의 표시 여부를 설정합니다.';
 

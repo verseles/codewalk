@@ -180,12 +180,16 @@ class AppPreferencesController extends ChangeNotifier {
   ChatRenderMode _chatRenderMode = ChatRenderMode.live;
   bool _showReasoning = true;
   bool _showToolCalls = true;
+  // Each step of a stretch of work while it runs, instead of its summary;
+  // off by default (#537).
+  bool _expandedTools = false;
   bool _showTaskList = true;
   bool _taskListCollapsed = false;
   bool _showTokensPerSecond = false;
   ChatRenderMode get chatRenderMode => _chatRenderMode;
   bool get showReasoning => _showReasoning;
   bool get showToolCalls => _showToolCalls;
+  bool get expandedTools => _expandedTools;
   bool get showTaskList => _showTaskList;
   bool get taskListCollapsed => _taskListCollapsed;
   bool get showTokensPerSecond => _showTokensPerSecond;
@@ -206,6 +210,12 @@ class AppPreferencesController extends ChangeNotifier {
     if (_disposed || _showToolCalls == value) return;
     _showToolCalls = value;
     _changed('showToolCalls');
+  }
+
+  void setExpandedTools(bool value) {
+    if (_disposed || _expandedTools == value) return;
+    _expandedTools = value;
+    _changed('expandedTools');
   }
 
   void setShowTaskList(bool value) {
@@ -401,6 +411,7 @@ class AppPreferencesController extends ChangeNotifier {
         : _chatRenderMode.name,
     'showReasoning': _showReasoning ? null : false,
     'showToolCalls': _showToolCalls ? null : false,
+    'expandedTools': _expandedTools ? true : null,
     'showTaskList': _showTaskList ? null : false,
     'taskListCollapsed': _taskListCollapsed ? true : null,
     'showTokensPerSecond': _showTokensPerSecond ? true : null,
@@ -513,6 +524,8 @@ class AppPreferencesController extends ChangeNotifier {
       if (reasoning is bool) _showReasoning = reasoning;
       final tools = value('showToolCalls');
       if (tools is bool) _showToolCalls = tools;
+      final expanded = value('expandedTools');
+      if (expanded is bool) _expandedTools = expanded;
       final taskList = value('showTaskList');
       if (taskList is bool) _showTaskList = taskList;
       final taskListCollapsed = value('taskListCollapsed');

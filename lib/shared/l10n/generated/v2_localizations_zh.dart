@@ -2040,6 +2040,9 @@ class V2LocalizationsZh extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => '工具调用气泡';
 
   @override
+  String get settingsAppearanceExpandedTools => '展开工具';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       '在助手消息中显示或隐藏工具执行卡片。';
 

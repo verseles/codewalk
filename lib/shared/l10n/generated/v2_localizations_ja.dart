@@ -2078,6 +2078,9 @@ class V2LocalizationsJa extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => 'ツール呼び出しバブル';
 
   @override
+  String get settingsAppearanceExpandedTools => 'ツールを展開表示';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'アシスタントメッセージ内のツール実行カードの表示/非表示を切り替えます。';
 

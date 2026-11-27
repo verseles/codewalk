@@ -2201,6 +2201,9 @@ class V2LocalizationsIt extends V2Localizations {
       'Bolle di chiamata dello strumento';
 
   @override
+  String get settingsAppearanceExpandedTools => 'Strumenti espansi';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'Mostra o nascondi le schede di esecuzione dello strumento nei messaggi dell\'assistente.';
 

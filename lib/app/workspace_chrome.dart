@@ -573,6 +573,12 @@ class _WorkspaceDisplaySheet extends StatelessWidget {
                 onChanged: preferences.setShowToolCalls,
               ),
               SwitchListTile.adaptive(
+                key: const ValueKey('display-toggle-expanded-tools'),
+                title: Text(l.settingsAppearanceExpandedTools),
+                value: preferences.expandedTools,
+                onChanged: preferences.setExpandedTools,
+              ),
+              SwitchListTile.adaptive(
                 key: const ValueKey('display-toggle-task-list'),
                 title: Text(l.settingsAppearanceTaskList),
                 value: preferences.showTaskList,

@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "سوچنے والے بلبلے۔",
   "settingsAppearanceThinkingBubblesDescription": "اسسٹنٹ پیغامات میں ریجننگ بلاکس دکھائیں یا چھپائیں۔",
   "settingsAppearanceToolCallBubbles": "ٹول کال بلبلے۔",
+  "settingsAppearanceExpandedTools": "پھیلے ہوئے ٹولز",
   "settingsAppearanceToolCallBubblesDescription": "معاون پیغامات میں ٹول ایگزیکیوشن کارڈز دکھائیں یا چھپائیں۔",
   "settingsBehaviorChatRenderMode": "چیٹ رینڈر موڈ",
   "settingsBehaviorChatRenderModeBlock": "بلاک",

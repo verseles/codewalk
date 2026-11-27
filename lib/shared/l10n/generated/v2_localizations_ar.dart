@@ -2149,6 +2149,9 @@ class V2LocalizationsAr extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => 'فقاعات استدعاء الأدوات';
 
   @override
+  String get settingsAppearanceExpandedTools => 'الأدوات موسّعة';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'إظهار أو إخفاء بطاقات تنفيذ الأدوات في رسائل المساعد.';
 

@@ -2165,6 +2165,9 @@ class V2LocalizationsUr extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => 'ٹول کال بلبلے۔';
 
   @override
+  String get settingsAppearanceExpandedTools => 'پھیلے ہوئے ٹولز';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'معاون پیغامات میں ٹول ایگزیکیوشن کارڈز دکھائیں یا چھپائیں۔';
 

@@ -91,6 +91,9 @@ Future<SessionLiveScroll> _pump(
   ChatRenderMode renderMode = ChatRenderMode.live,
   bool showReasoning = true,
   bool showToolCalls = true,
+  // The steps of the work at work show, as before #537, unless a test asks
+  // for the app's default summaries.
+  bool expandedTools = true,
   bool settle = true,
   ItemId? highlight,
 }) async {
@@ -110,6 +113,7 @@ Future<SessionLiveScroll> _pump(
           renderMode: renderMode,
           showReasoning: showReasoning,
           showToolCalls: showToolCalls,
+          expandedTools: expandedTools,
           child: SessionLiveTimeline(
             items: items,
             headerBuilder: (_) => const SizedBox(height: 8),
@@ -217,6 +221,37 @@ void main() {
       expect(find.byKey(const ValueKey('tool-result-t11')), findsNothing);
     },
   );
+
+  testWidgets('by default the work at work is its summary line (#537)', (
+    tester,
+  ) async {
+    final live = [
+      UserInput(
+        meta: _meta('u1'),
+        text: 'prompt 1',
+        delivery: const OpenValue.known(DeliveryState.delivered),
+      ),
+      _tool('t1', 'm1'),
+      _tool('t2', 'm1', status: ItemStatus.streaming),
+    ];
+    await _pump(
+      tester,
+      live,
+      settled: false,
+      expandedTools: false,
+      settle: false,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    final l10n = _l10n(tester);
+    final header = find.byKey(const ValueKey('work-group-work-t1'));
+    expect(header, findsOneWidget);
+    expect(find.text('· ${l10n.activityRunning(1)}'), findsOneWidget);
+    expect(find.byKey(const ValueKey('tool-result-t2')), findsNothing);
+    // A tap still shows each step.
+    await tester.tap(header);
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('tool-result-t2')), findsOneWidget);
+  });
 
   testWidgets(
     'activity compacts immediately when following answer streams and surfaces failures',

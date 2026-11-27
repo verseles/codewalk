@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "Bolle di pensiero",
   "settingsAppearanceThinkingBubblesDescription": "Mostra o nascondi i blocchi di ragionamento nei messaggi dell''assistente.",
   "settingsAppearanceToolCallBubbles": "Bolle di chiamata dello strumento",
+  "settingsAppearanceExpandedTools": "Strumenti espansi",
   "settingsAppearanceToolCallBubblesDescription": "Mostra o nascondi le schede di esecuzione dello strumento nei messaggi dell''assistente.",
   "settingsBehaviorChatRenderMode": "Modalità di rendering della chat",
   "settingsBehaviorChatRenderModeBlock": "Blocco",

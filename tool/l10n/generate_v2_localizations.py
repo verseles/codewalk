@@ -99,6 +99,7 @@ APPEARANCE_KEYS = {
     "settingsAppearanceThinkingBubbles",
     "settingsAppearanceThinkingBubblesDescription",
     "settingsAppearanceToolCallBubbles",
+    "settingsAppearanceExpandedTools",
     "settingsAppearanceToolCallBubblesDescription",
     "settingsAppearanceComposerTips",
     "settingsAppearanceComposerTipsDescription",

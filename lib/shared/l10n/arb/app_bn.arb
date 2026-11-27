@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "বুদবুদ চিন্তা",
   "settingsAppearanceThinkingBubblesDescription": "সহকারী বার্তাগুলিতে যুক্তি ব্লকগুলি দেখান বা লুকান৷",
   "settingsAppearanceToolCallBubbles": "টুল কল বুদবুদ",
+  "settingsAppearanceExpandedTools": "প্রসারিত টুল",
   "settingsAppearanceToolCallBubblesDescription": "সহকারী বার্তাগুলিতে টুল এক্সিকিউশন কার্ড দেখান বা লুকান।",
   "settingsBehaviorChatRenderMode": "চ্যাট রেন্ডার মোড",
   "settingsBehaviorChatRenderModeBlock": "ব্লক",

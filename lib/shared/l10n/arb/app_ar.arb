@@ -1638,6 +1638,7 @@
   "settingsAppearanceThinkingBubbles": "فقاعات التفكير",
   "settingsAppearanceThinkingBubblesDescription": "إظهار أو إخفاء كتل الاستدلال في رسائل المساعد.",
   "settingsAppearanceToolCallBubbles": "فقاعات استدعاء الأدوات",
+  "settingsAppearanceExpandedTools": "الأدوات موسّعة",
   "settingsAppearanceToolCallBubblesDescription": "إظهار أو إخفاء بطاقات تنفيذ الأدوات في رسائل المساعد.",
   "settingsBehaviorChatRenderMode": "وضع عرض الدردشة",
   "settingsBehaviorChatRenderModeBlock": "كتلة",

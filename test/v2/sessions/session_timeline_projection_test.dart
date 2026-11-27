@@ -153,6 +153,28 @@ void main() {
     expect(_shape(rows), ['u1', 'stretch(r1,t1,t2,t3)', 'a1']);
   });
 
+  test('without expanded tools a live tail is its summary at once (#537)', () {
+    final presentation = SessionTimelinePresentation();
+    final items = [
+      _user('u1'),
+      _think('r1', 'm1', complete: false),
+      _tool('t1', 'm1'),
+      _tool('t2', 'm1', status: ItemStatus.streaming),
+    ];
+    final rows = presentation.project(
+      items,
+      settled: false,
+      expandTools: false,
+    );
+    expect(_shape(rows), ['u1', 'stretch(r1,t1,t2,run=2)']);
+    // A tap still opens it, step by step.
+    presentation.toggle('work-r1');
+    expect(
+      _shape(presentation.project(items, settled: false, expandTools: false)),
+      ['u1', 'stretch(r1,t1,t2,run=2,open)', 'r1', 't1', 't2'],
+    );
+  });
+
   test('live tail with no following text stays individual compact rows', () {
     final rows = SessionTimelinePresentation().project([
       _user('u1'),

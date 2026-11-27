@@ -2207,6 +2207,9 @@ class V2LocalizationsDe extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => 'Toolaufruf-Blasen';
 
   @override
+  String get settingsAppearanceExpandedTools => 'Werkzeuge ausgeklappt';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'Tool-Ausführungskarten in Assistenten-Nachrichten anzeigen oder ausblenden.';
 

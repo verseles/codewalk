@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "Burbujas de pensamiento",
   "settingsAppearanceThinkingBubblesDescription": "Mostrar u ocultar bloques de razonamiento en los mensajes del asistente.",
   "settingsAppearanceToolCallBubbles": "Burbujas de llamada de herramienta",
+  "settingsAppearanceExpandedTools": "Herramientas expandidas",
   "settingsAppearanceToolCallBubblesDescription": "Mostrar u ocultar tarjetas de ejecución de herramientas.",
   "settingsBehaviorChatRenderMode": "Modo de renderizado del chat",
   "settingsBehaviorChatRenderModeBlock": "Bloque",

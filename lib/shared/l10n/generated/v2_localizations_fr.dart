@@ -2203,6 +2203,9 @@ class V2LocalizationsFr extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => 'Bulles d\'appel d\'outil';
 
   @override
+  String get settingsAppearanceExpandedTools => 'Outils développés';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'Afficher ou masquer les cartes d\'exécution d\'outil dans les messages de l\'assistant.';
 

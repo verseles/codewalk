@@ -2697,6 +2697,10 @@
   "@settingsAppearanceToolCallBubbles": {
     "description": "CodeWalk UI string — settingsAppearanceToolCallBubbles"
   },
+  "settingsAppearanceExpandedTools": "Expanded tools",
+  "@settingsAppearanceExpandedTools": {
+    "description": "Display menu: show each tool step while a stretch runs, instead of its summary (#537)"
+  },
   "settingsAppearanceToolCallBubblesDescription": "Show or hide tool execution cards in assistant messages.",
   "@settingsAppearanceToolCallBubblesDescription": {
     "description": "CodeWalk UI string — settingsAppearanceToolCallBubblesDescription"

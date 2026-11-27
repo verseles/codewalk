@@ -2172,6 +2172,9 @@ class V2LocalizationsHi extends V2Localizations {
   String get settingsAppearanceToolCallBubbles => 'टूल कॉल बुलबुले';
 
   @override
+  String get settingsAppearanceExpandedTools => 'विस्तृत टूल';
+
+  @override
   String get settingsAppearanceToolCallBubblesDescription =>
       'सहायक संदेशों में टूल निष्पादन (tool execution) कार्ड दिखाएं या छिपाएं।';
 

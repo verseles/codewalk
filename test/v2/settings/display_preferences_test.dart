@@ -19,6 +19,7 @@ void main() {
     addTearDown(preferences.dispose);
     await preferences.initialize();
     expect(preferences.showSessionTabs, isTrue);
+    expect(preferences.expandedTools, isFalse);
     expect(preferences.tabsGestureHintDismissed, isFalse);
     expect(backend.writes, ['cw2.schema']);
   });
@@ -29,6 +30,7 @@ void main() {
     addTearDown(first.dispose);
     await first.initialize();
     first.setShowSessionTabs(false);
+    first.setExpandedTools(true);
     first.setTabsGestureHintDismissed(true);
     await first.flush();
 
@@ -36,6 +38,7 @@ void main() {
     addTearDown(second.dispose);
     await second.initialize();
     expect(second.showSessionTabs, isFalse);
+    expect(second.expandedTools, isTrue);
     expect(second.tabsGestureHintDismissed, isTrue);
   });
 

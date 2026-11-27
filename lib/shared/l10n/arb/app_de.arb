@@ -1639,6 +1639,7 @@
   "settingsAppearanceThinkingBubbles": "Denkblasen",
   "settingsAppearanceThinkingBubblesDescription": "Gedankengänge-Blöcke in Assistenten-Nachrichten anzeigen oder ausblenden.",
   "settingsAppearanceToolCallBubbles": "Toolaufruf-Blasen",
+  "settingsAppearanceExpandedTools": "Werkzeuge ausgeklappt",
   "settingsAppearanceToolCallBubblesDescription": "Tool-Ausführungskarten in Assistenten-Nachrichten anzeigen oder ausblenden.",
   "settingsBehaviorChatRenderMode": "Darstellungsmodus des Chats",
   "settingsBehaviorChatRenderModeBlock": "Block",

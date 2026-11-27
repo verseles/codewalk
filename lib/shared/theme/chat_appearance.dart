@@ -17,6 +17,7 @@ class ChatAppearance extends InheritedWidget {
     this.renderMode = ChatRenderMode.live,
     this.showReasoning = true,
     this.showToolCalls = true,
+    this.expandedTools = false,
     this.showTokensPerSecond = false,
     this.composerSpellCheck = true,
     this.composerTips = true,
@@ -30,6 +31,11 @@ class ChatAppearance extends InheritedWidget {
   /// Whether reasoning and tool-call rows show in the timeline.
   final bool showReasoning;
   final bool showToolCalls;
+
+  /// Whether a stretch of work still running shows each step instead of its
+  /// summary (#537). The app starts with summaries; an isolated widget,
+  /// without this appearance, shows each step.
+  final bool expandedTools;
 
   /// Whether final turn answers display a discreet tokens-per-second indicator.
   final bool showTokensPerSecond;
@@ -57,6 +63,7 @@ class ChatAppearance extends InheritedWidget {
       renderMode != oldWidget.renderMode ||
       showReasoning != oldWidget.showReasoning ||
       showToolCalls != oldWidget.showToolCalls ||
+      expandedTools != oldWidget.expandedTools ||
       showTokensPerSecond != oldWidget.showTokensPerSecond ||
       composerSpellCheck != oldWidget.composerSpellCheck ||
       composerTips != oldWidget.composerTips;
