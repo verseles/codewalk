@@ -139,6 +139,8 @@ CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Cla
 - Do not use `make precommit`. After reviewer micro-fixes, use focused checks; rerun the gate only when a fix touches shared infrastructure, dependencies, generated files, l10n or build configuration.
 - Static text and docs changes need no gate unless they affect build or release instructions.
 - Golden references are x86_64 renders, regenerated with the `Goldens` workflow (`gh workflow run goldens.yml`), never on ARM. `test/flutter_test_config.dart` accepts up to 0.01% differing pixels on x86_64 (CI) and 0.3% on other hosts, where antialiasing rounds differently (#465; owner decision 2026-11-13). APKs do not build reliably on ARM64.
+- When a unit changes goldens, finish it in this order: push `main`, run `gh workflow run goldens.yml --ref main`, download its artifact with `gh run download <id>`, commit only the PNGs that differ from the repo (inspect them first), push, then run the gate on that SHA before any release. Until then the stale goldens are the only accepted failures.
+- While goldens are known to be stale, run `flutter test --no-pub -j $(nproc)` (no `--fail-fast`) to see every other failure; `make check` stops at the first one and reports the rest as "did not complete".
 - Coverage floor: 85% of app lines under `lib/`, plus the file floors in `tool/ci/coverage_baseline.tsv`. Package coverage is not gated yet (#477). Never lower a floor to get a green check.
 
 ## Helper budget
@@ -159,6 +161,7 @@ CodeWalk 2 serves many harnesses. OpenCode is only the first adapter; Codex, Cla
 ## Known pitfalls
 
 - Translations: change only the needed keys, keep ARB and generated code in sync, and inspect the diff after any regeneration for unintended removals.
+- Localization keys live in three places that must agree: the hand-edited ARB files (`lib/shared/l10n/arb/app_*.arb`; some locales have no `@key` metadata block), the key lists in `tool/l10n/*_catalog.py` (plus any imported key set in `generate_v2_localizations.py`), and the generated code from `python3 tool/l10n/generate_v2_localizations.py`. The generator refuses any ARB key a catalog does not list; finish with `--check`.
 - If `/tmp` is full, export `TMPPREFIX`, `TMPDIR`, `TEMP` and `TMP` to a directory with space on the same filesystem instead of deleting other processes' files.
 - After `dart format`, inspect the hunks and revert churn outside the intended change; reformatting other code goes in its own commit, never mixed with a feature or fix.
 - Credential redaction before truncation: when capping potentially sensitive strings in projections or UI, redact against the full source text with `redactCredentialSlice` before applying the byte cut—never slice with a fixed lookahead first, or credentials and PEM blocks crossing the cut boundary can leak.

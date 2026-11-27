@@ -2,7 +2,7 @@
   "artifact_seq": 6,
   "artifacts": {
     "A0001": {
-      "active": true,
+      "active": false,
       "bytes": 2043,
       "created_at": "2026-11-27T03:21:00Z",
       "evidence": "plan-*.out; fixture test/contract/fixtures/opencode/2.0.22/model.json (Ernie)",
@@ -12,13 +12,14 @@
       "path": "artifacts/tm_20261127T025825Z_6ddaec3e/A0001.md",
       "purpose": "Plano #515,#517,#526,#516,#518,#524",
       "rerun_when": "Owner muda decisões de produto do grupo 4",
+      "retired": true,
       "sha256": "6ad579d01208c6819c2a8332b5e14aa8c0b33022768a0c6af81247a72f2ecefb",
       "stage": "S1",
       "supersedes": null,
       "title": "ART-CANDIDATE-PLANS + ledger: plano do grupo 4 (9 helpers)"
     },
     "A0002": {
-      "active": true,
+      "active": false,
       "bytes": 2888,
       "created_at": "2026-11-27T03:26:27Z",
       "evidence": "A0001; decisões de owner; dissent Sol-F/Grok-F",
@@ -28,13 +29,14 @@
       "path": "artifacts/tm_20261127T025825Z_6ddaec3e/A0002.md",
       "purpose": "Plano executável do grupo 4",
       "rerun_when": "Owner muda decisão do grupo 4",
+      "retired": true,
       "sha256": "e3caa12d22396cda40ebba189db04895df3c25cbd96165e77e444697448228f7",
       "stage": "S1",
       "supersedes": null,
       "title": "ART-EXECUTION-HANDOFF grupo 4"
     },
     "A0003": {
-      "active": true,
+      "active": false,
       "bytes": 794,
       "created_at": "2026-11-27T03:43:50Z",
       "evidence": "/tmp/opencode/g4/rev/r515-*.out",
@@ -44,13 +46,14 @@
       "path": "artifacts/tm_20261127T025825Z_6ddaec3e/A0003.md",
       "purpose": "Review #515",
       "rerun_when": "session_model_options.dart muda",
+      "retired": true,
       "sha256": "f7dc8fbfcf522b6433a4a6975fc718bdc4678d20195500a8007d32bce73d820e",
       "stage": "S2",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS round 1 (#515 a4325752)"
     },
     "A0004": {
-      "active": true,
+      "active": false,
       "bytes": 272,
       "created_at": "2026-11-27T04:05:54Z",
       "evidence": "/tmp/opencode/g4/rev/r517-*.out",
@@ -60,13 +63,14 @@
       "path": "artifacts/tm_20261127T025825Z_6ddaec3e/A0004.md",
       "purpose": "Review #517+#526",
       "rerun_when": "session_variant_icon.dart muda",
+      "retired": true,
       "sha256": "27429875188481d3eb84eb543a930315516764772df9c325be29b84a2ace9ad0",
       "stage": "S6",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS #517+#526 (25b2d573..ff186bb6)"
     },
     "A0005": {
-      "active": true,
+      "active": false,
       "bytes": 719,
       "created_at": "2026-11-27T04:15:10Z",
       "evidence": "/tmp/opencode/g4/rev/r516-*.out",
@@ -76,13 +80,14 @@
       "path": "artifacts/tm_20261127T025825Z_6ddaec3e/A0005.md",
       "purpose": "Review #516+#518",
       "rerun_when": "session_selection_chip.dart muda",
+      "retired": true,
       "sha256": "67bbabf1a60186f29fca927015b14d1034d0e19965558d3feb64513495fca2a5",
       "stage": "S7",
       "supersedes": null,
       "title": "ART-REVIEW-REPORTS #516+#518 (ff186bb6..bf8fc28b)"
     },
     "A0006": {
-      "active": true,
+      "active": false,
       "bytes": 673,
       "created_at": "2026-11-27T04:24:06Z",
       "evidence": "/tmp/opencode/g4/rev/r524-*.out",
@@ -92,6 +97,7 @@
       "path": "artifacts/tm_20261127T025825Z_6ddaec3e/A0006.md",
       "purpose": "Review #524",
       "rerun_when": "session_model_chip_label.dart muda",
+      "retired": true,
       "sha256": "ce88e54fe1c8f40cfb2222b754f8433eff269b88012d30955ffb8d36cb4393dd",
       "stage": "S7",
       "supersedes": null,
@@ -183,8 +189,24 @@
       ],
       "id": "S9",
       "label": "Gate final, release notes, push e release minor",
+      "outcome": "Release v2.10.0 (7206fa56, tag) cortado e enviado; make watch-release iniciado",
+      "status": "done",
+      "validation": "gate verde em 7166a075; cut_stable ok"
+    },
+    {
+      "depends": [],
+      "id": "CONT1",
+      "label": "Adicionar ao AGENTS.md as 3 regras aprovadas (goldens no flow, catálogos l10n, suíte sem fail-fast)",
       "outcome": "",
       "status": "current",
+      "validation": ""
+    },
+    {
+      "depends": [],
+      "id": "CONT2",
+      "label": "Explicar os órfãos do tm doctor --strict e propor correção",
+      "outcome": "",
+      "status": "pending",
       "validation": ""
     }
   ],
@@ -192,25 +214,25 @@
   "contract": {
     "complete_when": [
       {
-        "evidence": null,
+        "evidence": "#515 #517 #526 #516 #518 #524 fechadas com commits; #527 grupo 4 marcado",
         "id": "C1",
         "text": "6 issues entregues e fechadas",
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "make check + v2-native-check rc=0 em 7166a075 (2543 testes); release commit 7206fa56 só muda pubspec/CHANGELOG",
         "id": "C2",
         "text": "gate verde no SHA do release",
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "make release V=stable: tag v2.10.0 enviada (7206fa56); make watch-release iniciado",
         "id": "C3",
         "text": "release minor cortado",
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "Avaliação no relatório final e no hey (Sol-F e Haiku melhores; Luna e Gemini piores)",
         "id": "C4",
         "text": "relatório com melhores/piores helpers enviado",
         "waived": false
@@ -329,10 +351,18 @@
     {
       "at": "2026-11-27T04:28:14Z",
       "text": "Push d3a798e5 (12 commits); goldens.yml run 45940050918 em main; issues #515 #517 #526 #516 #518 #524 fechadas com commits; #527 grupo 4 todo marcado. Squash não feito: owner pediu um commit por alteração e as correções não são adjacentes aos commits de origem (exigiria rebase interativo, proibido). Avaliação de helpers (4 rodadas de review + plano): melhores Sol-F e Haiku (high-value em 4/5 e 4/5), Grok-F forte no plano; piores Luna (aprovou tudo sem achados em 4 rodadas) e Gemini (acima do envelope no plano, achados só repetidos); DeepSeek útil na 1ª rodada que entrou."
+    },
+    {
+      "at": "2026-11-27T05:06:19Z",
+      "text": "Completed milestone preserved at 2026-11-27T04:53:44Z by agent: delivered=Grupo 4 da #527: #515, #517, #526, #516, #518, #524 entregues com revisão por commit, goldens x86, issues fechadas, #527 marcada e release v2.10.0. Follow-up TM (--quiet, state.json indentado, raiz pelo worktree) instalado. | validation=Gate final verde em 7166a075 (2543 testes); release v2.10.0 cortado | residual_risk=Workflow de release em andamento (watcher avisa via hey). tm doctor --strict acusa 149 órfãos antigos (nov/2–5), anteriores a esta tarefa. Sem squash: um commit por item, a pedido do owner."
+    },
+    {
+      "at": "2026-11-27T05:06:19Z",
+      "text": "Continuation request: Todos. E sobre o TM qual o problema que o doctor encontrou? | reason: Fim do flow do grupo 4: owner aprovou as 3 sugestões evergreen para o AGENTS.md e pergunta sobre o achado do tm doctor --strict"
     }
   ],
-  "generation": 51,
-  "next_action": "Gate final em 7166a075, depois make release V=stable + make watch-release",
+  "generation": 59,
+  "next_action": "Editar AGENTS.md (seções flow, Validation e Known pitfalls)",
   "pending_operation": null,
   "queued_followups": [
     {
@@ -351,7 +381,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T025825Z_6ddaec3e",
   "title": "Grupo 4 da #527 — seletor de modelos (flow)",
-  "updated_at": "2026-11-27T04:53:25Z",
+  "updated_at": "2026-11-27T05:06:19Z",
   "validations": [
     {
       "at": "2026-11-27T03:32:10Z",
@@ -414,6 +444,34 @@
       "check": "Gate final 7166a075",
       "criterion": null,
       "evidence": "make check TEST_JOBS=nproc rc=0; make v2-native-check rc=0 (2543 pass, 4 skip). main == origin/main == 7166a075",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T04:53:43Z",
+      "check": "6 issues entregues e fechadas",
+      "criterion": "C1",
+      "evidence": "#515 #517 #526 #516 #518 #524 fechadas com commits; #527 grupo 4 marcado",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T04:53:43Z",
+      "check": "Gate verde no SHA do release",
+      "criterion": "C2",
+      "evidence": "make check + v2-native-check rc=0 em 7166a075 (2543 testes); release commit 7206fa56 só muda pubspec/CHANGELOG",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T04:53:43Z",
+      "check": "Release minor cortado",
+      "criterion": "C3",
+      "evidence": "make release V=stable: tag v2.10.0 enviada (7206fa56); make watch-release iniciado",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T04:53:43Z",
+      "check": "Relatório com melhores/piores helpers",
+      "criterion": "C4",
+      "evidence": "Avaliação no relatório final e no hey (Sol-F e Haiku melhores; Luna e Gemini piores)",
       "outcome": "pass"
     }
   ]
