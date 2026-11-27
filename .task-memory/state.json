@@ -163,9 +163,9 @@
       ],
       "id": "S7",
       "label": "#524 nomes curtos no chip do composer",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "#524 85d5f49e + fix dbf040c8; 4 rodadas de review julgadas",
+      "status": "done",
+      "validation": "suíte completa 2541 ok, só 3 goldens"
     },
     {
       "depends": [
@@ -174,7 +174,7 @@
       "id": "S8",
       "label": "Avaliar helpers, BEHAVIOR.md, issues, #527 e squash",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -327,8 +327,8 @@
       "text": "ART-REVIEW-JUDGMENT #524: aceitos F1 Free inicial (trim antes das regras; Haiku, Sol-F), F2 Free só como palavra própria + limpeza de separadores de borda (Haiku, GLM), F3 semanticsLabel completo no chip (Sol-F), F5 '#' seguido de espaço é do nome (Haiku, Sol-F), F6 comentário do Free global (DeepSeek). F4 (Sol-F, ícone cortado por reticências): rejeição proposta, dissent → Sol discordou com objeção credível (ícone cortado mesmo com nome curto, ex. LongCat 2.5 Preview Free); resolvido aceitando: ícone antes do nome. Re-review dispensado: regras de texto e rótulo local, sem concorrência/segurança/interface/persistência/arquitetura. High-value: Haiku, Sol-F; Useful: GLM, DeepSeek; approve sem achados: Grok-F, Luna, Ernie, Gemini, Hungerg, Kimi."
     }
   ],
-  "generation": 47,
-  "next_action": "#524: tabela de regras no chip do composer",
+  "generation": 48,
+  "next_action": "Notas do release, push, workflow Goldens, commit PNGs",
   "pending_operation": null,
   "queued_followups": [
     {
@@ -347,7 +347,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T025825Z_6ddaec3e",
   "title": "Grupo 4 da #527 — seletor de modelos (flow)",
-  "updated_at": "2026-11-27T04:26:54Z",
+  "updated_at": "2026-11-27T04:27:20Z",
   "validations": [
     {
       "at": "2026-11-27T03:32:10Z",
