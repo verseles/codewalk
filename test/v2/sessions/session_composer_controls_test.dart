@@ -298,12 +298,13 @@ void main() {
       // The switch starts on the acknowledged default (auto-approve), turns it
       // off for this session and keeps the pick open.
       expect(tester.widget<SwitchListTile>(autoApprove).value, isTrue);
-      expect(find.text(l10n.chatPermissionAutoApproveOn), findsOneWidget);
+      // The title only names the switch; its state says on or off (#518).
+      expect(find.text(l10n.livePermissionAutoApprove), findsOneWidget);
       await tester.tap(autoApprove);
       await tester.pumpAndSettle();
       expect(live.permissionModeState.mode, PermissionMode.ask);
       expect(tester.widget<SwitchListTile>(autoApprove).value, isFalse);
-      expect(find.text(l10n.chatPermissionAutoApproveOff), findsOneWidget);
+      expect(find.text(l10n.livePermissionAutoApprove), findsOneWidget);
       expect(pickOpen, findsOneWidget);
       await tester.tap(autoApprove);
       await tester.pumpAndSettle();
@@ -536,6 +537,31 @@ void main() {
     expect(live.permissionModeState.mode, PermissionMode.ask);
   });
 
+  testWidgets('a failure is red, the requests waiting keep their color', (
+    tester,
+  ) async {
+    final backend = FakeMetadataBackend()
+      ..failWrite = PermissionModeStore.overridesKey;
+    policy.dispose();
+    policy = PermissionModeStore(store: V2MetadataStore(backend: backend));
+    await policy.initialize();
+    final (live, _) = await open(tester, permissions: 2);
+    final l10n = V2Localizations.of(
+      tester.element(find.byType(SessionModelChip)),
+    );
+    await openPick(tester, live);
+    await tester.tap(autoApprove);
+    await tester.pumpAndSettle();
+    final subtitle =
+        tester.widget<SwitchListTile>(autoApprove).subtitle! as Text;
+    final spans = (subtitle.textSpan! as TextSpan).children!.cast<TextSpan>();
+    final error = Theme.of(tester.element(autoApprove)).colorScheme.error;
+    expect(spans.first.text, l10n.livePermissionModeFailed);
+    expect(spans.first.style?.color, error);
+    expect(spans.last.text, l10n.liveSelectionPermissionsWaiting(2));
+    expect(spans.last.style?.color, isNot(error));
+  });
+
   testWidgets('the switch is the server\'s allow-everything rule (#494)', (
     tester,
   ) async {
@@ -568,13 +594,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(handle.unrestrictedCalls.last, 'enable');
     expect(tester.widget<SwitchListTile>(autoApprove).value, isTrue);
-    expect(
-      find.descendant(
-        of: autoApprove,
-        matching: find.text(l10n.livePermissionServerRule),
-      ),
-      findsOneWidget,
-    );
+    // No line explains the server's rule any more (#518).
+    expect(tester.widget<SwitchListTile>(autoApprove).subtitle, isNull);
     await tester.tap(autoApprove);
     await tester.pumpAndSettle();
     expect(handle.unrestrictedCalls.last, 'disable');
@@ -647,7 +668,7 @@ void main() {
     );
     await openPick(tester, live);
     expect(find.text(l10n.livePermissionModeUnavailable), findsOneWidget);
-    expect(find.text(l10n.chatPermissionAutoApproveOff), findsNothing);
+    expect(find.text(l10n.livePermissionAutoApprove), findsNothing);
     expect(
       tester
           .widget<SwitchListTile>(

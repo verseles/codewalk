@@ -566,10 +566,6 @@
   "@messageSelectText": {
     "description": "V2 message bubble options (#492)"
   },
-  "livePermissionServerRule": "محفوظ على الخادم لجميع العملاء. لا يسأل الوكيل عن أي شيء، حتى في وضع Plan.",
-  "@livePermissionServerRule": {
-    "description": "V2 permission switch synced with the server rule (#494)"
-  },
   "composerSendNow": "أرسل الآن",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"
@@ -1710,8 +1706,6 @@
   },
   "chatChooseAgent": "اختيار الوكيل",
   "chatChooseModel": "اختيار النموذج",
-  "chatPermissionAutoApproveOff": "الموافقة التلقائية على الأذونات غير مفعلة",
-  "chatPermissionAutoApproveOn": "الموافقة التلقائية على الأذونات مفعلة",
   "modelChooseAgent": "اختر الوكيل",
   "liveModelSearch": "البحث عن نموذج أو مزوّد",
   "@liveModelSearch": {
@@ -1751,6 +1745,10 @@
   },
   "liveModelPreferencesUnsaved": "يتعذّر حفظ المفضلة والنماذج الأخيرة على هذا الجهاز الآن.",
   "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  },
+  "livePermissionAutoApprove": "موافقة تلقائية",
+  "@livePermissionAutoApprove": {
     "description": "V2 live session model and agent selection"
   },
   "chatSlashCommandAgent": "فتح محدد الوكلاء",

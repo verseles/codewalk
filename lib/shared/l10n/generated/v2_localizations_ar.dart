@@ -875,10 +875,6 @@ class V2LocalizationsAr extends V2Localizations {
   String get messageSelectText => 'تحديد النص';
 
   @override
-  String get livePermissionServerRule =>
-      'محفوظ على الخادم لجميع العملاء. لا يسأل الوكيل عن أي شيء، حتى في وضع Plan.';
-
-  @override
   String get composerSendNow => 'أرسل الآن';
 
   @override
@@ -2274,14 +2270,6 @@ class V2LocalizationsAr extends V2Localizations {
   String get chatChooseModel => 'اختيار النموذج';
 
   @override
-  String get chatPermissionAutoApproveOff =>
-      'الموافقة التلقائية على الأذونات غير مفعلة';
-
-  @override
-  String get chatPermissionAutoApproveOn =>
-      'الموافقة التلقائية على الأذونات مفعلة';
-
-  @override
   String get modelChooseAgent => 'اختر الوكيل';
 
   @override
@@ -2314,6 +2302,9 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'يتعذّر حفظ المفضلة والنماذج الأخيرة على هذا الجهاز الآن.';
+
+  @override
+  String get livePermissionAutoApprove => 'موافقة تلقائية';
 
   @override
   String get chatSlashCommandAgent => 'فتح محدد الوكلاء';

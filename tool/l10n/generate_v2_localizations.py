@@ -27,7 +27,7 @@ from session_live_catalog import (
 )
 from session_composer_catalog import NEW_KEYS as COMPOSER_NEW_KEYS
 from session_attachments_catalog import NEW_KEYS as ATTACHMENTS_NEW_KEYS
-from session_search_catalog import NEW_KEYS as SEARCH_NEW_KEYS, SWITCH_KEYS, VOICE_KEYS, BUBBLE_KEYS, SERVER_RULE_KEYS
+from session_search_catalog import NEW_KEYS as SEARCH_NEW_KEYS, SWITCH_KEYS, VOICE_KEYS, BUBBLE_KEYS
 from session_command_catalog import (
     PORT_KEYS as COMMAND_PORT_KEYS,
     NEW_KEYS as COMMAND_NEW_KEYS,
@@ -180,7 +180,7 @@ KEYS |= {
 }
 KEYS |= set(COMPOSER_NEW_KEYS)
 KEYS |= set(ATTACHMENTS_NEW_KEYS)
-KEYS |= set(SEARCH_NEW_KEYS) | set(SWITCH_KEYS) | set(VOICE_KEYS) | set(BUBBLE_KEYS) | set(SERVER_RULE_KEYS)
+KEYS |= set(SEARCH_NEW_KEYS) | set(SWITCH_KEYS) | set(VOICE_KEYS) | set(BUBBLE_KEYS)
 KEYS |= COMMAND_PORT_KEYS | set(COMMAND_NEW_KEYS)
 KEYS |= set(PERMISSION_NEW_KEYS)
 KEYS |= set(STOP_NEW_KEYS)

@@ -845,10 +845,6 @@ class V2LocalizationsKo extends V2Localizations {
   String get messageSelectText => '텍스트 선택';
 
   @override
-  String get livePermissionServerRule =>
-      '모든 클라이언트를 위해 서버에 저장됩니다. Plan 모드에서도 에이전트가 아무것도 묻지 않습니다.';
-
-  @override
   String get composerSendNow => '지금 보내기';
 
   @override
@@ -2195,12 +2191,6 @@ class V2LocalizationsKo extends V2Localizations {
   String get chatChooseModel => '모델 선택';
 
   @override
-  String get chatPermissionAutoApproveOff => '권한 자동 승인 꺼짐';
-
-  @override
-  String get chatPermissionAutoApproveOn => '권한 자동 승인 켜짐';
-
-  @override
   String get modelChooseAgent => '에이전트 선택';
 
   @override
@@ -2233,6 +2223,9 @@ class V2LocalizationsKo extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       '지금은 이 기기에 즐겨찾기와 최근 모델을 저장할 수 없습니다.';
+
+  @override
+  String get livePermissionAutoApprove => '자동 승인';
 
   @override
   String get chatSlashCommandAgent => '에이전트 선택기 열기';

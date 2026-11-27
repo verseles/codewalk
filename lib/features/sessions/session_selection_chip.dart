@@ -667,38 +667,43 @@ class _SelectionPanelState extends State<_SelectionPanel> {
             l10n.liveUnrestrictedChangedElsewhere,
           _ => null,
         };
-        final detail = [
-          if (server != null && on) l10n.livePermissionServerRule,
-          if (pending > 0) l10n.liveSelectionPermissionsWaiting(pending),
-        ].join(' · ');
+        final waiting = pending > 0
+            ? l10n.liveSelectionPermissionsWaiting(pending)
+            : null;
         final failure = [
           if (_permissionFailed) l10n.livePermissionModeFailed,
           ?notice,
-        ];
+        ].join(' · ');
         final busy = server != null ? server.busy : live.savingPermissionMode;
         final canToggle = server != null
             ? (on ? live.canDisableUnrestricted : live.canEnableUnrestricted)
             : mode != null && live.canChangePermissionMode;
         return SwitchListTile(
           key: const ValueKey('live-auto-approve'),
+          // The switch itself says on or off; the title only names it (#518).
           title: Text(
             server == null && mode == null
                 ? l10n.livePermissionModeUnavailable
-                : on
-                ? l10n.chatPermissionAutoApproveOn
-                : l10n.chatPermissionAutoApproveOff,
+                : l10n.livePermissionAutoApprove,
           ),
-          subtitle: failure.isNotEmpty
-              ? Text(
-                  [
-                    ...failure,
-                    detail,
-                  ].where((part) => part.isNotEmpty).join(' · '),
-                  style: TextStyle(color: theme.colorScheme.error),
-                )
-              : detail.isEmpty
+          // What went wrong is said in the error color; the requests waiting
+          // keep the normal one beside it.
+          subtitle: failure.isEmpty && waiting == null
               ? null
-              : Text(detail),
+              : Text.rich(
+                  TextSpan(
+                    children: [
+                      if (failure.isNotEmpty)
+                        TextSpan(
+                          text: failure,
+                          style: TextStyle(color: theme.colorScheme.error),
+                        ),
+                      if (failure.isNotEmpty && waiting != null)
+                        const TextSpan(text: ' · '),
+                      ?waiting == null ? null : TextSpan(text: waiting),
+                    ],
+                  ),
+                ),
           value: on,
           onChanged: busy || !canToggle
               ? null

@@ -567,10 +567,6 @@
   "@messageSelectText": {
     "description": "V2 message bubble options (#492)"
   },
-  "livePermissionServerRule": "تمام کلائنٹس کے لیے سرور پر محفوظ۔ ایجنٹ کچھ نہیں پوچھتا، Plan موڈ میں بھی نہیں۔",
-  "@livePermissionServerRule": {
-    "description": "V2 permission switch synced with the server rule (#494)"
-  },
   "composerSendNow": "ابھی بھیجیں",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"
@@ -1711,8 +1707,6 @@
   },
   "chatChooseAgent": "ایجنٹ منتخب کریں",
   "chatChooseModel": "ماڈل منتخب کریں",
-  "chatPermissionAutoApproveOff": "اجازت خودکار منظوری آف ہے",
-  "chatPermissionAutoApproveOn": "اجازت خودکار منظوری آن ہے",
   "modelChooseAgent": "ایجنٹ کا انتخاب کریں۔",
   "liveModelSearch": "ماڈل یا فراہم کنندہ تلاش کریں",
   "@liveModelSearch": {
@@ -1752,6 +1746,10 @@
   },
   "liveModelPreferencesUnsaved": "ابھی اس آلے پر پسندیدہ اور حالیہ ماڈلز محفوظ نہیں کیے جا سکتے۔",
   "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  },
+  "livePermissionAutoApprove": "خودکار منظوری",
+  "@livePermissionAutoApprove": {
     "description": "V2 live session model and agent selection"
   },
   "chatSlashCommandAgent": "ایجنٹ سلیکٹر کھولیں",

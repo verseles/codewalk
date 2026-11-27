@@ -884,10 +884,6 @@ class V2LocalizationsHi extends V2Localizations {
   String get messageSelectText => 'टेक्स्ट चुनें';
 
   @override
-  String get livePermissionServerRule =>
-      'सभी क्लाइंट के लिए सर्वर पर सहेजा गया। एजेंट कुछ नहीं पूछता, Plan मोड में भी नहीं।';
-
-  @override
   String get composerSendNow => 'अभी भेजें';
 
   @override
@@ -2300,12 +2296,6 @@ class V2LocalizationsHi extends V2Localizations {
   String get chatChooseModel => 'मॉडल चुनें';
 
   @override
-  String get chatPermissionAutoApproveOff => 'अनुमति स्वतः-अनुमोदन बंद है';
-
-  @override
-  String get chatPermissionAutoApproveOn => 'अनुमति स्वतः-अनुमोदन चालू है';
-
-  @override
   String get modelChooseAgent => 'एजेंट चुनें';
 
   @override
@@ -2338,6 +2328,9 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'अभी इस डिवाइस पर पसंदीदा और हालिया मॉडल सहेजे नहीं जा सकते।';
+
+  @override
+  String get livePermissionAutoApprove => 'स्वतः अनुमोदन';
 
   @override
   String get chatSlashCommandAgent => 'एजेंट चयनकर्ता खोलें';

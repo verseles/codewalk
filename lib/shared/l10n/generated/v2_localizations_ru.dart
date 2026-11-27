@@ -889,10 +889,6 @@ class V2LocalizationsRu extends V2Localizations {
   String get messageSelectText => 'Выделить текст';
 
   @override
-  String get livePermissionServerRule =>
-      'Сохранено на сервере для всех клиентов. Агент ничего не спрашивает, даже в режиме Plan.';
-
-  @override
   String get composerSendNow => 'Отправить сейчас';
 
   @override
@@ -2314,14 +2310,6 @@ class V2LocalizationsRu extends V2Localizations {
   String get chatChooseModel => 'Выбрать модель';
 
   @override
-  String get chatPermissionAutoApproveOff =>
-      'Автоматическое одобрение разрешений выключено';
-
-  @override
-  String get chatPermissionAutoApproveOn =>
-      'Автоматическое одобрение разрешений включено';
-
-  @override
   String get modelChooseAgent => 'Выбрать агента';
 
   @override
@@ -2354,6 +2342,9 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'Сейчас не удаётся сохранить избранные и недавние модели на этом устройстве.';
+
+  @override
+  String get livePermissionAutoApprove => 'Автоодобрение';
 
   @override
   String get chatSlashCommandAgent => 'Открыть выбор агента';

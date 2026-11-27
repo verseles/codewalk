@@ -894,10 +894,6 @@ class V2LocalizationsIt extends V2Localizations {
   String get messageSelectText => 'Seleziona testo';
 
   @override
-  String get livePermissionServerRule =>
-      'Salvato sul server per tutti i client. L’agente non chiede nulla, nemmeno in modalità Plan.';
-
-  @override
   String get composerSendNow => 'Invia ora';
 
   @override
@@ -2334,14 +2330,6 @@ class V2LocalizationsIt extends V2Localizations {
   String get chatChooseModel => 'Scegli modello';
 
   @override
-  String get chatPermissionAutoApproveOff =>
-      'Approvazione automatica dei permessi disattiva';
-
-  @override
-  String get chatPermissionAutoApproveOn =>
-      'Approvazione automatica dei permessi attiva';
-
-  @override
   String get modelChooseAgent => 'Scegli agente';
 
   @override
@@ -2374,6 +2362,9 @@ class V2LocalizationsIt extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'Al momento non è possibile salvare preferiti e modelli recenti su questo dispositivo.';
+
+  @override
+  String get livePermissionAutoApprove => 'Approvazione automatica';
 
   @override
   String get chatSlashCommandAgent => 'Apri il selettore dell\'agente';

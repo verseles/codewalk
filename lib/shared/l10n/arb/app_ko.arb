@@ -567,10 +567,6 @@
   "@messageSelectText": {
     "description": "V2 message bubble options (#492)"
   },
-  "livePermissionServerRule": "모든 클라이언트를 위해 서버에 저장됩니다. Plan 모드에서도 에이전트가 아무것도 묻지 않습니다.",
-  "@livePermissionServerRule": {
-    "description": "V2 permission switch synced with the server rule (#494)"
-  },
   "composerSendNow": "지금 보내기",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"
@@ -1722,8 +1718,6 @@
   },
   "chatChooseAgent": "에이전트 선택",
   "chatChooseModel": "모델 선택",
-  "chatPermissionAutoApproveOff": "권한 자동 승인 꺼짐",
-  "chatPermissionAutoApproveOn": "권한 자동 승인 켜짐",
   "modelChooseAgent": "에이전트 선택",
   "liveModelSearch": "모델 또는 제공자 검색",
   "@liveModelSearch": {
@@ -1763,6 +1757,10 @@
   },
   "liveModelPreferencesUnsaved": "지금은 이 기기에 즐겨찾기와 최근 모델을 저장할 수 없습니다.",
   "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  },
+  "livePermissionAutoApprove": "자동 승인",
+  "@livePermissionAutoApprove": {
     "description": "V2 live session model and agent selection"
   },
   "chatSlashCommandAgent": "에이전트 선택기 열기",

@@ -843,10 +843,6 @@ class V2LocalizationsJa extends V2Localizations {
   String get messageSelectText => 'テキストを選択';
 
   @override
-  String get livePermissionServerRule =>
-      'すべてのクライアント向けにサーバーに保存されます。Plan モードでも、エージェントは何も確認しません。';
-
-  @override
   String get composerSendNow => '今すぐ送信';
 
   @override
@@ -2195,12 +2191,6 @@ class V2LocalizationsJa extends V2Localizations {
   String get chatChooseModel => 'モデルを選択';
 
   @override
-  String get chatPermissionAutoApproveOff => '権限の自動承認がオフ';
-
-  @override
-  String get chatPermissionAutoApproveOn => '権限の自動承認がオン';
-
-  @override
   String get modelChooseAgent => 'エージェントを選択';
 
   @override
@@ -2232,6 +2222,9 @@ class V2LocalizationsJa extends V2Localizations {
 
   @override
   String get liveModelPreferencesUnsaved => '現在、このデバイスにお気に入りと最近のモデルを保存できません。';
+
+  @override
+  String get livePermissionAutoApprove => '自動承認';
 
   @override
   String get chatSlashCommandAgent => 'エージェント選択を開く';

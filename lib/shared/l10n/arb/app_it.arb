@@ -567,10 +567,6 @@
   "@messageSelectText": {
     "description": "V2 message bubble options (#492)"
   },
-  "livePermissionServerRule": "Salvato sul server per tutti i client. L’agente non chiede nulla, nemmeno in modalità Plan.",
-  "@livePermissionServerRule": {
-    "description": "V2 permission switch synced with the server rule (#494)"
-  },
   "composerSendNow": "Invia ora",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"
@@ -1711,8 +1707,6 @@
   },
   "chatChooseAgent": "Seleziona agente",
   "chatChooseModel": "Scegli modello",
-  "chatPermissionAutoApproveOff": "Approvazione automatica dei permessi disattiva",
-  "chatPermissionAutoApproveOn": "Approvazione automatica dei permessi attiva",
   "modelChooseAgent": "Scegli agente",
   "liveModelSearch": "Cerca modello o provider",
   "@liveModelSearch": {
@@ -1752,6 +1746,10 @@
   },
   "liveModelPreferencesUnsaved": "Al momento non è possibile salvare preferiti e modelli recenti su questo dispositivo.",
   "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  },
+  "livePermissionAutoApprove": "Approvazione automatica",
+  "@livePermissionAutoApprove": {
     "description": "V2 live session model and agent selection"
   },
   "chatSlashCommandAgent": "Apri il selettore dell''agente",

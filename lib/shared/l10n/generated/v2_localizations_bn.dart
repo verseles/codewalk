@@ -877,10 +877,6 @@ class V2LocalizationsBn extends V2Localizations {
   String get messageSelectText => 'লেখা নির্বাচন করুন';
 
   @override
-  String get livePermissionServerRule =>
-      'সব ক্লায়েন্টের জন্য সার্ভারে সংরক্ষিত। এজেন্ট কিছুই জিজ্ঞেস করে না, Plan মোডেও না।';
-
-  @override
   String get composerSendNow => 'এখনই পাঠান';
 
   @override
@@ -2288,14 +2284,6 @@ class V2LocalizationsBn extends V2Localizations {
   String get chatChooseModel => 'মডেল নির্বাচন করুন';
 
   @override
-  String get chatPermissionAutoApproveOff =>
-      'অনুমতি স্বয়ংক্রিয়-অনুমোদন বন্ধ আছে';
-
-  @override
-  String get chatPermissionAutoApproveOn =>
-      'অনুমতি স্বয়ংক্রিয়-অনুমোদন চালু আছে';
-
-  @override
   String get modelChooseAgent => 'এজেন্ট নির্বাচন করুন';
 
   @override
@@ -2328,6 +2316,9 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'এই মুহূর্তে এই ডিভাইসে প্রিয় ও সাম্প্রতিক মডেল সংরক্ষণ করা যাচ্ছে না।';
+
+  @override
+  String get livePermissionAutoApprove => 'স্বয়ংক্রিয় অনুমোদন';
 
   @override
   String get chatSlashCommandAgent => 'এজেন্ট নির্বাচক খুলুন';

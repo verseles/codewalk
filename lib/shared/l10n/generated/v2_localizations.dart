@@ -1707,12 +1707,6 @@ abstract class V2Localizations {
   /// **'Select text'**
   String get messageSelectText;
 
-  /// V2 permission switch synced with the server rule (#494)
-  ///
-  /// In en, this message translates to:
-  /// **'Saved on the server for every client. The agent asks nothing, even in Plan mode.'**
-  String get livePermissionServerRule;
-
   /// V2 waiting messages (#486)
   ///
   /// In en, this message translates to:
@@ -4142,18 +4136,6 @@ abstract class V2Localizations {
   /// **'Choose model'**
   String get chatChooseModel;
 
-  /// CodeWalk UI string — chatPermissionAutoApproveOff
-  ///
-  /// In en, this message translates to:
-  /// **'Permission auto-approve is off'**
-  String get chatPermissionAutoApproveOff;
-
-  /// CodeWalk UI string — chatPermissionAutoApproveOn
-  ///
-  /// In en, this message translates to:
-  /// **'Permission auto-approve is on'**
-  String get chatPermissionAutoApproveOn;
-
   /// CodeWalk UI string — modelChooseAgent
   ///
   /// In en, this message translates to:
@@ -4219,6 +4201,12 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Favorites and recent models cannot be saved on this device right now.'**
   String get liveModelPreferencesUnsaved;
+
+  /// V2 live session model and agent selection
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-approve'**
+  String get livePermissionAutoApprove;
 
   /// CodeWalk UI string — chatSlashCommandAgent
   ///

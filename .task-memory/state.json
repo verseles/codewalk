@@ -95,9 +95,9 @@
       ],
       "id": "S5",
       "label": "#516 long-press de favorito em telas pequenas",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "#516 312fdb60 (review pendente após round #517+#526)",
+      "status": "done",
+      "validation": "82 testes ok"
     },
     {
       "depends": [
@@ -106,7 +106,7 @@
       "id": "S6",
       "label": "#518 rótulo do switch de aprovação automática",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     },
     {
@@ -263,8 +263,8 @@
       "text": "Follow-up TM instalado em ~/MEGA/CONFIG/opencode/skills/task-memory (backup em /tmp/opencode/g4/tm/orig): --quiet, state.json indentado, raiz descoberta no worktree. Teste ao vivo rodado de lib/."
     }
   ],
-  "generation": 33,
-  "next_action": "#516 long-press favorito <600dp, barra amarela, toast na folha",
+  "generation": 35,
+  "next_action": "#518: título curto do switch, remover subtítulo do servidor, Text.rich",
   "pending_operation": {
     "expected_bytes": 40000,
     "expected_seconds": 900,
@@ -290,7 +290,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T025825Z_6ddaec3e",
   "title": "Grupo 4 da #527 — seletor de modelos (flow)",
-  "updated_at": "2026-11-27T04:02:20Z",
+  "updated_at": "2026-11-27T04:05:36Z",
   "validations": [
     {
       "at": "2026-11-27T03:32:10Z",
@@ -325,6 +325,13 @@
       "check": "#516 focused",
       "criterion": null,
       "evidence": "picker+chip+composer+draft: 82 pass, só 3 goldens; 3 testes compactos novos (long-press, falha sem toast, ação semântica); generate --check ok; analyze limpo",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T04:05:36Z",
+      "check": "#518 focused",
+      "criterion": null,
+      "evidence": "composer_controls + draft_page + selection_chip: 65 pass; generate --check ok; chaves chatPermissionAutoApproveOn/Off e livePermissionServerRule removidas (sem outros usos); analyze limpo",
       "outcome": "pass"
     }
   ]

@@ -66,8 +66,6 @@ PORT_KEYS = {
     "chatChooseModel",
     "chatChooseAgent",
     "modelChooseAgent",
-    "chatPermissionAutoApproveOn",
-    "chatPermissionAutoApproveOff",
 }
 NEW_KEYS = (
     "liveOpen", "liveReadOnly", "liveConnecting", "liveHydrating", "liveLive",

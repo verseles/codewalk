@@ -828,10 +828,6 @@ class V2LocalizationsZh extends V2Localizations {
   String get messageSelectText => '选择文本';
 
   @override
-  String get livePermissionServerRule =>
-      '已保存在服务器上，对所有客户端生效。即使在 Plan 模式下，代理也不会询问任何事。';
-
-  @override
   String get composerSendNow => '立即发送';
 
   @override
@@ -2154,12 +2150,6 @@ class V2LocalizationsZh extends V2Localizations {
   String get chatChooseModel => '选择模型';
 
   @override
-  String get chatPermissionAutoApproveOff => '权限自动批准已关闭';
-
-  @override
-  String get chatPermissionAutoApproveOn => '权限自动批准已开启';
-
-  @override
   String get modelChooseAgent => '选择智能体';
 
   @override
@@ -2191,6 +2181,9 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get liveModelPreferencesUnsaved => '目前无法在此设备上保存收藏和最近使用的模型。';
+
+  @override
+  String get livePermissionAutoApprove => '自动批准';
 
   @override
   String get chatSlashCommandAgent => '打开智能体选择器';

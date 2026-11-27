@@ -1066,10 +1066,6 @@
   "@messageSelectText": {
     "description": "V2 message bubble options (#492)"
   },
-  "livePermissionServerRule": "Saved on the server for every client. The agent asks nothing, even in Plan mode.",
-  "@livePermissionServerRule": {
-    "description": "V2 permission switch synced with the server rule (#494)"
-  },
   "composerSendNow": "Send now",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"
@@ -2836,14 +2832,6 @@
   "@chatChooseModel": {
     "description": "CodeWalk UI string — chatChooseModel"
   },
-  "chatPermissionAutoApproveOff": "Permission auto-approve is off",
-  "@chatPermissionAutoApproveOff": {
-    "description": "CodeWalk UI string — chatPermissionAutoApproveOff"
-  },
-  "chatPermissionAutoApproveOn": "Permission auto-approve is on",
-  "@chatPermissionAutoApproveOn": {
-    "description": "CodeWalk UI string — chatPermissionAutoApproveOn"
-  },
   "modelChooseAgent": "Choose agent",
   "@modelChooseAgent": {
     "description": "CodeWalk UI string — modelChooseAgent"
@@ -2886,6 +2874,10 @@
   },
   "liveModelPreferencesUnsaved": "Favorites and recent models cannot be saved on this device right now.",
   "@liveModelPreferencesUnsaved": {
+    "description": "V2 live session model and agent selection"
+  },
+  "livePermissionAutoApprove": "Auto-approve",
+  "@livePermissionAutoApprove": {
     "description": "V2 live session model and agent selection"
   },
   "chatSlashCommandAgent": "Open agent selector",

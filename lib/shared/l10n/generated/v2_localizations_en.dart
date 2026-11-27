@@ -882,10 +882,6 @@ class V2LocalizationsEn extends V2Localizations {
   String get messageSelectText => 'Select text';
 
   @override
-  String get livePermissionServerRule =>
-      'Saved on the server for every client. The agent asks nothing, even in Plan mode.';
-
-  @override
   String get composerSendNow => 'Send now';
 
   @override
@@ -2299,12 +2295,6 @@ class V2LocalizationsEn extends V2Localizations {
   String get chatChooseModel => 'Choose model';
 
   @override
-  String get chatPermissionAutoApproveOff => 'Permission auto-approve is off';
-
-  @override
-  String get chatPermissionAutoApproveOn => 'Permission auto-approve is on';
-
-  @override
   String get modelChooseAgent => 'Choose agent';
 
   @override
@@ -2337,6 +2327,9 @@ class V2LocalizationsEn extends V2Localizations {
   @override
   String get liveModelPreferencesUnsaved =>
       'Favorites and recent models cannot be saved on this device right now.';
+
+  @override
+  String get livePermissionAutoApprove => 'Auto-approve';
 
   @override
   String get chatSlashCommandAgent => 'Open agent selector';
