@@ -403,30 +403,69 @@
     {
       "at": "2026-11-27T22:39:38Z",
       "text": "p534 judgment (final after dissent): remove Recent (state, Display/Appearance toggles, RecentSessionRow, l10n keys; stored key inert); ProjectWorkspace.shown stamps (left project s, new s+1, monotonic, tolerant decode, removed on close, nowMs from catalog clock); ProjectContextsController.ordered = active first, then max(latestSessionUpdate incl. children, stamp), ties by open order, open untouched; close handover unchanged (opus agreed); active project window = first 5 of pins-first list, current outside takes the 5th slot (sol-F objection adopted on the owner's literal 'até cinco'; overrides opus's all-pins/append positions, opus exchange already used), Show more/less TextButton (sessions-reveal, page state reset on project change), search uncapped, Load more only when whole list shows and it expands; rows padding 8/4, maxLines 2, centered, menu 40/32 shrinkWrap; findChildIndexCallback with keyed children (sol-F objection adopted)."
+    },
+    {
+      "at": "2026-11-27T22:49:12Z",
+      "text": "#534 committed 4a0e9904 (base 7b6b6992). Review u3: WORK ITEM codewalk-534-sidebar-revamp, key codewalk-534-sidebar-revamp-20261127T224912Z-b881, dir /home/ubuntu/MEGA/WORK/codewalk, metrics rvw_20261127T224912Z_4ffaf956, helpers (9) incl. Grok. Focused: sessions+settings suites 1798 pass, appearance goldens pass, analyze clean, l10n --check ok."
+    },
+    {
+      "at": "2026-11-27T22:50:39Z",
+      "text": "u3 handshakes READY: haiku, opus-F, luna, sol-F, deepseek, ernie, gemini, hungerg (key in /tmp/opencode/g8/rev/u3/key). Grok failed twice (credits)."
+    },
+    {
+      "at": "2026-11-27T22:51:29Z",
+      "text": "Asked the owner via hey (non-blocking) about #537: with 'Ferramentas expandidas' on, A) today's behavior (open while running, summary when text arrives) [recommended] or B) always expanded incl. history. Default off = summary line even while running. #536 plan: timelineSideInset phones 8 -> 12 dp."
+    },
+    {
+      "at": "2026-11-27T22:53:38Z",
+      "text": "Owner answered #537: A. 'Ferramentas expandidas' on = today's behavior (stretch open while running, summary once text arrives); off (default) = summary line even while running, tap expands."
     }
   ],
-  "generation": 26,
-  "next_action": "u2 handshakes, payload, gate; p534 planning still running",
-  "pending_operation": null,
+  "generation": 33,
+  "next_action": "u3 handshakes, payload, gate, dispatch",
+  "pending_operation": {
+    "expected_bytes": 40000,
+    "expected_seconds": 1200,
+    "id": "op_775bd34c099a",
+    "kind": "subagent",
+    "prepared_at": "2026-11-27T22:50:39Z",
+    "purpose": "u3 review round 1 (#534, 8 helpers)"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 13157,
     "path": "requests/tm_20261127T213730Z_22ec9025.txt",
     "sha256": "3312d9f5549abb4c885855d481df60fe972e395873a88d7d74b32332491a897b"
   },
-  "risks": [],
+  "risks": [
+    {
+      "at": "2026-11-27T22:56:37Z",
+      "id": "R0001",
+      "mitigation": "After #534 is pushed (it also removes the Appearance Recent card), run gh workflow run goldens.yml --ref main, download, inspect and commit only differing PNGs, push, gate on that SHA before the group release",
+      "stage": "S4",
+      "status": "open",
+      "text": "CI red on main since 2aeae5e2 (runs 46067006885, 46075515623, 46077955108): appearance golden desktop_light/dark differ 0.22% (2242 px) on x86; same diff before group 8, so stale since #519 (Settings changed); local ARM tolerance 0.3% hides it"
+    }
+  ],
   "schema": 1,
   "started_at": "2026-11-27T21:37:30Z",
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-27T22:39:38Z",
+  "updated_at": "2026-11-27T22:58:59Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
       "check": "make check TEST_JOBS=4 on 022ca26c (#535)",
       "criterion": null,
       "evidence": "/tmp/opencode/g8/gate-u2.log exit 0",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-27T22:58:59Z",
+      "check": "make check TEST_JOBS=4 on 4a0e9904 (#534)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g8/gate-u3.log exit 0",
       "outcome": "pass"
     }
   ]

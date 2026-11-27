@@ -21,10 +21,10 @@ import 'session_switch_note.dart';
 import 'session_timeline_projection.dart';
 import 'session_tool_result.dart';
 
-/// The timeline's side margin: narrow on a phone, so the agent's text,
-/// which has no card, reaches close to the screen's edge.
+/// The timeline's side margin: narrower on a phone, so the agent's text,
+/// which has no card, uses the screen, yet not glued to its edge (#536).
 double timelineSideInset(BuildContext context) =>
-    MediaQuery.sizeOf(context).width < 600 ? 8 : 16;
+    MediaQuery.sizeOf(context).width < 600 ? 12 : 16;
 
 /// The running text of the user's and the agent's messages: one Material
 /// step above the app's body text (#489). The conversation text scale still

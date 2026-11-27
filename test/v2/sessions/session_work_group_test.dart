@@ -131,6 +131,30 @@ V2Localizations _l10n(WidgetTester tester) =>
     V2Localizations.of(tester.element(find.byType(SessionLiveTimeline)));
 
 void main() {
+  testWidgets('a phone keeps the timeline 12 dp from its edges (#536)', (
+    tester,
+  ) async {
+    Future<double> inset(double width) async {
+      late double value;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: MediaQueryData(size: Size(width, 800)),
+          child: Builder(
+            builder: (context) {
+              value = timelineSideInset(context);
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      return value;
+    }
+
+    expect(await inset(390), 12);
+    expect(await inset(599), 12);
+    expect(await inset(600), 16);
+  });
+
   testWidgets('a search match on cardless agent text is outlined around it', (
     tester,
   ) async {
@@ -159,7 +183,7 @@ void main() {
     expect(border.strokeAlign, BorderSide.strokeAlignOutside);
     final row = tester.getRect(outline);
     expect(tester.getRect(answer).left, greaterThanOrEqualTo(row.left));
-    // The 8 dp side margin of a phone leaves room for the 2 dp stroke.
+    // The 12 dp side margin of a phone leaves room for the 2 dp stroke.
     expect(row.left, greaterThanOrEqualTo(border.width));
   });
 
