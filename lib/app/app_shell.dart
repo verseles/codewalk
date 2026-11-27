@@ -15,7 +15,6 @@ import '../features/hosts/endpoint_health_view.dart';
 import '../features/sessions/project_contexts_controller.dart';
 import '../features/sessions/project_icon_view.dart';
 import '../features/sessions/project_picker_dialog.dart';
-import '../features/sessions/session_live_controller.dart';
 import '../features/sessions/session_tab_strip.dart';
 import '../features/sessions/session_tabs_controller.dart';
 import '../features/sessions/sessions_controller.dart';
@@ -466,30 +465,33 @@ class _ToolbarProjectTitle extends StatelessWidget {
     );
   }
 
-  /// The shown session's title: its open view, else the list's row, else
-  /// its tab, never a guess. A session whose title is unknown keeps the
-  /// project title.
+  /// The shown session's title: its open view (the live stream's latest,
+  /// then its summary), else the list's or an open project's row, else its
+  /// tab, never a guess; an empty one gives way to the next. A session of
+  /// another server than the one selected, or whose title is unknown, keeps
+  /// the project title.
   static String? _sessionTitle(
     SessionRef session,
     SessionsController catalog,
     SessionTabsController? tabs,
   ) {
+    if (session.host.value != catalog.selectedProfile?.id) return null;
     String? named(String? title) =>
         title == null || title.trim().isEmpty ? null : title;
-    for (final view in tabs?.warmViews ?? const <SessionLiveController>[]) {
-      if (!view.disposed && view.session == session) {
-        return named(view.summary.info.title);
-      }
-    }
-    for (final row in catalog.loadedSessions) {
-      if (row.info.ref == session) return named(row.info.title);
-    }
-    final tab = tabs
-        ?.projection(session.host)
-        .ordered
-        .where((tab) => tab.ref == session)
+    final view = tabs?.warmViews
+        .where((view) => !view.disposed && view.session == session)
         .firstOrNull;
-    return named(tab?.title);
+    return named(view?.state?.info?.title) ??
+        named(view?.summary.info.title) ??
+        named(catalog.findSession(session)?.info.title) ??
+        named(
+          tabs
+              ?.projection(session.host)
+              .ordered
+              .where((tab) => tab.ref == session)
+              .firstOrNull
+              ?.title,
+        );
   }
 
   Widget _sessionTitleRow(
@@ -500,35 +502,47 @@ class _ToolbarProjectTitle extends StatelessWidget {
     String title,
   ) {
     final theme = Theme.of(context);
-    return Row(
-      children: [
-        IconButton(
-          key: const ValueKey('workspace-project-icon'),
-          tooltip: active == null
-              ? context.v2L10n.chatChooseDirectory
-              : '${serverPathTitle(active)} · '
-                    '${context.v2L10n.chatChooseDirectory}',
-          visualDensity: VisualDensity.compact,
-          onPressed: () => unawaited(
-            pickWorkspaceProject(context, catalog: catalog, contexts: contexts),
-          ),
-          icon: ProjectIconView(
-            source: active == null ? null : catalog.projects.iconAt(active),
-            size: 20,
-          ),
-        ),
-        Flexible(
-          child: Text(
-            title,
-            key: const ValueKey('workspace-session-title'),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w600,
+    // A toolbar crowded with actions can leave the title almost no room:
+    // the row then gives way instead of overflowing (#535).
+    return LayoutBuilder(
+      builder: (context, box) => box.maxWidth < 48
+          ? const SizedBox.shrink()
+          : Row(
+              children: [
+                IconButton(
+                  key: const ValueKey('workspace-project-icon'),
+                  tooltip: active == null
+                      ? context.v2L10n.chatChooseDirectory
+                      : '${serverPathTitle(active)} · '
+                            '${context.v2L10n.chatChooseDirectory}',
+                  visualDensity: VisualDensity.compact,
+                  onPressed: () => unawaited(
+                    pickWorkspaceProject(
+                      context,
+                      catalog: catalog,
+                      contexts: contexts,
+                    ),
+                  ),
+                  icon: ProjectIconView(
+                    source: active == null
+                        ? null
+                        : catalog.projects.iconAt(active),
+                    size: 20,
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    title,
+                    key: const ValueKey('workspace-session-title'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ),
-      ],
     );
   }
 }

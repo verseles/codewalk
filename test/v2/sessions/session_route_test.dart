@@ -6,6 +6,7 @@ import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/platform/sessions/session_tabs_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
+import 'package:codewalk/shared/sessions/session_catalog_changes.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 // ignore: deprecated_member_use
@@ -303,12 +304,40 @@ void main() {
         tester.getRect(icon).right,
         lessThanOrEqualTo(tester.getRect(title).left),
       );
+
+      // A rename read by the list reaches the toolbar.
+      app.directory.feeds.last.emit(const SessionCatalogChanged());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      source.respond([source.row('one'), source.row('far', title: 'Renamed')]);
+      await _settle(tester);
+      expect(tester.widget<Text>(title).data, 'Renamed');
+
       await tester.tap(icon);
       await _settle(tester);
       expect(find.byType(ProjectPickerDialog), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
     });
   }
+
+  testWidgets('an untitled session keeps the project title (#535)', (
+    tester,
+  ) async {
+    final app = await _open(tester, '/s/profile_a/ses_far');
+    app.dependencies.preferences.setShowSessionTabs(false);
+    final source = app.rig.sources.single;
+    source.respond([source.row('one')]);
+    await _settle(tester);
+    source.reads.single.$2.completion.complete(source.row('far', title: ' '));
+    await _settle(tester);
+    expect(find.byType(SessionLivePage), findsOneWidget);
+    expect(find.byKey(const ValueKey('workspace-session-title')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('workspace-project-title')),
+      findsOneWidget,
+    );
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
 
   testWidgets('a late direct read cannot open the previous endpoint binding', (
     tester,

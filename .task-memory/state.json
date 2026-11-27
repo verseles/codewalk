@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 1,
+  "artifact_seq": 4,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -16,6 +16,54 @@
       "stage": "S2",
       "supersedes": null,
       "title": "u1 review r1 (#532+#533)"
+    },
+    "A0002": {
+      "active": true,
+      "bytes": 1217,
+      "created_at": "2026-11-27T22:24:46Z",
+      "evidence": "/tmp/opencode/g8/plan/p534/r1_*.out",
+      "id": "A0002",
+      "impact": "Drives #534 implementation",
+      "origin": "7 delivered (haiku, opus-F, sol-F, deepseek, ernie, gemini, hungerg); luna invalid-delivery (only ## Behavior), re-emit requested",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0002.md",
+      "purpose": "Plan #534",
+      "rerun_when": "sessions_page.dart, project_workspace_store.dart or project_contexts_controller.dart change materially",
+      "sha256": "2360fdd1bdb35a3b2a4f1fcbf72e0d4a25021e2d8cdada54a678fe1f9014d670",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "p534 planning r1 (sidebar revamp)"
+    },
+    "A0003": {
+      "active": true,
+      "bytes": 1065,
+      "created_at": "2026-11-27T22:36:01Z",
+      "evidence": "/tmp/opencode/g8/plan/p534/d1*.out, /tmp/opencode/g8/rev/u2/r1_*.out",
+      "id": "A0003",
+      "impact": "#534 plan adjusted to sol-F objections; #535 fixes",
+      "origin": "p534: luna, opus-F, sol-F; u2: 8 helpers",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0003.md",
+      "purpose": "Close #534 planning judgment and review #535",
+      "rerun_when": "app_shell.dart or sessions_page.dart change",
+      "sha256": "7bd171cf0363c70c6e58aa642096ae36cd03b16557b394cc981fbc6cac33179a",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "p534 dissent + luna re-emit; u2 review r1 (#535)"
+    },
+    "A0004": {
+      "active": true,
+      "bytes": 417,
+      "created_at": "2026-11-27T22:37:07Z",
+      "evidence": "/tmp/opencode/g8/rev/u2/d1_helperCodex-6.2-sol-xhigh-F.out",
+      "id": "A0004",
+      "impact": "Guard fix stands with explicit tradeoff",
+      "origin": "helperCodex-6.2-sol-xhigh-F",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0004.md",
+      "purpose": "Dissent exchange",
+      "rerun_when": "toolbar actions layout changes",
+      "sha256": "39d6a5f05136c2460fa0e168c35ab81f93c17800e2074ce7cf151e06aa0d6374",
+      "stage": "S4",
+      "supersedes": null,
+      "title": "u2 sol-F dissent on #535 overflow fix"
     }
   },
   "checklist": [
@@ -339,18 +387,19 @@
     {
       "at": "2026-11-27T22:19:40Z",
       "text": "#535 implemented ahead of #534 while its planners run (no file overlap): base 986bd8b1f55aa559179b10a929833e78d929df31; _ToolbarProjectTitle shows, when showSessionTabs is false and a session is shown, a project IconButton (ProjectIconView, opens pickWorkspaceProject) + the session title (open view summary > loaded row > tab title; unknown title keeps the project title). Test in session_route_test at 390 and 1280. Suites route/desktop/tab_strip 80 pass."
+    },
+    {
+      "at": "2026-11-27T22:19:45Z",
+      "text": "Review u2 (#535, 986bd8b1..022ca26c): WORK ITEM codewalk-535-toolbar-session-title, key codewalk-535-toolbar-session-title-20261127T221944Z-1a1a, dir /home/ubuntu/MEGA/WORK/codewalk, metrics rvw_20261127T221944Z_375bd668, helpers (9) incl. Grok. Files /tmp/opencode/g8/rev/u2."
+    },
+    {
+      "at": "2026-11-27T22:20:46Z",
+      "text": "u2 handshakes READY: haiku, opus-F, luna, sol-F, deepseek, ernie, gemini, hungerg (key in /tmp/opencode/g8/rev/u2/key). Grok failed twice (credits)."
     }
   ],
-  "generation": 16,
-  "next_action": "Squash 170e8de5..HEAD into one commit, comment+close #532/#533, check them in #527; #534 planners running (op_a89edfeeb7df); meanwhile implement #535",
-  "pending_operation": {
-    "expected_bytes": 120000,
-    "expected_seconds": 1500,
-    "id": "op_a89edfeeb7df",
-    "kind": "subagent",
-    "prepared_at": "2026-11-27T22:12:40Z",
-    "purpose": "p534 planning round 1 (8 helpers)"
-  },
+  "generation": 24,
+  "next_action": "u2 handshakes, payload, gate; p534 planning still running",
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -363,6 +412,14 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-27T22:19:40Z",
-  "validations": []
+  "updated_at": "2026-11-27T22:37:07Z",
+  "validations": [
+    {
+      "at": "2026-11-27T22:28:42Z",
+      "check": "make check TEST_JOBS=4 on 022ca26c (#535)",
+      "criterion": null,
+      "evidence": "/tmp/opencode/g8/gate-u2.log exit 0",
+      "outcome": "pass"
+    }
+  ]
 }
