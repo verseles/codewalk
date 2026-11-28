@@ -328,7 +328,15 @@ class ReadAloudController extends ChangeNotifier {
       // The engine cannot resume: the message starts again.
       return read(key, _activeText ?? '');
     }
+    final id = _playing;
     await _toggle(AudioPlaybackStatus.paused);
+    // A player that cannot take it back says so, as when it cannot start.
+    final now = player?.current;
+    if (id != null &&
+        now?.activeId == id &&
+        now?.status == AudioPlaybackStatus.error) {
+      return SpeechFailure.unavailable;
+    }
     return null;
   }
 

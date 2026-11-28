@@ -71,7 +71,13 @@ final class FakePlayer implements AudioPlaybackPort {
     }
     if (current.activeId == id &&
         current.status == AudioPlaybackStatus.paused) {
-      emit(current.copyWith(status: AudioPlaybackStatus.playing));
+      emit(
+        current.copyWith(
+          status: fail
+              ? AudioPlaybackStatus.error
+              : AudioPlaybackStatus.playing,
+        ),
+      );
       return;
     }
     played.add(id);
@@ -289,6 +295,16 @@ void main() {
   test('a player that cannot play says so', () async {
     player.fail = true;
     expect(await controller.read('s|a', 'Hello'), SpeechFailure.unavailable);
+    await pumpEventQueue();
+    expect(controller.active, isNull);
+  });
+
+  test('a reading that cannot resume says so', () async {
+    await controller.read('s|a', 'Hello');
+    await controller.pause();
+    expect(controller.phase, ReadAloudPhase.paused);
+    player.fail = true;
+    expect(await controller.resume(), SpeechFailure.unavailable);
     await pumpEventQueue();
     expect(controller.active, isNull);
   });
