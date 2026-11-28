@@ -94,6 +94,7 @@ Future<void> shareMessageImage(BuildContext context) async {
   final l10n = context.v2L10n;
   final background = Theme.of(context).colorScheme.surface;
   final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+  final screen = Offset.zero & MediaQuery.sizeOf(context);
   if (sink == null || boundary == null) {
     showAppSnackBar(messenger, l10n.messageImageFailed);
     return;
@@ -113,6 +114,14 @@ Future<void> shareMessageImage(BuildContext context) async {
     showAppSnackBar(messenger, l10n.messageImageTooLong);
     return;
   }
+  // Where the share sheet points: the message's visible part, read before
+  // the capture, as the list may move it meanwhile.
+  final shown = (boundary.localToGlobal(Offset.zero) & boundary.size).intersect(
+    screen,
+  );
+  final origin = shown.width > 0 && shown.height > 0
+      ? shown
+      : Rect.fromCenter(center: screen.center, width: 1, height: 1);
   Uint8List? png;
   try {
     png = await captureMessageImage(
@@ -123,11 +132,11 @@ Future<void> shareMessageImage(BuildContext context) async {
   } on Object {
     png = null;
   }
-  if (png == null || !boundary.attached) {
+  // A good image is shared even if the list let the message go meanwhile.
+  if (png == null) {
     showAppSnackBar(messenger, l10n.messageImageFailed);
     return;
   }
-  final origin = boundary.localToGlobal(Offset.zero) & boundary.size;
   final outcome = await sink.deliver(
     png,
     fileName: messageImageFileName(DateTime.now()),

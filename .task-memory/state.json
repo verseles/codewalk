@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 22,
+  "artifact_seq": 24,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -352,6 +352,38 @@
       "stage": "S6",
       "supersedes": null,
       "title": "Batch: p542 planning r1 + u6 #540 review r1 + u7 #541 review r1"
+    },
+    "A0023": {
+      "active": true,
+      "bytes": 335,
+      "created_at": "2026-11-28T04:08:46Z",
+      "evidence": "/tmp/opencode/g8/rev/u5/r6_*.out; /tmp/opencode/g8/rev/u7/r1_native-opus.out",
+      "id": "A0023",
+      "impact": "#539 review loop done; #541 judgment input",
+      "origin": "6 helpers r6 + native general-purpose stand-in",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0023.md",
+      "purpose": "Re-review cbea5f2e; stand-in for failed Claude helpers on a00460f9",
+      "rerun_when": "message_action_bar.dart or read-aloud files change",
+      "sha256": "d6e6bf93980184df31374c9b45f35756e2d8f6c663fbe269287e439ddc2022ba",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u5 #539 round 6 + native stand-in review of #541 (partial batch)"
+    },
+    "A0024": {
+      "active": true,
+      "bytes": 1217,
+      "created_at": "2026-11-28T04:13:42Z",
+      "evidence": "/tmp/opencode/g8/rev/u6/r1_native-opus.out; /tmp/opencode/g8/rev/u6/dissent_h3.out; Plan stand-in reply in session transcript",
+      "id": "A0024",
+      "impact": "#540 one more fix; #542 synthesis input",
+      "origin": "native general-purpose (u6), native Plan (p542), helperCodex-6.2-sol-xhigh-F continuation",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0024.md",
+      "purpose": "Replace failed Claude helpers; resolve dissent",
+      "rerun_when": "#542 seams change",
+      "sha256": "10a4d26ce8c7c018bfa61b93c6f8995bf3ab1180a3755f63b8281cb9cc1e4bf8",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "Native stand-ins: #540 review + #542 plan; Sol-F dissent on #540 H3"
     }
   },
   "checklist": [
@@ -839,18 +871,23 @@
     {
       "at": "2026-11-28T03:30:52Z",
       "text": "u5 r5 fixes committed cbea5f2e (per-frame post-frame recheck replaces scroll listeners; non-finite anchor hides; text-scaled hint room; absorber/hint by real pill height). Gesture suite 38 pass; 4 mutation checks fail as expected. Round 6 payload /tmp/opencode/g8/rev/u5/p6.txt (validation placeholder)."
+    },
+    {
+      "at": "2026-11-28T04:08:59Z",
+      "text": "#539 review converged at round 6 (cbea5f2e): 6/6 working helpers approve, 0 findings; Claude helpers failed (quota). u5 sessions closed; metrics recorded r6. Squash skipped: #539 commits interleave with #540 (e98a01f4, b3718ca3) and #541 (a00460f9), so base..HEAD is not one stage; keep and report. Push waits for #540 and #541 convergence (e98a01f4 lies below the #539 fixes)."
+    },
+    {
+      "at": "2026-11-28T04:09:10Z",
+      "text": "u7 #541 r1 judgment (A0022/A0023): accept all ~29 deduped: completion->idle; player error->failure; cancelled/superseded->no failure; generation checks after each await; other audio during preparing cancels; /settings?section allowlist; fields commit on blur/before test/voice/key; https except local hosts (+1 l10n key); cloud total deadline + close on cancel; audioplayers temp files on iOS/macOS/Linux (own file, delete previous); history page stops its reading; deferred stop in dispose (tree lock); composer _continue stops; settings test stop + stop on leave; ordered settings writes; voice picker stale guard; speakable_text real HTML tags only, code kept, math skipped; locale in cache key; speed label as multiplier; active backend recorded; Edge 403->rejected, client close, IOException->offline, fallback voice reused; malformed URL->notConfigured; load() tolerant; Web section hidden without providers; key save provider race."
+    },
+    {
+      "at": "2026-11-28T04:10:06Z",
+      "text": "u6 #540 judgment: accepted H1 unique file, H2 Windows title, H4 truncated/empty gating, H5 clamp + ratio after frame, H6 12M pixel bound, H7 registrant order, H8 prune per file, H9 picture dispose, H10 detached notice (commit b3718ca3). H3 (share_plus Android clears its cache on next share) REJECTED: library behavior, rare lazy-reading target, fix needs custom FileProvider; Sol-F dissent continuation answered AGREE (retention text refers to codewalk_shares PNGs, as BEHAVIOR says)."
     }
   ],
-  "generation": 115,
-  "next_action": "When full gate bnm1y7z4s ends (expect only 2 #541 appearance goldens), fill p6 validation; dispatch r6 after the batch op_d9867bf20d60 (p542+u6+u7, waiter bk72b5cf9) is captured.",
-  "pending_operation": {
-    "expected_bytes": 60000,
-    "expected_seconds": 900,
-    "id": "op_5eecbf20db60",
-    "kind": "subagent",
-    "prepared_at": "2026-11-28T04:02:38Z",
-    "purpose": "Batch: u5 #539 round 6 (8 helpers, p6.txt, cbea5f2e) + native Claude stand-ins for failed Claude helpers: p542 plan, u6 #540 review, u7 #541 review"
-  },
+  "generation": 121,
+  "next_action": "Finish #541 fixes (controller done), tests, gate, commit; dissent to Sol-F on u6 H3 (share_plus Android cache); wait u6 + p542 stand-ins (op_6fd9ceb07cc2).",
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -872,7 +909,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T04:02:38Z",
+  "updated_at": "2026-11-28T04:13:42Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
