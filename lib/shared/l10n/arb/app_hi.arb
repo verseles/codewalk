@@ -2010,20 +2010,6 @@
   "chatReasoning": "तर्क कर रहा है...",
   "chatRetryingModelRequest": "मॉडल अनुरोध का पुनः प्रयास किया जा रहा है...",
   "chatStatusThinking": "सोच रहा है...",
-  "chatTipAcceptanceCriteria": "सुझाव: बड़े बदलावों के लिए स्वीकृति मानदंड जोड़ें",
-  "chatTipAskForPlan": "सुझाव: बड़े कार्यों में पहले योजना मांगें",
-  "chatTipBeSpecific": "सुझाव: विशिष्ट बनें — छोटे प्रॉम्प्ट का उत्तर तेज़ी से मिलता है",
-  "chatTipBreakTasks": "सुझाव: बड़े कार्यों को छोटे प्रॉम्प्ट में विभाजित करें",
-  "chatTipCompareOptions": "सुझाव: ट्रेडऑफ अस्पष्ट हों तो विकल्प मांगें",
-  "chatTipDefineVerification": "सुझाव: बताएं कौन से टेस्ट या जांच पास होनी चाहिए",
-  "chatTipNameRelevantFiles": "सुझाव: संबंधित फ़ाइलें, स्क्रीन या कमांड बताएं",
-  "chatTipProvideContext": "सुझाव: संदर्भ प्रदान करें — त्रुटि संदेश और लॉग पेस्ट करें",
-  "chatTipRequestDocs": "सुझाव: व्यवहार बदलने पर डॉक्स अपडेट मांगें",
-  "chatTipShareAttempts": "सुझाव: आपने क्या आजमाया और सटीक त्रुटि बताएं",
-  "chatTipStartWithGoal": "सुझाव: अंतिम लक्ष्य से शुरू करें",
-  "chatTipStateConstraints": "सुझाव: वे सीमाएं बताएं जिन्हें एजेंट को बचाए रखना है",
-  "chatTipStepByStep": "सुझाव: जटिल समस्याओं को डीबग करते समय चरण-दर-चरण पूछें",
-  "chatTipUseFocusedAgents": "सुझाव: योजना, समीक्षा या बिल्ड के लिए केंद्रित एजेंट चुनें",
   "settingsAppearanceComposerTips": "कंपोज़र युक्तियाँ",
   "settingsAppearanceComposerTipsDescription": "जब सहायक विचार कर रहा हो तो घूमती हुई युक्तियाँ दिखाएं या छिपाएं।",
   "settingsAppearanceSessionTabs": "सत्र टैब",
@@ -2377,5 +2363,48 @@
   "liveCompactionTriggerManual": "मैनुअल",
   "settingsAppearanceTokensPerSecond": "प्रति सेकंड टोकन",
   "msgInfoTokensPerSecondValue": "{value} tok/s",
-  "msgInfoTokensPerSecond": "गति: {tps}"
+  "msgInfoTokensPerSecond": "गति: {tps}",
+  "composerTipTabs": "सुझाव: {menu} मेनू से बातचीत को टैब के रूप में दिखाएँ",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "सुझाव: {menu} मेनू में ये सुझाव बंद करें",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "सुझाव: एजेंट को जारी रखने के लिए खाली भेजें पर दो बार टैप करें",
+  "composerTipEscape": "सुझाव: जवाब रोकने के लिए Esc दो बार दबाएँ",
+  "composerTipMessageBar": "सुझाव: संदेश को कॉपी, अग्रेषित और बहुत कुछ करने के लिए उस पर टैप करें",
+  "composerTipSelectWord": "सुझाव: संदेश के किसी शब्द को चुनने के लिए उस पर दो बार टैप करें",
+  "composerTipFavorite": "सुझाव: मॉडल सूची में किसी मॉडल को स्टार दें या देर तक दबाएँ, ताकि वह सबसे ऊपर रहे",
+  "composerTipShortcuts": "सुझाव: कीबोर्ड से मॉडल, वेरिएंट और एजेंट बदलें; {place} देखें",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "सुझाव: /compact या /undo जैसे कमांड के लिए / टाइप करें",
+  "composerTipPin": "सुझाव: शीर्ष बार के मेनू से क्रियाओं को उस पर पिन करें",
+  "composerTipVoice": "सुझाव: संदेश पढ़ने वाली आवाज़ {place} में चुनें",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

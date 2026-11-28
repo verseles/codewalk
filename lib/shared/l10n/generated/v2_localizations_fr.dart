@@ -2532,61 +2532,6 @@ class V2LocalizationsFr extends V2Localizations {
   String get chatStatusThinking => 'Réflexion...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'Conseil : Ajoutez des critères de validation aux grands changements';
-
-  @override
-  String get chatTipAskForPlan =>
-      'Conseil : Demandez un plan avant les grandes tâches';
-
-  @override
-  String get chatTipBeSpecific =>
-      'Conseil : Soyez précis — les prompts courts obtiennent des réponses plus rapides';
-
-  @override
-  String get chatTipBreakTasks =>
-      'Conseil : Divisez les grandes tâches en prompts plus petits';
-
-  @override
-  String get chatTipCompareOptions =>
-      'Conseil : Demandez des options quand les compromis sont flous';
-
-  @override
-  String get chatTipDefineVerification =>
-      'Conseil : Dites quels tests ou contrôles doivent passer';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'Conseil : Nommez les fichiers, écrans ou commandes utiles';
-
-  @override
-  String get chatTipProvideContext =>
-      'Conseil : Fournissez du contexte — collez les messages d\'erreur et les logs';
-
-  @override
-  String get chatTipRequestDocs =>
-      'Conseil : Demandez une mise à jour des docs si le comportement change';
-
-  @override
-  String get chatTipShareAttempts =>
-      'Conseil : Partagez vos essais et le message exact';
-
-  @override
-  String get chatTipStartWithGoal => 'Conseil : Commencez par le but final';
-
-  @override
-  String get chatTipStateConstraints =>
-      'Conseil : Indiquez les contraintes à préserver';
-
-  @override
-  String get chatTipStepByStep =>
-      'Conseil : Demandez étape par étape lors du débogage de problèmes complexes';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'Conseil : Choisissez un agent ciblé pour planifier, relire ou construire';
-
-  @override
   String get settingsAppearanceComposerTips =>
       'Conseils de l\'éditeur de message';
 
@@ -3327,5 +3272,53 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'Vitesse : $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'Conseil : Affichez les conversations en onglets depuis le menu $menu';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'Conseil : Désactivez ces conseils dans le menu $menu';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'Conseil : Touchez deux fois Envoyer vide pour que l’agent continue';
+
+  @override
+  String get composerTipEscape =>
+      'Conseil : Appuyez deux fois sur Échap pour arrêter la réponse';
+
+  @override
+  String get composerTipMessageBar =>
+      'Conseil : Touchez un message pour le copier, le transférer et plus';
+
+  @override
+  String get composerTipSelectWord =>
+      'Conseil : Touchez deux fois un mot d’un message pour le sélectionner';
+
+  @override
+  String get composerTipFavorite =>
+      'Conseil : Mettez une étoile à un modèle dans la liste des modèles, ou appuyez longuement dessus, pour le garder en tête';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'Conseil : Changez de modèle, de variante et d’agent au clavier ; voir $place';
+  }
+
+  @override
+  String get composerTipSlash =>
+      'Conseil : Tapez / pour des commandes comme /compact ou /undo';
+
+  @override
+  String get composerTipPin =>
+      'Conseil : Épinglez des actions à la barre supérieure depuis son menu';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'Conseil : Choisissez la voix qui lit les messages dans $place';
   }
 }

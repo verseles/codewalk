@@ -979,11 +979,22 @@
     {
       "at": "2026-11-28T05:32:51Z",
       "text": "Judged #541 r4 (A0027): accepted stop of pending start, superseded-state recheck, folder retry, foreign pass on any state change, key save during switch, tests; rejected 1-day sweep (tradeoff, dissent sent to Sol-F in r5). Fix d1816c75. Judged #542 r1: accepted double-send guard, picked-row snapshot+dedupe, failure-first picker, error->unavailable/unconfirmed, Stop halts waits, watching:false lease (no auto-approve), isCurrent holds, history pop, SafeArea, health listener, warm composer reload; rejected separate archive check (dissent in r2). Metrics recorded u7 r4, u8 r1."
+    },
+    {
+      "at": "2026-11-28T05:56:10Z",
+      "text": "Judged #541 r5 (A0028): accepted superseded-start file release + partial file delete (fix 6370c5d0); intended rejections AVPlayer pending + resume message -> dissent to Sol-F only (u7 r6). Judged #542 r2: accepted all (submit-error unconfirmed, live/stale recheck, confirm read for archive per Sol-F evidence, context failing + group Retry, short window, doc) fix 67771f4e. Metrics u7 r5, u8 r2 recorded. #547 commit de7fd928; #545 test fix 9f2f9099."
     }
   ],
-  "generation": 141,
-  "next_action": "Session tests running (bzxv93agu); then commit #542 fixes, dispatch u7 r5 + u8 r2 re-reviews, continue #547 tests",
-  "pending_operation": null,
+  "generation": 143,
+  "next_action": "Dispatch u7 r6 (Sol-F dissent) + u8 r3; meanwhile finish #548 (tips with links: code done, update tests, BEHAVIOR, commit)",
+  "pending_operation": {
+    "expected_bytes": 20000,
+    "expected_seconds": 900,
+    "id": "op_89be7451b314",
+    "kind": "subagent",
+    "prepared_at": "2026-11-28T05:56:10Z",
+    "purpose": "#541 r6 Sol-F dissent + #542 r3 re-review"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -1005,7 +1016,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T05:50:03Z",
+  "updated_at": "2026-11-28T05:56:10Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

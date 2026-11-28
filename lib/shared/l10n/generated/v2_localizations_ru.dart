@@ -2510,61 +2510,6 @@ class V2LocalizationsRu extends V2Localizations {
   String get chatStatusThinking => 'Размышление...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'Совет: Добавьте критерии приемки для крупных изменений';
-
-  @override
-  String get chatTipAskForPlan =>
-      'Совет: Для больших задач сначала запросите план';
-
-  @override
-  String get chatTipBeSpecific =>
-      'Совет: Будьте конкретны — более короткие запросы обрабатываются быстрее';
-
-  @override
-  String get chatTipBreakTasks =>
-      'Совет: Разбивайте большие задачи на более мелкие запросы';
-
-  @override
-  String get chatTipCompareOptions =>
-      'Совет: Запросите варианты, если компромиссы неясны';
-
-  @override
-  String get chatTipDefineVerification =>
-      'Совет: Укажите, какие тесты или проверки должны пройти';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'Совет: Укажите важные файлы, экраны или команды';
-
-  @override
-  String get chatTipProvideContext =>
-      'Совет: Предоставляйте контекст — вставляйте сообщения об ошибках и логи';
-
-  @override
-  String get chatTipRequestDocs =>
-      'Совет: Просите обновить docs, когда поведение меняется';
-
-  @override
-  String get chatTipShareAttempts =>
-      'Совет: Расскажите, что пробовали, и точную ошибку';
-
-  @override
-  String get chatTipStartWithGoal => 'Совет: Начните с конечной цели';
-
-  @override
-  String get chatTipStateConstraints =>
-      'Совет: Укажите ограничения, которые агент должен сохранить';
-
-  @override
-  String get chatTipStepByStep =>
-      'Совет: Запрашивайте пошаговые инструкции при отладке сложных проблем';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'Совет: Выберите фокусного агента для плана, ревью или сборки';
-
-  @override
   String get settingsAppearanceComposerTips => 'Подсказки в редакторе';
 
   @override
@@ -3298,5 +3243,53 @@ class V2LocalizationsRu extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'Скорость: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'Совет: Показывайте беседы вкладками через меню «$menu»';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'Совет: Отключите эти советы в меню «$menu»';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'Совет: Дважды нажмите пустую кнопку «Отправить», чтобы агент продолжил';
+
+  @override
+  String get composerTipEscape =>
+      'Совет: Дважды нажмите Esc, чтобы остановить ответ';
+
+  @override
+  String get composerTipMessageBar =>
+      'Совет: Нажмите на сообщение, чтобы скопировать, переслать его и не только';
+
+  @override
+  String get composerTipSelectWord =>
+      'Совет: Дважды нажмите на слово в сообщении, чтобы выделить его';
+
+  @override
+  String get composerTipFavorite =>
+      'Совет: Отметьте модель звездой в списке моделей или удерживайте её, чтобы она была вверху';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'Совет: Переключайте модель, вариант и агента с клавиатуры; см. «$place»';
+  }
+
+  @override
+  String get composerTipSlash =>
+      'Совет: Введите / для команд вроде /compact или /undo';
+
+  @override
+  String get composerTipPin =>
+      'Совет: Закрепляйте действия на верхней панели через её меню';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'Совет: Выберите голос для чтения сообщений в разделе «$place»';
   }
 }

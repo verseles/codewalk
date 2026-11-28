@@ -2525,61 +2525,6 @@ class V2LocalizationsEs extends V2Localizations {
   String get chatStatusThinking => 'Pensando...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'Consejo: Añade criterios de aceptación en cambios grandes';
-
-  @override
-  String get chatTipAskForPlan =>
-      'Consejo: Pide un plan primero en tareas grandes';
-
-  @override
-  String get chatTipBeSpecific =>
-      'Consejo: Sé específico — los mensajes cortos reciben respuestas más rápidas';
-
-  @override
-  String get chatTipBreakTasks =>
-      'Consejo: Divide tareas grandes en mensajes más pequeños';
-
-  @override
-  String get chatTipCompareOptions =>
-      'Consejo: Pide alternativas cuando los tradeoffs no estén claros';
-
-  @override
-  String get chatTipDefineVerification =>
-      'Consejo: Di qué pruebas o comprobaciones deben pasar';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'Consejo: Nombra archivos, pantallas o comandos relevantes';
-
-  @override
-  String get chatTipProvideContext =>
-      'Consejo: Proporciona contexto — pega mensajes de error y registros';
-
-  @override
-  String get chatTipRequestDocs =>
-      'Consejo: Pide actualizar docs cuando cambie el comportamiento';
-
-  @override
-  String get chatTipShareAttempts =>
-      'Consejo: Comparte lo que intentaste y el error exacto';
-
-  @override
-  String get chatTipStartWithGoal => 'Consejo: Empieza por el objetivo final';
-
-  @override
-  String get chatTipStateConstraints =>
-      'Consejo: Indica restricciones que el agente debe preservar';
-
-  @override
-  String get chatTipStepByStep =>
-      'Consejo: Pide paso a paso al depurar problemas complejos';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'Consejo: Elige un agente enfocado para plan, revisión o build';
-
-  @override
   String get settingsAppearanceComposerTips => 'Consejos del compositor';
 
   @override
@@ -3316,5 +3261,53 @@ class V2LocalizationsEs extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'Velocidad: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'Consejo: Muestra las conversaciones en pestañas desde el menú $menu';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'Consejo: Desactiva estos consejos en el menú $menu';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'Consejo: Toca dos veces Enviar vacío para que el agente continúe';
+
+  @override
+  String get composerTipEscape =>
+      'Consejo: Pulsa Esc dos veces para detener la respuesta';
+
+  @override
+  String get composerTipMessageBar =>
+      'Consejo: Toca un mensaje para copiarlo, reenviarlo y más';
+
+  @override
+  String get composerTipSelectWord =>
+      'Consejo: Toca dos veces una palabra de un mensaje para seleccionarla';
+
+  @override
+  String get composerTipFavorite =>
+      'Consejo: Marca un modelo con la estrella en la lista de modelos, o mantenlo pulsado, para tenerlo arriba';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'Consejo: Cambia de modelo, variante y agente con el teclado; consulta $place';
+  }
+
+  @override
+  String get composerTipSlash =>
+      'Consejo: Escribe / para comandos como /compact o /undo';
+
+  @override
+  String get composerTipPin =>
+      'Consejo: Fija acciones en la barra superior desde su menú';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'Consejo: Elige la voz que lee los mensajes en $place';
   }
 }

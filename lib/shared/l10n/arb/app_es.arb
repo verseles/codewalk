@@ -2010,20 +2010,6 @@
   "chatReasoning": "Razonando...",
   "chatRetryingModelRequest": "Reintentando solicitud de modelo...",
   "chatStatusThinking": "Pensando...",
-  "chatTipAcceptanceCriteria": "Consejo: Añade criterios de aceptación en cambios grandes",
-  "chatTipAskForPlan": "Consejo: Pide un plan primero en tareas grandes",
-  "chatTipBeSpecific": "Consejo: Sé específico — los mensajes cortos reciben respuestas más rápidas",
-  "chatTipBreakTasks": "Consejo: Divide tareas grandes en mensajes más pequeños",
-  "chatTipCompareOptions": "Consejo: Pide alternativas cuando los tradeoffs no estén claros",
-  "chatTipDefineVerification": "Consejo: Di qué pruebas o comprobaciones deben pasar",
-  "chatTipNameRelevantFiles": "Consejo: Nombra archivos, pantallas o comandos relevantes",
-  "chatTipProvideContext": "Consejo: Proporciona contexto — pega mensajes de error y registros",
-  "chatTipRequestDocs": "Consejo: Pide actualizar docs cuando cambie el comportamiento",
-  "chatTipShareAttempts": "Consejo: Comparte lo que intentaste y el error exacto",
-  "chatTipStartWithGoal": "Consejo: Empieza por el objetivo final",
-  "chatTipStateConstraints": "Consejo: Indica restricciones que el agente debe preservar",
-  "chatTipStepByStep": "Consejo: Pide paso a paso al depurar problemas complejos",
-  "chatTipUseFocusedAgents": "Consejo: Elige un agente enfocado para plan, revisión o build",
   "settingsAppearanceComposerTips": "Consejos del compositor",
   "settingsAppearanceComposerTipsDescription": "Mostrar u ocultar consejos rotativos mientras el asistente razona.",
   "settingsAppearanceSessionTabs": "Pestañas de sesión",
@@ -2377,5 +2363,48 @@
   "liveCompactionTriggerManual": "Manual",
   "settingsAppearanceTokensPerSecond": "Tokens por segundo",
   "msgInfoTokensPerSecondValue": "{value} tok/s",
-  "msgInfoTokensPerSecond": "Velocidad: {tps}"
+  "msgInfoTokensPerSecond": "Velocidad: {tps}",
+  "composerTipTabs": "Consejo: Muestra las conversaciones en pestañas desde el menú {menu}",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "Consejo: Desactiva estos consejos en el menú {menu}",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "Consejo: Toca dos veces Enviar vacío para que el agente continúe",
+  "composerTipEscape": "Consejo: Pulsa Esc dos veces para detener la respuesta",
+  "composerTipMessageBar": "Consejo: Toca un mensaje para copiarlo, reenviarlo y más",
+  "composerTipSelectWord": "Consejo: Toca dos veces una palabra de un mensaje para seleccionarla",
+  "composerTipFavorite": "Consejo: Marca un modelo con la estrella en la lista de modelos, o mantenlo pulsado, para tenerlo arriba",
+  "composerTipShortcuts": "Consejo: Cambia de modelo, variante y agente con el teclado; consulta {place}",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "Consejo: Escribe / para comandos como /compact o /undo",
+  "composerTipPin": "Consejo: Fija acciones en la barra superior desde su menú",
+  "composerTipVoice": "Consejo: Elige la voz que lee los mensajes en {place}",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

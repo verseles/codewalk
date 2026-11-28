@@ -2494,59 +2494,6 @@ class V2LocalizationsHi extends V2Localizations {
   String get chatStatusThinking => 'सोच रहा है...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'सुझाव: बड़े बदलावों के लिए स्वीकृति मानदंड जोड़ें';
-
-  @override
-  String get chatTipAskForPlan => 'सुझाव: बड़े कार्यों में पहले योजना मांगें';
-
-  @override
-  String get chatTipBeSpecific =>
-      'सुझाव: विशिष्ट बनें — छोटे प्रॉम्प्ट का उत्तर तेज़ी से मिलता है';
-
-  @override
-  String get chatTipBreakTasks =>
-      'सुझाव: बड़े कार्यों को छोटे प्रॉम्प्ट में विभाजित करें';
-
-  @override
-  String get chatTipCompareOptions =>
-      'सुझाव: ट्रेडऑफ अस्पष्ट हों तो विकल्प मांगें';
-
-  @override
-  String get chatTipDefineVerification =>
-      'सुझाव: बताएं कौन से टेस्ट या जांच पास होनी चाहिए';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'सुझाव: संबंधित फ़ाइलें, स्क्रीन या कमांड बताएं';
-
-  @override
-  String get chatTipProvideContext =>
-      'सुझाव: संदर्भ प्रदान करें — त्रुटि संदेश और लॉग पेस्ट करें';
-
-  @override
-  String get chatTipRequestDocs => 'सुझाव: व्यवहार बदलने पर डॉक्स अपडेट मांगें';
-
-  @override
-  String get chatTipShareAttempts =>
-      'सुझाव: आपने क्या आजमाया और सटीक त्रुटि बताएं';
-
-  @override
-  String get chatTipStartWithGoal => 'सुझाव: अंतिम लक्ष्य से शुरू करें';
-
-  @override
-  String get chatTipStateConstraints =>
-      'सुझाव: वे सीमाएं बताएं जिन्हें एजेंट को बचाए रखना है';
-
-  @override
-  String get chatTipStepByStep =>
-      'सुझाव: जटिल समस्याओं को डीबग करते समय चरण-दर-चरण पूछें';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'सुझाव: योजना, समीक्षा या बिल्ड के लिए केंद्रित एजेंट चुनें';
-
-  @override
   String get settingsAppearanceComposerTips => 'कंपोज़र युक्तियाँ';
 
   @override
@@ -3274,5 +3221,52 @@ class V2LocalizationsHi extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'गति: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'सुझाव: $menu मेनू से बातचीत को टैब के रूप में दिखाएँ';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'सुझाव: $menu मेनू में ये सुझाव बंद करें';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'सुझाव: एजेंट को जारी रखने के लिए खाली भेजें पर दो बार टैप करें';
+
+  @override
+  String get composerTipEscape => 'सुझाव: जवाब रोकने के लिए Esc दो बार दबाएँ';
+
+  @override
+  String get composerTipMessageBar =>
+      'सुझाव: संदेश को कॉपी, अग्रेषित और बहुत कुछ करने के लिए उस पर टैप करें';
+
+  @override
+  String get composerTipSelectWord =>
+      'सुझाव: संदेश के किसी शब्द को चुनने के लिए उस पर दो बार टैप करें';
+
+  @override
+  String get composerTipFavorite =>
+      'सुझाव: मॉडल सूची में किसी मॉडल को स्टार दें या देर तक दबाएँ, ताकि वह सबसे ऊपर रहे';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'सुझाव: कीबोर्ड से मॉडल, वेरिएंट और एजेंट बदलें; $place देखें';
+  }
+
+  @override
+  String get composerTipSlash =>
+      'सुझाव: /compact या /undo जैसे कमांड के लिए / टाइप करें';
+
+  @override
+  String get composerTipPin =>
+      'सुझाव: शीर्ष बार के मेनू से क्रियाओं को उस पर पिन करें';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'सुझाव: संदेश पढ़ने वाली आवाज़ $place में चुनें';
   }
 }

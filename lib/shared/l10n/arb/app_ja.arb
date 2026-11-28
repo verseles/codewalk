@@ -2010,20 +2010,6 @@
   "chatReasoning": "推論中...",
   "chatRetryingModelRequest": "モデルリクエストを再試行中...",
   "chatStatusThinking": "思考中...",
-  "chatTipAcceptanceCriteria": "ヒント: 大きな変更には受け入れ条件を追加しましょう",
-  "chatTipAskForPlan": "ヒント: 大きなタスクでは先に計画を依頼しましょう",
-  "chatTipBeSpecific": "ヒント: 具体的に — 短いプロンプトほど早く回答が得られます",
-  "chatTipBreakTasks": "ヒント: 大きなタスクを小さなプロンプトに分割します",
-  "chatTipCompareOptions": "ヒント: トレードオフが不明なら代替案を依頼しましょう",
-  "chatTipDefineVerification": "ヒント: 通すべきテストやチェックを伝えましょう",
-  "chatTipNameRelevantFiles": "ヒント: 関連するファイル、画面、コマンドを伝えましょう",
-  "chatTipProvideContext": "ヒント: コンテキストを提供 — エラーメッセージやログを貼り付けます",
-  "chatTipRequestDocs": "ヒント: 挙動が変わるなら docs 更新を依頼しましょう",
-  "chatTipShareAttempts": "ヒント: 試したことと正確なエラーを共有しましょう",
-  "chatTipStartWithGoal": "ヒント: 最終目標から始めましょう",
-  "chatTipStateConstraints": "ヒント: エージェントが守る制約を伝えましょう",
-  "chatTipStepByStep": "ヒント: 複雑な問題のデバッグ時はステップバイステップで依頼します",
-  "chatTipUseFocusedAgents": "ヒント: 計画、レビュー、実装に合うエージェントを選びましょう",
   "settingsAppearanceComposerTips": "コンポーザーヒント",
   "settingsAppearanceComposerTipsDescription": "アシスタントが推論中に回転表示されるヒントの表示/非表示を切り替えます。",
   "settingsAppearanceSessionTabs": "セッションタブ",
@@ -2377,5 +2363,48 @@
   "liveCompactionTriggerManual": "手動",
   "settingsAppearanceTokensPerSecond": "1秒あたりのトークン数",
   "msgInfoTokensPerSecondValue": "{value} tok/s",
-  "msgInfoTokensPerSecond": "速度: {tps}"
+  "msgInfoTokensPerSecond": "速度: {tps}",
+  "composerTipTabs": "ヒント: {menu}メニューから会話をタブで表示できます",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "ヒント: {menu}メニューでこのヒントをオフにできます",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "ヒント: 空の送信をダブルタップするとエージェントが続行します",
+  "composerTipEscape": "ヒント: Escを2回押すと応答を停止します",
+  "composerTipMessageBar": "ヒント: メッセージをタップすると、コピーや転送などができます",
+  "composerTipSelectWord": "ヒント: メッセージ内の単語をダブルタップすると選択できます",
+  "composerTipFavorite": "ヒント: モデル一覧でモデルにスターを付けるか長押しすると、上に表示されます",
+  "composerTipShortcuts": "ヒント: モデル、バリアント、エージェントはキーボードで切り替えられます。{place}を参照",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "ヒント: /と入力すると、/compactや/undoなどのコマンドを使えます",
+  "composerTipPin": "ヒント: 上部バーのメニューから操作をバーに固定できます",
+  "composerTipVoice": "ヒント: メッセージを読み上げる音声は{place}で選べます",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

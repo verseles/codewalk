@@ -1,16 +1,23 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:codewalk_core/codewalk_core.dart';
+import 'package:codewalk_core/codewalk_core.dart' hide Page;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:provider/provider.dart';
 
+import '../../app/app_preferences_controller.dart';
+import '../../app/workspace_chrome.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/theme/chat_appearance.dart';
+import '../voice/read_aloud_controller.dart';
 import 'session_live_controller.dart';
 import 'session_timeline_projection.dart';
 import 'session_tool_details_dialog.dart';
@@ -34,24 +41,93 @@ enum ComposerStatusKind {
 
 typedef ComposerActivity = ({ComposerStatusKind kind, String label});
 
-/// The tips the slot rotates while the assistant works: prompting practices
-/// that hold for any agent, like the retained reference's.
-List<String> composerTips(V2Localizations l10n) => [
-  l10n.chatTipBeSpecific,
-  l10n.chatTipStepByStep,
-  l10n.chatTipProvideContext,
-  l10n.chatTipBreakTasks,
-  l10n.chatTipStartWithGoal,
-  l10n.chatTipNameRelevantFiles,
-  l10n.chatTipStateConstraints,
-  l10n.chatTipAskForPlan,
-  l10n.chatTipDefineVerification,
-  l10n.chatTipShareAttempts,
-  l10n.chatTipCompareOptions,
-  l10n.chatTipRequestDocs,
-  l10n.chatTipAcceptanceCriteria,
-  l10n.chatTipUseFocusedAgents,
-  l10n.composerTipHoldSend,
+/// Where a tip's link leads (#548).
+enum ComposerTipLink { display, shortcuts, readAloud }
+
+/// A tip about something the app does. With a [link], the words [label],
+/// between [before] and [after], open where it leads.
+@immutable
+final class ComposerTip {
+  const ComposerTip(this.before, {this.label = '', this.after = '', this.link});
+
+  final String before;
+  final String label;
+  final String after;
+  final ComposerTipLink? link;
+
+  String get text => '$before$label$after';
+
+  @override
+  bool operator ==(Object other) =>
+      other is ComposerTip && other.text == text && other.link == link;
+
+  @override
+  int get hashCode => Object.hash(text, link);
+}
+
+/// [message] with [label] as its link to [link], wherever the language puts
+/// it.
+ComposerTip _linked(
+  String Function(String place) message,
+  String label,
+  ComposerTipLink link,
+) {
+  const mark = '\u0000';
+  final whole = message(mark);
+  final at = whole.indexOf(mark);
+  if (at < 0) return ComposerTip(message(label));
+  return ComposerTip(
+    whole.substring(0, at),
+    label: label,
+    after: whole.substring(at + mark.length),
+    link: link,
+  );
+}
+
+/// The tips the slot rotates while the assistant works: things the app does
+/// that are easy to miss (#548), each only where it applies: the Display
+/// menu where there is one ([display]), and tabs only while hidden
+/// ([tabsShown]); keys where there is a keyboard ([keyboard]); the voice
+/// where messages can be read aloud ([readAloud]).
+List<ComposerTip> composerTips(
+  V2Localizations l10n, {
+  bool display = false,
+  bool tabsShown = false,
+  bool keyboard = false,
+  bool readAloud = false,
+}) => [
+  if (display && !tabsShown)
+    _linked(
+      l10n.composerTipTabs,
+      l10n.chatDisplayMenu,
+      ComposerTipLink.display,
+    ),
+  ComposerTip(l10n.composerTipHoldSend),
+  ComposerTip(l10n.composerTipMessageBar),
+  ComposerTip(l10n.composerTipContinue),
+  ComposerTip(l10n.composerTipSelectWord),
+  if (keyboard) ComposerTip(l10n.composerTipEscape),
+  ComposerTip(l10n.composerTipFavorite),
+  if (keyboard)
+    _linked(
+      l10n.composerTipShortcuts,
+      l10n.settingsShortcutsTitle,
+      ComposerTipLink.shortcuts,
+    ),
+  ComposerTip(l10n.composerTipSlash),
+  ComposerTip(l10n.composerTipPin),
+  if (readAloud)
+    _linked(
+      l10n.composerTipVoice,
+      l10n.readAloudTitle,
+      ComposerTipLink.readAloud,
+    ),
+  if (display)
+    _linked(
+      l10n.composerTipTipsOff,
+      l10n.chatDisplayMenu,
+      ComposerTipLink.display,
+    ),
 ];
 
 /// What [state] reports the assistant doing, or null while it does not work.
@@ -293,8 +369,8 @@ class SessionComposerStatus extends StatefulWidget {
   State<SessionComposerStatus> createState() => _SessionComposerStatusState();
 }
 
-/// What the slot shows: an activity, or a tip.
-typedef _Shown = ({ComposerStatusKind? kind, String label});
+/// What the slot shows: an activity, or a [tip].
+typedef _Shown = ({ComposerStatusKind? kind, String label, ComposerTip? tip});
 
 /// The states a screen reader must hear; work and tips change too often.
 bool _announced(ComposerStatusKind? kind) => switch (kind) {
@@ -317,14 +393,49 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
   Timer? _hide;
   Timer? _rotation;
   int? _tip;
+  late final _linkTap = TapGestureRecognizer()..onTap = _follow;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _tip ??= (widget.pick ?? Random().nextInt)(
-      composerTips(context.v2L10n).length,
-    );
+    _tip ??= (widget.pick ?? Random().nextInt)(_tipList().length);
     _apply();
+  }
+
+  /// The tips that apply here now.
+  List<ComposerTip> _tipList() {
+    final preferences = context.read<AppPreferencesController?>();
+    return composerTips(
+      context.v2L10n,
+      display: preferences != null,
+      tabsShown: preferences?.showSessionTabs ?? false,
+      keyboard:
+          kIsWeb ||
+          (preferences?.hasPhysicalKeyboard ?? false) ||
+          const {
+            TargetPlatform.linux,
+            TargetPlatform.macOS,
+            TargetPlatform.windows,
+          }.contains(defaultTargetPlatform),
+      readAloud: context.read<ReadAloudController?>()?.offered ?? false,
+    );
+  }
+
+  /// Opens where the tip shown leads.
+  void _follow() {
+    final link = _shown?.tip?.link;
+    if (link == null || !mounted) return;
+    switch (link) {
+      case ComposerTipLink.display:
+        unawaited(showWorkspaceDisplayMenu(context));
+      case ComposerTipLink.shortcuts || ComposerTipLink.readAloud:
+        final router = GoRouter.maybeOf(context);
+        if (router == null) return;
+        final section = link == ComposerTipLink.shortcuts
+            ? 'shortcuts'
+            : 'readAloud';
+        unawaited(router.push<void>('/settings?section=$section'));
+    }
   }
 
   @override
@@ -338,6 +449,7 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
     _show?.cancel();
     _hide?.cancel();
     _rotation?.cancel();
+    _linkTap.dispose();
     super.dispose();
   }
 
@@ -345,10 +457,15 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
 
   _Shown _fallback() {
     if (!_tips) {
-      return (kind: ComposerStatusKind.working, label: widget.activity!.label);
+      return (
+        kind: ComposerStatusKind.working,
+        label: widget.activity!.label,
+        tip: null,
+      );
     }
-    final tips = composerTips(context.v2L10n);
-    return (kind: null, label: tips[_tip! % tips.length]);
+    final tips = _tipList();
+    final tip = tips[_tip! % tips.length];
+    return (kind: null, label: tip.text, tip: tip);
   }
 
   /// Takes what the session reports now; called before each build that may
@@ -389,7 +506,7 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
       _rotation?.cancel();
       _rotation = null;
       _pending = null;
-      _shown = (kind: activity.kind, label: activity.label);
+      _shown = (kind: activity.kind, label: activity.label, tip: null);
       return;
     }
     final fallback = _fallback();
@@ -490,6 +607,29 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
                             ? RetryCountdown(
                                 at: widget.retryAt!,
                                 now: widget.now,
+                                style: style,
+                              )
+                            : shown.tip?.link != null
+                            ? Text.rich(
+                                TextSpan(
+                                  children: [
+                                    TextSpan(text: shown.tip!.before),
+                                    TextSpan(
+                                      text: shown.tip!.label,
+                                      recognizer: _linkTap,
+                                      mouseCursor: SystemMouseCursors.click,
+                                      style: TextStyle(
+                                        color: scheme.primary,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: scheme.primary,
+                                      ),
+                                    ),
+                                    TextSpan(text: shown.tip!.after),
+                                  ],
+                                ),
+                                key: const ValueKey('composer-tip-linked'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: style,
                               )
                             : Text(

@@ -2010,20 +2010,6 @@
   "chatReasoning": "Denkt nach...",
   "chatRetryingModelRequest": "Modellanfrage wird wiederholt...",
   "chatStatusThinking": "Nachdenken...",
-  "chatTipAcceptanceCriteria": "Tipp: Fügen Sie Akzeptanzkriterien für größere Änderungen hinzu",
-  "chatTipAskForPlan": "Tipp: Fragen Sie bei großen Aufgaben zuerst nach einem Plan",
-  "chatTipBeSpecific": "Tipp: Seien Sie spezifisch — kürzere Prompts erhalten schnellere Antworten",
-  "chatTipBreakTasks": "Tipp: Teilen Sie große Aufgaben in kleinere Prompts auf",
-  "chatTipCompareOptions": "Tipp: Fragen Sie nach Alternativen, wenn Tradeoffs unklar sind",
-  "chatTipDefineVerification": "Tipp: Sagen Sie, welche Tests oder Checks bestehen sollen",
-  "chatTipNameRelevantFiles": "Tipp: Nennen Sie relevante Dateien, Screens oder Befehle",
-  "chatTipProvideContext": "Tipp: Geben Sie Kontext an — fügen Sie Fehlermeldungen und Logs ein",
-  "chatTipRequestDocs": "Tipp: Bitten Sie um Doku-Updates, wenn sich Verhalten ändert",
-  "chatTipShareAttempts": "Tipp: Teilen Sie mit, was Sie versucht haben und welcher Fehler erschien",
-  "chatTipStartWithGoal": "Tipp: Beginnen Sie mit dem Endziel",
-  "chatTipStateConstraints": "Tipp: Nennen Sie Einschränkungen, die der Agent bewahren muss",
-  "chatTipStepByStep": "Tipp: Fragen Sie nach Schritt-für-Schritt beim Debuggen komplexer Probleme",
-  "chatTipUseFocusedAgents": "Tipp: Wählen Sie einen fokussierten Agenten für Plan, Review oder Build",
   "settingsAppearanceComposerTips": "Composer-Tipps",
   "settingsAppearanceComposerTipsDescription": "Rotierende Tipps anzeigen oder ausblenden, während der Assistent nachdenkt.",
   "settingsAppearanceSessionTabs": "Sitzungs-Tabs",
@@ -2377,5 +2363,48 @@
   "liveCompactionTriggerManual": "Manuell",
   "settingsAppearanceTokensPerSecond": "Tokens pro Sekunde",
   "msgInfoTokensPerSecondValue": "{value} tok/s",
-  "msgInfoTokensPerSecond": "Geschwindigkeit: {tps}"
+  "msgInfoTokensPerSecond": "Geschwindigkeit: {tps}",
+  "composerTipTabs": "Tipp: Zeigen Sie Unterhaltungen über das Menü {menu} als Tabs an",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "Tipp: Schalten Sie diese Tipps im Menü {menu} aus",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "Tipp: Tippen Sie zweimal auf das leere Senden, damit der Agent weitermacht",
+  "composerTipEscape": "Tipp: Drücken Sie zweimal Esc, um die Antwort zu stoppen",
+  "composerTipMessageBar": "Tipp: Tippen Sie auf eine Nachricht, um sie zu kopieren, weiterzuleiten und mehr",
+  "composerTipSelectWord": "Tipp: Tippen Sie zweimal auf ein Wort einer Nachricht, um es auszuwählen",
+  "composerTipFavorite": "Tipp: Markieren Sie ein Modell in der Modellliste mit dem Stern oder drücken Sie es lange, damit es oben bleibt",
+  "composerTipShortcuts": "Tipp: Wechseln Sie Modell, Variante und Agent per Tastatur; siehe {place}",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "Tipp: Geben Sie / für Befehle wie /compact oder /undo ein",
+  "composerTipPin": "Tipp: Heften Sie Aktionen über das Menü der oberen Leiste dort an",
+  "composerTipVoice": "Tipp: Wählen Sie die Stimme, die Nachrichten vorliest, unter {place}",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

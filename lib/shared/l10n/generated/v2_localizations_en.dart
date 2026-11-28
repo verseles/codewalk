@@ -2495,59 +2495,6 @@ class V2LocalizationsEn extends V2Localizations {
   String get chatStatusThinking => 'Thinking...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'Tip: Add acceptance criteria for larger changes';
-
-  @override
-  String get chatTipAskForPlan => 'Tip: Ask for a plan first on large tasks';
-
-  @override
-  String get chatTipBeSpecific =>
-      'Tip: Be specific — shorter prompts get faster answers';
-
-  @override
-  String get chatTipBreakTasks => 'Tip: Break large tasks into smaller prompts';
-
-  @override
-  String get chatTipCompareOptions =>
-      'Tip: Ask for alternatives when tradeoffs are unclear';
-
-  @override
-  String get chatTipDefineVerification =>
-      'Tip: Say which tests or checks should pass';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'Tip: Name relevant files, screens, or commands';
-
-  @override
-  String get chatTipProvideContext =>
-      'Tip: Provide context — paste error messages and logs';
-
-  @override
-  String get chatTipRequestDocs =>
-      'Tip: Ask for docs updates when behavior changes';
-
-  @override
-  String get chatTipShareAttempts =>
-      'Tip: Share what you tried and the exact error';
-
-  @override
-  String get chatTipStartWithGoal => 'Tip: Start with the end goal';
-
-  @override
-  String get chatTipStateConstraints =>
-      'Tip: State constraints the agent must preserve';
-
-  @override
-  String get chatTipStepByStep =>
-      'Tip: Ask for step-by-step when debugging complex issues';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'Tip: Pick a focused agent for plan, review, or build';
-
-  @override
   String get settingsAppearanceComposerTips => 'Composer tips';
 
   @override
@@ -3277,5 +3224,51 @@ class V2LocalizationsEn extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'Speed: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'Tip: Show conversations as tabs from the $menu menu';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'Tip: Turn these tips off in the $menu menu';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'Tip: Double-tap the empty Send to tell the agent to continue';
+
+  @override
+  String get composerTipEscape => 'Tip: Press Escape twice to stop the reply';
+
+  @override
+  String get composerTipMessageBar =>
+      'Tip: Tap a message to copy it, forward it and more';
+
+  @override
+  String get composerTipSelectWord =>
+      'Tip: Double-tap a word in a message to select it';
+
+  @override
+  String get composerTipFavorite =>
+      'Tip: Star a model in the model list, or long-press it, to keep it on top';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'Tip: Switch models, variants and agents from the keyboard; see $place';
+  }
+
+  @override
+  String get composerTipSlash =>
+      'Tip: Type / for commands such as /compact or /undo';
+
+  @override
+  String get composerTipPin => 'Tip: Pin actions to the top bar from its menu';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'Tip: Pick the voice that reads messages aloud in $place';
   }
 }

@@ -1,3 +1,4 @@
+import 'package:codewalk/app/app_preferences_controller.dart';
 import 'package:codewalk/features/sessions/session_composer_status.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/theme/chat_appearance.dart';
@@ -5,6 +6,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 import 'live_fakes.dart';
 
@@ -274,12 +276,12 @@ void main() {
     final tips = composerTips(l10n);
     const working = (kind: ComposerStatusKind.working, label: 'Reasoning...');
     await _pump(tester, working);
-    expect(find.text(tips[0]), findsNothing);
+    expect(find.text(tips[0].text), findsNothing);
     await tester.pump(SessionComposerStatus.showDelay);
-    expect(find.text(tips[0]), findsOneWidget);
+    expect(find.text(tips[0].text), findsOneWidget);
     await tester.pump(SessionComposerStatus.tipInterval);
     await tester.pumpAndSettle();
-    expect(find.text(tips[1]), findsOneWidget);
+    expect(find.text(tips[1].text), findsOneWidget);
     // Real activity shows at once and stops the tips.
     await _pump(tester, (kind: ComposerStatusKind.progress, label: 'grep'));
     await tester.pumpAndSettle();
@@ -308,8 +310,83 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(l10n.chatReasoning), findsOneWidget);
     for (final tip in composerTips(l10n)) {
-      expect(find.text(tip), findsNothing);
+      expect(find.text(tip.text), findsNothing);
     }
+  });
+
+  test('tips are offered only where they apply, in every language (#548)', () {
+    for (final locale in V2Localizations.supportedLocales) {
+      final l10n = lookupV2Localizations(locale);
+      final plain = composerTips(l10n);
+      expect(plain.where((tip) => tip.link != null), isEmpty);
+      final all = composerTips(
+        l10n,
+        display: true,
+        keyboard: true,
+        readAloud: true,
+      );
+      expect(all.length, plain.length + 5, reason: '$locale');
+      // The link sits where the language puts its label.
+      final linked = all.where((tip) => tip.link != null).toList();
+      expect(linked.map((tip) => tip.link), [
+        ComposerTipLink.display,
+        ComposerTipLink.shortcuts,
+        ComposerTipLink.readAloud,
+        ComposerTipLink.display,
+      ], reason: '$locale');
+      for (final tip in linked) {
+        expect(tip.label, isNotEmpty);
+        expect(tip.text, contains(tip.label));
+      }
+      // Tabs already shown need no tip.
+      expect(
+        composerTips(l10n, display: true, tabsShown: true).length,
+        composerTips(l10n, display: true).length - 1,
+      );
+    }
+  });
+
+  testWidgets('a tip about a menu opens it from its link (#548)', (
+    tester,
+  ) async {
+    final l10n = await _l10n(tester);
+    final preferences = AppPreferencesController();
+    addTearDown(preferences.dispose);
+    preferences.setShowSessionTabs(false);
+    final tips = composerTips(l10n, display: true);
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AppPreferencesController?>.value(
+        value: preferences,
+        child: MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(
+            body: ChatAppearance(
+              mathRendering: true,
+              conversationTextScale: 1,
+              composerTips: true,
+              child: SessionComposerStatus(
+                activity: (
+                  kind: ComposerStatusKind.working,
+                  label: 'Reasoning...',
+                ),
+                pick: (_) => 0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(SessionComposerStatus.showDelay);
+    await tester.pumpAndSettle();
+    expect(tips.first.link, ComposerTipLink.display);
+    expect(find.text(tips.first.text), findsOneWidget);
+    await tester.tapOnText(find.textRange.ofSubstring(l10n.chatDisplayMenu));
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey('workspace-display-sheet')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a label longer than the bar offers its whole text', (

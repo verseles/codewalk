@@ -44,24 +44,11 @@ PORT_KEYS = {
     # The Block render mode's placeholder.
     "chatBlockResponsePendingTitle",
     "chatBlockResponsePendingDescription",
-    # The composer's status slot: activity, then tips (#133).
+    # The composer's status slot: its activity (#133); its tips are v2's
+    # own since #548.
     "chatReasoning",
     "chatStatusThinking",
     "chatRetryingModelRequest",
-    "chatTipBeSpecific",
-    "chatTipStepByStep",
-    "chatTipProvideContext",
-    "chatTipBreakTasks",
-    "chatTipStartWithGoal",
-    "chatTipNameRelevantFiles",
-    "chatTipStateConstraints",
-    "chatTipAskForPlan",
-    "chatTipDefineVerification",
-    "chatTipShareAttempts",
-    "chatTipCompareOptions",
-    "chatTipRequestDocs",
-    "chatTipAcceptanceCriteria",
-    "chatTipUseFocusedAgents",
     # The composer's selection chips and the agent menu's footer (#153).
     "chatChooseModel",
     "chatChooseAgent",

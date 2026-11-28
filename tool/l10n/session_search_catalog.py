@@ -184,3 +184,18 @@ FORWARD_KEYS = (
     'messageForwardHours',
     'messageForwardDays',
 )
+
+# The composer's tips about real features, some with a link (#548).
+TIP_KEYS = (
+    'composerTipTabs',
+    'composerTipTipsOff',
+    'composerTipContinue',
+    'composerTipEscape',
+    'composerTipMessageBar',
+    'composerTipSelectWord',
+    'composerTipFavorite',
+    'composerTipShortcuts',
+    'composerTipSlash',
+    'composerTipPin',
+    'composerTipVoice',
+)

@@ -2009,20 +2009,6 @@
   "chatReasoning": "تفكير...",
   "chatRetryingModelRequest": "إعادة محاولة طلب النموذج...",
   "chatStatusThinking": "جاري التفكير...",
-  "chatTipAcceptanceCriteria": "نصيحة: أضف معايير قبول للتغييرات الكبيرة",
-  "chatTipAskForPlan": "نصيحة: اطلب خطة أولا للمهام الكبيرة",
-  "chatTipBeSpecific": "نصيحة: كن محددًا - المطالبات الأقصر تحصل على إجابات أسرع",
-  "chatTipBreakTasks": "نصيحة: قسم المهام الكبيرة إلى مطالبات أصغر",
-  "chatTipCompareOptions": "نصيحة: اطلب بدائل عندما تكون المفاضلات غير واضحة",
-  "chatTipDefineVerification": "نصيحة: قل أي اختبارات أو فحوصات يجب أن تنجح",
-  "chatTipNameRelevantFiles": "نصيحة: اذكر الملفات أو الشاشات أو الأوامر ذات الصلة",
-  "chatTipProvideContext": "نصيحة: قدم سياقًا - الصق رسائل الخطأ والسجلات",
-  "chatTipRequestDocs": "نصيحة: اطلب تحديث الوثائق عند تغير السلوك",
-  "chatTipShareAttempts": "نصيحة: شارك ما جربته والخطأ الدقيق",
-  "chatTipStartWithGoal": "نصيحة: ابدأ بالهدف النهائي",
-  "chatTipStateConstraints": "نصيحة: اذكر القيود التي يجب على الوكيل الحفاظ عليها",
-  "chatTipStepByStep": "نصيحة: اطلب خطوة بخطوة عند تصحيح المشكلات المعقدة",
-  "chatTipUseFocusedAgents": "نصيحة: اختر وكيلا مركزا للتخطيط أو المراجعة أو البناء",
   "settingsAppearanceComposerTips": "نصائح الملحِّن",
   "settingsAppearanceComposerTipsDescription": "إظهار أو إخفاء النصائح الدوارة أثناء استدلال المساعد.",
   "settingsAppearanceSessionTabs": "تبويبات الجلسات",
@@ -2376,5 +2362,48 @@
   "liveCompactionTriggerManual": "يدوي",
   "settingsAppearanceTokensPerSecond": "الرموز في الثانية",
   "msgInfoTokensPerSecondValue": "{value} tok/s",
-  "msgInfoTokensPerSecond": "السرعة: {tps}"
+  "msgInfoTokensPerSecond": "السرعة: {tps}",
+  "composerTipTabs": "نصيحة: اعرض المحادثات كعلامات تبويب من قائمة {menu}",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "نصيحة: أوقف هذه النصائح من قائمة {menu}",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "نصيحة: انقر مرتين على إرسال الفارغ ليتابع الوكيل",
+  "composerTipEscape": "نصيحة: اضغط Esc مرتين لإيقاف الرد",
+  "composerTipMessageBar": "نصيحة: انقر على رسالة لنسخها أو إعادة توجيهها والمزيد",
+  "composerTipSelectWord": "نصيحة: انقر مرتين على كلمة في رسالة لتحديدها",
+  "composerTipFavorite": "نصيحة: ضع نجمة على نموذج في قائمة النماذج أو اضغط عليه مطولًا ليبقى في الأعلى",
+  "composerTipShortcuts": "نصيحة: بدّل النموذج والمتغير والوكيل من لوحة المفاتيح؛ راجع {place}",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "نصيحة: اكتب / لأوامر مثل /compact أو /undo",
+  "composerTipPin": "نصيحة: ثبّت الإجراءات في الشريط العلوي من قائمته",
+  "composerTipVoice": "نصيحة: اختر الصوت الذي يقرأ الرسائل في {place}",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

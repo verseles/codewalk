@@ -2390,48 +2390,6 @@ class V2LocalizationsJa extends V2Localizations {
   String get chatStatusThinking => '思考中...';
 
   @override
-  String get chatTipAcceptanceCriteria => 'ヒント: 大きな変更には受け入れ条件を追加しましょう';
-
-  @override
-  String get chatTipAskForPlan => 'ヒント: 大きなタスクでは先に計画を依頼しましょう';
-
-  @override
-  String get chatTipBeSpecific => 'ヒント: 具体的に — 短いプロンプトほど早く回答が得られます';
-
-  @override
-  String get chatTipBreakTasks => 'ヒント: 大きなタスクを小さなプロンプトに分割します';
-
-  @override
-  String get chatTipCompareOptions => 'ヒント: トレードオフが不明なら代替案を依頼しましょう';
-
-  @override
-  String get chatTipDefineVerification => 'ヒント: 通すべきテストやチェックを伝えましょう';
-
-  @override
-  String get chatTipNameRelevantFiles => 'ヒント: 関連するファイル、画面、コマンドを伝えましょう';
-
-  @override
-  String get chatTipProvideContext => 'ヒント: コンテキストを提供 — エラーメッセージやログを貼り付けます';
-
-  @override
-  String get chatTipRequestDocs => 'ヒント: 挙動が変わるなら docs 更新を依頼しましょう';
-
-  @override
-  String get chatTipShareAttempts => 'ヒント: 試したことと正確なエラーを共有しましょう';
-
-  @override
-  String get chatTipStartWithGoal => 'ヒント: 最終目標から始めましょう';
-
-  @override
-  String get chatTipStateConstraints => 'ヒント: エージェントが守る制約を伝えましょう';
-
-  @override
-  String get chatTipStepByStep => 'ヒント: 複雑な問題のデバッグ時はステップバイステップで依頼します';
-
-  @override
-  String get chatTipUseFocusedAgents => 'ヒント: 計画、レビュー、実装に合うエージェントを選びましょう';
-
-  @override
   String get settingsAppearanceComposerTips => 'コンポーザーヒント';
 
   @override
@@ -3127,5 +3085,46 @@ class V2LocalizationsJa extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return '速度: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'ヒント: $menuメニューから会話をタブで表示できます';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'ヒント: $menuメニューでこのヒントをオフにできます';
+  }
+
+  @override
+  String get composerTipContinue => 'ヒント: 空の送信をダブルタップするとエージェントが続行します';
+
+  @override
+  String get composerTipEscape => 'ヒント: Escを2回押すと応答を停止します';
+
+  @override
+  String get composerTipMessageBar => 'ヒント: メッセージをタップすると、コピーや転送などができます';
+
+  @override
+  String get composerTipSelectWord => 'ヒント: メッセージ内の単語をダブルタップすると選択できます';
+
+  @override
+  String get composerTipFavorite => 'ヒント: モデル一覧でモデルにスターを付けるか長押しすると、上に表示されます';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'ヒント: モデル、バリアント、エージェントはキーボードで切り替えられます。$placeを参照';
+  }
+
+  @override
+  String get composerTipSlash => 'ヒント: /と入力すると、/compactや/undoなどのコマンドを使えます';
+
+  @override
+  String get composerTipPin => 'ヒント: 上部バーのメニューから操作をバーに固定できます';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'ヒント: メッセージを読み上げる音声は$placeで選べます';
   }
 }

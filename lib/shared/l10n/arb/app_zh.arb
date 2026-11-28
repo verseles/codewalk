@@ -2010,20 +2010,6 @@
   "chatReasoning": "推理中...",
   "chatRetryingModelRequest": "正在重试模型请求...",
   "chatStatusThinking": "正在思考...",
-  "chatTipAcceptanceCriteria": "提示：大型变更加入验收标准",
-  "chatTipAskForPlan": "提示：大任务先请求计划",
-  "chatTipBeSpecific": "提示：请具体一些 — 简短的提示词能获得更快的回答",
-  "chatTipBreakTasks": "提示：将大任务分解为更小的提示词",
-  "chatTipCompareOptions": "提示：权衡不清时请求替代方案",
-  "chatTipDefineVerification": "提示：说明哪些测试或检查必须通过",
-  "chatTipNameRelevantFiles": "提示：说明相关文件、界面或命令",
-  "chatTipProvideContext": "提示：提供上下文 — 粘贴错误消息和日志",
-  "chatTipRequestDocs": "提示：行为变化时请求更新文档",
-  "chatTipShareAttempts": "提示：分享已尝试的内容和准确错误",
-  "chatTipStartWithGoal": "提示：先说明最终目标",
-  "chatTipStateConstraints": "提示：说明代理必须保留的约束",
-  "chatTipStepByStep": "提示：在调试复杂问题时要求逐步进行",
-  "chatTipUseFocusedAgents": "提示：为计划、评审或构建选择专注代理",
   "settingsAppearanceComposerTips": "Composer 提示",
   "settingsAppearanceComposerTipsDescription": "在助手进行推理时显示或隐藏循环提示。",
   "settingsAppearanceSessionTabs": "会话标签页",
@@ -2377,5 +2363,48 @@
   "liveCompactionTriggerManual": "手动",
   "settingsAppearanceTokensPerSecond": "每秒 Token 数",
   "msgInfoTokensPerSecondValue": "{value} tok/s",
-  "msgInfoTokensPerSecond": "速度：{tps}"
+  "msgInfoTokensPerSecond": "速度：{tps}",
+  "composerTipTabs": "提示：可在“{menu}”菜单中将对话显示为标签页",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "提示：可在“{menu}”菜单中关闭这些提示",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "提示：双击空的发送按钮可让智能体继续",
+  "composerTipEscape": "提示：按两次 Esc 可停止回复",
+  "composerTipMessageBar": "提示：点按消息即可复制、转发等",
+  "composerTipSelectWord": "提示：双击消息中的词语即可选中",
+  "composerTipFavorite": "提示：在模型列表中为模型加星标或长按它，即可将其置顶",
+  "composerTipShortcuts": "提示：可用键盘切换模型、变体和智能体；参见“{place}”",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "提示：输入 / 可使用 /compact 或 /undo 等命令",
+  "composerTipPin": "提示：可从顶栏菜单将操作固定到顶栏",
+  "composerTipVoice": "提示：可在“{place}”中选择朗读消息的声音",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -2010,20 +2010,6 @@
   "chatReasoning": "Рассуждение...",
   "chatRetryingModelRequest": "Повторная попытка запроса к модели...",
   "chatStatusThinking": "Размышление...",
-  "chatTipAcceptanceCriteria": "Совет: Добавьте критерии приемки для крупных изменений",
-  "chatTipAskForPlan": "Совет: Для больших задач сначала запросите план",
-  "chatTipBeSpecific": "Совет: Будьте конкретны — более короткие запросы обрабатываются быстрее",
-  "chatTipBreakTasks": "Совет: Разбивайте большие задачи на более мелкие запросы",
-  "chatTipCompareOptions": "Совет: Запросите варианты, если компромиссы неясны",
-  "chatTipDefineVerification": "Совет: Укажите, какие тесты или проверки должны пройти",
-  "chatTipNameRelevantFiles": "Совет: Укажите важные файлы, экраны или команды",
-  "chatTipProvideContext": "Совет: Предоставляйте контекст — вставляйте сообщения об ошибках и логи",
-  "chatTipRequestDocs": "Совет: Просите обновить docs, когда поведение меняется",
-  "chatTipShareAttempts": "Совет: Расскажите, что пробовали, и точную ошибку",
-  "chatTipStartWithGoal": "Совет: Начните с конечной цели",
-  "chatTipStateConstraints": "Совет: Укажите ограничения, которые агент должен сохранить",
-  "chatTipStepByStep": "Совет: Запрашивайте пошаговые инструкции при отладке сложных проблем",
-  "chatTipUseFocusedAgents": "Совет: Выберите фокусного агента для плана, ревью или сборки",
   "settingsAppearanceComposerTips": "Подсказки в редакторе",
   "settingsAppearanceComposerTipsDescription": "Показывать или скрывать сменяющиеся подсказки, пока ассистент рассуждает.",
   "settingsAppearanceSessionTabs": "Вкладки сессий",
@@ -2377,5 +2363,48 @@
   "liveCompactionTriggerManual": "Вручную",
   "settingsAppearanceTokensPerSecond": "Токенов в секунду",
   "msgInfoTokensPerSecondValue": "{value} tok/s",
-  "msgInfoTokensPerSecond": "Скорость: {tps}"
+  "msgInfoTokensPerSecond": "Скорость: {tps}",
+  "composerTipTabs": "Совет: Показывайте беседы вкладками через меню «{menu}»",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "Совет: Отключите эти советы в меню «{menu}»",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "Совет: Дважды нажмите пустую кнопку «Отправить», чтобы агент продолжил",
+  "composerTipEscape": "Совет: Дважды нажмите Esc, чтобы остановить ответ",
+  "composerTipMessageBar": "Совет: Нажмите на сообщение, чтобы скопировать, переслать его и не только",
+  "composerTipSelectWord": "Совет: Дважды нажмите на слово в сообщении, чтобы выделить его",
+  "composerTipFavorite": "Совет: Отметьте модель звездой в списке моделей или удерживайте её, чтобы она была вверху",
+  "composerTipShortcuts": "Совет: Переключайте модель, вариант и агента с клавиатуры; см. «{place}»",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "Совет: Введите / для команд вроде /compact или /undo",
+  "composerTipPin": "Совет: Закрепляйте действия на верхней панели через её меню",
+  "composerTipVoice": "Совет: Выберите голос для чтения сообщений в разделе «{place}»",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

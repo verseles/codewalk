@@ -2010,20 +2010,6 @@
   "chatReasoning": "যুক্তি করছে...",
   "chatRetryingModelRequest": "মডেল অনুরোধ পুনরায় চেষ্টা করা হচ্ছে...",
   "chatStatusThinking": "চিন্তা করছে...",
-  "chatTipAcceptanceCriteria": "পরামর্শ: বড় পরিবর্তনে গ্রহণযোগ্যতার শর্ত যোগ করুন",
-  "chatTipAskForPlan": "পরামর্শ: বড় কাজের আগে একটি পরিকল্পনা চাইুন",
-  "chatTipBeSpecific": "পরামর্শ: সুনির্দিষ্ট হোন — ছোট প্রম্পট দ্রুত উত্তর পায়",
-  "chatTipBreakTasks": "পরামর্শ: বড় কাজগুলিকে ছোট প্রম্পটে ভাগ করুন",
-  "chatTipCompareOptions": "পরামর্শ: ট্রেডঅফ অস্পষ্ট হলে বিকল্প চান",
-  "chatTipDefineVerification": "পরামর্শ: কোন পরীক্ষা বা চেক পাস করতে হবে বলুন",
-  "chatTipNameRelevantFiles": "পরামর্শ: প্রাসঙ্গিক ফাইল, স্ক্রিন বা কমান্ডের নাম দিন",
-  "chatTipProvideContext": "পরামর্শ: প্রসঙ্গ প্রদান করুন — ত্রুটি বার্তা এবং লগ পেস্ট করুন",
-  "chatTipRequestDocs": "পরামর্শ: আচরণ বদলালে ডকস আপডেট চাইুন",
-  "chatTipShareAttempts": "পরামর্শ: কী চেষ্টা করেছেন এবং সঠিক ত্রুটি জানান",
-  "chatTipStartWithGoal": "পরামর্শ: শেষ লক্ষ্য দিয়ে শুরু করুন",
-  "chatTipStateConstraints": "পরামর্শ: এজেন্টকে যে সীমা মানতে হবে তা বলুন",
-  "chatTipStepByStep": "পরামর্শ: জটিল সমস্যা ডিবাগ করার সময় ধাপে ধাপে জিজ্ঞাসা করুন",
-  "chatTipUseFocusedAgents": "পরামর্শ: পরিকল্পনা, রিভিউ বা বিল্ডের জন্য ফোকাসড এজেন্ট বেছে নিন",
   "settingsAppearanceComposerTips": "সুরকার টিপস",
   "settingsAppearanceComposerTipsDescription": "সহকারী যখন যুক্তি দিচ্ছে তখন ঘোরানো টিপস দেখান বা লুকান৷",
   "settingsAppearanceSessionTabs": "সেশন ট্যাব",
@@ -2377,5 +2363,48 @@
   "liveCompactionTriggerManual": "ম্যানুয়াল",
   "settingsAppearanceTokensPerSecond": "প্রতি সেকেন্ডে টোকেন",
   "msgInfoTokensPerSecondValue": "{value} tok/s",
-  "msgInfoTokensPerSecond": "গতি: {tps}"
+  "msgInfoTokensPerSecond": "গতি: {tps}",
+  "composerTipTabs": "পরামর্শ: {menu} মেনু থেকে কথোপকথনগুলো ট্যাব হিসেবে দেখান",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "পরামর্শ: {menu} মেনুতে এই পরামর্শগুলো বন্ধ করুন",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "পরামর্শ: এজেন্টকে চালিয়ে যেতে খালি পাঠান-এ দুবার ট্যাপ করুন",
+  "composerTipEscape": "পরামর্শ: উত্তর থামাতে Esc দুবার চাপুন",
+  "composerTipMessageBar": "পরামর্শ: কপি, ফরওয়ার্ড ও আরও কিছুর জন্য একটি বার্তায় ট্যাপ করুন",
+  "composerTipSelectWord": "পরামর্শ: বার্তার কোনো শব্দ নির্বাচন করতে তাতে দুবার ট্যাপ করুন",
+  "composerTipFavorite": "পরামর্শ: মডেল তালিকায় কোনো মডেলে তারা দিন বা চেপে ধরে রাখুন, যাতে সেটি উপরে থাকে",
+  "composerTipShortcuts": "পরামর্শ: কীবোর্ড দিয়ে মডেল, ভ্যারিয়েন্ট ও এজেন্ট বদলান; {place} দেখুন",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "পরামর্শ: /compact বা /undo-এর মতো কমান্ডের জন্য / লিখুন",
+  "composerTipPin": "পরামর্শ: উপরের বারের মেনু থেকে অ্যাকশনগুলো সেখানে পিন করুন",
+  "composerTipVoice": "পরামর্শ: বার্তা পড়ে শোনানোর কণ্ঠ {place}-এ বেছে নিন",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

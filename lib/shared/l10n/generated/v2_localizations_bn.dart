@@ -2483,58 +2483,6 @@ class V2LocalizationsBn extends V2Localizations {
   String get chatStatusThinking => 'চিন্তা করছে...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'পরামর্শ: বড় পরিবর্তনে গ্রহণযোগ্যতার শর্ত যোগ করুন';
-
-  @override
-  String get chatTipAskForPlan => 'পরামর্শ: বড় কাজের আগে একটি পরিকল্পনা চাইুন';
-
-  @override
-  String get chatTipBeSpecific =>
-      'পরামর্শ: সুনির্দিষ্ট হোন — ছোট প্রম্পট দ্রুত উত্তর পায়';
-
-  @override
-  String get chatTipBreakTasks =>
-      'পরামর্শ: বড় কাজগুলিকে ছোট প্রম্পটে ভাগ করুন';
-
-  @override
-  String get chatTipCompareOptions => 'পরামর্শ: ট্রেডঅফ অস্পষ্ট হলে বিকল্প চান';
-
-  @override
-  String get chatTipDefineVerification =>
-      'পরামর্শ: কোন পরীক্ষা বা চেক পাস করতে হবে বলুন';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'পরামর্শ: প্রাসঙ্গিক ফাইল, স্ক্রিন বা কমান্ডের নাম দিন';
-
-  @override
-  String get chatTipProvideContext =>
-      'পরামর্শ: প্রসঙ্গ প্রদান করুন — ত্রুটি বার্তা এবং লগ পেস্ট করুন';
-
-  @override
-  String get chatTipRequestDocs => 'পরামর্শ: আচরণ বদলালে ডকস আপডেট চাইুন';
-
-  @override
-  String get chatTipShareAttempts =>
-      'পরামর্শ: কী চেষ্টা করেছেন এবং সঠিক ত্রুটি জানান';
-
-  @override
-  String get chatTipStartWithGoal => 'পরামর্শ: শেষ লক্ষ্য দিয়ে শুরু করুন';
-
-  @override
-  String get chatTipStateConstraints =>
-      'পরামর্শ: এজেন্টকে যে সীমা মানতে হবে তা বলুন';
-
-  @override
-  String get chatTipStepByStep =>
-      'পরামর্শ: জটিল সমস্যা ডিবাগ করার সময় ধাপে ধাপে জিজ্ঞাসা করুন';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'পরামর্শ: পরিকল্পনা, রিভিউ বা বিল্ডের জন্য ফোকাসড এজেন্ট বেছে নিন';
-
-  @override
   String get settingsAppearanceComposerTips => 'সুরকার টিপস';
 
   @override
@@ -3266,5 +3214,52 @@ class V2LocalizationsBn extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'গতি: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'পরামর্শ: $menu মেনু থেকে কথোপকথনগুলো ট্যাব হিসেবে দেখান';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'পরামর্শ: $menu মেনুতে এই পরামর্শগুলো বন্ধ করুন';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'পরামর্শ: এজেন্টকে চালিয়ে যেতে খালি পাঠান-এ দুবার ট্যাপ করুন';
+
+  @override
+  String get composerTipEscape => 'পরামর্শ: উত্তর থামাতে Esc দুবার চাপুন';
+
+  @override
+  String get composerTipMessageBar =>
+      'পরামর্শ: কপি, ফরওয়ার্ড ও আরও কিছুর জন্য একটি বার্তায় ট্যাপ করুন';
+
+  @override
+  String get composerTipSelectWord =>
+      'পরামর্শ: বার্তার কোনো শব্দ নির্বাচন করতে তাতে দুবার ট্যাপ করুন';
+
+  @override
+  String get composerTipFavorite =>
+      'পরামর্শ: মডেল তালিকায় কোনো মডেলে তারা দিন বা চেপে ধরে রাখুন, যাতে সেটি উপরে থাকে';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'পরামর্শ: কীবোর্ড দিয়ে মডেল, ভ্যারিয়েন্ট ও এজেন্ট বদলান; $place দেখুন';
+  }
+
+  @override
+  String get composerTipSlash =>
+      'পরামর্শ: /compact বা /undo-এর মতো কমান্ডের জন্য / লিখুন';
+
+  @override
+  String get composerTipPin =>
+      'পরামর্শ: উপরের বারের মেনু থেকে অ্যাকশনগুলো সেখানে পিন করুন';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'পরামর্শ: বার্তা পড়ে শোনানোর কণ্ঠ $place-এ বেছে নিন';
   }
 }

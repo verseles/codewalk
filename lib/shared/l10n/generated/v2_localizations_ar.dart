@@ -2468,57 +2468,6 @@ class V2LocalizationsAr extends V2Localizations {
   String get chatStatusThinking => 'جاري التفكير...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'نصيحة: أضف معايير قبول للتغييرات الكبيرة';
-
-  @override
-  String get chatTipAskForPlan => 'نصيحة: اطلب خطة أولا للمهام الكبيرة';
-
-  @override
-  String get chatTipBeSpecific =>
-      'نصيحة: كن محددًا - المطالبات الأقصر تحصل على إجابات أسرع';
-
-  @override
-  String get chatTipBreakTasks => 'نصيحة: قسم المهام الكبيرة إلى مطالبات أصغر';
-
-  @override
-  String get chatTipCompareOptions =>
-      'نصيحة: اطلب بدائل عندما تكون المفاضلات غير واضحة';
-
-  @override
-  String get chatTipDefineVerification =>
-      'نصيحة: قل أي اختبارات أو فحوصات يجب أن تنجح';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'نصيحة: اذكر الملفات أو الشاشات أو الأوامر ذات الصلة';
-
-  @override
-  String get chatTipProvideContext =>
-      'نصيحة: قدم سياقًا - الصق رسائل الخطأ والسجلات';
-
-  @override
-  String get chatTipRequestDocs => 'نصيحة: اطلب تحديث الوثائق عند تغير السلوك';
-
-  @override
-  String get chatTipShareAttempts => 'نصيحة: شارك ما جربته والخطأ الدقيق';
-
-  @override
-  String get chatTipStartWithGoal => 'نصيحة: ابدأ بالهدف النهائي';
-
-  @override
-  String get chatTipStateConstraints =>
-      'نصيحة: اذكر القيود التي يجب على الوكيل الحفاظ عليها';
-
-  @override
-  String get chatTipStepByStep =>
-      'نصيحة: اطلب خطوة بخطوة عند تصحيح المشكلات المعقدة';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'نصيحة: اختر وكيلا مركزا للتخطيط أو المراجعة أو البناء';
-
-  @override
   String get settingsAppearanceComposerTips => 'نصائح الملحِّن';
 
   @override
@@ -3242,5 +3191,51 @@ class V2LocalizationsAr extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'السرعة: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'نصيحة: اعرض المحادثات كعلامات تبويب من قائمة $menu';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'نصيحة: أوقف هذه النصائح من قائمة $menu';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'نصيحة: انقر مرتين على إرسال الفارغ ليتابع الوكيل';
+
+  @override
+  String get composerTipEscape => 'نصيحة: اضغط Esc مرتين لإيقاف الرد';
+
+  @override
+  String get composerTipMessageBar =>
+      'نصيحة: انقر على رسالة لنسخها أو إعادة توجيهها والمزيد';
+
+  @override
+  String get composerTipSelectWord =>
+      'نصيحة: انقر مرتين على كلمة في رسالة لتحديدها';
+
+  @override
+  String get composerTipFavorite =>
+      'نصيحة: ضع نجمة على نموذج في قائمة النماذج أو اضغط عليه مطولًا ليبقى في الأعلى';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'نصيحة: بدّل النموذج والمتغير والوكيل من لوحة المفاتيح؛ راجع $place';
+  }
+
+  @override
+  String get composerTipSlash => 'نصيحة: اكتب / لأوامر مثل /compact أو /undo';
+
+  @override
+  String get composerTipPin =>
+      'نصيحة: ثبّت الإجراءات في الشريط العلوي من قائمته';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'نصيحة: اختر الصوت الذي يقرأ الرسائل في $place';
   }
 }

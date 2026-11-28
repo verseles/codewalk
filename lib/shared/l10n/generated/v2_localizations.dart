@@ -4492,90 +4492,6 @@ abstract class V2Localizations {
   /// **'Thinking...'**
   String get chatStatusThinking;
 
-  /// CodeWalk UI string — chatTipAcceptanceCriteria
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Add acceptance criteria for larger changes'**
-  String get chatTipAcceptanceCriteria;
-
-  /// CodeWalk UI string — chatTipAskForPlan
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Ask for a plan first on large tasks'**
-  String get chatTipAskForPlan;
-
-  /// CodeWalk UI string — chatTipBeSpecific
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Be specific — shorter prompts get faster answers'**
-  String get chatTipBeSpecific;
-
-  /// CodeWalk UI string — chatTipBreakTasks
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Break large tasks into smaller prompts'**
-  String get chatTipBreakTasks;
-
-  /// CodeWalk UI string — chatTipCompareOptions
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Ask for alternatives when tradeoffs are unclear'**
-  String get chatTipCompareOptions;
-
-  /// CodeWalk UI string — chatTipDefineVerification
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Say which tests or checks should pass'**
-  String get chatTipDefineVerification;
-
-  /// CodeWalk UI string — chatTipNameRelevantFiles
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Name relevant files, screens, or commands'**
-  String get chatTipNameRelevantFiles;
-
-  /// CodeWalk UI string — chatTipProvideContext
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Provide context — paste error messages and logs'**
-  String get chatTipProvideContext;
-
-  /// CodeWalk UI string — chatTipRequestDocs
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Ask for docs updates when behavior changes'**
-  String get chatTipRequestDocs;
-
-  /// CodeWalk UI string — chatTipShareAttempts
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Share what you tried and the exact error'**
-  String get chatTipShareAttempts;
-
-  /// CodeWalk UI string — chatTipStartWithGoal
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Start with the end goal'**
-  String get chatTipStartWithGoal;
-
-  /// CodeWalk UI string — chatTipStateConstraints
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: State constraints the agent must preserve'**
-  String get chatTipStateConstraints;
-
-  /// CodeWalk UI string — chatTipStepByStep
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Ask for step-by-step when debugging complex issues'**
-  String get chatTipStepByStep;
-
-  /// CodeWalk UI string — chatTipUseFocusedAgents
-  ///
-  /// In en, this message translates to:
-  /// **'Tip: Pick a focused agent for plan, review, or build'**
-  String get chatTipUseFocusedAgents;
-
   /// CodeWalk UI string — settingsAppearanceComposerTips
   ///
   /// In en, this message translates to:
@@ -5733,6 +5649,72 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Speed: {tps}'**
   String msgInfoTokensPerSecond(String tps);
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Show conversations as tabs from the {menu} menu'**
+  String composerTipTabs(String menu);
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Turn these tips off in the {menu} menu'**
+  String composerTipTipsOff(String menu);
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Double-tap the empty Send to tell the agent to continue'**
+  String get composerTipContinue;
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Press Escape twice to stop the reply'**
+  String get composerTipEscape;
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Tap a message to copy it, forward it and more'**
+  String get composerTipMessageBar;
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Double-tap a word in a message to select it'**
+  String get composerTipSelectWord;
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Star a model in the model list, or long-press it, to keep it on top'**
+  String get composerTipFavorite;
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Switch models, variants and agents from the keyboard; see {place}'**
+  String composerTipShortcuts(String place);
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Type / for commands such as /compact or /undo'**
+  String get composerTipSlash;
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Pin actions to the top bar from its menu'**
+  String get composerTipPin;
+
+  /// V2 composer tips about real features (#548)
+  ///
+  /// In en, this message translates to:
+  /// **'Tip: Pick the voice that reads messages aloud in {place}'**
+  String composerTipVoice(String place);
 }
 
 class _V2LocalizationsDelegate extends LocalizationsDelegate<V2Localizations> {

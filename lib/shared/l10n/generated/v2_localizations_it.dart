@@ -2535,62 +2535,6 @@ class V2LocalizationsIt extends V2Localizations {
   String get chatStatusThinking => 'Pensando...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'Suggerimento: Aggiungi criteri di accettazione per cambi grandi';
-
-  @override
-  String get chatTipAskForPlan =>
-      'Suggerimento: Chiedi prima un piano per attività grandi';
-
-  @override
-  String get chatTipBeSpecific =>
-      'Suggerimento: Sii specifico — prompt brevi ottengono risposte più veloci';
-
-  @override
-  String get chatTipBreakTasks =>
-      'Suggerimento: Dividi compiti grandi in prompt più piccoli';
-
-  @override
-  String get chatTipCompareOptions =>
-      'Suggerimento: Chiedi alternative quando i tradeoff non sono chiari';
-
-  @override
-  String get chatTipDefineVerification =>
-      'Suggerimento: Dì quali test o controlli devono passare';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'Suggerimento: Indica file, schermate o comandi rilevanti';
-
-  @override
-  String get chatTipProvideContext =>
-      'Suggerimento: Fornisci contesto — incolla messaggi di errore e log';
-
-  @override
-  String get chatTipRequestDocs =>
-      'Suggerimento: Chiedi aggiornamenti docs quando cambia il comportamento';
-
-  @override
-  String get chatTipShareAttempts =>
-      'Suggerimento: Condividi cosa hai provato e il messaggio esatto';
-
-  @override
-  String get chatTipStartWithGoal =>
-      'Suggerimento: Inizia con il risultato finale';
-
-  @override
-  String get chatTipStateConstraints =>
-      'Suggerimento: Indica i vincoli da preservare';
-
-  @override
-  String get chatTipStepByStep =>
-      'Suggerimento: Chiedi passo-passo durante il debug di problemi complessi';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'Suggerimento: Scegli un agente mirato per piano, review o build';
-
-  @override
   String get settingsAppearanceComposerTips => 'Suggerimenti del composer';
 
   @override
@@ -3330,5 +3274,53 @@ class V2LocalizationsIt extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'Velocità: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'Suggerimento: Mostra le conversazioni come schede dal menu $menu';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'Suggerimento: Disattiva questi suggerimenti nel menu $menu';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'Suggerimento: Tocca due volte Invia vuoto per far continuare l’agente';
+
+  @override
+  String get composerTipEscape =>
+      'Suggerimento: Premi Esc due volte per fermare la risposta';
+
+  @override
+  String get composerTipMessageBar =>
+      'Suggerimento: Tocca un messaggio per copiarlo, inoltrarlo e altro';
+
+  @override
+  String get composerTipSelectWord =>
+      'Suggerimento: Tocca due volte una parola di un messaggio per selezionarla';
+
+  @override
+  String get composerTipFavorite =>
+      'Suggerimento: Metti la stella a un modello nell’elenco dei modelli, o tienilo premuto, per tenerlo in cima';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'Suggerimento: Cambia modello, variante e agente dalla tastiera; vedi $place';
+  }
+
+  @override
+  String get composerTipSlash =>
+      'Suggerimento: Digita / per comandi come /compact o /undo';
+
+  @override
+  String get composerTipPin =>
+      'Suggerimento: Fissa le azioni nella barra superiore dal suo menu';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'Suggerimento: Scegli la voce che legge i messaggi in $place';
   }
 }

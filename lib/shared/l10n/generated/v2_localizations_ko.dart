@@ -2391,48 +2391,6 @@ class V2LocalizationsKo extends V2Localizations {
   String get chatStatusThinking => '생각 중...';
 
   @override
-  String get chatTipAcceptanceCriteria => '팁: 큰 변경에는 승인 기준을 추가하세요';
-
-  @override
-  String get chatTipAskForPlan => '팁: 큰 작업은 먼저 계획을 요청하세요';
-
-  @override
-  String get chatTipBeSpecific => '팁: 구체적으로 작성하세요 — 프롬프트가 짧을수록 답변이 빠릅니다';
-
-  @override
-  String get chatTipBreakTasks => '팁: 큰 작업은 작은 프롬프트로 나누세요';
-
-  @override
-  String get chatTipCompareOptions => '팁: 트레이드오프가 불명확하면 대안을 요청하세요';
-
-  @override
-  String get chatTipDefineVerification => '팁: 통과해야 할 테스트나 체크를 알려 주세요';
-
-  @override
-  String get chatTipNameRelevantFiles => '팁: 관련 파일, 화면, 명령을 알려 주세요';
-
-  @override
-  String get chatTipProvideContext => '팁: 컨텍스트를 제공하세요 — 오류 메시지와 로그를 붙여넣으세요';
-
-  @override
-  String get chatTipRequestDocs => '팁: 동작이 바뀌면 docs 업데이트를 요청하세요';
-
-  @override
-  String get chatTipShareAttempts => '팁: 시도한 내용과 정확한 오류를 공유하세요';
-
-  @override
-  String get chatTipStartWithGoal => '팁: 최종 목표부터 알려 주세요';
-
-  @override
-  String get chatTipStateConstraints => '팁: 에이전트가 지켜야 할 제약을 알려 주세요';
-
-  @override
-  String get chatTipStepByStep => '팁: 복잡한 문제 디버깅 시 단계별 설명을 요청하세요';
-
-  @override
-  String get chatTipUseFocusedAgents => '팁: 계획, 리뷰, 빌드에 맞는 에이전트를 선택하세요';
-
-  @override
   String get settingsAppearanceComposerTips => '컴포저 팁';
 
   @override
@@ -3126,5 +3084,47 @@ class V2LocalizationsKo extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return '속도: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return '팁: $menu 메뉴에서 대화를 탭으로 표시할 수 있습니다';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return '팁: $menu 메뉴에서 이 팁을 끌 수 있습니다';
+  }
+
+  @override
+  String get composerTipContinue => '팁: 빈 보내기를 두 번 탭하면 에이전트가 계속합니다';
+
+  @override
+  String get composerTipEscape => '팁: Esc를 두 번 누르면 응답이 중지됩니다';
+
+  @override
+  String get composerTipMessageBar => '팁: 메시지를 탭하여 복사, 전달 등을 할 수 있습니다';
+
+  @override
+  String get composerTipSelectWord => '팁: 메시지의 단어를 두 번 탭하여 선택하세요';
+
+  @override
+  String get composerTipFavorite =>
+      '팁: 모델 목록에서 모델에 별표를 표시하거나 길게 누르면 맨 위에 둘 수 있습니다';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return '팁: 키보드로 모델, 변형, 에이전트를 전환할 수 있습니다. $place 참조';
+  }
+
+  @override
+  String get composerTipSlash => '팁: /를 입력하면 /compact, /undo 같은 명령을 쓸 수 있습니다';
+
+  @override
+  String get composerTipPin => '팁: 상단 바의 메뉴에서 작업을 바에 고정할 수 있습니다';
+
+  @override
+  String composerTipVoice(String place) {
+    return '팁: 메시지를 읽어 줄 음성은 $place에서 고르세요';
   }
 }

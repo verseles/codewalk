@@ -2010,20 +2010,6 @@
   "chatReasoning": "Raisonnement...",
   "chatRetryingModelRequest": "Nouvelle tentative de demande de modèle...",
   "chatStatusThinking": "Réflexion...",
-  "chatTipAcceptanceCriteria": "Conseil : Ajoutez des critères de validation aux grands changements",
-  "chatTipAskForPlan": "Conseil : Demandez un plan avant les grandes tâches",
-  "chatTipBeSpecific": "Conseil : Soyez précis — les prompts courts obtiennent des réponses plus rapides",
-  "chatTipBreakTasks": "Conseil : Divisez les grandes tâches en prompts plus petits",
-  "chatTipCompareOptions": "Conseil : Demandez des options quand les compromis sont flous",
-  "chatTipDefineVerification": "Conseil : Dites quels tests ou contrôles doivent passer",
-  "chatTipNameRelevantFiles": "Conseil : Nommez les fichiers, écrans ou commandes utiles",
-  "chatTipProvideContext": "Conseil : Fournissez du contexte — collez les messages d''erreur et les logs",
-  "chatTipRequestDocs": "Conseil : Demandez une mise à jour des docs si le comportement change",
-  "chatTipShareAttempts": "Conseil : Partagez vos essais et le message exact",
-  "chatTipStartWithGoal": "Conseil : Commencez par le but final",
-  "chatTipStateConstraints": "Conseil : Indiquez les contraintes à préserver",
-  "chatTipStepByStep": "Conseil : Demandez étape par étape lors du débogage de problèmes complexes",
-  "chatTipUseFocusedAgents": "Conseil : Choisissez un agent ciblé pour planifier, relire ou construire",
   "settingsAppearanceComposerTips": "Conseils de l''éditeur de message",
   "settingsAppearanceComposerTipsDescription": "Afficher ou masquer les conseils rotatifs pendant que l''assistant réfléchit.",
   "settingsAppearanceSessionTabs": "Onglets de session",
@@ -2377,5 +2363,48 @@
   "liveCompactionTriggerManual": "Manuel",
   "settingsAppearanceTokensPerSecond": "Jetons par seconde",
   "msgInfoTokensPerSecondValue": "{value} tok/s",
-  "msgInfoTokensPerSecond": "Vitesse : {tps}"
+  "msgInfoTokensPerSecond": "Vitesse : {tps}",
+  "composerTipTabs": "Conseil : Affichez les conversations en onglets depuis le menu {menu}",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "Conseil : Désactivez ces conseils dans le menu {menu}",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "Conseil : Touchez deux fois Envoyer vide pour que l’agent continue",
+  "composerTipEscape": "Conseil : Appuyez deux fois sur Échap pour arrêter la réponse",
+  "composerTipMessageBar": "Conseil : Touchez un message pour le copier, le transférer et plus",
+  "composerTipSelectWord": "Conseil : Touchez deux fois un mot d’un message pour le sélectionner",
+  "composerTipFavorite": "Conseil : Mettez une étoile à un modèle dans la liste des modèles, ou appuyez longuement dessus, pour le garder en tête",
+  "composerTipShortcuts": "Conseil : Changez de modèle, de variante et d’agent au clavier ; voir {place}",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "Conseil : Tapez / pour des commandes comme /compact ou /undo",
+  "composerTipPin": "Conseil : Épinglez des actions à la barre supérieure depuis son menu",
+  "composerTipVoice": "Conseil : Choisissez la voix qui lit les messages dans {place}",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -3116,62 +3116,6 @@
   "@chatStatusThinking": {
     "description": "CodeWalk UI string — chatStatusThinking"
   },
-  "chatTipAcceptanceCriteria": "Tip: Add acceptance criteria for larger changes",
-  "@chatTipAcceptanceCriteria": {
-    "description": "CodeWalk UI string — chatTipAcceptanceCriteria"
-  },
-  "chatTipAskForPlan": "Tip: Ask for a plan first on large tasks",
-  "@chatTipAskForPlan": {
-    "description": "CodeWalk UI string — chatTipAskForPlan"
-  },
-  "chatTipBeSpecific": "Tip: Be specific — shorter prompts get faster answers",
-  "@chatTipBeSpecific": {
-    "description": "CodeWalk UI string — chatTipBeSpecific"
-  },
-  "chatTipBreakTasks": "Tip: Break large tasks into smaller prompts",
-  "@chatTipBreakTasks": {
-    "description": "CodeWalk UI string — chatTipBreakTasks"
-  },
-  "chatTipCompareOptions": "Tip: Ask for alternatives when tradeoffs are unclear",
-  "@chatTipCompareOptions": {
-    "description": "CodeWalk UI string — chatTipCompareOptions"
-  },
-  "chatTipDefineVerification": "Tip: Say which tests or checks should pass",
-  "@chatTipDefineVerification": {
-    "description": "CodeWalk UI string — chatTipDefineVerification"
-  },
-  "chatTipNameRelevantFiles": "Tip: Name relevant files, screens, or commands",
-  "@chatTipNameRelevantFiles": {
-    "description": "CodeWalk UI string — chatTipNameRelevantFiles"
-  },
-  "chatTipProvideContext": "Tip: Provide context — paste error messages and logs",
-  "@chatTipProvideContext": {
-    "description": "CodeWalk UI string — chatTipProvideContext"
-  },
-  "chatTipRequestDocs": "Tip: Ask for docs updates when behavior changes",
-  "@chatTipRequestDocs": {
-    "description": "CodeWalk UI string — chatTipRequestDocs"
-  },
-  "chatTipShareAttempts": "Tip: Share what you tried and the exact error",
-  "@chatTipShareAttempts": {
-    "description": "CodeWalk UI string — chatTipShareAttempts"
-  },
-  "chatTipStartWithGoal": "Tip: Start with the end goal",
-  "@chatTipStartWithGoal": {
-    "description": "CodeWalk UI string — chatTipStartWithGoal"
-  },
-  "chatTipStateConstraints": "Tip: State constraints the agent must preserve",
-  "@chatTipStateConstraints": {
-    "description": "CodeWalk UI string — chatTipStateConstraints"
-  },
-  "chatTipStepByStep": "Tip: Ask for step-by-step when debugging complex issues",
-  "@chatTipStepByStep": {
-    "description": "CodeWalk UI string — chatTipStepByStep"
-  },
-  "chatTipUseFocusedAgents": "Tip: Pick a focused agent for plan, review, or build",
-  "@chatTipUseFocusedAgents": {
-    "description": "CodeWalk UI string — chatTipUseFocusedAgents"
-  },
   "settingsAppearanceComposerTips": "Composer tips",
   "@settingsAppearanceComposerTips": {
     "description": "CodeWalk UI string — settingsAppearanceComposerTips"
@@ -4041,6 +3985,70 @@
     "description": "Message info dialog row label showing token generation speed",
     "placeholders": {
       "tps": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTabs": "Tip: Show conversations as tabs from the {menu} menu",
+  "@composerTipTabs": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipTipsOff": "Tip: Turn these tips off in the {menu} menu",
+  "@composerTipTipsOff": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "menu": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipContinue": "Tip: Double-tap the empty Send to tell the agent to continue",
+  "@composerTipContinue": {
+    "description": "V2 composer tips about real features (#548)"
+  },
+  "composerTipEscape": "Tip: Press Escape twice to stop the reply",
+  "@composerTipEscape": {
+    "description": "V2 composer tips about real features (#548)"
+  },
+  "composerTipMessageBar": "Tip: Tap a message to copy it, forward it and more",
+  "@composerTipMessageBar": {
+    "description": "V2 composer tips about real features (#548)"
+  },
+  "composerTipSelectWord": "Tip: Double-tap a word in a message to select it",
+  "@composerTipSelectWord": {
+    "description": "V2 composer tips about real features (#548)"
+  },
+  "composerTipFavorite": "Tip: Star a model in the model list, or long-press it, to keep it on top",
+  "@composerTipFavorite": {
+    "description": "V2 composer tips about real features (#548)"
+  },
+  "composerTipShortcuts": "Tip: Switch models, variants and agents from the keyboard; see {place}",
+  "@composerTipShortcuts": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "composerTipSlash": "Tip: Type / for commands such as /compact or /undo",
+  "@composerTipSlash": {
+    "description": "V2 composer tips about real features (#548)"
+  },
+  "composerTipPin": "Tip: Pin actions to the top bar from its menu",
+  "@composerTipPin": {
+    "description": "V2 composer tips about real features (#548)"
+  },
+  "composerTipVoice": "Tip: Pick the voice that reads messages aloud in {place}",
+  "@composerTipVoice": {
+    "description": "V2 composer tips about real features (#548)",
+    "placeholders": {
+      "place": {
         "type": "String"
       }
     }

@@ -2488,59 +2488,6 @@ class V2LocalizationsUr extends V2Localizations {
   String get chatStatusThinking => 'سوچ رہا ہے...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'مشورہ: بڑی تبدیلیوں کے لیے قبولیت کے معیار شامل کریں';
-
-  @override
-  String get chatTipAskForPlan => 'مشورہ: بڑے کاموں میں پہلے منصوبہ مانگیں';
-
-  @override
-  String get chatTipBeSpecific =>
-      'مشورہ: مخصوص بنیں — چھوٹے پرامپٹ کا جواب تیزی سے ملتا ہے';
-
-  @override
-  String get chatTipBreakTasks =>
-      'مشورہ: بڑے کاموں کو چھوٹے پرامپٹ میں تقسیم کریں';
-
-  @override
-  String get chatTipCompareOptions =>
-      'مشورہ: ٹریڈ آف واضح نہ ہوں تو متبادل مانگیں';
-
-  @override
-  String get chatTipDefineVerification =>
-      'مشورہ: بتائیں کون سے ٹیسٹ یا چیکس پاس ہونے چاہئیں';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'مشورہ: متعلقہ فائلیں، اسکرینیں یا کمانڈز بتائیں';
-
-  @override
-  String get chatTipProvideContext =>
-      'مشورہ: سیاق و سباق فراہم کریں — غلطی کے پیغامات اور لاگز پیسٹ کریں';
-
-  @override
-  String get chatTipRequestDocs => 'مشورہ: رویہ بدلے تو docs اپ ڈیٹ مانگیں';
-
-  @override
-  String get chatTipShareAttempts =>
-      'مشورہ: جو آزمایا اور درست خرابی شیئر کریں';
-
-  @override
-  String get chatTipStartWithGoal => 'مشورہ: آخری مقصد سے شروع کریں';
-
-  @override
-  String get chatTipStateConstraints =>
-      'مشورہ: وہ پابندیاں بتائیں جو ایجنٹ کو برقرار رکھنی ہیں';
-
-  @override
-  String get chatTipStepByStep =>
-      'مشورہ: پیچیدہ مسائل کو ڈیبگ کرتے وقت مرحلہ وار پوچھیں';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'مشورہ: پلان، ریویو یا بلڈ کے لیے مرکوز ایجنٹ چنیں';
-
-  @override
   String get settingsAppearanceComposerTips => 'کمپوزر ٹپس';
 
   @override
@@ -3270,5 +3217,52 @@ class V2LocalizationsUr extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'رفتار: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'مشورہ: $menu مینو سے گفتگوؤں کو ٹیبز کی صورت میں دکھائیں';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'مشورہ: $menu مینو میں یہ مشورے بند کریں';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'مشورہ: ایجنٹ کو جاری رکھنے کے لیے خالی بھیجیں پر دو بار ٹیپ کریں';
+
+  @override
+  String get composerTipEscape => 'مشورہ: جواب روکنے کے لیے Esc دو بار دبائیں';
+
+  @override
+  String get composerTipMessageBar =>
+      'مشورہ: کسی پیغام کو کاپی، آگے بھیجنے اور مزید کے لیے اس پر ٹیپ کریں';
+
+  @override
+  String get composerTipSelectWord =>
+      'مشورہ: پیغام کا کوئی لفظ منتخب کرنے کے لیے اس پر دو بار ٹیپ کریں';
+
+  @override
+  String get composerTipFavorite =>
+      'مشورہ: ماڈل فہرست میں کسی ماڈل کو ستارہ دیں یا دبائے رکھیں تاکہ وہ سب سے اوپر رہے';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'مشورہ: کی بورڈ سے ماڈل، ویریئنٹ اور ایجنٹ بدلیں؛ $place دیکھیں';
+  }
+
+  @override
+  String get composerTipSlash =>
+      'مشورہ: /compact یا /undo جیسے کمانڈز کے لیے / لکھیں';
+
+  @override
+  String get composerTipPin =>
+      'مشورہ: اوپر والی بار کے مینو سے کارروائیاں وہاں پن کریں';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'مشورہ: پیغامات پڑھنے والی آواز $place میں منتخب کریں';
   }
 }

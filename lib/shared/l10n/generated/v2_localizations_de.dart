@@ -2538,61 +2538,6 @@ class V2LocalizationsDe extends V2Localizations {
   String get chatStatusThinking => 'Nachdenken...';
 
   @override
-  String get chatTipAcceptanceCriteria =>
-      'Tipp: Fügen Sie Akzeptanzkriterien für größere Änderungen hinzu';
-
-  @override
-  String get chatTipAskForPlan =>
-      'Tipp: Fragen Sie bei großen Aufgaben zuerst nach einem Plan';
-
-  @override
-  String get chatTipBeSpecific =>
-      'Tipp: Seien Sie spezifisch — kürzere Prompts erhalten schnellere Antworten';
-
-  @override
-  String get chatTipBreakTasks =>
-      'Tipp: Teilen Sie große Aufgaben in kleinere Prompts auf';
-
-  @override
-  String get chatTipCompareOptions =>
-      'Tipp: Fragen Sie nach Alternativen, wenn Tradeoffs unklar sind';
-
-  @override
-  String get chatTipDefineVerification =>
-      'Tipp: Sagen Sie, welche Tests oder Checks bestehen sollen';
-
-  @override
-  String get chatTipNameRelevantFiles =>
-      'Tipp: Nennen Sie relevante Dateien, Screens oder Befehle';
-
-  @override
-  String get chatTipProvideContext =>
-      'Tipp: Geben Sie Kontext an — fügen Sie Fehlermeldungen und Logs ein';
-
-  @override
-  String get chatTipRequestDocs =>
-      'Tipp: Bitten Sie um Doku-Updates, wenn sich Verhalten ändert';
-
-  @override
-  String get chatTipShareAttempts =>
-      'Tipp: Teilen Sie mit, was Sie versucht haben und welcher Fehler erschien';
-
-  @override
-  String get chatTipStartWithGoal => 'Tipp: Beginnen Sie mit dem Endziel';
-
-  @override
-  String get chatTipStateConstraints =>
-      'Tipp: Nennen Sie Einschränkungen, die der Agent bewahren muss';
-
-  @override
-  String get chatTipStepByStep =>
-      'Tipp: Fragen Sie nach Schritt-für-Schritt beim Debuggen komplexer Probleme';
-
-  @override
-  String get chatTipUseFocusedAgents =>
-      'Tipp: Wählen Sie einen fokussierten Agenten für Plan, Review oder Build';
-
-  @override
   String get settingsAppearanceComposerTips => 'Composer-Tipps';
 
   @override
@@ -3333,5 +3278,53 @@ class V2LocalizationsDe extends V2Localizations {
   @override
   String msgInfoTokensPerSecond(String tps) {
     return 'Geschwindigkeit: $tps';
+  }
+
+  @override
+  String composerTipTabs(String menu) {
+    return 'Tipp: Zeigen Sie Unterhaltungen über das Menü $menu als Tabs an';
+  }
+
+  @override
+  String composerTipTipsOff(String menu) {
+    return 'Tipp: Schalten Sie diese Tipps im Menü $menu aus';
+  }
+
+  @override
+  String get composerTipContinue =>
+      'Tipp: Tippen Sie zweimal auf das leere Senden, damit der Agent weitermacht';
+
+  @override
+  String get composerTipEscape =>
+      'Tipp: Drücken Sie zweimal Esc, um die Antwort zu stoppen';
+
+  @override
+  String get composerTipMessageBar =>
+      'Tipp: Tippen Sie auf eine Nachricht, um sie zu kopieren, weiterzuleiten und mehr';
+
+  @override
+  String get composerTipSelectWord =>
+      'Tipp: Tippen Sie zweimal auf ein Wort einer Nachricht, um es auszuwählen';
+
+  @override
+  String get composerTipFavorite =>
+      'Tipp: Markieren Sie ein Modell in der Modellliste mit dem Stern oder drücken Sie es lange, damit es oben bleibt';
+
+  @override
+  String composerTipShortcuts(String place) {
+    return 'Tipp: Wechseln Sie Modell, Variante und Agent per Tastatur; siehe $place';
+  }
+
+  @override
+  String get composerTipSlash =>
+      'Tipp: Geben Sie / für Befehle wie /compact oder /undo ein';
+
+  @override
+  String get composerTipPin =>
+      'Tipp: Heften Sie Aktionen über das Menü der oberen Leiste dort an';
+
+  @override
+  String composerTipVoice(String place) {
+    return 'Tipp: Wählen Sie die Stimme, die Nachrichten vorliest, unter $place';
   }
 }
