@@ -1366,6 +1366,7 @@ class SessionLiveController extends ChangeNotifier
     scroll.dispose();
     search.dispose();
     capsuleShown.dispose();
+    shellSightings.dispose();
     _composer?.dispose();
     turn.dispose();
     draft.removeListener(_draftChanged);

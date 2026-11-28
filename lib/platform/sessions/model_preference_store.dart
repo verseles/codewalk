@@ -302,7 +302,13 @@ final class ModelPreferenceStore extends ChangeNotifier {
       if (previous != null && previous != value) previous,
       ...current.where((v) => v != value && v != previous),
     ].take(maxRecents).toList(growable: false);
-    if (listEquals(next, current)) return null;
+    // The same values again still make the row the newest of its kind, so
+    // a pick repeated keeps its row from the bound (#547).
+    final newest = history.lastWhere(
+      (r) => r.kind == kind,
+      orElse: () => _History(kind, '', '', '', const []),
+    );
+    if (listEquals(next, current) && same(newest)) return null;
     final rows = [
       ...history.where((r) => !same(r)),
       _History(kind, server, project, scope, next),

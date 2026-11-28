@@ -356,57 +356,102 @@ List<CapsuleShellEntry> sessionShellEntries(
   return [for (final key in order) byKey[key]!];
 }
 
-/// Whether the floating robot capsule should be displayed for [state].
 /// How long a shell runs before the chip counts and shows it (#544), so
 /// quick commands never make the count jump.
 const shellShownAfter = Duration(seconds: 5);
 
 /// When each shell of a session was seen to start and end, for one whose
 /// own times are not known (#544): a shell that reports no start counts
-/// from when it was first seen running, and a quick one never shows, even
-/// once its live record gives way to a timeline row without times. A shell
-/// that had ended before it was ever seen, as in history, shows.
-final class ShellSightings {
-  static const _bound = 256;
+/// from when it was first seen running (or unconfirmed), and a quick one
+/// never shows, even once its live record gives way to a timeline row
+/// without times or its shell id arrives late. A shell that had ended
+/// before it was ever seen, as in history, shows. It tells its listeners
+/// when a running shell reaches [shellShownAfter].
+final class ShellSightings extends ChangeNotifier {
   final _times = <String, (DateTime, DateTime?)>{};
+  Timer? _timer;
+  DateTime? _timerAt;
+  bool _disposed = false;
 
-  /// The shells of [entries] that ran long enough by [now] to show.
-  List<CapsuleShellEntry> shown(
-    List<CapsuleShellEntry> entries,
-    DateTime now,
-  ) => [
-    for (final entry in entries)
-      if (_shown(entry, now)) entry,
+  /// The shells of [entries], all the session's, that ran long enough by
+  /// [now] to show; the sightings of shells no longer among them go.
+  List<CapsuleShellEntry> shown(List<CapsuleShellEntry> entries, DateTime now) {
+    final kept = <String>{};
+    final shown = [
+      for (final entry in entries)
+        if (_shown(entry, now, kept)) entry,
+    ];
+    _times.removeWhere((key, _) => !kept.contains(key));
+    _arm(entries, now);
+    return shown;
+  }
+
+  // The names a shell goes by: its entry's, and its timeline row's, which
+  // stays when its shell id arrives later.
+  static List<String> _keys(CapsuleShellEntry entry) => [
+    entry.key,
+    if (entry.timelineItem case final item?) 'item:${item.id.value}',
   ];
 
-  /// When the next running shell of [entries] reaches [shellShownAfter].
-  DateTime? next(List<CapsuleShellEntry> entries, DateTime now) {
+  static bool _active(CapsuleShellEntry entry) =>
+      entry.isRunning || entry.isUnconfirmed;
+
+  (DateTime, DateTime?)? _seen(CapsuleShellEntry entry) {
+    for (final key in _keys(entry)) {
+      if (_times[key] case final seen?) return seen;
+    }
+    return null;
+  }
+
+  bool _shown(CapsuleShellEntry entry, DateTime now, Set<String> kept) {
+    final seen = _seen(entry);
+    final start = entry.startedAt ?? seen?.$1 ?? (_active(entry) ? now : null);
+    if (start == null) return true;
+    final end = _active(entry) ? null : entry.completedAt ?? seen?.$2 ?? now;
+    for (final key in _keys(entry)) {
+      _times[key] = (start, end);
+      kept.add(key);
+    }
+    return (end ?? now).difference(start) >= shellShownAfter;
+  }
+
+  /// Tells the listeners when the next active shell of [entries] reaches
+  /// [shellShownAfter].
+  void _arm(List<CapsuleShellEntry> entries, DateTime now) {
     DateTime? next;
     for (final entry in entries) {
-      final started = entry.startedAt ?? _times[entry.key]?.$1;
-      if (!entry.isRunning || started == null) continue;
+      if (!_active(entry)) continue;
+      final started = entry.startedAt ?? _seen(entry)?.$1;
+      if (started == null) continue;
       final at = started.add(shellShownAfter);
       if (!at.isAfter(now)) continue;
       if (next == null || at.isBefore(next)) next = at;
     }
-    return next;
+    final pending = _timerAt;
+    if (_disposed ||
+        next == null ||
+        (pending != null && !next.isBefore(pending))) {
+      return;
+    }
+    _timer?.cancel();
+    _timerAt = next;
+    _timer = Timer(next.difference(now), () {
+      _timer = null;
+      _timerAt = null;
+      if (!_disposed) notifyListeners();
+    });
   }
 
-  /// Forgets every shell, as when the session changes.
-  void clear() => _times.clear();
-
-  bool _shown(CapsuleShellEntry entry, DateTime now) {
-    final seen = _times[entry.key];
-    final start = entry.startedAt ?? seen?.$1 ?? (entry.isRunning ? now : null);
-    if (start == null) return true;
-    final end = entry.isRunning ? null : entry.completedAt ?? seen?.$2 ?? now;
-    _times.remove(entry.key);
-    _times[entry.key] = (start, end);
-    if (_times.length > _bound) _times.remove(_times.keys.first);
-    return (end ?? now).difference(start) >= shellShownAfter;
+  @override
+  void dispose() {
+    _disposed = true;
+    _timer?.cancel();
+    super.dispose();
   }
 }
 
+/// Whether the floating robot capsule may show for [state]: sub-agents, or
+/// shells it still has to look at.
 bool hasSessionCapsuleActivity(
   SessionState? state, {
   required bool canObserveShells,
@@ -474,24 +519,8 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
     return _observedShellIds.difference(liveIds);
   }
 
-  // Rebuilds the chip when a running shell becomes old enough to show.
-  Timer? _shown;
-  DateTime? _shownAt;
-
-  void _armShown(DateTime? at, DateTime now) {
-    if (at == null || (_shownAt != null && !at.isBefore(_shownAt!))) return;
-    _shown?.cancel();
-    _shownAt = at;
-    _shown = Timer(at.difference(now), () {
-      _shown = null;
-      _shownAt = null;
-      if (mounted) setState(() {});
-    });
-  }
-
   @override
   void dispose() {
-    _shown?.cancel();
     _focus.dispose();
     // Gone with its activity: the timeline gives its room back.
     final live = widget.live;
@@ -635,7 +664,7 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
 
   @override
   Widget build(BuildContext context) => ListenableBuilder(
-    listenable: widget.live,
+    listenable: Listenable.merge([widget.live, widget.live.shellSightings]),
     builder: (context, _) {
       final state = widget.live.state;
       final children = subagentWork(state);
@@ -647,9 +676,7 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
       );
       // A quick command never shows; one that runs on shows once it is
       // five seconds old.
-      final sightings = widget.live.shellSightings;
-      final shells = sightings.shown(every, now);
-      _armShown(sightings.next(every, now), now);
+      final shells = widget.live.shellSightings.shown(every, now);
       final visible =
           state != null && (children.isNotEmpty || shells.isNotEmpty);
       // The timeline keeps room for the chip only while it shows.
@@ -1084,7 +1111,10 @@ class _SubagentPopinState extends State<_SubagentPopin> {
         clipBehavior: Clip.antiAlias,
         color: Theme.of(context).colorScheme.surfaceContainerHigh,
         child: ListenableBuilder(
-          listenable: widget.live,
+          listenable: Listenable.merge([
+            widget.live,
+            widget.live.shellSightings,
+          ]),
           builder: (context, _) {
             final l10n = context.v2L10n;
             final current =

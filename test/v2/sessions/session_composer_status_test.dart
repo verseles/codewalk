@@ -388,6 +388,10 @@ void main() {
       find.descendant(of: link, matching: find.text(l10n.chatDisplayMenu)),
       findsOneWidget,
     );
+    // The line turns to another tip meanwhile: the dialog's link still
+    // leads where it says.
+    await tester.pump(SessionComposerStatus.tipInterval);
+    await tester.pumpAndSettle();
     await tester.tap(link);
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('composer-status-whole')), findsNothing);

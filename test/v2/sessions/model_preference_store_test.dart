@@ -261,6 +261,19 @@ void main() {
     expect(store.agentModel('server-a', '/work/app', 'plan'), isNull);
   });
 
+  test('a pick repeated keeps its rows from the bound', () async {
+    final store = await load();
+    await store.recordVariant('server-a', '/work/app', 'p/keep', 'high');
+    for (var i = 0; i < ModelPreferenceStore.maxProjects ~/ 2 - 1; i++) {
+      await store.recordVariant('server-a', '/work/app', 'p/m$i', 'low');
+    }
+    // The same pick again makes its rows the newest.
+    await store.recordVariant('server-a', '/work/app', 'p/keep', 'high');
+    await store.recordVariant('server-a', '/work/app', 'p/new', 'low');
+    expect(store.lastVariant('server-a', 'p/keep'), 'high');
+    expect(store.lastVariant('server-a', 'p/m0'), isNull);
+  });
+
   test(
     'a record from before the server row answers from its projects',
     () async {

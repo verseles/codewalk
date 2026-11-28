@@ -425,7 +425,12 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
   /// Opens where the tip shown leads.
   void _follow() {
     final link = _shown?.tip?.link;
-    if (link == null || !mounted) return;
+    if (link != null) _open(link);
+  }
+
+  /// Opens where [link] leads.
+  void _open(ComposerTipLink link) {
+    if (!mounted) return;
     switch (link) {
       case ComposerTipLink.display:
         unawaited(showWorkspaceDisplayMenu(context));
@@ -669,7 +674,12 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
                                 context,
                                 shown.label,
                                 tip: shown.tip?.link == null ? null : shown.tip,
-                                follow: _follow,
+                                // The tip the dialog shows, whatever the
+                                // line turns to meanwhile.
+                                follow: switch (shown.tip?.link) {
+                                  final link? => () => _open(link),
+                                  null => null,
+                                },
                               ),
                               child: Text(
                                 context.v2L10n.chatMessageShowMoreCompact,

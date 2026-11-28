@@ -905,6 +905,52 @@ void main() {
     expect(rig.live.capsuleShown.value, isTrue);
   });
 
+  testWidgets('a shell id that arrives late keeps the first sighting', (
+    tester,
+  ) async {
+    var now = DateTime.utc(2026, 11, 19, 1, 0, 10);
+    final port = _FakeShellPort();
+    final rig = await _mount(tester, shellPort: port, clock: () => now);
+    final child = SessionRef(rig.parent.host, rig.parent.harness, 'ses_c1');
+    final subagent = WorkItem(
+      id: const WorkId('w1'),
+      owner: SessionOwner(child, origin: rig.parent),
+      child: child,
+      parent: rig.parent,
+      status: const OpenValue.known(WorkStatus.running),
+      completionScope: const OpenValue.known(CompletionScope.child),
+      title: 'Analyzer',
+    );
+    void emit(List<TimelineItem> items) => rig.handle.emit(
+      SessionLiveView(
+        session: rig.parent,
+        phase: SessionLivePhase.live,
+        state: liveState(rig.parent, items: items, work: [subagent]),
+      ),
+    );
+    // The sub-agent keeps the chip up, and its pop-in open.
+    emit([_shellTool(rig.parent, 'i_late', streaming: true)]);
+    await _settle(tester);
+    await tester.tap(find.byKey(const ValueKey('subagent-capsule')));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('subagent-popin')), findsOneWidget);
+    // Three seconds on, its shell id arrives: the wait does not start over.
+    now = now.add(const Duration(seconds: 3));
+    emit([
+      _shellTool(rig.parent, 'i_late', streaming: true, shellId: 'sh_late'),
+    ]);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('shell-row-sh_late')), findsNothing);
+    // Five seconds after it was first seen, the open pop-in lists it with no
+    // new event.
+    // (The test's clock and its timers move apart: the timers get time
+    // enough to reach the five seconds.)
+    now = now.add(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 3));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('shell-row-sh_late')), findsOneWidget);
+  });
+
   testWidgets('a shell shows in the chip only after five seconds (#544)', (
     tester,
   ) async {

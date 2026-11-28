@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 30,
+  "artifact_seq": 31,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -480,6 +480,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "8.3 review r1 (#543-#548)"
+    },
+    "A0031": {
+      "active": true,
+      "bytes": 796,
+      "created_at": "2026-11-28T06:45:00Z",
+      "evidence": "/tmp/opencode/g8/rev/u9/r2_*.out",
+      "id": "A0031",
+      "impact": "Fix round 2 for 8.3",
+      "origin": "6 helpers",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0031.md",
+      "purpose": "Re-review e4ab0949",
+      "rerun_when": "after fix",
+      "sha256": "ac9172b1a3082a8283248f484e92e8f1fe35de97d166cfbb5b750ca33dc29312",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "8.3 review r2"
     }
   },
   "checklist": [
@@ -1029,7 +1045,7 @@
       "text": "Judged 8.3 r1 (A0030): accepted A draft dictation, B unknown-start shells via ShellSightings, C timeline room via live.capsuleShown, D linked tip in More dialog, F doc, G lastVariant falls back to newest project row, H draft picks record variant, J no 4->3 shrink with focus, K deferred onListening, L keyboard tips w/o kIsWeb + preferences-only tips, N docs, O drop liveChildrenRunning. Rejected: E mic delay at mount (dissent to Sol-F), I '*' row eviction (bounded LRU, downgrade-safe), M stale tip until rotation. Metrics u9 r1 recorded. Also committed #549 da98f660, #550 ffb96bb8, #551 c0878a6a, #552 6f0a7e25."
     }
   ],
-  "generation": 151,
+  "generation": 153,
   "next_action": "v2 suite running (bhlosxy38); then commit 8.3 fixes, dispatch u9 r2 re-review, then #553",
   "pending_operation": null,
   "queued_followups": [],
@@ -1053,7 +1069,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T06:36:20Z",
+  "updated_at": "2026-11-28T06:45:00Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
