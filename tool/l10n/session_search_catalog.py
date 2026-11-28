@@ -128,6 +128,7 @@ READ_ALOUD_KEYS = (
     'readAloudModel',
     'readAloudBaseUrl',
     'readAloudBaseUrlRequired',
+    'readAloudBaseUrlInsecure',
     'readAloudApiKey',
     'readAloudApiKeySaved',
     'readAloudSave',

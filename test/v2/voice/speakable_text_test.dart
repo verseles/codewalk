@@ -31,6 +31,42 @@ final hidden = true;
     expect(speakableText('```\nonly code\n```'), isEmpty);
   });
 
+  test('code and comparisons are read as written; math and HTML are not', () {
+    expect(
+      speakableText(
+        r'Use `List<String>` when a < b and c > d, not $\frac{1}{2}$. '
+        '<!-- note --><pre>hidden</pre><b>Bold</b> end.',
+      ),
+      'Use List<String> when a < b and c > d, not . Bold end.',
+    );
+  });
+
+  test('provider addresses stay encrypted beyond the local network', () {
+    bool secure(String address) => speechAddressSecure(Uri.parse(address));
+    for (final address in [
+      'https://api.example.com',
+      'http://localhost:8000',
+      'http://127.0.0.1:9000',
+      'http://192.168.1.5',
+      'http://10.0.0.2',
+      'http://172.20.0.1',
+      'http://100.100.1.1',
+      'http://box.tail1234.ts.net',
+      'http://printer.local',
+      'http://[fd00::1]:80',
+    ]) {
+      expect(secure(address), isTrue, reason: address);
+    }
+    for (final address in [
+      'http://example.com',
+      'http://8.8.8.8',
+      'http://172.32.0.1',
+      'ftp://files.example.com',
+    ]) {
+      expect(secure(address), isFalse, reason: address);
+    }
+  });
+
   test('settings round-trip and tolerate bad values', () {
     const settings = ReadAloudSettings(
       provider: SpeechProvider.elevenLabs,

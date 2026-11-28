@@ -86,6 +86,9 @@ void main() {
     'codewalk://s/host/session?token=secret',
     'codewalk://s/host/%00',
     '/settings?token=secret',
+    '/settings?section=readAloud&token=secret',
+    '/settings?section=read%20aloud',
+    '/settings?section=readAloud#secret',
     'codewalk://s/host/%FF',
     'codewalk://s/%E2%82/session',
     '/s/host/%FF',
@@ -100,6 +103,16 @@ void main() {
       expect(navigation.consumePairingLink(), isNull);
     });
   }
+
+  test('a Settings section opens by its name alone (#541)', () {
+    final navigation = AppNavigationController();
+    addTearDown(navigation.dispose);
+    expect(
+      navigation.prepareLink(Uri.parse('/settings?section=readAloud')),
+      '/settings?section=readAloud',
+    );
+    expect(navigation.pendingIntent, isNull);
+  });
 
   test('leaving pairing and disposing clears its transient link', () {
     final navigation = AppNavigationController();

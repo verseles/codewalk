@@ -671,6 +671,10 @@
   "@readAloudBaseUrlRequired": {
     "description": "V2 read aloud (#541)"
   },
+  "readAloudBaseUrlInsecure": "এই ডিভাইস বা নেটওয়ার্কের বাইরের ঠিকানার জন্য https ব্যবহার করুন",
+  "@readAloudBaseUrlInsecure": {
+    "description": "V2 read aloud (#541)"
+  },
   "readAloudApiKey": "API কী",
   "@readAloudApiKey": {
     "description": "V2 read aloud (#541)"

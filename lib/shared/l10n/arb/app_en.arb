@@ -1196,6 +1196,10 @@
   "@readAloudBaseUrlRequired": {
     "description": "V2 read aloud (#541)"
   },
+  "readAloudBaseUrlInsecure": "Use https for addresses outside this device or network",
+  "@readAloudBaseUrlInsecure": {
+    "description": "V2 read aloud (#541)"
+  },
   "readAloudApiKey": "API key",
   "@readAloudApiKey": {
     "description": "V2 read aloud (#541)"

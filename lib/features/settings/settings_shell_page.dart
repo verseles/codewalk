@@ -251,8 +251,10 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       '${window ? ' ${l.settingsBehaviorWindowChrome} ${l.settingsBehaviorWindowChromeDescription} ${l.settingsBehaviorWindowClose} ${l.settingsBehaviorWindowCloseDescription}' : ''}',
       l.settingsNavigationGroupExperience,
     );
+    // Only where some voice service can run: never on the Web for now.
     final readAloud =
-        context.read<ReadAloudController?>() != null &&
+        (context.read<ReadAloudController?>()?.providers.isNotEmpty ??
+            false) &&
         matches(
           l.readAloudTitle,
           '${l.readAloudEnableDescription} ${l.readAloudProvider} '

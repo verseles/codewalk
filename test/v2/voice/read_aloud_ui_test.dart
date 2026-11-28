@@ -59,14 +59,15 @@ void main() {
 
   tearDown(() => controller.dispose());
 
-  Widget app(Widget child) => ChangeNotifierProvider<ReadAloudController?>.value(
-    value: controller,
-    child: MaterialApp(
-      localizationsDelegates: V2Localizations.localizationsDelegates,
-      supportedLocales: V2Localizations.supportedLocales,
-      home: Scaffold(body: child),
-    ),
-  );
+  Widget app(Widget child) =>
+      ChangeNotifierProvider<ReadAloudController?>.value(
+        value: controller,
+        child: MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(body: child),
+        ),
+      );
 
   testWidgets('the bar reads a message, and the pill pauses and stops it', (
     tester,
@@ -176,5 +177,55 @@ void main() {
     await tester.pumpAndSettle();
     expect(synth.requests.last.text, 'Hello! This is how messages will sound.');
     expect(synth.requests.last.apiKey, 'sk-test');
+  });
+  testWidgets('an address typed but not confirmed still counts', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await keys.write(SpeechProvider.openAi, 'sk-test');
+    await tester.pumpWidget(app(const ReadAloudSettingsPage()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('read_aloud_provider_openAi')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('read_aloud_base_url')),
+      'https://tts.example',
+    );
+    // Test voice right away, with no Enter.
+    await tester.tap(find.byKey(const ValueKey('read_aloud_test')));
+    await tester.pumpAndSettle();
+    expect(controller.settings.baseUrl, 'https://tts.example');
+    expect(synth.requests.last.settings.baseUrl, 'https://tts.example');
+    // While it reads, the button stops it.
+    await tester.tap(find.byKey(const ValueKey('read_aloud_test_stop')));
+    await tester.pumpAndSettle();
+    expect(controller.active, isNull);
+    // An address in the clear beyond the network is flagged once left.
+    await tester.enterText(
+      find.byKey(const ValueKey('read_aloud_base_url')),
+      'http://tts.example',
+    );
+    await tester.tap(find.byKey(const ValueKey('read_aloud_model')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text('Use https for addresses outside this device or network'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('leaving settings ends the voice test', (tester) async {
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(const ReadAloudSettingsPage()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('read_aloud_test')));
+    await tester.pumpAndSettle();
+    expect(controller.active, ReadAloudController.testKey);
+    await tester.pumpWidget(app(const SizedBox()));
+    await tester.pumpAndSettle();
+    expect(controller.active, isNull);
   });
 }

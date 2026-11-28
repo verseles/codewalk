@@ -30,6 +30,16 @@ void stopReadingIn(BuildContext context, SessionRef session) {
   unawaited(controller?.stopWhere((key) => key.startsWith(prefix)));
 }
 
+/// Stops [controller]'s reading of [session] once the widget tree is free
+/// again, as when a page that shows the session goes away (#541).
+void stopReadingAfter(ReadAloudController? controller, SessionRef session) {
+  if (controller == null) return;
+  final prefix = readAloudSessionPrefix(session);
+  scheduleMicrotask(
+    () => unawaited(controller.stopWhere((key) => key.startsWith(prefix))),
+  );
+}
+
 /// Read aloud for [item] in its bar (#541): a whole message with words to
 /// speak, while the setting is on; Stop reading on the message being read.
 MessageAction? readAloudAction(

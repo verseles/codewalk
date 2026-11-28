@@ -941,6 +941,9 @@ class V2LocalizationsKo extends V2Localizations {
   String get readAloudBaseUrlRequired => 'NVIDIA NIM에 필수';
 
   @override
+  String get readAloudBaseUrlInsecure => '이 기기나 네트워크 밖의 주소에는 https를 사용하세요';
+
+  @override
   String get readAloudApiKey => 'API 키';
 
   @override

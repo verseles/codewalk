@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/voice/read_aloud.dart';
 
@@ -23,3 +25,12 @@ String readAloudFailureText(V2Localizations l10n, SpeechFailure failure) =>
       SpeechFailure.notConfigured => l10n.readAloudFailNotConfigured,
       SpeechFailure.unavailable => l10n.readAloudFailUnavailable,
     };
+
+/// The speed [rate] (0–1, normal in the middle) gives with [provider], as
+/// a multiplier: `0.5×` to `2.0×`, or ElevenLabs' `0.7×` to `1.2×`.
+String readAloudSpeed(SpeechProvider provider, double rate) {
+  final speed = provider == SpeechProvider.elevenLabs
+      ? 0.7 + 0.5 * rate
+      : 0.5 * pow(4, rate);
+  return '${speed.toStringAsFixed(1)}×';
+}

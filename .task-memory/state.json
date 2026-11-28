@@ -883,10 +883,22 @@
     {
       "at": "2026-11-28T04:10:06Z",
       "text": "u6 #540 judgment: accepted H1 unique file, H2 Windows title, H4 truncated/empty gating, H5 clamp + ratio after frame, H6 12M pixel bound, H7 registrant order, H8 prune per file, H9 picture dispose, H10 detached notice (commit b3718ca3). H3 (share_plus Android clears its cache on next share) REJECTED: library behavior, rare lazy-reading target, fix needs custom FileProvider; Sol-F dissent continuation answered AGREE (retention text refers to codewalk_shares PNGs, as BEHAVIOR says)."
+    },
+    {
+      "at": "2026-11-28T04:28:34Z",
+      "text": "Owner went to sleep (no pending decision). #540 extra fix 2d0eee6b. #541 fixes in working tree (controller generation/completion/error/other-audio, ordered writes by revision, deferred stops, history stop, composer continue stop, settings commit-on-blur + test stop + voice/key races + speed label + insecure address text, settings link allowlist, https rule, cloud deadline + cancel close, Edge 403 rejected + fallback reuse + IOException offline + client close, speakable code/math/HTML, audioplayers own temp file, Web section hidden). Voice tests 19 pass, bootstrap 21 pass."
+    },
+    {
+      "at": "2026-11-28T04:31:38Z",
+      "text": "p542 synthesis (A0022, A0024): Forward between Copy and Read aloud, live+history, confirmed prompt/complete answer with text; picker grouped by open projects (contextRows), 20 newest roots, source/other hosts excluded, search, Set selection, states; text 'Forwarded from: project / title' + blank line + item text; sequential temp lease per target (SessionLiveDirectory.open, no composer), ready wait 20s (live, !stale, outbox, no holds, no staged revert), outbox.submit Delivery.queue, isCurrent rechecks stop/staged; admitted/delivered/settled=ok, rejected/cancelled=failed+dismiss, refusal=failed, uncertain=unconfirmed (no reconcile, never resent); close lease finally; Stop; Retry failed only; all ok -> close+snackbar; no Undo; Ctrl/Cmd+Shift+F. Deferred: previews, archived filter, ledger key, capacity 9, block joining. Sol-F dissent sent. Metrics p542 r1 recorded."
+    },
+    {
+      "at": "2026-11-28T04:32:49Z",
+      "text": "#542 Sol-F dissent reply: AGREE 1 (no previews), 5 (item text only); DISAGREE 2 (archived: projection drops time.archived), 3 (composer sendAgain on uncertain may duplicate), 4 (8 warm tabs block any 9th target). Resolution: 2 -> project time.archived into SessionSummary.archivedAt, filter archived rows in the picker and recheck the catalog row before submit; 3 -> resolved by evidence: composerSendAgain is an explicit user action labeled 'Send again (may duplicate)', same semantics as any uncertain prompt, never automatic; 4 -> raise the OpenCode slot watch capacity 8 -> 9 (tabs stay at 8), so one temporary lease always fits."
     }
   ],
-  "generation": 121,
-  "next_action": "Finish #541 fixes (controller done), tests, gate, commit; dissent to Sol-F on u6 H3 (share_plus Android cache); wait u6 + p542 stand-ins (op_6fd9ceb07cc2).",
+  "generation": 125,
+  "next_action": "Add #541 regression tests (completion, error, superseded no failure, other audio while preparing, history stop, settings commit/stop, speakable cases, https rule), BEHAVIOR updates, gate, commit; then u6 r2 + u7 r2 re-reviews; then #542 synthesis.",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -909,7 +921,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T04:13:42Z",
+  "updated_at": "2026-11-28T04:37:29Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1000,6 +1012,13 @@
       "check": "Full gate on cbea5f2e",
       "criterion": null,
       "evidence": "analyze 4 pre-existing; tests all pass except appearance golden desktop_light/dark (expected, #541 settings destination). /tmp/opencode/g8/t_r5.log",
+      "outcome": "info"
+    },
+    {
+      "at": "2026-11-28T04:37:29Z",
+      "check": "Full gate with #541 fixes (working tree)",
+      "criterion": null,
+      "evidence": "analyze 4 pre-existing; l10n check ok; tests +2683 ~4 -2, only appearance golden desktop_light/dark (expected, x86 regen after push). /tmp/opencode/g8/t541b.log",
       "outcome": "info"
     }
   ]

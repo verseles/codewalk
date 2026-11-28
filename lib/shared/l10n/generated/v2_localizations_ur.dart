@@ -980,6 +980,10 @@ class V2LocalizationsUr extends V2Localizations {
   String get readAloudBaseUrlRequired => 'NVIDIA NIM کے لیے لازمی';
 
   @override
+  String get readAloudBaseUrlInsecure =>
+      'اس ڈیوائس یا نیٹ ورک سے باہر کے پتوں کے لیے https استعمال کریں';
+
+  @override
   String get readAloudApiKey => 'API کلید';
 
   @override

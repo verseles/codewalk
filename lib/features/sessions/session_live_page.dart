@@ -219,8 +219,7 @@ class _SessionLivePageState extends State<SessionLivePage>
   @override
   void dispose() {
     // Leaving the conversation ends its reading (#541).
-    final prefix = readAloudSessionPrefix(widget.controller.session);
-    unawaited(_readAloud?.stopWhere((key) => key.startsWith(prefix)));
+    stopReadingAfter(_readAloud, widget.controller.session);
     WidgetsBinding.instance.removeObserver(this);
     _childLookup?.cancel();
     _shown?.releaseComposer(_focusComposer);

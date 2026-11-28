@@ -85,7 +85,7 @@ final class EdgeSpeech implements SpeechSynthesizer {
     }
     final settings = request.settings;
     final fallback = defaultVoice(request.locale);
-    final voice = settings.voice ?? fallback;
+    var voice = settings.voice ?? fallback;
     final out = BytesBuilder(copy: false);
     for (final chunk in edgeChunks(edgeEscape(text))) {
       if (cancel.cancelled) {
@@ -95,11 +95,12 @@ final class EdgeSpeech implements SpeechSynthesizer {
       try {
         audio = await _speakChunk(chunk, voice, settings.rate, cancel);
       } on SpeechException catch (error) {
-        // A voice Microsoft dropped answers with no audio: once, the
-        // language's default voice reads instead.
+        // A voice Microsoft dropped answers with no audio: the language's
+        // default voice reads instead, for the rest of the message too.
         if (error.failure != SpeechFailure.noAudio || voice == fallback) {
           rethrow;
         }
+        voice = fallback;
         audio = await _speakChunk(chunk, fallback, settings.rate, cancel);
       }
       out.add(audio);
@@ -116,6 +117,8 @@ final class EdgeSpeech implements SpeechSynthesizer {
     SpeechCancel cancel,
   ) async {
     final socket = await _open(retry: true);
+    // A stop drops the connection at once.
+    cancel.onCancel(() => unawaited(socket.close()));
     try {
       final date = edgeDate(DateTime.now().toUtc());
       socket
@@ -154,6 +157,9 @@ final class EdgeSpeech implements SpeechSynthesizer {
       throw const SpeechException(SpeechFailure.offline, 'timeout');
     } on WebSocketException {
       throw const SpeechException(SpeechFailure.offline, 'websocket');
+    } on IOException {
+      // The connection dropped midway.
+      throw const SpeechException(SpeechFailure.offline);
     } finally {
       unawaited(socket.close());
     }
@@ -190,6 +196,7 @@ final class EdgeSpeech implements SpeechSynthesizer {
         // The websocket owns the detached socket from here on.
         // ignore: close_sinks
         final socket = await response.detachSocket();
+        client.close();
         return WebSocket.fromUpgradedSocket(socket, serverSide: false);
       }
       final date = response.headers.value(HttpHeaders.dateHeader);
@@ -202,10 +209,9 @@ final class EdgeSpeech implements SpeechSynthesizer {
           return await _open(retry: false);
         }
       }
+      // Edge takes no key: a refusal is the service's, not the user's.
       throw SpeechException(
-        response.statusCode == HttpStatus.forbidden
-            ? SpeechFailure.unauthorized
-            : SpeechFailure.rejected,
+        SpeechFailure.rejected,
         'HTTP ${response.statusCode}',
       );
     } on SpeechException {

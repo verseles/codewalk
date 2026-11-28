@@ -30,14 +30,71 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
   bool _keySaved = false;
   bool _loadingVoices = false;
   int _keyRead = 0;
+  ReadAloudController? _controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _controller = context.read<ReadAloudController?>();
+  }
 
   @override
   void dispose() {
+    // What the fields say is kept, and the voice test ends with the page,
+    // once the tree is free again.
+    final controller = _controller;
+    if (controller != null) {
+      final pending = _pending(controller);
+      scheduleMicrotask(() {
+        if (pending != null) unawaited(controller.update(pending));
+        unawaited(
+          controller.stopWhere((key) => key == ReadAloudController.testKey),
+        );
+      });
+    }
     _model.dispose();
     _baseUrl.dispose();
     _key.dispose();
     _phrase.dispose();
     super.dispose();
+  }
+
+  /// The settings with what the fields say, or null when they say nothing
+  /// new.
+  ReadAloudSettings? _pending(ReadAloudController controller) {
+    final settings = controller.settings;
+    if (_shown != settings.provider) return null;
+    String? value(TextEditingController field) {
+      final text = field.text.trim();
+      return text.isEmpty ? null : text;
+    }
+
+    final baseUrl = value(_baseUrl);
+    final model = value(_model);
+    final phrase = value(_phrase);
+    var next = settings;
+    if (baseUrl != settings.baseUrl) {
+      next = baseUrl == null
+          ? next.copyWith(clearBaseUrl: true)
+          : next.copyWith(baseUrl: baseUrl);
+    }
+    if (model != settings.model) {
+      next = model == null
+          ? next.copyWith(clearModel: true)
+          : next.copyWith(model: model);
+    }
+    if (phrase != settings.testPhrase) {
+      next = phrase == null
+          ? next.copyWith(clearTestPhrase: true)
+          : next.copyWith(testPhrase: phrase);
+    }
+    return next == settings ? null : next;
+  }
+
+  /// Applies what the fields say, as the user leaves them or acts on them.
+  Future<void> _commit(ReadAloudController controller) async {
+    final next = _pending(controller);
+    if (next != null) await controller.update(next);
   }
 
   /// Fills the fields from [settings] when another service is shown.
@@ -62,6 +119,8 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
   Future<void> _pickVoice(ReadAloudController controller) async {
     final l10n = context.v2L10n;
     final messenger = ScaffoldMessenger.maybeOf(context);
+    await _commit(controller);
+    if (!mounted) return;
     final settings = controller.settings;
     setState(() => _loadingVoices = true);
     List<SpeechVoice> voices;
@@ -90,11 +149,19 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
       options: options,
       selected: settings.voice ?? '',
     );
-    if (chosen == null || !mounted) return;
+    // The list belongs to the service it came from: a choice made after
+    // another service was picked is dropped.
+    final now = controller.settings;
+    if (chosen == null ||
+        !mounted ||
+        now.provider != settings.provider ||
+        now.baseUrl != settings.baseUrl) {
+      return;
+    }
     await controller.update(
       chosen.isEmpty
-          ? settings.copyWith(clearVoice: true)
-          : settings.copyWith(voice: chosen),
+          ? now.copyWith(clearVoice: true)
+          : now.copyWith(voice: chosen),
     );
     if (mounted) await _test(controller);
   }
@@ -102,6 +169,8 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
   Future<void> _test(ReadAloudController controller) async {
     final l10n = context.v2L10n;
     final messenger = ScaffoldMessenger.maybeOf(context);
+    await _commit(controller);
+    if (!mounted) return;
     final phrase = _phrase.text.trim().isEmpty
         ? l10n.readAloudTestPhraseDefault
         : _phrase.text.trim();
@@ -109,6 +178,24 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
     if (failure != null) {
       showAppSnackBar(messenger, readAloudFailureText(l10n, failure));
     }
+  }
+
+  /// [field], whose text is applied once the focus leaves it.
+  Widget _committed(ReadAloudController controller, Widget field) => Focus(
+    canRequestFocus: false,
+    skipTraversal: true,
+    onFocusChange: (focused) {
+      if (!focused) unawaited(_commit(controller));
+    },
+    child: field,
+  );
+
+  /// Whether [address] would carry text and keys in the clear beyond the
+  /// local network, which the services refuse.
+  static bool _insecure(String? address) {
+    if (address == null) return false;
+    final uri = Uri.tryParse(address.trim());
+    return uri != null && uri.hasScheme && !speechAddressSecure(uri);
   }
 
   @override
@@ -215,35 +302,32 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
               ),
               if (provider.cloud && provider != SpeechProvider.edge) ...[
                 const SizedBox(height: 8),
-                TextField(
-                  key: const ValueKey('read_aloud_base_url'),
-                  controller: _baseUrl,
-                  keyboardType: TextInputType.url,
-                  decoration: InputDecoration(
-                    labelText: l10n.readAloudBaseUrl,
-                    helperText: provider == SpeechProvider.nim
-                        ? l10n.readAloudBaseUrlRequired
-                        : null,
-                  ),
-                  onSubmitted: (value) => unawaited(
-                    controller.update(
-                      value.trim().isEmpty
-                          ? settings.copyWith(clearBaseUrl: true)
-                          : settings.copyWith(baseUrl: value.trim()),
+                _committed(
+                  controller,
+                  TextField(
+                    key: const ValueKey('read_aloud_base_url'),
+                    controller: _baseUrl,
+                    keyboardType: TextInputType.url,
+                    decoration: InputDecoration(
+                      labelText: l10n.readAloudBaseUrl,
+                      helperText: provider == SpeechProvider.nim
+                          ? l10n.readAloudBaseUrlRequired
+                          : null,
+                      errorText: _insecure(settings.baseUrl)
+                          ? l10n.readAloudBaseUrlInsecure
+                          : null,
                     ),
+                    onSubmitted: (_) => unawaited(_commit(controller)),
                   ),
                 ),
                 const SizedBox(height: 8),
-                TextField(
-                  key: const ValueKey('read_aloud_model'),
-                  controller: _model,
-                  decoration: InputDecoration(labelText: l10n.readAloudModel),
-                  onSubmitted: (value) => unawaited(
-                    controller.update(
-                      value.trim().isEmpty
-                          ? settings.copyWith(clearModel: true)
-                          : settings.copyWith(model: value.trim()),
-                    ),
+                _committed(
+                  controller,
+                  TextField(
+                    key: const ValueKey('read_aloud_model'),
+                    controller: _model,
+                    decoration: InputDecoration(labelText: l10n.readAloudModel),
+                    onSubmitted: (_) => unawaited(_commit(controller)),
                   ),
                 ),
               ],
@@ -269,8 +353,9 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
                       onPressed: () async {
                         final value = _key.text.trim();
                         if (value.isEmpty) return;
+                        await _commit(controller);
                         await controller.keys.write(provider, value);
-                        if (!mounted) return;
+                        if (!mounted || _shown != provider) return;
                         _key.clear();
                         setState(() => _keySaved = true);
                       },
@@ -281,7 +366,7 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
                         key: const ValueKey('read_aloud_api_key_clear'),
                         onPressed: () async {
                           await controller.keys.write(provider, null);
-                          if (!mounted) return;
+                          if (!mounted || _shown != provider) return;
                           setState(() => _keySaved = false);
                         },
                         child: Text(l10n.readAloudClear),
@@ -296,7 +381,9 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
                   key: const ValueKey('read_aloud_speed'),
                   value: settings.rate,
                   divisions: 10,
-                  label: '${(settings.rate * 100).round()}%',
+                  label: readAloudSpeed(provider, settings.rate),
+                  semanticFormatterCallback: (value) =>
+                      readAloudSpeed(provider, value),
                   onChanged: (value) => unawaited(
                     controller.update(settings.copyWith(rate: value)),
                   ),
@@ -305,30 +392,35 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
             ]),
             const SizedBox(height: 12),
             card([
-              TextField(
-                key: const ValueKey('read_aloud_test_phrase'),
-                controller: _phrase,
-                decoration: InputDecoration(
-                  labelText: l10n.readAloudTestPhrase,
-                  hintText: l10n.readAloudTestPhraseDefault,
-                ),
-                onSubmitted: (value) => unawaited(
-                  controller.update(
-                    value.trim().isEmpty
-                        ? settings.copyWith(clearTestPhrase: true)
-                        : settings.copyWith(testPhrase: value.trim()),
+              _committed(
+                controller,
+                TextField(
+                  key: const ValueKey('read_aloud_test_phrase'),
+                  controller: _phrase,
+                  decoration: InputDecoration(
+                    labelText: l10n.readAloudTestPhrase,
+                    hintText: l10n.readAloudTestPhraseDefault,
                   ),
+                  onSubmitted: (_) => unawaited(_commit(controller)),
                 ),
               ),
               const SizedBox(height: 8),
               Align(
                 alignment: AlignmentDirectional.centerStart,
-                child: FilledButton.icon(
-                  key: const ValueKey('read_aloud_test'),
-                  onPressed: () => unawaited(_test(controller)),
-                  icon: const Icon(Icons.volume_up),
-                  label: Text(l10n.readAloudTest),
-                ),
+                // While the test reads, the same button stops it.
+                child: controller.active == ReadAloudController.testKey
+                    ? FilledButton.icon(
+                        key: const ValueKey('read_aloud_test_stop'),
+                        onPressed: () => unawaited(controller.stop()),
+                        icon: const Icon(Icons.stop),
+                        label: Text(l10n.readAloudStop),
+                      )
+                    : FilledButton.icon(
+                        key: const ValueKey('read_aloud_test'),
+                        onPressed: () => unawaited(_test(controller)),
+                        icon: const Icon(Icons.volume_up),
+                        label: Text(l10n.readAloudTest),
+                      ),
               ),
             ]),
           ],

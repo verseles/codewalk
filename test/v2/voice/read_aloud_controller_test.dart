@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:codewalk/features/voice/read_aloud_actions.dart';
 import 'package:codewalk/features/voice/read_aloud_controller.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
 import 'package:codewalk/shared/media/audio_playback.dart';
 import 'package:codewalk/shared/voice/memory_speech_keys.dart';
 import 'package:codewalk/shared/voice/read_aloud.dart';
+import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../storage/storage_fakes.dart';
@@ -39,6 +41,9 @@ final class FakePlayer implements AudioPlaybackPort {
   final played = <String>[];
   int stops = 0;
 
+  /// Whether starting an audio fails, as a codec the platform lacks.
+  bool fail = false;
+
   @override
   AudioPlaybackState current = const AudioPlaybackState();
 
@@ -70,7 +75,12 @@ final class FakePlayer implements AudioPlaybackPort {
       return;
     }
     played.add(id);
-    emit(AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.playing));
+    emit(
+      AudioPlaybackState(
+        activeId: id,
+        status: fail ? AudioPlaybackStatus.error : AudioPlaybackStatus.playing,
+      ),
+    );
   }
 
   @override
@@ -178,6 +188,93 @@ void main() {
     await first;
     expect(player.played, ['read-aloud:s|b']);
     expect(controller.active, 's|b');
+  });
+
+  test('a reading that plays to its end is over', () async {
+    await controller.read('s|a', 'Hello');
+    await pumpEventQueue();
+    expect(controller.phase, ReadAloudPhase.playing);
+    // The player rests, paused, at the end of what played through.
+    player.emit(
+      const AudioPlaybackState(
+        activeId: 'read-aloud:s|a',
+        status: AudioPlaybackStatus.paused,
+        position: Duration(seconds: 3),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    await pumpEventQueue();
+    expect(controller.active, isNull);
+    expect(controller.phase, ReadAloudPhase.idle);
+    // Read again, it starts over rather than resuming the end.
+    await controller.read('s|a', 'Hello');
+    await pumpEventQueue();
+    expect(player.stops, 1);
+    expect(controller.phase, ReadAloudPhase.playing);
+  });
+
+  test('a player that cannot play says so', () async {
+    player.fail = true;
+    expect(await controller.read('s|a', 'Hello'), SpeechFailure.unavailable);
+    await pumpEventQueue();
+    expect(controller.active, isNull);
+  });
+
+  test('a reading stopped or replaced reports no failure', () async {
+    final gate = synth.gate = Completer<void>();
+    synth.failure = const SpeechException(SpeechFailure.offline);
+    final first = controller.read('s|a', 'First');
+    await pumpEventQueue();
+    await controller.stop();
+    gate.complete();
+    expect(await first, isNull);
+  });
+
+  test(
+    'an audio started while a reading is prepared keeps the player',
+    () async {
+      final gate = synth.gate = Completer<void>();
+      final first = controller.read('s|a', 'First');
+      await pumpEventQueue();
+      player.emit(
+        const AudioPlaybackState(
+          activeId: 'attachment',
+          status: AudioPlaybackStatus.playing,
+        ),
+      );
+      await pumpEventQueue();
+      expect(controller.phase, ReadAloudPhase.idle);
+      gate.complete();
+      expect(await first, isNull);
+      expect(player.played, isEmpty);
+    },
+  );
+
+  test('the newest choice is the one stored', () async {
+    await controller.read('s|a', 'Hello');
+    final first = controller.update(
+      controller.settings.copyWith(provider: SpeechProvider.openAi),
+    );
+    final second = controller.update(
+      controller.settings.copyWith(enabled: false),
+    );
+    await Future.wait([first, second]);
+    final stored = ReadAloudSettings.decode(
+      backend.values[ReadAloudController.settingsKey]! as String,
+    )!;
+    expect(stored.enabled, isFalse);
+    expect(stored.provider, SpeechProvider.openAi);
+  });
+
+  test('a page that goes stops its reading once the tree is free', () async {
+    const session = SessionRef(HostId('h'), HarnessInstanceId('h'), 'ses_1');
+    final key = readAloudKey(session, const ItemId('a'));
+    await controller.read(key, 'Hello');
+    stopReadingAfter(controller, session);
+    // Nothing changes while the page is still being taken down.
+    expect(controller.active, key);
+    await pumpEventQueue();
+    expect(controller.active, isNull);
   });
 
   test('a session closing stops only its own reading', () async {

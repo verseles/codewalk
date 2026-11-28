@@ -85,6 +85,24 @@ class AppNavigationController extends ChangeNotifier {
       return Uri(pathSegments: ['', 's', ...sessionSegments]).toString();
     }
 
+    // A Settings section, as a read-aloud failure's Settings button opens:
+    // its one name and nothing else.
+    final section = link.queryParametersAll['section'];
+    if (local &&
+        link.path == '/settings' &&
+        link.queryParametersAll.length == 1 &&
+        section != null &&
+        section.length == 1 &&
+        RegExp(r'^[a-zA-Z]{1,40}$').hasMatch(section.single) &&
+        !link.hasFragment) {
+      if (_pending is! SessionNavigationIntent) _pending = null;
+      notifyListeners();
+      return Uri(
+        path: '/settings',
+        queryParameters: {'section': section.single},
+      ).toString();
+    }
+
     if (local &&
         const ['/', '/hosts', '/sessions', '/settings'].contains(link.path) &&
         !link.hasQuery &&

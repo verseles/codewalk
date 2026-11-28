@@ -4,12 +4,14 @@ import 'package:codewalk_core/codewalk_core.dart'
     show ItemId, resolveTurnTokensPerSecondByAnswer;
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/markdown_link_opener.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../voice/read_aloud_actions.dart';
+import '../voice/read_aloud_controller.dart';
 import 'session_attachment_scope.dart';
 import 'session_history_controller.dart';
 import 'session_report_group.dart';
@@ -34,6 +36,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
   final _rowState = PageStorageBucket();
   final _presentation = SessionTimelinePresentation();
   final _expandedSubagentCalls = <ItemId>{};
+  ReadAloudController? _readAloud;
 
   @override
   void initState() {
@@ -44,7 +47,15 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _readAloud = context.read<ReadAloudController?>();
+  }
+
+  @override
   void dispose() {
+    // Leaving the history ends its reading (#541).
+    stopReadingAfter(_readAloud, widget.controller.session);
     widget.controller.dispose();
     super.dispose();
   }

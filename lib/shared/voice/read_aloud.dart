@@ -191,8 +191,58 @@ final class SpeechVoice {
 /// Lets a running synthesis know it is no longer wanted.
 final class SpeechCancel {
   bool _cancelled = false;
+  final _actions = <void Function()>[];
   bool get cancelled => _cancelled;
-  void cancel() => _cancelled = true;
+
+  /// Runs [action] once this is cancelled, at once if it already is, as a
+  /// request that drops its connection.
+  void onCancel(void Function() action) {
+    if (_cancelled) {
+      action();
+    } else {
+      _actions.add(action);
+    }
+  }
+
+  void cancel() {
+    if (_cancelled) return;
+    _cancelled = true;
+    for (final action in List.of(_actions)) {
+      action();
+    }
+    _actions.clear();
+  }
+}
+
+/// Whether a provider's [address] may carry message text and keys: https,
+/// or plain http only to this device, the local network or a tailnet.
+bool speechAddressSecure(Uri address) {
+  if (address.scheme == 'https') return true;
+  if (address.scheme != 'http') return false;
+  final host = address.host.toLowerCase();
+  if (host == 'localhost' ||
+      host == '::1' ||
+      host.endsWith('.local') ||
+      host.endsWith('.ts.net')) {
+    return true;
+  }
+  final parts = host.split('.').map(int.tryParse).toList();
+  if (parts.length == 4 &&
+      parts.every((part) => part != null && part >= 0 && part <= 255)) {
+    final a = parts[0]!;
+    final b = parts[1]!;
+    return a == 127 ||
+        a == 10 ||
+        (a == 192 && b == 168) ||
+        (a == 172 && b >= 16 && b <= 31) ||
+        // Carrier-grade NAT, where tailnets live.
+        (a == 100 && b >= 64 && b <= 127);
+  }
+  // IPv6 unique local and link-local addresses.
+  return host.contains(':') &&
+      (host.startsWith('fc') ||
+          host.startsWith('fd') ||
+          host.startsWith('fe80'));
 }
 
 /// Audio a provider made, ready to play.

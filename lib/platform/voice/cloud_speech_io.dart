@@ -54,9 +54,15 @@ final class CloudSpeech implements SpeechSynthesizer {
   Uri _base(ReadAloudSettings settings, String path) {
     final base = settings.baseUrl ?? defaultBase[provider];
     if (base == null) throw const SpeechException(SpeechFailure.notConfigured);
-    final uri = endpoint(base, path);
-    if (uri.scheme != 'https' && uri.scheme != 'http') {
-      throw const SpeechException(SpeechFailure.notConfigured);
+    final Uri uri;
+    try {
+      uri = endpoint(base, path);
+    } on FormatException {
+      throw const SpeechException(SpeechFailure.notConfigured, 'address');
+    }
+    // Text and keys never travel in the clear beyond the local network.
+    if (uri.host.isEmpty || !speechAddressSecure(uri)) {
+      throw const SpeechException(SpeechFailure.notConfigured, 'address');
     }
     return uri;
   }
@@ -249,39 +255,18 @@ final class CloudSpeech implements SpeechSynthesizer {
     required SpeechCancel cancel,
   }) async {
     final client = _client()..connectionTimeout = _connect;
+    // A stop drops the connection at once.
+    cancel.onCancel(() => client.close(force: true));
     try {
-      final request = await client.openUrl(method, uri).timeout(_total);
-      // A key is for this host only: never follow a redirect with it.
-      request.followRedirects = false;
-      headers.forEach(request.headers.set);
-      if (body != null) request.add(body);
-      final response = await request.close().timeout(_total);
-      if (cancel.cancelled) {
-        throw const SpeechException(SpeechFailure.unavailable, 'cancelled');
-      }
-      final status = response.statusCode;
-      if (status < 200 || status >= 300) {
-        await response.drain<void>();
-        throw SpeechException(switch (status) {
-          401 || 403 => SpeechFailure.unauthorized,
-          429 => SpeechFailure.rateLimited,
-          413 => SpeechFailure.tooLong,
-          _ => SpeechFailure.rejected,
-        }, 'HTTP $status');
-      }
-      final out = BytesBuilder(copy: false);
-      await for (final chunk in response.timeout(_total)) {
-        if (cancel.cancelled) {
-          throw const SpeechException(SpeechFailure.unavailable, 'cancelled');
-        }
-        out.add(chunk);
-        if (out.length > _maxAudio) {
-          throw const SpeechException(SpeechFailure.tooLong, 'audio');
-        }
-      }
-      final bytes = out.takeBytes();
-      if (bytes.isEmpty) throw const SpeechException(SpeechFailure.noAudio);
-      return bytes;
+      // One deadline for the whole exchange, the body included.
+      return await _exchange(
+        client,
+        method,
+        uri,
+        headers: headers,
+        body: body,
+        cancel: cancel,
+      ).timeout(_total);
     } on SpeechException {
       rethrow;
     } on TimeoutException {
@@ -295,5 +280,47 @@ final class CloudSpeech implements SpeechSynthesizer {
     } finally {
       client.close(force: true);
     }
+  }
+
+  Future<Uint8List> _exchange(
+    HttpClient client,
+    String method,
+    Uri uri, {
+    required Map<String, String> headers,
+    List<int>? body,
+    required SpeechCancel cancel,
+  }) async {
+    final request = await client.openUrl(method, uri);
+    // A key is for this host only: never follow a redirect with it.
+    request.followRedirects = false;
+    headers.forEach(request.headers.set);
+    if (body != null) request.add(body);
+    final response = await request.close();
+    if (cancel.cancelled) {
+      throw const SpeechException(SpeechFailure.unavailable, 'cancelled');
+    }
+    final status = response.statusCode;
+    if (status < 200 || status >= 300) {
+      // The connection closes with the client; its body is not read.
+      throw SpeechException(switch (status) {
+        401 || 403 => SpeechFailure.unauthorized,
+        429 => SpeechFailure.rateLimited,
+        413 => SpeechFailure.tooLong,
+        _ => SpeechFailure.rejected,
+      }, 'HTTP $status');
+    }
+    final out = BytesBuilder(copy: false);
+    await for (final chunk in response) {
+      if (cancel.cancelled) {
+        throw const SpeechException(SpeechFailure.unavailable, 'cancelled');
+      }
+      out.add(chunk);
+      if (out.length > _maxAudio) {
+        throw const SpeechException(SpeechFailure.tooLong, 'audio');
+      }
+    }
+    final bytes = out.takeBytes();
+    if (bytes.isEmpty) throw const SpeechException(SpeechFailure.noAudio);
+    return bytes;
   }
 }

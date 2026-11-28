@@ -923,6 +923,9 @@ class V2LocalizationsZh extends V2Localizations {
   String get readAloudBaseUrlRequired => 'NVIDIA NIM 必填';
 
   @override
+  String get readAloudBaseUrlInsecure => '此设备或网络之外的地址请使用 https';
+
+  @override
   String get readAloudApiKey => 'API 密钥';
 
   @override

@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../../shared/media/audio_playback.dart';
 
@@ -17,6 +20,13 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
   AudioPlaybackState _state = const AudioPlaybackState();
   bool _disposed = false;
   bool _unsupportedRuntime = false;
+
+  // Where the player plays from a file (iOS, macOS, Linux): the one file of
+  // the audio now loaded, removed once another takes its place or playback
+  // stops, so audio never piles up in the temporary folder (#541).
+  File? _file;
+  int _files = 0;
+  bool _swept = false;
 
   @override
   bool get supported => !_unsupportedRuntime;
@@ -102,27 +112,19 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
         }
       }
       await player.stop();
+      await _release();
       _emit(
-        AudioPlaybackState(
-          activeId: id,
-          status: AudioPlaybackStatus.loading,
-        ),
+        AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.loading),
       );
-      await player.play(BytesSource(bytes, mimeType: mimeType));
+      await player.play(await _source(bytes, mimeType));
     } on MissingPluginException {
       _unsupportedRuntime = true;
       _emit(
-        AudioPlaybackState(
-          activeId: id,
-          status: AudioPlaybackStatus.error,
-        ),
+        AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.error),
       );
     } on Object {
       _emit(
-        AudioPlaybackState(
-          activeId: id,
-          status: AudioPlaybackStatus.error,
-        ),
+        AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.error),
       );
     }
   }
@@ -138,6 +140,55 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
     }
   }
 
+  /// The player's source for [bytes]: the bytes themselves where the
+  /// platform takes them, else a file of this app's own, which audioplayers
+  /// would otherwise write and never remove.
+  Future<Source> _source(Uint8List bytes, String mimeType) async {
+    if (kIsWeb || !(Platform.isIOS || Platform.isMacOS || Platform.isLinux)) {
+      return BytesSource(bytes, mimeType: mimeType);
+    }
+    final folder = Directory(
+      '${(await getTemporaryDirectory()).path}${Platform.pathSeparator}'
+      'codewalk_audio',
+    );
+    await folder.create(recursive: true);
+    if (!_swept) {
+      // Left behind by a run that ended abruptly.
+      _swept = true;
+      try {
+        await for (final entry in folder.list()) {
+          if (entry is File) await entry.delete();
+        }
+      } on FileSystemException {
+        // Swept next time.
+      }
+    }
+    final extension = switch (mimeType) {
+      'audio/wav' || 'audio/x-wav' => 'wav',
+      'audio/ogg' => 'ogg',
+      'audio/aac' => 'aac',
+      'audio/mp4' || 'audio/m4a' => 'm4a',
+      _ => 'mp3',
+    };
+    final file = File(
+      '${folder.path}${Platform.pathSeparator}play-${_files++}.$extension',
+    );
+    await file.writeAsBytes(bytes, flush: true);
+    _file = file;
+    return DeviceFileSource(file.path, mimeType: mimeType);
+  }
+
+  Future<void> _release() async {
+    final file = _file;
+    _file = null;
+    if (file == null) return;
+    try {
+      await file.delete();
+    } on FileSystemException {
+      // Gone already, or swept on the next run.
+    }
+  }
+
   @override
   Future<void> stop() async {
     if (_disposed) return;
@@ -146,6 +197,7 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
     } on Object {
       // Best-effort stop.
     }
+    await _release();
     _emit(const AudioPlaybackState());
   }
 
@@ -163,6 +215,7 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
       // Best-effort dispose.
     }
     _player = null;
+    await _release();
     await _updates.close();
   }
 }

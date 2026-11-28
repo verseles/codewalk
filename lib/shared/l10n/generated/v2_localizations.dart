@@ -1892,6 +1892,12 @@ abstract class V2Localizations {
   /// V2 read aloud (#541)
   ///
   /// In en, this message translates to:
+  /// **'Use https for addresses outside this device or network'**
+  String get readAloudBaseUrlInsecure;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
   /// **'API key'**
   String get readAloudApiKey;
 

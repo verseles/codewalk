@@ -1,13 +1,17 @@
 import 'package:markdown/markdown.dart' as md;
 
+import '../rendering/render_math_syntax.dart';
+
 /// The words of a message as they are read aloud (#541): Markdown and HTML
-/// markers, fenced and indented code, tables, images and math blocks are
-/// left out; link text, inline code and list items stay, one sentence or
-/// block per line, with no run of spaces.
+/// markers, fenced, indented and HTML code, tables, images and math (as the
+/// timeline finds it) are left out; link text, inline code and list items
+/// stay, one sentence or block per line, with no run of spaces.
 String speakableText(String markdown) {
   final document = md.Document(
     extensionSet: md.ExtensionSet.gitHubFlavored,
     encodeHtml: false,
+    blockSyntaxes: const [BlockMathSyntax()],
+    inlineSyntaxes: [SingleLineBlockMathSyntax(), InlineMathSyntax()],
   );
   final nodes = document.parseLines(
     markdown.replaceAll('\r\n', '\n').split('\n'),
@@ -24,7 +28,16 @@ String speakableText(String markdown) {
       .join('\n');
 }
 
-const _skipped = {'pre', 'table', 'img', 'hr', 'script', 'style'};
+const _skipped = {
+  'pre',
+  'table',
+  'img',
+  'hr',
+  'script',
+  'style',
+  'inlineMath',
+  'blockMath',
+};
 const _blocks = {
   'p',
   'h1',
@@ -47,6 +60,11 @@ void _block(md.Node node, StringBuffer out) {
   }
   if (node is! md.Element) return;
   if (_skipped.contains(node.tag)) return;
+  // Inline code is read as written, angle brackets and all.
+  if (node.tag == 'code') {
+    out.write(node.textContent);
+    return;
+  }
   // Math blocks ($$ … $$) are not speech.
   if (node.tag == 'p' && _isMathBlock(node)) return;
   final children = node.children ?? const <md.Node>[];
@@ -62,5 +80,16 @@ bool _isMathBlock(md.Element paragraph) {
   return text.length > 4 && text.startsWith(r'$$') && text.endsWith(r'$$');
 }
 
-/// Text inside a node, without HTML tags the parser left as text.
-String _plain(String text) => text.replaceAll(RegExp('<[^>]+>'), ' ');
+/// Text inside a node, without the raw HTML the parser left as text: code,
+/// scripts and styles with their content, comments, and tags; a lone `<`
+/// or `>`, as in `a < b`, stays.
+String _plain(String text) => text
+    .replaceAll(
+      RegExp(
+        r'<(pre|code|script|style)\b[^>]*>[\s\S]*?</\1\s*>',
+        caseSensitive: false,
+      ),
+      ' ',
+    )
+    .replaceAll(RegExp(r'<!--[\s\S]*?-->'), ' ')
+    .replaceAll(RegExp('</?[A-Za-z][^<>]*>'), ' ');

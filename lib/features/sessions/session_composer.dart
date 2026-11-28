@@ -266,6 +266,8 @@ class _SessionComposerState extends State<SessionComposer> {
 
   Future<void> _continue() async {
     if (!_canContinue) return;
+    // A new prompt ends the conversation's reading (#541).
+    stopReadingIn(context, widget.controller.live.session);
     setState(() => _continuing = true);
     try {
       // Text typed meanwhile is the next message, and keeps the keyboard.

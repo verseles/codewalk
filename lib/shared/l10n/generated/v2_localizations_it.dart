@@ -993,6 +993,10 @@ class V2LocalizationsIt extends V2Localizations {
   String get readAloudBaseUrlRequired => 'Obbligatorio per NVIDIA NIM';
 
   @override
+  String get readAloudBaseUrlInsecure =>
+      'Usa https per indirizzi fuori da questo dispositivo o rete';
+
+  @override
   String get readAloudApiKey => 'Chiave API';
 
   @override
