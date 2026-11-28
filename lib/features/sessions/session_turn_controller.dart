@@ -83,10 +83,14 @@ class SessionTurnController extends ChangeNotifier
       port!.unavailable(shared.SessionTurnAction.redoNext) == null;
 
   bool get canRedoAll =>
-      !_disposed && port?.unavailable(shared.SessionTurnAction.redoAll) == null;
+      !_disposed &&
+      port != null &&
+      port!.unavailable(shared.SessionTurnAction.redoAll) == null;
 
   bool get canCompact =>
-      !_disposed && port?.unavailable(shared.SessionTurnAction.compact) == null;
+      !_disposed &&
+      port != null &&
+      port!.unavailable(shared.SessionTurnAction.compact) == null;
 
   bool get compacting => !_disposed && port?.state.compacting == true;
 

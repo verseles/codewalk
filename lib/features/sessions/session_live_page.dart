@@ -38,7 +38,7 @@ import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
 import 'session_subagent_capsule.dart';
 import 'session_switch_note.dart';
-import 'session_tabs_controller.dart';
+import 'session_tab_strip.dart';
 import 'session_task_list.dart';
 import 'session_timeline_projection.dart';
 import 'sessions_controller.dart';
@@ -376,7 +376,13 @@ class _SessionLivePageState extends State<SessionLivePage>
     if (!settled || owner == null) return const [];
     final catalog = context.read<SessionsController?>();
     final row = catalog?.findSession(c.session);
-    final canFork = row != null && catalog!.actionSupport.available;
+    // Only a session the list shows can fork, as the command checks; and
+    // not while an undo is staged, whose hidden turns a fork would copy.
+    final canFork =
+        row != null &&
+        catalog!.actionSupport.available &&
+        catalog.lists(c.session) &&
+        c.turn.port?.state.staged != true;
     return [
       if (c.turn.canUndo)
         turn.latest
@@ -414,7 +420,7 @@ class _SessionLivePageState extends State<SessionLivePage>
     ];
   }
 
-  /// Forks the session before [before], or all of it, then opens the new
+  /// Forks the session before [before], or all of it, then shows the new
   /// session with [draft] in its message box.
   Future<void> _forkFrom(
     SessionsController catalog,
@@ -424,7 +430,7 @@ class _SessionLivePageState extends State<SessionLivePage>
   }) async {
     final messenger = ScaffoldMessenger.maybeOf(context);
     final l10n = context.v2L10n;
-    final tabs = context.read<SessionTabsController?>();
+    final router = GoRouter.maybeOf(context);
     final drafts = context.read<SessionDraftStore?>();
     final result = await catalog.forkFrom(row, before: before);
     final ref = result.session;
@@ -444,16 +450,9 @@ class _SessionLivePageState extends State<SessionLivePage>
       drafts.save(ref, draft);
       await drafts.flush();
     }
-    SessionSummary? summary;
-    try {
-      summary = await catalog.read(ref)?.result;
-    } on Object {
-      summary = null;
-    }
-    if (summary == null || tabs == null) return;
-    if (await tabs.open(summary) == SessionTabOpen.full) {
-      showAppSnackBar(messenger, l10n.sessionTabsFull);
-    }
+    // The workspace shows a session through its route, as a list row does;
+    // the route opens its tab.
+    router?.go(sessionTabLocation(ref));
   }
 
   @override

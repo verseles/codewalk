@@ -148,6 +148,12 @@ class _MessageActionHostState extends State<MessageActionHost> {
   final _link = LayerLink();
   final _portal = OverlayPortalController();
   final _firstButton = FocusNode(debugLabel: 'message bar');
+  // Holds the bar's buttons, to tell whether the focus is in the bar.
+  final _barFocus = FocusNode(
+    debugLabel: 'message bar buttons',
+    canRequestFocus: false,
+    skipTraversal: true,
+  );
   final _messageFocus = FocusNode(debugLabel: 'message');
   bool _highlight = false;
   bool _hasSelection = false;
@@ -156,6 +162,14 @@ class _MessageActionHostState extends State<MessageActionHost> {
   double _pinnedDy = 0;
   Timer? _hoverTimer;
   ValueListenable<bool>? _scrolling;
+
+  // Bar presses wait out a double tap's second tap after a tap opened it,
+  // so that tap cannot land on a button by accident.
+  Timer? _settling;
+  bool _keysHandled = false;
+
+  // The three-dots menu is open: Escape is its own.
+  bool _menuOpen = false;
 
   // The press being tracked as a possible tap.
   Offset? _downAt;
@@ -176,15 +190,47 @@ class _MessageActionHostState extends State<MessageActionHost> {
   void dispose() {
     _scrolling?.removeListener(_scrollChanged);
     _hoverTimer?.cancel();
+    _settling?.cancel();
+    _keys(false);
     if (identical(_shown, this)) _shown = null;
     _firstButton.dispose();
+    _barFocus.dispose();
     _messageFocus.dispose();
     super.dispose();
   }
 
   void _scrollChanged() {
-    if (_scrolling?.value ?? false) _hide();
+    if (!(_scrolling?.value ?? false)) return;
+    // A press that turned into a scroll is no tap.
+    _downAt = null;
+    _hide();
   }
+
+  /// Escape closes the bar wherever the focus is, before any other use of
+  /// the key, such as the workspace's own.
+  bool _onKey(KeyEvent event) {
+    if (event is! KeyDownEvent ||
+        event.logicalKey != LogicalKeyboardKey.escape ||
+        !_portal.isShowing ||
+        _menuOpen) {
+      return false;
+    }
+    final inBar = _barHasFocus;
+    _hide(refocus: inBar);
+    return true;
+  }
+
+  void _keys(bool on) {
+    if (on == _keysHandled) return;
+    _keysHandled = on;
+    if (on) {
+      HardwareKeyboard.instance.addHandler(_onKey);
+    } else {
+      HardwareKeyboard.instance.removeHandler(_onKey);
+    }
+  }
+
+  bool get _barHasFocus => _barFocus.hasFocus;
 
   List<MessageAction> get _all =>
       [...widget.actions]..sort((a, b) => a.id.index.compareTo(b.id.index));
@@ -207,7 +253,12 @@ class _MessageActionHostState extends State<MessageActionHost> {
     return !(origin & box.size).contains(global);
   }
 
-  void _show({required bool pin, Offset? at, bool focus = false}) {
+  void _show({
+    required bool pin,
+    Offset? at,
+    bool focus = false,
+    bool tapped = false,
+  }) {
     if (!mounted || _all.isEmpty) return;
     _hoverTimer?.cancel();
     final other = _shown;
@@ -216,6 +267,11 @@ class _MessageActionHostState extends State<MessageActionHost> {
     _place(at);
     setState(() => _pinned = _pinned || pin);
     _portal.show();
+    _keys(true);
+    _settling?.cancel();
+    _settling = tapped
+        ? Timer(kDoubleTapTimeout, () => _settling = null)
+        : null;
     if (focus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _firstButton.requestFocus();
@@ -225,6 +281,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
 
   void _hide({bool refocus = false}) {
     _hoverTimer?.cancel();
+    _keys(false);
     if (identical(_shown, this)) _shown = null;
     if (!_portal.isShowing) return;
     _portal.hide();
@@ -232,8 +289,9 @@ class _MessageActionHostState extends State<MessageActionHost> {
     if (refocus && mounted) _messageFocus.requestFocus();
   }
 
-  /// Picks the edge the bar sits on: the top when it fits in the visible
-  /// list, else the bottom, else near the top of what is visible.
+  /// Picks the edge the bar sits on: one whose bar fits in the visible
+  /// list, the one away from the finger or pointer that opened it (the top
+  /// without one), else near the trigger inside what is visible.
   void _place(Offset? at) {
     final box = _contentBox;
     if (box == null) return;
@@ -243,9 +301,16 @@ class _MessageActionHostState extends State<MessageActionHost> {
         ? viewportBox.localToGlobal(Offset.zero) & viewportBox.size
         : Offset.zero & MediaQuery.sizeOf(context);
     const half = _barHeight / 2 + _barMargin;
-    if (rect.top - half >= viewport.top) {
+    bool fits(double y) =>
+        y - half >= viewport.top && y + half <= viewport.bottom;
+    final top = fits(rect.top);
+    final bottom = fits(rect.bottom);
+    final away = at != null && at.dy < rect.center.dy;
+    if (top && bottom) {
+      _edge = away ? _Edge.bottom : _Edge.top;
+    } else if (top) {
       _edge = _Edge.top;
-    } else if (rect.bottom + half <= viewport.bottom) {
+    } else if (bottom) {
       _edge = _Edge.bottom;
     } else {
       _edge = _Edge.pinned;
@@ -269,6 +334,16 @@ class _MessageActionHostState extends State<MessageActionHost> {
                 MessagePointerTarget.control);
   }
 
+  void _pointerMove(PointerMoveEvent event) {
+    final downAt = _downAt;
+    if (downAt == null) return;
+    final slop = event.kind == PointerDeviceKind.mouse
+        ? kPrecisePointerHitSlop
+        : kTouchSlop;
+    // A press that travelled is a drag, even if it comes back.
+    if ((event.position - downAt).distance > slop) _downAt = null;
+  }
+
   void _pointerUp(PointerUpEvent event) {
     final downAt = _downAt;
     final downTime = _downTime;
@@ -287,7 +362,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
       if (_portal.isShowing && _pinned) {
         _hide();
       } else {
-        _show(pin: true, at: event.position);
+        _show(pin: true, at: event.position, tapped: true);
       }
     });
   }
@@ -322,7 +397,8 @@ class _MessageActionHostState extends State<MessageActionHost> {
   }
 
   void _run(MessageAction action) {
-    _hide();
+    if (_settling != null) return;
+    _hide(refocus: _barHasFocus);
     action.onSelected(context);
   }
 
@@ -334,16 +410,19 @@ class _MessageActionHostState extends State<MessageActionHost> {
       box.localToGlobal(Offset.zero, ancestor: overlay),
       box.localToGlobal(box.size.bottomRight(Offset.zero), ancestor: overlay),
     );
+    if (_settling != null) return;
     _hoverTimer?.cancel();
+    final wasPinned = _pinned;
     setState(() => _pinned = true);
-    final chosen = await showMenu<MessageAction>(
+    _menuOpen = true;
+    final chosen = await showMenu<MessageActionId>(
       context: context,
       position: RelativeRect.fromRect(rect, Offset.zero & overlay.size),
       items: [
         for (final action in overflow)
           PopupMenuItem(
             key: ValueKey('message-action-${action.id.name}'),
-            value: action,
+            value: action.id,
             child: Row(
               children: [
                 Icon(action.icon, size: 20),
@@ -354,8 +433,23 @@ class _MessageActionHostState extends State<MessageActionHost> {
           ),
       ],
     );
+    _menuOpen = false;
     if (!mounted) return;
-    if (chosen != null) _run(chosen);
+    // The action as it is now: the message may have changed meanwhile, as
+    // when a newer turn moved a fork's cut.
+    final action = _all.where((a) => a.id == chosen).firstOrNull;
+    if (action != null) {
+      _run(action);
+      return;
+    }
+    // A dismissed menu leaves the bar as it was: a bar the mouse showed
+    // still hides once the mouse is gone.
+    setState(() => _pinned = wasPinned);
+    if (!wasPinned && _portal.isShowing) {
+      _hoverTimer = Timer(messageBarHideDelay, () {
+        if (mounted && !_pinned) _hide();
+      });
+    }
   }
 
   Widget _bar(BuildContext context) {
@@ -409,35 +503,38 @@ class _MessageActionHostState extends State<MessageActionHost> {
                   ),
                 },
                 child: FocusTraversalGroup(
-                  child: Semantics(
-                    container: true,
-                    explicitChildNodes: true,
-                    label: l10n.messageActions,
-                    child: _ActionPill(
-                      end: widget.end,
-                      maxWidth: (viewportWidth - 16).clamp(
-                        _barHeight,
-                        double.infinity,
+                  child: Focus(
+                    focusNode: _barFocus,
+                    child: Semantics(
+                      container: true,
+                      explicitChildNodes: true,
+                      label: l10n.messageActions,
+                      child: _ActionPill(
+                        end: widget.end,
+                        maxWidth: (viewportWidth - 16).clamp(
+                          _barHeight,
+                          double.infinity,
+                        ),
+                        buttons: [
+                          for (final action in primary)
+                            _PillButton(
+                              key: ValueKey('message-action-${action.id.name}'),
+                              focusNode: focusFor(),
+                              label: action.label,
+                              icon: action.icon,
+                              onPressed: (_) => _run(action),
+                            ),
+                          if (overflow.isNotEmpty)
+                            _PillButton(
+                              key: const ValueKey('message-action-more'),
+                              focusNode: focusFor(),
+                              label: l10n.messageMoreActions,
+                              icon: Symbols.more_vert,
+                              onPressed: (button) =>
+                                  unawaited(_more(button, overflow)),
+                            ),
+                        ],
                       ),
-                      buttons: [
-                        for (final action in primary)
-                          _PillButton(
-                            key: ValueKey('message-action-${action.id.name}'),
-                            focusNode: focusFor(),
-                            label: action.label,
-                            icon: action.icon,
-                            onPressed: (_) => _run(action),
-                          ),
-                        if (overflow.isNotEmpty)
-                          _PillButton(
-                            key: const ValueKey('message-action-more'),
-                            focusNode: focusFor(),
-                            label: l10n.messageMoreActions,
-                            icon: Symbols.more_vert,
-                            onPressed: (button) =>
-                                unawaited(_more(button, overflow)),
-                          ),
-                      ],
                     ),
                   ),
                 ),
@@ -491,8 +588,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
       container: true,
       customSemanticsActions: {
         for (final action in all)
-          CustomSemanticsAction(label: action.label): () =>
-              action.onSelected(context),
+          CustomSemanticsAction(label: action.label): () => _run(action),
       },
       child: FocusableActionDetector(
         focusNode: _messageFocus,
@@ -512,45 +608,46 @@ class _MessageActionHostState extends State<MessageActionHost> {
           onTapOutside: (_) {
             if (_portal.isShowing) _hide();
           },
-          child: MouseRegion(
-            onEnter: _hoverEnter,
-            onExit: _hoverExit,
-            child: Listener(
+          child: Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerDown: _pointerDown,
+            onPointerMove: _pointerMove,
+            onPointerUp: _pointerUp,
+            onPointerCancel: (_) => _downAt = null,
+            child: RawGestureDetector(
+              // The row beside the message answers a long press too.
               behavior: HitTestBehavior.translucent,
-              onPointerDown: _pointerDown,
-              onPointerUp: _pointerUp,
-              onPointerCancel: (_) => _downAt = null,
-              child: RawGestureDetector(
-                // The row beside the message answers a long press too.
-                behavior: HitTestBehavior.translucent,
-                excludeFromSemantics: true,
-                gestures: {
-                  _CleanLongPress:
-                      GestureRecognizerFactoryWithHandlers<_CleanLongPress>(
-                        () => _CleanLongPress(allow: _beside, debugOwner: this),
-                        (instance) => instance.onLongPressStart = _longPress,
-                      ),
-                  TapGestureRecognizer:
-                      GestureRecognizerFactoryWithHandlers<
-                        TapGestureRecognizer
-                      >(
-                        () => TapGestureRecognizer(debugOwner: this),
-                        (instance) =>
-                            instance.onSecondaryTapUp = (details) =>
-                                _show(pin: true, at: details.globalPosition),
-                      ),
-                },
-                child: Align(
-                  alignment: widget.end
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: ConstrainedBox(
-                    constraints: widget.constraints,
-                    child: CompositedTransformTarget(
-                      link: _link,
-                      child: OverlayPortal(
-                        controller: _portal,
-                        overlayChildBuilder: _bar,
+              excludeFromSemantics: true,
+              gestures: {
+                _CleanLongPress:
+                    GestureRecognizerFactoryWithHandlers<_CleanLongPress>(
+                      () => _CleanLongPress(allow: _beside, debugOwner: this),
+                      (instance) => instance.onLongPressStart = _longPress,
+                    ),
+                TapGestureRecognizer:
+                    GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+                      () => TapGestureRecognizer(debugOwner: this),
+                      (instance) =>
+                          instance.onSecondaryTapUp = (details) =>
+                              _show(pin: true, at: details.globalPosition),
+                    ),
+              },
+              child: Align(
+                alignment: widget.end
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: ConstrainedBox(
+                  constraints: widget.constraints,
+                  child: CompositedTransformTarget(
+                    link: _link,
+                    child: OverlayPortal(
+                      controller: _portal,
+                      overlayChildBuilder: _bar,
+                      // Resting on the message itself, not its row,
+                      // shows the bar.
+                      child: MouseRegion(
+                        onEnter: _hoverEnter,
+                        onExit: _hoverExit,
                         child: content,
                       ),
                     ),

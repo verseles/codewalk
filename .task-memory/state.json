@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 15,
+  "artifact_seq": 16,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -240,6 +240,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "ART-EXECUTION-HANDOFF #539-#542"
+    },
+    "A0016": {
+      "active": true,
+      "bytes": 1205,
+      "created_at": "2026-11-28T01:55:42Z",
+      "evidence": "/tmp/opencode/g8/rev/u5/r1_*.out",
+      "id": "A0016",
+      "impact": "Fix round needed before push",
+      "origin": "8 helpers: Claude haiku/opus, luna, sol-F, DeepSeek, Ernie, Gemini, Hungerg",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0016.md",
+      "purpose": "Review round 1 of the action bar",
+      "rerun_when": "message_action_bar/live page fork code changes",
+      "sha256": "82948301c55cdf4c400129b9da2286ded15687cb49c9dcd902fef81d9491eaf3",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u5 r1 review #539 (4ea5b87a)"
     }
   },
   "checklist": [
@@ -671,18 +687,19 @@
     {
       "at": "2026-11-28T01:19:03Z",
       "text": "u5 handshake: 8 READY (Claude haiku/opus, luna, sol-F, DeepSeek, Ernie, Gemini, Hungerg); Grok rc=1 (no credits, failed). Dispatching r1 to the 8; natives replace Claude only if they fail again."
+    },
+    {
+      "at": "2026-11-28T01:21:07Z",
+      "text": "CI goldens root cause: my earlier PIL check compared RGBA getbbox (alpha only), so 8 changed goldens were wrongly kept. Re-applied from run 46089433935 in a separate commit after 4ea5b87a: desktop appearance (stale since #519 removed Release history) + 6 capsule/popin (#536 margin). Local golden tests 18/18 pass. Push pending #539 review convergence."
+    },
+    {
+      "at": "2026-11-28T01:57:01Z",
+      "text": "u5 r1 judged. Accept: Escape closes from anywhere (HardwareKeyboard handler while shown); Fork only when catalog.lists(session) and no staged revert; canRedoAll/canCompact need a port; overflow cancel restores pin + hide timer; bar on the edge away from the trigger + ignore bar presses for kDoubleTapTimeout after a tap open; hover only over the content; menu re-resolves the action by id at run; drag beyond slop or scroll cancels the tap; edges need both viewport bounds; semantics actions go through _run; refocus message after a keyboard action; fork navigates via router.go(sessionTabLocation(ref)) after saving the draft (tabs.open alone does not show it; verified sessions_page _openLive); MessageTurn doc split; highlighted code RichText registers with SelectionArea; post-fork test. Reject: accepted-without-ref notice (OpenCode always returns the session)."
     }
   ],
-  "generation": 80,
+  "generation": 84,
   "next_action": "Handshake u5 helpers, then dispatch round 1 + native stand-ins",
-  "pending_operation": {
-    "expected_bytes": 40000,
-    "expected_seconds": 900,
-    "id": "op_20bfbccd97ba",
-    "kind": "subagent",
-    "prepared_at": "2026-11-28T01:19:03Z",
-    "purpose": "u5 review round 1 of #539 (8 helpers)"
-  },
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -704,7 +721,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T01:19:03Z",
+  "updated_at": "2026-11-28T02:07:45Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -746,6 +763,13 @@
       "check": "#539 gate (analyze + full suite + l10n check)",
       "criterion": null,
       "evidence": "analyze 4/4 budget; tests +2621 ~4 -3, the 3 = pre-existing subagent_capsule goldens (also red in CI f6c7a46e, env-dependent); l10n --check ok. Log /tmp/opencode/g8/gate539.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T02:07:45Z",
+      "check": "#539 fix round 1 gate",
+      "criterion": null,
+      "evidence": "analyze 4/4 budget; full suite +2631 ~4 -0 (goldens fixed by 835a6995). Log /tmp/opencode/g8/gate539b.log",
       "outcome": "pass"
     }
   ]

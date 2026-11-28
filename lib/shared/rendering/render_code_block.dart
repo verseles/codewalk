@@ -422,8 +422,14 @@ class _HighlightedCode extends StatelessWidget {
     final root = theme['root'];
     return Container(
       color: root?.backgroundColor ?? const Color(0xffffffff),
+      // Registers with an enclosing selection area, as a Text does, so the
+      // highlighted code stays selectable (#539).
       child: RichText(
         textScaler: MediaQuery.textScalerOf(context),
+        selectionRegistrar: SelectionContainer.maybeOf(context),
+        selectionColor:
+            DefaultSelectionStyle.of(context).selectionColor ??
+            DefaultSelectionStyle.defaultColor,
         text: TextSpan(
           style: TextStyle(
             fontFamily: 'monospace',

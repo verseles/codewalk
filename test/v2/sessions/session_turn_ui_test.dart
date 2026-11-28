@@ -7,15 +7,19 @@ import 'package:codewalk/features/sessions/session_live_controller.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/features/sessions/session_tabs_controller.dart';
 import 'package:codewalk/features/sessions/sessions_controller.dart';
+import 'package:codewalk/platform/sessions/session_draft_store.dart';
 import 'package:codewalk/platform/sessions/session_tabs_store.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
+import 'package:codewalk/platform/storage/payload_store.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_turn_actions.dart';
 import 'package:codewalk_core/codewalk_core.dart';
+import 'package:flutter/gestures.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../storage/storage_fakes.dart';
@@ -175,6 +179,7 @@ void main() {
       for (final text in ['First user prompt', 'First response']) {
         await tester.tap(find.text(text));
         await tester.pumpAndSettle();
+        await tester.pump(kDoubleTapTimeout);
         expect(undo, findsNothing);
         await tester.tap(more);
         await tester.pumpAndSettle();
@@ -199,6 +204,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Second user prompt'));
       await tester.pumpAndSettle();
+      await tester.pump(kDoubleTapTimeout);
       port.nextAnchor = user2.meta.anchor;
       await tester.tap(undo);
       await tester.pumpAndSettle();
@@ -258,6 +264,7 @@ void main() {
       Future<void> fork(String text) async {
         await tester.tap(find.text(text));
         await tester.pumpAndSettle();
+        await tester.pump(kDoubleTapTimeout);
         await tester.tap(find.byKey(const ValueKey('message-action-more')));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const ValueKey('message-action-fork')));
@@ -277,6 +284,95 @@ void main() {
         'fork:${user2.id.value}',
         'fork',
       ]);
+    },
+  );
+
+  testWidgets(
+    'a prompt\'s fork opens the new session with the prompt in its box',
+    (tester) async {
+      final actions = FakeActionSource();
+      final rig = CatalogRig(actions: actions);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      final loading = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      final summary = source.row('one');
+      source.respond([summary]);
+      await loading;
+      final copy = source.row('copy').info.ref;
+      actions.forked = copy;
+      final metadata = V2MetadataStore(backend: FakeMetadataBackend());
+      final drafts = SessionDraftStore(
+        payloads: PreferencesPayloadStore(metadata),
+        index: metadata,
+      );
+      final directory = LiveDirectory();
+      final ref = summary.info.ref;
+      final live = SessionLiveController(
+        hosts: rig.hosts,
+        profile: profile('a'),
+        summary: summary,
+        directory: directory,
+      );
+      addTearDown(live.dispose);
+      final start = live.start();
+      final handle = directory.grant(ref, turnActions: _FakePort());
+      await start;
+      final user1 = _turn('msg_1', ref: ref, text: 'First user prompt');
+      handle.emit(
+        SessionLiveView(
+          session: ref,
+          phase: SessionLivePhase.live,
+          state: liveState(
+            ref,
+            items: [
+              user1,
+              _answer('ans_1', ref: ref, text: 'First response'),
+            ],
+          ),
+        ),
+      );
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) =>
+                Scaffold(body: SessionLivePage(controller: live)),
+          ),
+          GoRoute(
+            path: '/s/:host/:id',
+            builder: (context, state) =>
+                Text('opened ${state.pathParameters['id']}'),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider<SessionsController?>.value(
+              value: rig.sessions,
+            ),
+            Provider<SessionDraftStore?>.value(value: drafts),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+            localizationsDelegates: V2Localizations.localizationsDelegates,
+            supportedLocales: V2Localizations.supportedLocales,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('First user prompt'));
+      await tester.pumpAndSettle();
+      await tester.pump(kDoubleTapTimeout);
+      await tester.tap(find.byKey(const ValueKey('message-action-more')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('message-action-fork')));
+      await tester.pumpAndSettle();
+      expect(actions.calls, ['fork:${user1.id.value}']);
+      expect(find.text('opened ses_copy'), findsOneWidget);
+      expect(await drafts.read(copy), 'First user prompt');
     },
   );
 

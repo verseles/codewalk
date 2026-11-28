@@ -90,6 +90,7 @@ void main() {
     await tester.tap(find.textContaining('All'));
     await tester.pumpAndSettle();
     expect(_bar, findsOneWidget);
+    await tester.pump(kDoubleTapTimeout);
     await tester.tap(_action(MessageActionId.copy));
     await tester.pumpAndSettle();
     expect(copied, ['# Done\n\nAll **good**.']);
@@ -232,28 +233,129 @@ void main() {
     expect(_bar, findsNothing);
   });
 
-  testWidgets('the bar sits on the top edge, or the bottom one at the top', (
-    tester,
-  ) async {
+  testWidgets('the bar sits on the edge away from the finger, inside the '
+      'list', (tester) async {
     await _pump(tester, [
       SessionTimelineTile(item: _agent('at the very top')),
       const SizedBox(height: 120),
       SessionTimelineTile(item: _user('lower down')),
     ]);
-    await tester.tap(find.text('lower down'));
-    await tester.pumpAndSettle();
     final card = tester.getRect(find.byType(Card));
+    // A tap low on the bubble puts the bar on its top edge, at its end.
+    await tester.tapAt(Offset(card.right - 6, card.bottom - 3));
+    await tester.pumpAndSettle();
     expect(tester.getCenter(_bar).dy, moreOrLessEquals(card.top, epsilon: 1));
-    // The user's bar sits at the bubble's end.
     expect(tester.getRect(_bar).right, lessThanOrEqualTo(card.right));
     await tester.tapAt(const Offset(400, 500));
     await tester.pumpAndSettle();
+    // A tap high on it puts the bar on its bottom edge.
+    await tester.tapAt(Offset(card.right - 6, card.top + 3));
+    await tester.pumpAndSettle();
+    expect(
+      tester.getCenter(_bar).dy,
+      moreOrLessEquals(card.bottom, epsilon: 1),
+    );
+    await tester.tapAt(const Offset(400, 500));
+    await tester.pumpAndSettle();
+    // At the top of the list, the top edge has no room.
     await tester.tap(find.text('at the very top'));
     await tester.pumpAndSettle();
     final top = tester.getRect(
       find.byKey(const ValueKey('message-bubble-test/a')),
     );
+    expect(tester.getRect(_bar).top, greaterThanOrEqualTo(0));
     expect(tester.getCenter(_bar).dy, greaterThan(top.top));
+  });
+
+  testWidgets("a double tap's second tap on the bar runs nothing", (
+    tester,
+  ) async {
+    final copied = await _pump(tester, [
+      SessionTimelineTile(item: _user('hi')),
+    ]);
+    final card = tester.getRect(find.byType(Card));
+    await tester.tapAt(Offset(card.right - 6, card.bottom - 3));
+    await tester.pump(const Duration(milliseconds: 60));
+    await tester.tap(_action(MessageActionId.copy));
+    await tester.pump();
+    expect(copied, isEmpty);
+    expect(_bar, findsOneWidget);
+  });
+
+  testWidgets('Escape closes a bar a tap opened, wherever the focus is', (
+    tester,
+  ) async {
+    final focus = FocusNode();
+    addTearDown(focus.dispose);
+    await _pump(tester, [
+      SessionTimelineTile(item: _agent('the answer')),
+      Focus(focusNode: focus, child: const SizedBox(height: 10)),
+    ]);
+    await tester.tap(find.text('the answer'));
+    await tester.pumpAndSettle();
+    focus.requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(_bar, findsNothing);
+  });
+
+  testWidgets('a drag that comes back opens nothing', (tester) async {
+    await _pump(tester, [SessionTimelineTile(item: _agent('the answer'))]);
+    final start = tester.getCenter(find.text('the answer'));
+    final gesture = await tester.startGesture(start);
+    await gesture.moveBy(const Offset(0, 40));
+    await gesture.moveTo(start + const Offset(1, 0));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(_bar, findsNothing);
+  });
+
+  testWidgets('the mouse beside the bubble shows nothing', (tester) async {
+    await _pump(tester, [SessionTimelineTile(item: _user('hi'))]);
+    final bubble = tester.getRect(find.textContaining('hi'));
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: const Offset(700, 500));
+    await mouse.moveTo(Offset(20, bubble.center.dy));
+    await tester.pump(messageBarHoverDelay * 2);
+    await tester.pumpAndSettle();
+    expect(_bar, findsNothing);
+  });
+
+  testWidgets('a dismissed menu lets a mouse bar hide again', (tester) async {
+    await _pump(tester, [
+      SessionTimelineTile(
+        item: _agent('the answer'),
+        actions: [
+          MessageAction(
+            id: MessageActionId.fork,
+            label: 'Fork from here',
+            icon: Icons.call_split,
+            overflow: true,
+            onSelected: (_) {},
+          ),
+        ],
+      ),
+    ]);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: const Offset(700, 500));
+    await mouse.moveTo(tester.getCenter(find.text('the answer')));
+    await tester.pump(messageBarHoverDelay * 2);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('message-action-more')));
+    await tester.pumpAndSettle();
+    expect(find.text('Fork from here'), findsOneWidget);
+    // Escape is the menu's first.
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.text('Fork from here'), findsNothing);
+    expect(_bar, findsOneWidget);
+    await mouse.moveTo(const Offset(700, 500));
+    await tester.pump(messageBarHideDelay * 2);
+    await tester.pumpAndSettle();
+    expect(_bar, findsNothing);
   });
 
   testWidgets('turn actions show where offered; overflow ones in the menu', (
@@ -278,6 +380,7 @@ void main() {
     ]);
     await tester.tap(find.text('my prompt'));
     await tester.pumpAndSettle();
+    await tester.pump(kDoubleTapTimeout);
     final buttons = tester
         .widgetList(
           find.descendant(
@@ -305,6 +408,7 @@ void main() {
     expect(_bar, findsNothing);
     await tester.tap(find.text('my prompt'));
     await tester.pumpAndSettle();
+    await tester.pump(kDoubleTapTimeout);
     await tester.tap(find.byKey(const ValueKey('message-action-more')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Fork from here'));
@@ -509,5 +613,28 @@ void main() {
     expect(turns[u2.id]?.owner, u2);
     expect(turns[a2.id]?.latest, isTrue);
     expect(turns[a2.id]?.next, isNull);
+  });
+
+  testWidgets('highlighted code is selectable too', (tester) async {
+    final copied = await _pump(tester, [
+      SessionTimelineTile(
+        item: _agent('Run this:\n\n```dart\nfinal answer = 42;\n```'),
+      ),
+    ]);
+    await tester.longPressAt(
+      tester.getTopLeft(find.textContaining('answer', findRichText: true)) +
+          const Offset(10, 6),
+    );
+    await tester.pumpAndSettle();
+    expect(_bar, findsNothing);
+    await tester.tap(
+      find.descendant(
+        of: find.byType(AdaptiveTextSelectionToolbar),
+        matching: find.text('Copy'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // The code's own word, not the paragraph's above it.
+    expect(copied.single, contains('final'));
   });
 }

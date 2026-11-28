@@ -20,13 +20,6 @@ import 'session_timeline_projection.dart';
 import 'session_timeline_tile.dart';
 import 'session_work_group.dart';
 
-/// The live session timeline: the resident items, the header and the
-/// viewport rules that keep the newest content in view.
-///
-/// The list is chronological and forward, like the retained reference: the
-/// header is the first row and the items follow it, so a live update appends
-/// below the reader and the newest content is at the end.
-///
 /// The confirmed user turn a message belongs to (#539).
 final class MessageTurn {
   const MessageTurn({this.owner, this.latest = false, this.next});
@@ -63,6 +56,13 @@ Map<ItemId, MessageTurn> messageTurns(List<TimelineItem> items) {
   return result;
 }
 
+/// The live session timeline: the resident items, the header and the
+/// viewport rules that keep the newest content in view.
+///
+/// The list is chronological and forward, like the retained reference: the
+/// header is the first row and the items follow it, so a live update appends
+/// below the reader and the newest content is at the end.
+///
 /// Older history pages in above the rows the timeline first showed. Those
 /// rows open a center sliver: what comes before it grows upwards and what
 /// comes after it grows downwards, so a page added on top never moves the row

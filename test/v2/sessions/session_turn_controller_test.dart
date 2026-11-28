@@ -371,6 +371,8 @@ void main() {
     expect(live.turn.port, isNull);
     expect(live.turn.canUndo, isFalse);
     expect(live.turn.canRedoNext, isFalse);
+    expect(live.turn.canRedoAll, isFalse);
+    expect(live.turn.canCompact, isFalse);
   });
 
   test(
