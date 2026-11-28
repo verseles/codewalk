@@ -616,9 +616,9 @@ description of this code.
 
 - **Given** a whole message (a sent prompt, or a finished answer whose start history kept) and a platform that can take images (#540)
 - **When** the user picks Share as image in its action bar
-- **Then** the message alone (its card or its text with its clock, never the bar, the focus outline or the rest of the timeline) becomes a PNG on the theme's surface with a 16-pixel margin, at the screen's density up to 3x, smaller when needed to stay within 8192 by 4096 pixels; a message too tall even at half size says "Too long to share as an image" and copying still works
-- **Then** on Android, macOS and Windows the system share sheet receives the file alone (no text that a target could take instead), written to this app's own share folder, whose images older than a day are removed on the next share; on Linux, whose share sheet takes no files, the button reads Save as image and the system save dialog writes the PNG where the user chooses, then says "Image saved"
-- **Then** a streaming answer, a waiting prompt and the Web offer no image; a failure says "The image could not be made" and never shares text instead
+- **Then** the message alone (its card or its text with its clock, never the bar, the focus outline or the rest of the timeline) becomes a PNG on the theme's surface with a 16-pixel margin, at the screen's density up to 3x, smaller when needed to stay within 8192 by 4096 pixels and 12 million pixels in all; a message too tall even at half size says "Too long to share as an image" and copying still works
+- **Then** on Android, macOS and Windows the system share sheet receives the file alone (no text that a target could take instead), written to a new file of its own in this app's share folder (two images of the same second never share one), whose images older than a day are removed on the next share; on Linux, whose share sheet takes no files, the button reads Save as image and the system save dialog writes the PNG where the user chooses, then says "Image saved"
+- **Then** a streaming answer, a waiting prompt, a message shown only in part for its length (over 64,000 characters), a message with nothing to show and the Web offer no image; a failure says "The image could not be made" and never shares text instead
 
 ### V2 read aloud
 

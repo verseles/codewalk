@@ -517,13 +517,18 @@ class SessionTimelineTile extends StatelessWidget {
                   icon: Symbols.content_copy,
                   onSelected: (context) => copyConversationText(context, text),
                 ),
-              // The whole message only: never a streaming answer or one
-              // whose start history lost (#540).
+              // The whole message only: never a streaming answer, one whose
+              // start history lost, one shown only in part for its length,
+              // or one with nothing to show (#540).
               if (imageMode != MessageImageMode.none &&
+                  MessageRenderBudget.decide(text).kind !=
+                      RenderDecisionKind.plainTruncated &&
                   switch (item) {
                     AssistantText(:final complete, :final prefixMissing) =>
-                      complete && !prefixMissing,
-                    _ => true,
+                      complete && !prefixMissing && text.trim().isNotEmpty,
+                    UserInput(:final attachments) =>
+                      text.trim().isNotEmpty || attachments.isNotEmpty,
+                    _ => false,
                   })
                 MessageAction(
                   id: MessageActionId.shareImage,

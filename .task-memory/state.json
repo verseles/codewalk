@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 21,
+  "artifact_seq": 22,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -336,6 +336,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "u5 #539 review round 5 reports"
+    },
+    "A0022": {
+      "active": true,
+      "bytes": 403,
+      "created_at": "2026-11-28T04:02:31Z",
+      "evidence": "/tmp/opencode/g8/plan/p542/r1_*.out; /tmp/opencode/g8/rev/u6/r1_*.out; /tmp/opencode/g8/rev/u7/r1_*.out",
+      "id": "A0022",
+      "impact": "Inputs for #542 synthesis and #540/#541 fixes",
+      "origin": "8 helpers x3 jobs",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0022.md",
+      "purpose": "Plan #542; review e98a01f4 and a00460f9",
+      "rerun_when": "boundaries change",
+      "sha256": "6c5725262ae1abb633f25311e17b343f559ada69351d02e835af4e223472bbce",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "Batch: p542 planning r1 + u6 #540 review r1 + u7 #541 review r1"
     }
   },
   "checklist": [
@@ -819,17 +835,21 @@
     {
       "at": "2026-11-28T03:26:52Z",
       "text": "u5 r5 judgment (A0021): accept all. G1 hint room from text scaler (scale(16)+14); G2 hint test asserts inside ClipRect, plus large text; G3 replace position listener + ScrollNotificationObserver with a post-frame recheck rearmed every frame while the bar shows (no ensureVisualUpdate, idle-free) so width-only resizes re-clip; G4 non-finite anchor -> hide; test skipOffstage:false; G5 absorber and hint sized by the pill's real height (FractionallySizedBox heightFactor 0.5; hint via FractionalTranslation), desktop compact density test. Round 6 re-review after fixes."
+    },
+    {
+      "at": "2026-11-28T03:30:52Z",
+      "text": "u5 r5 fixes committed cbea5f2e (per-frame post-frame recheck replaces scroll listeners; non-finite anchor hides; text-scaled hint room; absorber/hint by real pill height). Gesture suite 38 pass; 4 mutation checks fail as expected. Round 6 payload /tmp/opencode/g8/rev/u5/p6.txt (validation placeholder)."
     }
   ],
-  "generation": 111,
-  "next_action": "Implement r5 fixes in message_action_bar.dart + gesture tests, gate, commit, round 6. Batch op_d9867bf20d60 (p542 + u6 + u7) running; waiter bk72b5cf9.",
+  "generation": 115,
+  "next_action": "When full gate bnm1y7z4s ends (expect only 2 #541 appearance goldens), fill p6 validation; dispatch r6 after the batch op_d9867bf20d60 (p542+u6+u7, waiter bk72b5cf9) is captured.",
   "pending_operation": {
-    "expected_bytes": 150000,
-    "expected_seconds": 1200,
-    "id": "op_d9867bf20d60",
+    "expected_bytes": 60000,
+    "expected_seconds": 900,
+    "id": "op_5eecbf20db60",
     "kind": "subagent",
-    "prepared_at": "2026-11-28T03:26:33Z",
-    "purpose": "Batch: p542 planning (8 helpers, plan/p542 p1.txt) + u6 #540 review e98a01f4 + u7 #541 review a00460f9 (8 helpers each), concurrent"
+    "prepared_at": "2026-11-28T04:02:38Z",
+    "purpose": "Batch: u5 #539 round 6 (8 helpers, p6.txt, cbea5f2e) + native Claude stand-ins for failed Claude helpers: p542 plan, u6 #540 review, u7 #541 review"
   },
   "queued_followups": [],
   "request": {
@@ -852,7 +872,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T03:26:52Z",
+  "updated_at": "2026-11-28T04:02:38Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -936,6 +956,13 @@
       "check": "#541 full suite (working tree)",
       "criterion": null,
       "evidence": "+2483 ~4 -3: app_snack_bar guard (fixed: read-aloud failure via showAppSnackBar; guard+voice 25 pass) and appearance golden desktop_light/dark (expected: new Read aloud settings destination; regenerate on x86 via goldens.yml after push). Log /tmp/opencode/g8/t541.log",
+      "outcome": "info"
+    },
+    {
+      "at": "2026-11-28T03:38:28Z",
+      "check": "Full gate on cbea5f2e",
+      "criterion": null,
+      "evidence": "analyze 4 pre-existing; tests all pass except appearance golden desktop_light/dark (expected, #541 settings destination). /tmp/opencode/g8/t_r5.log",
       "outcome": "info"
     }
   ]

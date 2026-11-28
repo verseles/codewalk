@@ -20,6 +20,10 @@ const messageImagePadding = 16.0;
 const messageImageMaxHeight = 8192.0;
 const messageImageMaxWidth = 4096.0;
 
+/// The most pixels one image holds, so a long answer at a high density
+/// never needs hundreds of megabytes on a small phone.
+const messageImageMaxPixels = 12000000.0;
+
 /// The scale a message of [content] logical size is drawn at: the screen's,
 /// up to 3, then smaller so the image fits; null when it cannot fit at half
 /// size.
@@ -31,6 +35,7 @@ double? messageImageRatio(Size content, {required double devicePixelRatio}) {
     min(devicePixelRatio, 3.0),
     messageImageMaxHeight / height,
     messageImageMaxWidth / width,
+    sqrt(messageImageMaxPixels / (width * height)),
   ].reduce(min);
   return ratio < 0.5 ? null : ratio;
 }
@@ -44,23 +49,30 @@ Future<Uint8List?> captureMessageImage(
 }) async {
   final content = await boundary.toImage(pixelRatio: ratio);
   ui.Image? composed;
+  ui.Picture? picture;
   try {
-    final margin = messageImagePadding * ratio;
-    final width = content.width + (2 * margin).round();
-    final height = content.height + (2 * margin).round();
+    // The capture rounds its own size up: the margin gives way so the
+    // image never passes its limits.
+    final margin = (2 * messageImagePadding * ratio).round();
+    final width = min(content.width + margin, messageImageMaxWidth.toInt());
+    final height = min(content.height + margin, messageImageMaxHeight.toInt());
     final recorder = ui.PictureRecorder();
     Canvas(recorder)
       ..drawRect(
         Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
         Paint()..color = background,
       )
-      ..drawImage(content, Offset(margin, margin), Paint());
-    final picture = recorder.endRecording();
+      ..drawImage(
+        content,
+        Offset((width - content.width) / 2, (height - content.height) / 2),
+        Paint(),
+      );
+    picture = recorder.endRecording();
     composed = await picture.toImage(width, height);
-    picture.dispose();
     final data = await composed.toByteData(format: ui.ImageByteFormat.png);
     return data?.buffer.asUint8List();
   } finally {
+    picture?.dispose();
     content.dispose();
     composed?.dispose();
   }
@@ -82,10 +94,17 @@ Future<void> shareMessageImage(BuildContext context) async {
   final l10n = context.v2L10n;
   final background = Theme.of(context).colorScheme.surface;
   final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-  if (sink == null || boundary == null || !boundary.hasSize) {
+  if (sink == null || boundary == null) {
     showAppSnackBar(messenger, l10n.messageImageFailed);
     return;
   }
+  // The bar that ran this is gone from the next frame on.
+  await WidgetsBinding.instance.endOfFrame;
+  if (!boundary.attached || !boundary.hasSize) {
+    showAppSnackBar(messenger, l10n.messageImageFailed);
+    return;
+  }
+  // The message as it is now drawn, after any change of size meanwhile.
   final ratio = messageImageRatio(
     boundary.size,
     devicePixelRatio: devicePixelRatio,
@@ -94,9 +113,6 @@ Future<void> shareMessageImage(BuildContext context) async {
     showAppSnackBar(messenger, l10n.messageImageTooLong);
     return;
   }
-  // The bar that ran this is gone from the next frame on.
-  await WidgetsBinding.instance.endOfFrame;
-  if (!boundary.attached) return;
   Uint8List? png;
   try {
     png = await captureMessageImage(

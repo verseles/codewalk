@@ -1,14 +1,17 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:codewalk/features/sessions/message_image_share.dart';
 import 'package:codewalk/features/sessions/session_timeline_tile.dart';
+import 'package:codewalk/platform/media/message_image_sink_io.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/media/message_image.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/gestures.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
 import 'package:provider/provider.dart';
@@ -96,11 +99,60 @@ void main() {
     // Tall: the height bound wins.
     final tall = messageImageRatio(const Size(300, 6000), devicePixelRatio: 3)!;
     expect((6000 + 2 * messageImagePadding) * tall, closeTo(8192, 0.01));
+    // Big at a high density: the pixel bound wins.
+    final big = messageImageRatio(const Size(1300, 2700), devicePixelRatio: 3)!;
+    expect(
+      (1300 + 2 * messageImagePadding) *
+          big *
+          (2700 + 2 * messageImagePadding) *
+          big,
+      closeTo(messageImageMaxPixels, 1),
+    );
     // Too tall even at half size.
     expect(
       messageImageRatio(const Size(300, 20000), devicePixelRatio: 3),
       isNull,
     );
+  });
+
+  testWidgets('the image never passes its limits', (tester) async {
+    final key = GlobalKey();
+    await tester.pumpWidget(
+      Center(
+        child: OverflowBox(
+          maxHeight: double.infinity,
+          child: RepaintBoundary(
+            key: key,
+            // Rounded up by the capture, this height once made 8193 pixels.
+            child: const SizedBox(
+              width: 300,
+              height: 5990.4,
+              child: ColoredBox(color: Colors.red),
+            ),
+          ),
+        ),
+      ),
+    );
+    final boundary =
+        key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+    final ratio = messageImageRatio(boundary.size, devicePixelRatio: 3)!;
+    final png = await tester.runAsync(
+      () =>
+          captureMessageImage(boundary, ratio: ratio, background: Colors.white),
+    );
+    final image = img.decodePng(png!)!;
+    expect(image.height, lessThanOrEqualTo(messageImageMaxHeight));
+    expect(image.width, lessThanOrEqualTo(messageImageMaxWidth));
+  });
+
+  test('two images of the same second get files of their own', () async {
+    final folder = await Directory.systemTemp.createTemp('codewalk_shares');
+    addTearDown(() => folder.delete(recursive: true));
+    final first = await writeNewImage(folder, 'a.png', Uint8List(1));
+    final second = await writeNewImage(folder, 'a.png', Uint8List(2));
+    expect(first.uri.pathSegments.last, 'a.png');
+    expect(second.uri.pathSegments.last, 'a-2.png');
+    expect(await first.length(), 1);
   });
 
   test('the file is named after the moment', () {
@@ -189,6 +241,16 @@ void main() {
 
     await _pump(tester, null, SessionTimelineTile(item: _agent('the answer')));
     await _openBar(tester, find.text('the answer'));
+    expect(_shareButton, findsNothing);
+
+    // Shown only in part for its length: no image of a part.
+    await _pump(
+      tester,
+      _Sink(MessageImageMode.share),
+      SessionTimelineTile(item: _agent('word ' * 13000)),
+    );
+    await _openBar(tester, find.byType(SessionTimelineTile));
+    expect(find.byKey(const ValueKey('message-action-copy')), findsOneWidget);
     expect(_shareButton, findsNothing);
   });
 }

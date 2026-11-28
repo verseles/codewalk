@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -41,11 +42,14 @@ final class _PlatformMessageImages implements MessageImageSink {
             : MessageImageOutcome.saved;
       }
       final file = await _write(png, fileName);
+      final name = file.uri.pathSegments.last;
       // The file alone: Windows targets then take the image itself, never
-      // a text fallback (a v1 lesson).
+      // a text fallback (a v1 lesson). Windows still needs a title, which
+      // names the sheet and adds no text.
       final result = await SharePlus.instance.share(
         ShareParams(
-          files: [XFile(file.path, mimeType: 'image/png', name: fileName)],
+          files: [XFile(file.path, mimeType: 'image/png', name: name)],
+          title: Platform.isWindows ? name : null,
           sharePositionOrigin: origin,
         ),
       );
@@ -67,9 +71,7 @@ final class _PlatformMessageImages implements MessageImageSink {
     final folder = Directory('${base.path}${Platform.pathSeparator}$_folder');
     await folder.create(recursive: true);
     await _prune(folder);
-    final file = File('${folder.path}${Platform.pathSeparator}$fileName');
-    await file.writeAsBytes(png, flush: true);
-    return file;
+    return writeNewImage(folder, fileName, png);
   }
 
   /// Removes this app's shared images older than a day.
@@ -78,11 +80,41 @@ final class _PlatformMessageImages implements MessageImageSink {
     try {
       await for (final entry in folder.list()) {
         if (entry is! File || !entry.path.endsWith('.png')) continue;
-        final changed = entry.lastModifiedSync();
-        if (now.difference(changed) > _keep) await entry.delete();
+        try {
+          final changed = entry.lastModifiedSync();
+          if (now.difference(changed) > _keep) await entry.delete();
+        } on FileSystemException {
+          // A file another process holds stays for the next time.
+        }
       }
     } on FileSystemException {
-      // A file another process holds stays for the next time.
+      // A folder that cannot be listed is pruned the next time.
     }
+  }
+}
+
+/// Writes [png] to a new file in [folder] named after [fileName], adding
+/// `-2`, `-3`… when that name is taken: two images of the same second never
+/// share a file, so a target still reading the first never gets the second.
+@visibleForTesting
+Future<File> writeNewImage(
+  Directory folder,
+  String fileName,
+  Uint8List png,
+) async {
+  final stem = fileName.endsWith('.png')
+      ? fileName.substring(0, fileName.length - 4)
+      : fileName;
+  for (var n = 1; ; n++) {
+    final name = n == 1 ? '$stem.png' : '$stem-$n.png';
+    final file = File('${folder.path}${Platform.pathSeparator}$name');
+    try {
+      await file.create(exclusive: true);
+    } on FileSystemException {
+      if (n < 100) continue;
+      rethrow;
+    }
+    await file.writeAsBytes(png, flush: true);
+    return file;
   }
 }
