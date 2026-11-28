@@ -663,11 +663,26 @@
     {
       "at": "2026-11-28T00:53:39Z",
       "text": "Owner Q2 = b: #542 Forward like v1: multi-select sessions and send immediately to all (per-target outcome, no blind replay of uncertain sends)."
+    },
+    {
+      "at": "2026-11-28T01:18:09Z",
+      "text": "u5 review #539: boundary 4ea5b87a (base f6c7a46e), WORK ITEM codewalk-539-message-action-bar, key in /tmp/opencode/g8/rev/u5/key, metrics rvw_20261128T011730Z_82aebb86. Pool: 9 helpers (Claude x2 replaced by native Plan stand-ins haiku/opus per owner; Grok no credits). Payload /tmp/opencode/g8/rev/u5/p1.txt."
+    },
+    {
+      "at": "2026-11-28T01:19:03Z",
+      "text": "u5 handshake: 8 READY (Claude haiku/opus, luna, sol-F, DeepSeek, Ernie, Gemini, Hungerg); Grok rc=1 (no credits, failed). Dispatching r1 to the 8; natives replace Claude only if they fail again."
     }
   ],
-  "generation": 77,
-  "next_action": "Continue #539: wire MessageActionHost into session_timeline_tile, live timeline turn actions, fork(before), l10n, tests",
-  "pending_operation": null,
+  "generation": 80,
+  "next_action": "Handshake u5 helpers, then dispatch round 1 + native stand-ins",
+  "pending_operation": {
+    "expected_bytes": 40000,
+    "expected_seconds": 900,
+    "id": "op_20bfbccd97ba",
+    "kind": "subagent",
+    "prepared_at": "2026-11-28T01:19:03Z",
+    "purpose": "u5 review round 1 of #539 (8 helpers)"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -689,7 +704,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T01:17:18Z",
+  "updated_at": "2026-11-28T01:19:03Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
