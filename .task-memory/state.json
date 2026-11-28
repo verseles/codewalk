@@ -1200,10 +1200,14 @@
     {
       "at": "2026-11-28T07:56:00Z",
       "text": "Pushed e8ad29a7 (all group 8 reviewed commits). Goldens run 46123352062 on x86 started. Follow-ups created: #554 device voice, #555 forward pending, #556 settings transition bars, #557 hidden-tab shell sightings. Release notes drafted at release-notes/v2.14.0.md (uncommitted). Loop commits kept (interleaved across units, no squash)."
+    },
+    {
+      "at": "2026-11-28T07:58:04Z",
+      "text": "R0001 resolved: x86 Goldens run 46123352062 at e8ad29a7 rendered all 36 goldens; the 10 differing PNGs committed in 4347e56b, so every committed golden equals its x86 render in RGB. Release proceeds per project rule (local gate decides, CI safety net via make watch-ci; release.yml has its own Linux smoke and verify before publish)."
     }
   ],
-  "generation": 193,
-  "next_action": "When goldens run ends: compare RGB, commit changed PNGs + notes, push, make watch-ci; then close #534 #536-#553 with comments, tick #527, make release V=stable",
+  "generation": 194,
+  "next_action": "make release V=stable (dry run first), make watch-release, close issues and tick #527",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -1217,7 +1221,7 @@
       "id": "R0001",
       "mitigation": "After #534 is pushed (it also removes the Appearance Recent card), run gh workflow run goldens.yml --ref main, download, inspect and commit only differing PNGs, push, gate on that SHA before the group release",
       "stage": "S4",
-      "status": "open",
+      "status": "resolved",
       "text": "CI red on main since 2aeae5e2 (runs 46067006885, 46075515623, 46077955108): appearance golden desktop_light/dark differ 0.22% (2242 px) on x86; same diff before group 8, so stale since #519 (Settings changed); local ARM tolerance 0.3% hides it"
     }
   ],
@@ -1226,7 +1230,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T07:57:09Z",
+  "updated_at": "2026-11-28T07:58:04Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
