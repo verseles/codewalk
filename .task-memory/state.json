@@ -1,8 +1,8 @@
 {
-  "artifact_seq": 34,
+  "artifact_seq": 37,
   "artifacts": {
     "A0001": {
-      "active": true,
+      "active": false,
       "bytes": 740,
       "created_at": "2026-11-27T22:11:17Z",
       "evidence": "/tmp/opencode/g8/rev/u1/r1_*.out",
@@ -12,13 +12,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0001.md",
       "purpose": "Review 170e8de5..f5a05c40",
       "rerun_when": "sessions_page.dart, session_actions_menu.dart or workspace_draft_page.dart change",
+      "retired": true,
       "sha256": "fae4e064501ebfe88a83d3b159c097220aa7502f04d2065985b089f669f31cf8",
       "stage": "S2",
       "supersedes": null,
       "title": "u1 review r1 (#532+#533)"
     },
     "A0002": {
-      "active": true,
+      "active": false,
       "bytes": 1217,
       "created_at": "2026-11-27T22:24:46Z",
       "evidence": "/tmp/opencode/g8/plan/p534/r1_*.out",
@@ -28,13 +29,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0002.md",
       "purpose": "Plan #534",
       "rerun_when": "sessions_page.dart, project_workspace_store.dart or project_contexts_controller.dart change materially",
+      "retired": true,
       "sha256": "2360fdd1bdb35a3b2a4f1fcbf72e0d4a25021e2d8cdada54a678fe1f9014d670",
       "stage": "S4",
       "supersedes": null,
       "title": "p534 planning r1 (sidebar revamp)"
     },
     "A0003": {
-      "active": true,
+      "active": false,
       "bytes": 1065,
       "created_at": "2026-11-27T22:36:01Z",
       "evidence": "/tmp/opencode/g8/plan/p534/d1*.out, /tmp/opencode/g8/rev/u2/r1_*.out",
@@ -44,13 +46,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0003.md",
       "purpose": "Close #534 planning judgment and review #535",
       "rerun_when": "app_shell.dart or sessions_page.dart change",
+      "retired": true,
       "sha256": "7bd171cf0363c70c6e58aa642096ae36cd03b16557b394cc981fbc6cac33179a",
       "stage": "S4",
       "supersedes": null,
       "title": "p534 dissent + luna re-emit; u2 review r1 (#535)"
     },
     "A0004": {
-      "active": true,
+      "active": false,
       "bytes": 417,
       "created_at": "2026-11-27T22:37:07Z",
       "evidence": "/tmp/opencode/g8/rev/u2/d1_helperCodex-6.2-sol-xhigh-F.out",
@@ -60,13 +63,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0004.md",
       "purpose": "Dissent exchange",
       "rerun_when": "toolbar actions layout changes",
+      "retired": true,
       "sha256": "39d6a5f05136c2460fa0e168c35ab81f93c17800e2074ce7cf151e06aa0d6374",
       "stage": "S4",
       "supersedes": null,
       "title": "u2 sol-F dissent on #535 overflow fix"
     },
     "A0005": {
-      "active": true,
+      "active": false,
       "bytes": 1012,
       "created_at": "2026-11-27T23:08:03Z",
       "evidence": "/tmp/opencode/g8/rev/u3/r1_*.out",
@@ -76,13 +80,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0005.md",
       "purpose": "Review 4a0e9904",
       "rerun_when": "sessions_page.dart, project_workspace_store.dart or project_contexts_controller.dart change",
+      "retired": true,
       "sha256": "0609a3a1d327d349e1d51a9a26b91af60e661234743bd67206d9d24412dcd5f7",
       "stage": "S4",
       "supersedes": null,
       "title": "u3 review r1 (#534 sidebar revamp)"
     },
     "A0006": {
-      "active": true,
+      "active": false,
       "bytes": 656,
       "created_at": "2026-11-27T23:18:25Z",
       "evidence": "/tmp/opencode/g8/rev/u3/r2_*.out",
@@ -92,13 +97,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0006.md",
       "purpose": "Re-review",
       "rerun_when": "project_workspace_store.dart or sessions_page.dart change",
+      "retired": true,
       "sha256": "ae371da599c63f360c5278031e926fcf166a971f1de919789b8132d71a0139ce",
       "stage": "S4",
       "supersedes": null,
       "title": "u3 re-review r2 (#534 fix 0e911541)"
     },
     "A0007": {
-      "active": true,
+      "active": false,
       "bytes": 192,
       "created_at": "2026-11-27T23:25:18Z",
       "evidence": "/tmp/opencode/g8/rev/u3/r3_*.out",
@@ -108,13 +114,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0007.md",
       "purpose": "Re-review",
       "rerun_when": "#534 files change",
+      "retired": true,
       "sha256": "554166a51cde6f9c2675475487632fff7fdab5ae8ae985c89d5e4676c2018785",
       "stage": "S4",
       "supersedes": null,
       "title": "u3 re-review r3 (#534 fix 7122ddc7)"
     },
     "A0008": {
-      "active": true,
+      "active": false,
       "bytes": 182,
       "created_at": "2026-11-27T23:25:59Z",
       "evidence": "/tmp/opencode/g8/rev/u3/r3b_helperClaude-haiku-5-max.err",
@@ -124,13 +131,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0008.md",
       "purpose": "Recovery",
       "rerun_when": "never",
+      "retired": true,
       "sha256": "ab36a0451fea23c332da8156fc94f1db5c68be6e5b15d61d65ebb5e0d19b64d6",
       "stage": "S4",
       "supersedes": null,
       "title": "u3 r3 haiku resume"
     },
     "A0009": {
-      "active": true,
+      "active": false,
       "bytes": 768,
       "created_at": "2026-11-27T23:47:27Z",
       "evidence": "/tmp/opencode/g8/rev/u4/r1_*.out, r1_native-*.note",
@@ -140,13 +148,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0009.md",
       "purpose": "Review 5d2bc856, 538c0b0a, 6843825b",
       "rerun_when": "markdown_content.dart or timeline tiles change",
+      "retired": true,
       "sha256": "c5feccbe8b4ab81315750a7f1e56caeafe3337640c1b6ee559f925085160fa03",
       "stage": "S6",
       "supersedes": null,
       "title": "u4 review r1 (#536-#538)"
     },
     "A0010": {
-      "active": true,
+      "active": false,
       "bytes": 799,
       "created_at": "2026-11-28T00:05:12Z",
       "evidence": "/tmp/opencode/g8/rev/u4/r2_*",
@@ -156,13 +165,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0010.md",
       "purpose": "Re-review",
       "rerun_when": "markdown_content.dart changes",
+      "retired": true,
       "sha256": "083045c5f13aa0d8179e92bb2d4857441582a94162a239c35742f5661ffc191c",
       "stage": "S6",
       "supersedes": null,
       "title": "u4 re-review r2 (#536-#538 fix a612095d)"
     },
     "A0011": {
-      "active": true,
+      "active": false,
       "bytes": 415,
       "created_at": "2026-11-28T00:26:11Z",
       "evidence": "/tmp/opencode/g8/rev/u4/r3_*",
@@ -172,13 +182,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0011.md",
       "purpose": "Re-review",
       "rerun_when": "markdown_content.dart or tile change",
+      "retired": true,
       "sha256": "4b6c4ff4d3a8f6dc38797a4afc2276ffb9dbae5997c979fb40c258d2b2c1527a",
       "stage": "S6",
       "supersedes": null,
       "title": "u4 re-review r3 (#538 fix 3fe38ba2)"
     },
     "A0012": {
-      "active": true,
+      "active": false,
       "bytes": 603,
       "created_at": "2026-11-28T00:36:02Z",
       "evidence": "/tmp/opencode/g8/rev/u4/r4_*.out, r4_native-*.note; /tmp/opencode/g8/plan/p539/r1_*",
@@ -188,13 +199,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0012.md",
       "purpose": "Re-review round 4 of u4 and first planning round for #539-#542",
       "rerun_when": "u4 code changes beyond the two suggestions",
+      "retired": true,
       "sha256": "01f3cba0ed787aca284e22c4f9f9ee199d13404b2cf87547e01cfccbd33ea27a",
       "stage": "S6",
       "supersedes": null,
       "title": "u4 r4 review (#536-#538, f7e3da16) + p539 planning r1 partial"
     },
     "A0013": {
-      "active": true,
+      "active": false,
       "bytes": 177,
       "created_at": "2026-11-28T00:43:12Z",
       "evidence": "/tmp/opencode/g8/plan/p539/r1_*",
@@ -204,13 +216,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0013.md",
       "purpose": "Remaining helper plans for #539-#542",
       "rerun_when": "payload p1.txt changes",
+      "retired": true,
       "sha256": "58aef2e5a7a3d9a90424a1d547e8573a563bbf366de21325cb9858f018adeace",
       "stage": "S6",
       "supersedes": null,
       "title": "p539 planning r1: luna + Hungerg plans"
     },
     "A0014": {
-      "active": true,
+      "active": false,
       "bytes": 912,
       "created_at": "2026-11-28T00:46:20Z",
       "evidence": "/tmp/opencode/g8/plan/p539/r1_native-opus.md",
@@ -220,13 +233,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0014.md",
       "purpose": "Last plan for #539-#542",
       "rerun_when": "payload p1.txt changes",
+      "retired": true,
       "sha256": "9fce74a6af9145b2593793b20022a5f5dbcffbbb28f2823bf333a09fbf048782",
       "stage": "S6",
       "supersedes": null,
       "title": "p539 planning r1: native opus stand-in plan"
     },
     "A0015": {
-      "active": true,
+      "active": false,
       "bytes": 1533,
       "created_at": "2026-11-28T00:50:31Z",
       "evidence": "/tmp/opencode/g8/plan/p539/r1_*",
@@ -236,13 +250,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0015.md",
       "purpose": "Execution plan for the message action units",
       "rerun_when": "owner changes Q1/Q2 or a unit's design fails a prototype",
+      "retired": true,
       "sha256": "adf1c6fbe5b2a6ed0e76d6b77eb0dee78a6ce483dfca1a4c1ab9afc546450ba9",
       "stage": "S6",
       "supersedes": null,
       "title": "ART-EXECUTION-HANDOFF #539-#542"
     },
     "A0016": {
-      "active": true,
+      "active": false,
       "bytes": 1205,
       "created_at": "2026-11-28T01:55:42Z",
       "evidence": "/tmp/opencode/g8/rev/u5/r1_*.out",
@@ -252,13 +267,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0016.md",
       "purpose": "Review round 1 of the action bar",
       "rerun_when": "message_action_bar/live page fork code changes",
+      "retired": true,
       "sha256": "82948301c55cdf4c400129b9da2286ded15687cb49c9dcd902fef81d9491eaf3",
       "stage": "S6",
       "supersedes": null,
       "title": "u5 r1 review #539 (4ea5b87a)"
     },
     "A0017": {
-      "active": true,
+      "active": false,
       "bytes": 895,
       "created_at": "2026-11-28T02:17:35Z",
       "evidence": "/tmp/opencode/g8/rev/u5/r2_*.out",
@@ -268,13 +284,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0017.md",
       "purpose": "Re-review round 2",
       "rerun_when": "message_action_bar or fork code changes",
+      "retired": true,
       "sha256": "115db5492453b1260bbfcb6243eb18701d2b09306b2bca2b73b40505d0d808c7",
       "stage": "S6",
       "supersedes": null,
       "title": "u5 r2 re-review #539 (386397ce)"
     },
     "A0018": {
-      "active": true,
+      "active": false,
       "bytes": 643,
       "created_at": "2026-11-28T02:41:10Z",
       "evidence": "/tmp/opencode/g8/rev/u5/r3_*.out",
@@ -284,13 +301,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0018.md",
       "purpose": "Re-review round 3",
       "rerun_when": "message_action_bar/fork code changes",
+      "retired": true,
       "sha256": "c675c67c7ea77fec831f4c3225412292e9e44b83f9dcc45db3bcd0fd722ec500",
       "stage": "S6",
       "supersedes": null,
       "title": "u5 r3 re-review #539 (00abe9cb)"
     },
     "A0019": {
-      "active": true,
+      "active": false,
       "bytes": 849,
       "created_at": "2026-11-28T03:00:05Z",
       "evidence": "/tmp/opencode/g8/rev/u5/r4_*.out",
@@ -300,13 +318,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0019.md",
       "purpose": "Re-review 13044164",
       "rerun_when": "message_action_bar.dart or _forkFrom change",
+      "retired": true,
       "sha256": "bf84e3866324e783efed2843b138a0c8a052e8d9de317c482fbd6cb2290b3f5d",
       "stage": "S6",
       "supersedes": null,
       "title": "u5 #539 review round 4 reports"
     },
     "A0020": {
-      "active": true,
+      "active": false,
       "bytes": 1187,
       "created_at": "2026-11-28T03:12:33Z",
       "evidence": "session_live_source.dart:179,92; prompt_outbox.dart:104; prompt_client.dart:155-162; workspace_first_prompt.dart:55; sessions_controller.dart:21-239; v1 forward_message_dialog.dart",
@@ -316,13 +335,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0020.md",
       "purpose": "Plan #542 Forward",
       "rerun_when": "send/outbox/live directory APIs change",
+      "retired": true,
       "sha256": "2a3da488afa668270cd3eb0c622e13a1af376c5b1f436c1495f8ae0a41cd8a00",
       "stage": "S6",
       "supersedes": null,
       "title": "#542 v1 forward UX and v2 seams"
     },
     "A0021": {
-      "active": true,
+      "active": false,
       "bytes": 668,
       "created_at": "2026-11-28T03:26:29Z",
       "evidence": "/tmp/opencode/g8/rev/u5/r5_*.out",
@@ -332,13 +352,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0021.md",
       "purpose": "Re-review bdc25d4b",
       "rerun_when": "message_action_bar.dart changes",
+      "retired": true,
       "sha256": "d419dd58843a3efa8ae10469e6c35b2b0fcea97c2065ae65039c26176f393b8d",
       "stage": "S6",
       "supersedes": null,
       "title": "u5 #539 review round 5 reports"
     },
     "A0022": {
-      "active": true,
+      "active": false,
       "bytes": 403,
       "created_at": "2026-11-28T04:02:31Z",
       "evidence": "/tmp/opencode/g8/plan/p542/r1_*.out; /tmp/opencode/g8/rev/u6/r1_*.out; /tmp/opencode/g8/rev/u7/r1_*.out",
@@ -348,13 +369,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0022.md",
       "purpose": "Plan #542; review e98a01f4 and a00460f9",
       "rerun_when": "boundaries change",
+      "retired": true,
       "sha256": "6c5725262ae1abb633f25311e17b343f559ada69351d02e835af4e223472bbce",
       "stage": "S6",
       "supersedes": null,
       "title": "Batch: p542 planning r1 + u6 #540 review r1 + u7 #541 review r1"
     },
     "A0023": {
-      "active": true,
+      "active": false,
       "bytes": 335,
       "created_at": "2026-11-28T04:08:46Z",
       "evidence": "/tmp/opencode/g8/rev/u5/r6_*.out; /tmp/opencode/g8/rev/u7/r1_native-opus.out",
@@ -364,13 +386,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0023.md",
       "purpose": "Re-review cbea5f2e; stand-in for failed Claude helpers on a00460f9",
       "rerun_when": "message_action_bar.dart or read-aloud files change",
+      "retired": true,
       "sha256": "d6e6bf93980184df31374c9b45f35756e2d8f6c663fbe269287e439ddc2022ba",
       "stage": "S6",
       "supersedes": null,
       "title": "u5 #539 round 6 + native stand-in review of #541 (partial batch)"
     },
     "A0024": {
-      "active": true,
+      "active": false,
       "bytes": 1217,
       "created_at": "2026-11-28T04:13:42Z",
       "evidence": "/tmp/opencode/g8/rev/u6/r1_native-opus.out; /tmp/opencode/g8/rev/u6/dissent_h3.out; Plan stand-in reply in session transcript",
@@ -380,13 +403,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0024.md",
       "purpose": "Replace failed Claude helpers; resolve dissent",
       "rerun_when": "#542 seams change",
+      "retired": true,
       "sha256": "10a4d26ce8c7c018bfa61b93c6f8995bf3ab1180a3755f63b8281cb9cc1e4bf8",
       "stage": "S6",
       "supersedes": null,
       "title": "Native stand-ins: #540 review + #542 plan; Sol-F dissent on #540 H3"
     },
     "A0025": {
-      "active": true,
+      "active": false,
       "bytes": 192,
       "created_at": "2026-11-28T04:51:35Z",
       "evidence": "/tmp/opencode/g8/rev/u6/r2_*.out; /tmp/opencode/g8/rev/u7/r2_*.out",
@@ -396,13 +420,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0025.md",
       "purpose": "Re-review b3718ca3+2d0eee6b and d698564d",
       "rerun_when": "#540/#541 files change",
+      "retired": true,
       "sha256": "eab325b0104377507d5c90ad05e6a272ea5e2d3a437c00ed9135d389b2949e9d",
       "stage": "S6",
       "supersedes": null,
       "title": "u6 #540 r2 + u7 #541 r2 re-reviews"
     },
     "A0026": {
-      "active": true,
+      "active": false,
       "bytes": 112,
       "created_at": "2026-11-28T05:07:04Z",
       "evidence": "/tmp/opencode/g8/rev/u7/r3_*.out",
@@ -412,13 +437,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0026.md",
       "purpose": "Re-review 8674ac7d",
       "rerun_when": "#541 files change",
+      "retired": true,
       "sha256": "8d5fa1f8ebb10e757181f767d8bc7412d8e3469eca14b9ff518af921f817057b",
       "stage": "S6",
       "supersedes": null,
       "title": "u7 #541 re-review round 3"
     },
     "A0027": {
-      "active": true,
+      "active": false,
       "bytes": 1465,
       "created_at": "2026-11-28T05:21:40Z",
       "evidence": "/tmp/opencode/g8/rev/u7/r4_*.out, /tmp/opencode/g8/rev/u8/r1_*.out, r1_native-opus.out",
@@ -428,13 +454,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0027.md",
       "purpose": "Review #541 round 4 and #542 round 1",
       "rerun_when": "after fixes commit",
+      "retired": true,
       "sha256": "d4d85102d3ba0fd033a600f4e56c9bc377a92d1939f37c16febf3f7b6cfb5bcd",
       "stage": "S6",
       "supersedes": null,
       "title": "#541 r4 + #542 r1 reviews"
     },
     "A0028": {
-      "active": true,
+      "active": false,
       "bytes": 918,
       "created_at": "2026-11-28T05:50:03Z",
       "evidence": "/tmp/opencode/g8/rev/u7/r5_*.out, /tmp/opencode/g8/rev/u8/r2_*.out",
@@ -444,13 +471,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0028.md",
       "purpose": "Re-review d1816c75 and 8c6e88f1",
       "rerun_when": "after fixes",
+      "retired": true,
       "sha256": "733c80336ced786e87b91b8f64471e8d9d75ce9b5c6a96bb4e30c1dd22a53260",
       "stage": "S6",
       "supersedes": null,
       "title": "#541 r5 + #542 r2 re-reviews"
     },
     "A0029": {
-      "active": true,
+      "active": false,
       "bytes": 564,
       "created_at": "2026-11-28T06:06:16Z",
       "evidence": "/tmp/opencode/g8/rev/u7/r6_*.out, /tmp/opencode/g8/rev/u8/r3_*.out",
@@ -460,13 +488,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0029.md",
       "purpose": "Dissent on #541 rejections; re-review 67771f4e",
       "rerun_when": "n/a",
+      "retired": true,
       "sha256": "12fea759697a6440a16254683616cddbe40026e3b77020807af12a8f5cbb5ffd",
       "stage": "S6",
       "supersedes": null,
       "title": "#541 r6 Sol-F dissent + #542 r3"
     },
     "A0030": {
-      "active": true,
+      "active": false,
       "bytes": 1129,
       "created_at": "2026-11-28T06:18:58Z",
       "evidence": "/tmp/opencode/g8/rev/u9/r1_*.out",
@@ -476,13 +505,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0030.md",
       "purpose": "Initial review of 80026a94..d35cf9de (8.3)",
       "rerun_when": "after fix commit",
+      "retired": true,
       "sha256": "1660194bb67f89680008f4cdba3eed24730b965fee6f2b3125475728d9f4186a",
       "stage": "S6",
       "supersedes": null,
       "title": "8.3 review r1 (#543-#548)"
     },
     "A0031": {
-      "active": true,
+      "active": false,
       "bytes": 796,
       "created_at": "2026-11-28T06:45:00Z",
       "evidence": "/tmp/opencode/g8/rev/u9/r2_*.out",
@@ -492,13 +522,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0031.md",
       "purpose": "Re-review e4ab0949",
       "rerun_when": "after fix",
+      "retired": true,
       "sha256": "ac9172b1a3082a8283248f484e92e8f1fe35de97d166cfbb5b750ca33dc29312",
       "stage": "S6",
       "supersedes": null,
       "title": "8.3 review r2"
     },
     "A0032": {
-      "active": true,
+      "active": false,
       "bytes": 964,
       "created_at": "2026-11-28T07:07:54Z",
       "evidence": "/tmp/opencode/g8/rev/u9/r3_*.out, /tmp/opencode/g8/rev/u10/r1_*.out",
@@ -508,13 +539,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0032.md",
       "purpose": "Re-review a2e05556; initial review da98f660..f9a8bf0c",
       "rerun_when": "after fixes",
+      "retired": true,
       "sha256": "6fd58e4358892d26442284d1b8b1cdef8ba26fbe4249d98181579a8ece4862d1",
       "stage": "S6",
       "supersedes": null,
       "title": "8.3 r3 + 8.4-8.6 r1 reviews"
     },
     "A0033": {
-      "active": true,
+      "active": false,
       "bytes": 689,
       "created_at": "2026-11-28T07:19:37Z",
       "evidence": "/tmp/opencode/g8/rev/u9/r4_*.out, /tmp/opencode/g8/rev/u10/r2_*.out",
@@ -524,13 +556,14 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0033.md",
       "purpose": "Re-review 5ed8a987 and 64f6b0af",
       "rerun_when": "after fixes",
+      "retired": true,
       "sha256": "658186ed21cc0ec71043a40adf93f66083302923a2dc7d7229fe83c9154b27d8",
       "stage": "S6",
       "supersedes": null,
       "title": "8.3 r4 + 8.4-8.6 r2"
     },
     "A0034": {
-      "active": true,
+      "active": false,
       "bytes": 624,
       "created_at": "2026-11-28T07:36:31Z",
       "evidence": "/tmp/opencode/g8/rev/u9/r5_*.out, /tmp/opencode/g8/rev/u10/r3_*.out",
@@ -540,10 +573,62 @@
       "path": "artifacts/tm_20261127T213730Z_22ec9025/A0034.md",
       "purpose": "Re-review fddeb392 and 5bbc7812",
       "rerun_when": "n/a",
+      "retired": true,
       "sha256": "d04669cd53bd5356e531122676a61e4a6cbce92046834619c5fbcb5d96f2e472",
       "stage": "S6",
       "supersedes": null,
       "title": "8.3 r5 + 8.4-8.6 r3 (final)"
+    },
+    "A0035": {
+      "active": false,
+      "bytes": 373,
+      "created_at": "2026-11-28T07:46:55Z",
+      "evidence": "/tmp/opencode/g8/rev/u9/r6_*.out, /tmp/opencode/g8/rev/u10/r4_*.out",
+      "id": "A0035",
+      "impact": "u10 converged; u9 one more round",
+      "origin": "6 helpers each",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0035.md",
+      "purpose": "Re-review 0becb82b and 695a9f81",
+      "rerun_when": "n/a",
+      "retired": true,
+      "sha256": "c5e6b094c92c676b634295af72223bd2cd69c7884251a99d2ac0e9d79f0c4ed0",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "8.3 r6 + 8.4-8.6 r4"
+    },
+    "A0036": {
+      "active": false,
+      "bytes": 294,
+      "created_at": "2026-11-28T07:51:19Z",
+      "evidence": "/tmp/opencode/g8/rev/u9/r7_*.out",
+      "id": "A0036",
+      "impact": "Intended rejection of background-tab edge -> dissent to Sol-F",
+      "origin": "6 helpers",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0036.md",
+      "purpose": "Re-review bfcf9271",
+      "rerun_when": "n/a",
+      "retired": true,
+      "sha256": "d0101cb5f7bae2ae836e80afe670d502d0741ed067613c9ccb2d47baab10f087",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "8.3 r7"
+    },
+    "A0037": {
+      "active": false,
+      "bytes": 146,
+      "created_at": "2026-11-28T07:53:33Z",
+      "evidence": "/tmp/opencode/g8/rev/u9/r8_helperCodex-6.2-sol-xhigh-F.out",
+      "id": "A0037",
+      "impact": "u9 converged; follow-up issue for background-tab sightings",
+      "origin": "Codex-6.2-sol-xhigh-F",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0037.md",
+      "purpose": "Dissent on background-tab Completed row",
+      "rerun_when": "n/a",
+      "retired": true,
+      "sha256": "a630ccbe2c7993f1b8deda38a5b7a6aae0bece3ab96685f5be2cfc49b8fb3fc2",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "8.3 r8 dissent Sol-F"
     }
   },
   "checklist": [
@@ -601,9 +686,9 @@
       ],
       "id": "S6",
       "label": "[3] Timeline: slightly wider side padding on phones",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "#536 phone padding done in 8.2 block (commits local, reviewed u7/u8)",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -611,9 +696,9 @@
       ],
       "id": "S7",
       "label": "[5] Timeline: collapsed tool/thinking summary by default, Display toggle for expanded tools",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#537 collapsed summary + Display toggle (option a)",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -621,9 +706,9 @@
       ],
       "id": "S8",
       "label": "[4] TPS and duration on by default, inline after the last word without icons",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#538 TPS/duration inline by default",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -631,9 +716,9 @@
       ],
       "id": "S9",
       "label": "[12] Message action bar: always-selectable text, floating bar (copy, undo turn, overflow rewind/fork), desktop hover",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#539 floating action bar converged",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -641,9 +726,9 @@
       ],
       "id": "S10",
       "label": "[12c] Message action: share as image",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#540 share as image converged",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -651,9 +736,9 @@
       ],
       "id": "S11",
       "label": "[12b] Message action: read aloud with multi-provider TTS, Edge by default",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#541 read aloud Edge default; converged u7 r6",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -661,9 +746,9 @@
       ],
       "id": "S12",
       "label": "[12a] Message action: forward to another session",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#542 forward multi-select; converged u8 r3",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -671,9 +756,9 @@
       ],
       "id": "S13",
       "label": "[1] Composer: never show 'Subagents running: N'",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#543 no 'Subagents running' in composer",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -681,9 +766,9 @@
       ],
       "id": "S14",
       "label": "[2] Activity chip: count shells only after 5 s",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#544 shells after 5 s; u9 converged r7/r8 (Sol-F agreed follow-up)",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -691,9 +776,9 @@
       ],
       "id": "S15",
       "label": "[8] Mic: debounce the return to the right after send",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#545 mic debounce",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -701,9 +786,9 @@
       ],
       "id": "S16",
       "label": "[9] Mic: expanded composer without keyboard, input grows to 3 lines",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#546 dictation composer 3 lines",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -711,9 +796,9 @@
       ],
       "id": "S17",
       "label": "[16] Model selector: remember the last effort variant per model",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#547 last variant per model",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -721,9 +806,9 @@
       ],
       "id": "S18",
       "label": "[6] Composer tips: real tips with a tappable menu link",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#548 tips with links",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -731,9 +816,9 @@
       ],
       "id": "S19",
       "label": "[15] Tasks widget: title 'Tasks' plus done/total chip",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#549 Tasks title",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -741,9 +826,9 @@
       ],
       "id": "S20",
       "label": "[17] Task list: open by default, 5 visible rows centered on the in-progress item",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#550 5 rows centered; u10 converged r4",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -751,9 +836,9 @@
       ],
       "id": "S21",
       "label": "[13] Settings: back and title only in the top bar, consistent across pages",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#551 settings single bar; u10 converged",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -761,9 +846,9 @@
       ],
       "id": "S22",
       "label": "[14] Settings news card: X close, hide after first view, 'Novidades' label",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#552 news card X, seen once; u10 converged",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -771,9 +856,9 @@
       ],
       "id": "S23",
       "label": "[18] Default GitHub theme on new installs",
-      "outcome": "",
-      "status": "pending",
-      "validation": ""
+      "outcome": "#553 GitHub theme on new installs; u10 converged r4",
+      "status": "done",
+      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
     },
     {
       "depends": [
@@ -782,7 +867,7 @@
       "id": "S24",
       "label": "Group 8 docs, #527 check-off, push and minor release",
       "outcome": "",
-      "status": "pending",
+      "status": "current",
       "validation": ""
     }
   ],
@@ -1107,18 +1192,15 @@
     {
       "at": "2026-11-28T07:40:57Z",
       "text": "Judged final rounds (A0034): 8.3 accepted settled-only ending + name links + doc (0becb82b), rejected 512 eviction (sugg); 8.4-8.6 accepted first-load deadlock fix + covered-route news (695a9f81), residual interrupted first launch accepted. Metrics u9 r5, u10 r3 recorded."
+    },
+    {
+      "at": "2026-11-28T07:53:44Z",
+      "text": "u9 (8.3) converged at r7/r8: 5/6 approve r7; Sol-F warning (hidden-tab untimed shell completion shows one Completed row) deferred to follow-up after dissent, Sol-F agreed (approve r8). DeepSeek page-level test suggestion rejected: ShellSightings settled-empty path unit-tested, page wiring 2 lines verified by all. Metrics r7 recorded."
     }
   ],
-  "generation": 166,
-  "next_action": "Dispatch u9 r6 + u10 r4; then push, goldens regen, close issues, release",
-  "pending_operation": {
-    "expected_bytes": 25000,
-    "expected_seconds": 900,
-    "id": "op_83282bf8e68b",
-    "kind": "subagent",
-    "prepared_at": "2026-11-28T07:40:57Z",
-    "purpose": "u9 r6 (0becb82b) + u10 r4 (695a9f81) re-reviews"
-  },
+  "generation": 191,
+  "next_action": "Push reviewed commits, regenerate goldens on x86 (R0001), close issues, #527, follow-ups, minor release",
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -1140,7 +1222,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T07:40:57Z",
+  "updated_at": "2026-11-28T07:54:29Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
