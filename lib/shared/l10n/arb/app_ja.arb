@@ -2174,9 +2174,9 @@
   "settingsAboutDismiss": "閉じる",
   "releaseAnnouncementsDoNotShowAgain": "次の更新まで表示しない",
   "releaseAnnouncementsTitle": "新着情報",
-  "settingsAboutChangelog": "Changelog",
-  "@settingsAboutChangelog": {
-    "description": "CodeWalk UI string - settingsAboutChangelog"
+  "settingsAboutNews": "新機能",
+  "@settingsAboutNews": {
+    "description": "The news card button that opens the release history (#552)"
   },
   "settingsAboutWhatsNew": "v{version} の新機能",
   "@settingsAboutWhatsNew": {

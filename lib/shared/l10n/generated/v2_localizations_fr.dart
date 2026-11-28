@@ -2728,7 +2728,7 @@ class V2LocalizationsFr extends V2Localizations {
   String get releaseAnnouncementsTitle => 'Nouveautés';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => 'Nouveautés';
 
   @override
   String settingsAboutWhatsNew(String version) {

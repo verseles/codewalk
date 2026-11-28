@@ -2683,7 +2683,7 @@ class V2LocalizationsEn extends V2Localizations {
   String get releaseAnnouncementsTitle => 'What’s new';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => 'What’s new';
 
   @override
   String settingsAboutWhatsNew(String version) {

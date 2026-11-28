@@ -2570,7 +2570,7 @@ class V2LocalizationsJa extends V2Localizations {
   String get releaseAnnouncementsTitle => '新着情報';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => '新機能';
 
   @override
   String settingsAboutWhatsNew(String version) {

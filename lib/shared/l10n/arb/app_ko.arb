@@ -2212,9 +2212,9 @@
   "settingsAboutDismiss": "닫기",
   "releaseAnnouncementsDoNotShowAgain": "다음 업데이트까지 다시 표시하지 않기",
   "releaseAnnouncementsTitle": "새로운 소식",
-  "settingsAboutChangelog": "Changelog",
-  "@settingsAboutChangelog": {
-    "description": "CodeWalk UI string - settingsAboutChangelog"
+  "settingsAboutNews": "새로운 소식",
+  "@settingsAboutNews": {
+    "description": "The news card button that opens the release history (#552)"
   },
   "settingsAboutWhatsNew": "v{version}의 새로운 소식",
   "@settingsAboutWhatsNew": {

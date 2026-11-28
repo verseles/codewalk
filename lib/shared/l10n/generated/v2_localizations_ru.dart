@@ -2701,7 +2701,7 @@ class V2LocalizationsRu extends V2Localizations {
   String get releaseAnnouncementsTitle => 'Что нового';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => 'Что нового';
 
   @override
   String settingsAboutWhatsNew(String version) {

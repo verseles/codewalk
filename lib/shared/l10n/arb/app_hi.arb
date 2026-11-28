@@ -2174,9 +2174,9 @@
   "settingsAboutDismiss": "खारिज करें",
   "releaseAnnouncementsDoNotShowAgain": "अगले अपडेट तक फिर न दिखाएँ",
   "releaseAnnouncementsTitle": "नया क्या है",
-  "settingsAboutChangelog": "Changelog",
-  "@settingsAboutChangelog": {
-    "description": "CodeWalk UI string - settingsAboutChangelog"
+  "settingsAboutNews": "नया क्या है",
+  "@settingsAboutNews": {
+    "description": "The news card button that opens the release history (#552)"
   },
   "settingsAboutWhatsNew": "v{version} में नया क्या है",
   "@settingsAboutWhatsNew": {

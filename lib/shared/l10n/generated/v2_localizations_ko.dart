@@ -2572,7 +2572,7 @@ class V2LocalizationsKo extends V2Localizations {
   String get releaseAnnouncementsTitle => '새로운 소식';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => '새로운 소식';
 
   @override
   String settingsAboutWhatsNew(String version) {

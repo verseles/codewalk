@@ -2675,7 +2675,7 @@ class V2LocalizationsBn extends V2Localizations {
   String get releaseAnnouncementsTitle => 'নতুন কী আছে';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => 'নতুন কী আছে';
 
   @override
   String settingsAboutWhatsNew(String version) {

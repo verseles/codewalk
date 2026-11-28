@@ -2654,7 +2654,7 @@ class V2LocalizationsAr extends V2Localizations {
   String get releaseAnnouncementsTitle => 'ما الجديد';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => 'الجديد';
 
   @override
   String settingsAboutWhatsNew(String version) {

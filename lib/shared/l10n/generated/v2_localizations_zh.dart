@@ -2528,7 +2528,7 @@ class V2LocalizationsZh extends V2Localizations {
   String get releaseAnnouncementsTitle => '新功能';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => '新内容';
 
   @override
   String settingsAboutWhatsNew(String version) {

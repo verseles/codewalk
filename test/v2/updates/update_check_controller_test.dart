@@ -342,6 +342,38 @@ void main() {
     updates.dispose();
   });
 
+  test('news seen in Settings stays until they close, then is gone', () async {
+    installed = '2.0.0-beta.2';
+    final updates = controller();
+    await updates.setChannel(UpdateChannel.beta);
+    final entries = jsonDecode(listing(['v2.0.0-beta.2'])) as List;
+    for (final entry in entries) {
+      (entry as Map)['published_at'] = '2026-11-04T12:00:00Z';
+      entry['body'] = '> 📣 News for ${entry['tag_name']}';
+    }
+    final check = updates.check();
+    await answer(jsonEncode(entries));
+    await check;
+    expect(updates.visibleNews?.tag, 'v2.0.0-beta.2');
+    await updates.newsSeen();
+    // Still shown on this visit (#552).
+    expect(updates.visibleNews?.tag, 'v2.0.0-beta.2');
+    var notified = 0;
+    updates.addListener(() => notified++);
+    updates.leaveNews();
+    expect(notified, 1);
+    expect(updates.visibleNews, isNull);
+    // A later run reads it as dismissed.
+    final restored = controller();
+    await restored.setChannel(UpdateChannel.beta);
+    final again = restored.check();
+    await answer(jsonEncode(entries));
+    await again;
+    expect(restored.visibleNews, isNull);
+    updates.dispose();
+    restored.dispose();
+  });
+
   test('silent failure preserves a previously found update', () async {
     final updates = controller();
     final first = updates.check();

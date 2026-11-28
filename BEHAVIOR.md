@@ -985,7 +985,8 @@ description of this code.
 
 - **Given** the user opens Settings > Version and updates (#519)
 - **Then** the installed version and update controls come first and the release history follows below them in the same scroll; Settings search finds this one destination by update or history words
-- **Then** What's new Changelog and About's Release history open it scrolled to the history heading, which stays in view while the history loads or an update card appears above it, until the user scrolls; selecting the destination itself opens it at the top, also when it is already open
+- **Then** the news card of the installed release, at the top of Settings and in About, has a small X at its top end that dismisses it at once, and its What's new and Our group buttons; once seen in Settings it stays until they close and is gone from the next visit, as if dismissed (`cw2.updates.dismissedNewsTag`) (#552)
+- **Then** the news card's What's new and About's Release history open it scrolled to the history heading, which stays in view while the history loads or an update card appears above it, until the user scrolls; selecting the destination itself opens it at the top, also when it is already open
 - **When** native loading is available
 - **Then** the public fixed GitHub changelog is read without profile authentication, redirects or automatic replay, with a 256 KiB body limit and bounded timeouts
 - **Then** the isolated `cw2.releaseHistory.cache` stores a validated envelope of at most 512 KiB, with one-hour freshness and coalesced loading

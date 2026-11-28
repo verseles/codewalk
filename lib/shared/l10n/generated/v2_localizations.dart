@@ -4846,11 +4846,11 @@ abstract class V2Localizations {
   /// **'What’s new'**
   String get releaseAnnouncementsTitle;
 
-  /// CodeWalk UI string — settingsAboutChangelog
+  /// The news card button that opens the release history (#552)
   ///
   /// In en, this message translates to:
-  /// **'Changelog'**
-  String get settingsAboutChangelog;
+  /// **'What’s new'**
+  String get settingsAboutNews;
 
   /// CodeWalk UI string — settingsAboutWhatsNew
   ///

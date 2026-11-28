@@ -51,6 +51,10 @@ final class UpdateCheckController extends ChangeNotifier {
   String? _installed;
   String? _dismissedTag;
   String? _dismissedNewsTag;
+
+  /// The news seen in Settings this visit: already dismissed for the next
+  /// one, still shown until Settings close (#552).
+  String? _showingNews;
   final Set<String> _presentedNotices = {};
   String? _automaticUpdate;
   String? _automaticNews;
@@ -96,7 +100,8 @@ final class UpdateCheckController extends ChangeNotifier {
               entry.version != installed)) {
         continue;
       }
-      return entry.announcement == null || entry.tag == _dismissedNewsTag
+      return entry.announcement == null ||
+              (entry.tag == _dismissedNewsTag && entry.tag != _showingNews)
           ? null
           : entry;
     }
@@ -204,8 +209,32 @@ final class UpdateCheckController extends ChangeNotifier {
     }
     if (_disposed) return false;
     _dismissedNewsTag = tag;
+    _showingNews = null;
     notifyListeners();
     return true;
+  }
+
+  /// The news card was seen in Settings: it stays until they close and is
+  /// gone from the next visit, as if dismissed (#552). A write that fails
+  /// leaves it for the next visit too.
+  Future<void> newsSeen() async {
+    final tag = visibleNews?.tag;
+    if (_disposed || tag == null || tag == _showingNews) return;
+    _showingNews = tag;
+    try {
+      await _store.write(dismissedNewsKey, tag);
+    } on Object {
+      return;
+    }
+    if (_disposed || _showingNews != tag) return;
+    _dismissedNewsTag = tag;
+  }
+
+  /// Settings closed: news seen there no longer shows.
+  void leaveNews() {
+    if (_disposed || _showingNews == null) return;
+    _showingNews = null;
+    notifyListeners();
   }
 
   Future<void> setChannel(UpdateChannel value) async {

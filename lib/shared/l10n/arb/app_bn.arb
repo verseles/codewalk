@@ -2174,9 +2174,9 @@
   "settingsAboutDismiss": "খারিজ",
   "releaseAnnouncementsDoNotShowAgain": "পরবর্তী আপডেট পর্যন্ত আর দেখাবেন না",
   "releaseAnnouncementsTitle": "নতুন কী আছে",
-  "settingsAboutChangelog": "Changelog",
-  "@settingsAboutChangelog": {
-    "description": "CodeWalk UI string - settingsAboutChangelog"
+  "settingsAboutNews": "নতুন কী আছে",
+  "@settingsAboutNews": {
+    "description": "The news card button that opens the release history (#552)"
   },
   "settingsAboutWhatsNew": "v{version}-এ নতুন কী আছে",
   "@settingsAboutWhatsNew": {

@@ -2677,7 +2677,7 @@ class V2LocalizationsUr extends V2Localizations {
   String get releaseAnnouncementsTitle => 'نیا کیا ہے';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => 'نیا کیا ہے';
 
   @override
   String settingsAboutWhatsNew(String version) {

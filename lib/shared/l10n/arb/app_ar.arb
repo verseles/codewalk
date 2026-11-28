@@ -2173,9 +2173,9 @@
   "settingsAboutDismiss": "تجاهل",
   "releaseAnnouncementsDoNotShowAgain": "عدم العرض مجددًا حتى التحديث القادم",
   "releaseAnnouncementsTitle": "ما الجديد",
-  "settingsAboutChangelog": "Changelog",
-  "@settingsAboutChangelog": {
-    "description": "CodeWalk UI string - settingsAboutChangelog"
+  "settingsAboutNews": "الجديد",
+  "@settingsAboutNews": {
+    "description": "The news card button that opens the release history (#552)"
   },
   "settingsAboutWhatsNew": "الجديد في v{version}",
   "@settingsAboutWhatsNew": {

@@ -3352,9 +3352,9 @@
   "@releaseAnnouncementsTitle": {
     "description": "Post-upgrade announcement dialog title"
   },
-  "settingsAboutChangelog": "Changelog",
-  "@settingsAboutChangelog": {
-    "description": "CodeWalk UI string — settingsAboutChangelog"
+  "settingsAboutNews": "What’s new",
+  "@settingsAboutNews": {
+    "description": "The news card button that opens the release history (#552)"
   },
   "settingsAboutWhatsNew": "What''s new in v{version}",
   "@settingsAboutWhatsNew": {

@@ -2710,7 +2710,7 @@ class V2LocalizationsPt extends V2Localizations {
   String get releaseAnnouncementsTitle => 'Novidades';
 
   @override
-  String get settingsAboutChangelog => 'Changelog';
+  String get settingsAboutNews => 'Novidades';
 
   @override
   String settingsAboutWhatsNew(String version) {

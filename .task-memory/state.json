@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 29,
+  "artifact_seq": 30,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -464,6 +464,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "#541 r6 Sol-F dissent + #542 r3"
+    },
+    "A0030": {
+      "active": true,
+      "bytes": 1129,
+      "created_at": "2026-11-28T06:18:58Z",
+      "evidence": "/tmp/opencode/g8/rev/u9/r1_*.out",
+      "id": "A0030",
+      "impact": "Fix round for 8.3",
+      "origin": "Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg + native stand-in",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0030.md",
+      "purpose": "Initial review of 80026a94..d35cf9de (8.3)",
+      "rerun_when": "after fix commit",
+      "sha256": "1660194bb67f89680008f4cdba3eed24730b965fee6f2b3125475728d9f4186a",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "8.3 review r1 (#543-#548)"
     }
   },
   "checklist": [
@@ -1009,16 +1025,9 @@
       "text": "#541 converged: Sol-F r6 approve; its remaining suggestion (resume failure message) implemented 1226a32d; re-review skipped (small change reusing SpeechFailure.unavailable, new test). #542 converged: r3 single consensus item (notFound->gone, no task->unavailable) + small layout/autofocus/search fixes add5ef96; re-review skipped (narrow, tested: dialog notFound test, run tests). u7 and u8 helper sessions closed. Metrics u7 r6, u8 r3 recorded."
     }
   ],
-  "generation": 148,
+  "generation": 149,
   "next_action": "Dispatch u9 r1 (8.3 #543-#548) to 6 helpers + native stand-in reviewer",
-  "pending_operation": {
-    "expected_bytes": 40000,
-    "expected_seconds": 1200,
-    "id": "op_15b5d39722ad",
-    "kind": "subagent",
-    "prepared_at": "2026-11-28T06:06:49Z",
-    "purpose": "u9 r1: initial review of 8.3 (#543-#548) by 6 helpers + native stand-in"
-  },
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -1040,7 +1049,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T06:06:49Z",
+  "updated_at": "2026-11-28T06:18:58Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

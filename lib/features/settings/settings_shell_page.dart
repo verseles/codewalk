@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
@@ -68,6 +70,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _checks = context.read<UpdateCheckController?>();
     if (!_opened) {
       _opened = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -93,8 +96,14 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     _wasWide = wide;
   }
 
+  UpdateCheckController? _checks;
+
   @override
   void dispose() {
+    // News seen here is gone from the next visit (#552); told once the
+    // tree is free.
+    final checks = _checks;
+    if (checks != null) scheduleMicrotask(checks.leaveNews);
     _search.dispose();
     _searchFocus.dispose();
     _backFocus.dispose();

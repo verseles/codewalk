@@ -2174,9 +2174,9 @@
   "settingsAboutDismiss": "Ignora",
   "releaseAnnouncementsDoNotShowAgain": "Non mostrare più fino al prossimo aggiornamento",
   "releaseAnnouncementsTitle": "Novità",
-  "settingsAboutChangelog": "Changelog",
-  "@settingsAboutChangelog": {
-    "description": "CodeWalk UI string - settingsAboutChangelog"
+  "settingsAboutNews": "Novità",
+  "@settingsAboutNews": {
+    "description": "The news card button that opens the release history (#552)"
   },
   "settingsAboutWhatsNew": "Novità della v{version}",
   "@settingsAboutWhatsNew": {

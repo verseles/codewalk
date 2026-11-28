@@ -12,7 +12,7 @@ PORT_KEYS = {
     "releaseAnnouncementsDoNotShowAgain",
     "chatClose",
     "settingsAboutWhatsNew",
-    "settingsAboutChangelog",
+    "settingsAboutNews",
     "settingsAboutOurGroup",
     "appShellRestart",
     "appShellInstallingUpdate",
