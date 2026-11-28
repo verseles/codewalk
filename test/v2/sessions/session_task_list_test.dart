@@ -132,6 +132,26 @@ void main() {
 
     await show(5);
     expect(shown(), {3, 4, 5, 6, 7});
+    // A list kept shorter than five rows still shows the task in progress.
+    await tester.pumpWidget(
+      _wrap(
+        Scaffold(
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: SessionTaskListPanel(
+              plan: plan(6),
+              collapsed: false,
+              maxListHeight: 60,
+              onToggleCollapsed: () {},
+            ),
+          ),
+        ),
+        disableAnimations: true,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(shown(), contains(6));
+    await show(5);
     // Another task in progress: the list turns to it.
     await show(6);
     expect(shown(), {4, 5, 6, 7, 8});

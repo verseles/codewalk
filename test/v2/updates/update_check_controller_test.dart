@@ -10,10 +10,19 @@ import 'package:flutter_test/flutter_test.dart';
 class MemoryBackend implements MetadataBackend {
   final values = <String, Object>{};
   bool failWrite = false;
+
+  /// A write of this key waits for [release], telling [entered] it began.
+  String? blockedKey;
+  Completer<void>? entered;
+  Completer<void>? release;
   @override
   Future<Object?> read(String key) async => values[key];
   @override
   Future<void> write(String key, Object value) async {
+    if (key == blockedKey && release != null) {
+      if (!(entered?.isCompleted ?? true)) entered!.complete();
+      await release!.future;
+    }
     if (failWrite) throw StateError('storage');
     values[key] = value;
   }
@@ -372,6 +381,33 @@ void main() {
     expect(restored.visibleNews, isNull);
     updates.dispose();
     restored.dispose();
+  });
+
+  test('news seen stays dismissed when Settings close mid-write', () async {
+    installed = '2.0.0-beta.2';
+    final updates = controller();
+    await updates.setChannel(UpdateChannel.beta);
+    final entries = jsonDecode(listing(['v2.0.0-beta.2'])) as List;
+    for (final entry in entries) {
+      (entry as Map)['published_at'] = '2026-11-04T12:00:00Z';
+      entry['body'] = '> 📣 News for ${entry['tag_name']}';
+    }
+    final check = updates.check();
+    await answer(jsonEncode(entries));
+    await check;
+    backend
+      ..blockedKey = UpdateCheckController.dismissedNewsKey
+      ..entered = Completer<void>()
+      ..release = Completer<void>();
+    final seen = updates.newsSeen();
+    await backend.entered!.future;
+    // Settings close while the dismissal is written.
+    updates.leaveNews();
+    backend.release!.complete();
+    await seen;
+    expect(updates.visibleNews, isNull);
+    expect(updates.automaticNewsNotice, isNull);
+    updates.dispose();
   });
 
   test('silent failure preserves a previously found update', () async {

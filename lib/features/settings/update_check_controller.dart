@@ -77,7 +77,9 @@ final class UpdateCheckController extends ChangeNotifier {
   UpdateCandidate? get automaticUpdateNotice =>
       visibleCandidate?.tag == _automaticUpdate ? visibleCandidate : null;
   ReleaseCatalogEntry? get automaticNewsNotice =>
-      visibleNews?.tag == _automaticNews ? visibleNews : null;
+      visibleNews?.tag == _automaticNews && visibleNews?.tag != _showingNews
+      ? visibleNews
+      : null;
   void markNoticePresented(String tag, {required bool news}) {
     _presentedNotices.add('${news ? 'news' : 'update'}:$tag');
     if (news) {
@@ -221,12 +223,15 @@ final class UpdateCheckController extends ChangeNotifier {
     final tag = visibleNews?.tag;
     if (_disposed || tag == null || tag == _showingNews) return;
     _showingNews = tag;
+    // Seen here, it is not announced elsewhere either.
+    if (_automaticNews == tag) _automaticNews = null;
     try {
       await _store.write(dismissedNewsKey, tag);
     } on Object {
       return;
     }
-    if (_disposed || _showingNews != tag) return;
+    // Dismissed whether or not Settings closed while it was written.
+    if (_disposed) return;
     _dismissedNewsTag = tag;
   }
 

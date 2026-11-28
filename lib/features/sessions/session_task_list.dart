@@ -175,12 +175,14 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
           !_scrollController.hasClients) {
         return;
       }
-      // The task in progress in the middle: two rows before it, two after.
+      // The task in progress in the middle of what the list shows: two rows
+      // before it and two after when it shows five, fewer when it is
+      // shorter.
       final position = _scrollController.position;
-      final offset =
-          ((currentIndex - SessionTaskListPanel.visibleRows ~/ 2) * _rowExtent)
-              .clamp(0.0, position.maxScrollExtent)
-              .toDouble();
+      final rowTop = 4 + currentIndex * _rowExtent;
+      final offset = (rowTop - (position.viewportDimension - _rowExtent) / 2)
+          .clamp(0.0, position.maxScrollExtent)
+          .toDouble();
       if (AppIndeterminate.motion(context)) {
         unawaited(
           _scrollController.animateTo(

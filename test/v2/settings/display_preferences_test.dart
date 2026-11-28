@@ -21,7 +21,8 @@ void main() {
     expect(preferences.showSessionTabs, isTrue);
     expect(preferences.expandedTools, isFalse);
     expect(preferences.tabsGestureHintDismissed, isFalse);
-    expect(backend.writes, ['cw2.schema']);
+    // A new install writes only its theme, GitHub (#553).
+    expect(backend.writes, ['cw2.schema', 'cw2.settings.themePreset']);
   });
 
   test('the display choices survive a reload', () async {
