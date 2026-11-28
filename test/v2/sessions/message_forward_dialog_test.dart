@@ -110,15 +110,24 @@ void main() {
 
   /// Pumps until the run ends, answering each target's read again as the
   /// server has it.
-  Future<void> settle(WidgetTester tester) async {
+  Future<void> settle(
+    WidgetTester tester, {
+    Set<String> deleted = const {},
+  }) async {
     for (var i = 0; i < 20; i++) {
       await tester.pump();
       for (final (ref, task) in source.reads) {
         if (task.completion.isCompleted) continue;
-        final row = rows().where((row) => row.info.ref == ref).firstOrNull;
+        final row = rows()
+            .where(
+              (row) =>
+                  row.info.ref == ref &&
+                  !deleted.contains(row.info.ref.nativeId),
+            )
+            .firstOrNull;
         if (row == null) {
           task.completion.completeError(
-            const SessionCatalogException(SessionCatalogFailure.unavailable),
+            const SessionCatalogException(SessionCatalogFailure.notFound),
           );
         } else {
           task.completion.complete(row);
@@ -222,6 +231,26 @@ void main() {
     expect(
       find.text('Not sent: the conversation is gone or archived'),
       findsOneWidget,
+    );
+  });
+
+  testWidgets('a conversation the server deleted is reported gone', (
+    tester,
+  ) async {
+    await pump(tester);
+    await tester.tap(target('one'));
+    await tester.tap(target('two'));
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('forward_send')));
+    await settle(tester, deleted: {source.row('one').info.ref.nativeId});
+    expect(find.text('Sent to 1 of 2'), findsOneWidget);
+    expect(
+      find.text('Not sent: the conversation is gone or archived'),
+      findsOneWidget,
+    );
+    expect(
+      outbox.calls.where((call) => call.startsWith('submit')),
+      hasLength(1),
     );
   });
 

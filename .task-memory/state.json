@@ -983,10 +983,14 @@
     {
       "at": "2026-11-28T05:56:10Z",
       "text": "Judged #541 r5 (A0028): accepted superseded-start file release + partial file delete (fix 6370c5d0); intended rejections AVPlayer pending + resume message -> dissent to Sol-F only (u7 r6). Judged #542 r2: accepted all (submit-error unconfirmed, live/stale recheck, confirm read for archive per Sol-F evidence, context failing + group Retry, short window, doc) fix 67771f4e. Metrics u7 r5, u8 r2 recorded. #547 commit de7fd928; #545 test fix 9f2f9099."
+    },
+    {
+      "at": "2026-11-28T05:58:46Z",
+      "text": "8.3 review unit u9 (#543-#548, commits 80026a94 b93142cd e0753859 9f2f9099 de7fd928 d35cf9de): metrics rvw_20261128T055800Z_7275622f, key codewalk-g8-composer-chip-20261128T055757Z-d3e5. Handshakes READY: Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg. Grok-47-high-F failed (out of credits, technical, excluded). Claude helpers excluded (quota; owner: use native stand-in)."
     }
   ],
-  "generation": 143,
-  "next_action": "Dispatch u7 r6 (Sol-F dissent) + u8 r3; meanwhile finish #548 (tips with links: code done, update tests, BEHAVIOR, commit)",
+  "generation": 145,
+  "next_action": "Wait full gate (bwrf2woul) and u7 r6/u8 r3 (bzlrawjcu); then dispatch u9 r1 + native stand-in review",
   "pending_operation": {
     "expected_bytes": 20000,
     "expected_seconds": 900,
@@ -1016,7 +1020,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T05:56:10Z",
+  "updated_at": "2026-11-28T06:05:22Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1135,6 +1139,13 @@
       "check": "#547 tests: store, picker, chip, cycle + analyze + mutation",
       "criterion": null,
       "evidence": "77+23 tests pass; analyze 4 (budget); picker #547 test fails with chip change reverted",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T06:05:22Z",
+      "check": "Full flutter test at d35cf9de",
+      "criterion": null,
+      "evidence": "all pass except expected goldens: appearance desktop_light/dark (#541 settings entry), subagent capsule x3 (#543 status line); regen on x86 via goldens.yml after push. log /tmp/opencode/g8/full.log",
       "outcome": "pass"
     }
   ]

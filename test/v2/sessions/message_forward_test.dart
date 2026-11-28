@@ -217,7 +217,7 @@ void main() {
     MessageForwardRun run(
       List<String> ids, {
       bool Function()? offline,
-      Future<bool> Function(SessionRef session)? confirm,
+      Future<bool> Function(SessionRef session, Future<void> ended)? confirm,
       Duration timeout = const Duration(seconds: 20),
     }) => MessageForwardRun(
       text: 'Forwarded from: app / Src\n\nhello',
@@ -427,10 +427,12 @@ void main() {
     });
 
     test('the server tells of an archive the list has not seen', () async {
-      final archived = run(['a'], confirm: (_) async => false);
+      final archived = run(['a'], confirm: (_, _) async => false);
       await archived.run();
       expect(archived.targets.single.miss, ForwardMiss.gone);
-      final unknown = run(['b'], confirm: (_) async => throw StateError('x'));
+      final unknown = run([
+        'b',
+      ], confirm: (_, _) async => throw StateError('x'));
       await unknown.run();
       expect(unknown.targets.single.miss, ForwardMiss.unavailable);
       expect(outbox.calls, isEmpty);

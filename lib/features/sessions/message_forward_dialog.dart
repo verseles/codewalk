@@ -11,6 +11,7 @@ import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
 import '../../shared/sessions/server_path.dart';
+import '../../shared/sessions/session_catalog_source.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
@@ -230,12 +231,18 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
     return row != null && forwardTargetAllowed(row, widget.source);
   }
 
-  /// The target as its server has it now; an archive the list has not
-  /// learned yet counts.
-  Future<bool> _confirm(SessionRef ref) async {
+  /// The target as its server has it now: an archive or deletion the list
+  /// has not learned yet counts; with no way to ask, it cannot tell.
+  Future<bool> _confirm(SessionRef ref, Future<void> ended) async {
     final task = widget.catalog.read(ref);
-    if (task == null) return _available(ref);
-    return forwardTargetAllowed(await task.result, widget.source);
+    if (task == null) throw StateError('No source to read $ref');
+    unawaited(ended.then((_) => task.cancel()));
+    try {
+      return forwardTargetAllowed(await task.result, widget.source);
+    } on SessionCatalogException catch (error) {
+      if (error.failure == SessionCatalogFailure.notFound) return false;
+      rethrow;
+    }
   }
 
   Future<void> _send(List<ForwardGroup> groups) async {
@@ -298,11 +305,13 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
           builder: (context, constraints) => Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                l10n.messageForwardTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 8),
+              if (constraints.maxHeight >= 260) ...[
+                Text(
+                  l10n.messageForwardTitle,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+              ],
               if (constraints.maxHeight >= 400) ...[
                 _Preview(provenance: widget.provenance, text: widget.text),
                 const SizedBox(height: 12),
@@ -349,7 +358,8 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
       ],
     );
     Widget body;
-    if (none && failed) {
+    // A search that matches nothing says so, even after a failed read.
+    if (none && failed && _query.text.trim().isEmpty) {
       body = retry(const ValueKey('forward_retry_load'));
     } else if (none && (loading || catalog.loading)) {
       body = const Center(child: AppIndeterminateRing(size: 24));
@@ -419,7 +429,13 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
         TextField(
           key: const ValueKey('forward_search'),
           controller: _query,
-          autofocus: !offline,
+          // A phone keeps its keyboard down until the search is tapped, so
+          // the list shows first.
+          autofocus:
+              !offline &&
+              !WindowSizeClass.fromWidth(
+                MediaQuery.sizeOf(context).width,
+              ).isCompact,
           decoration: InputDecoration(
             hintText: l10n.messageForwardSearch,
             prefixIcon: const Icon(Icons.search),

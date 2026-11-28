@@ -67,6 +67,8 @@ final class SessionContextRefresh {
       (d) => !_directories.contains(d) && !known.contains(d),
     );
     _directories = next;
+    // With nothing to read, no failure is left to tell.
+    if (next.isEmpty) _failures = 0;
     if (fresh) refresh();
   }
 

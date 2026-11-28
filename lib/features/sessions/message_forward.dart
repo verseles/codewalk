@@ -143,7 +143,8 @@ class MessageForwardRun extends ChangeNotifier {
 
   /// Reads the target again from its server right before the post: false
   /// when it was archived or deleted meanwhile; throws when it cannot tell.
-  final Future<bool> Function(SessionRef session)? confirm;
+  /// The read may end once [ended] completes: the run no longer waits.
+  final Future<bool> Function(SessionRef session, Future<void> ended)? confirm;
 
   /// Whether the server is known to be offline now.
   final bool Function()? offline;
@@ -261,13 +262,16 @@ class MessageForwardRun extends ChangeNotifier {
       if (confirm != null) {
         // The list learns of an archive a moment after the server.
         final bool? listed;
+        final ended = Completer<void>();
         try {
           listed = await Future.any<bool?>([
-            confirm(target.ref),
+            confirm(target.ref, ended.future),
             _halt.future.then((_) => null),
           ]).timeout(readyTimeout);
         } on Object {
           return _fail(target, ForwardMiss.unavailable);
+        } finally {
+          ended.complete();
         }
         if (_stopped || listed == null) {
           target.status = ForwardStatus.stopped;
