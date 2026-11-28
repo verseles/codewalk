@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 20,
+  "artifact_seq": 21,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -320,6 +320,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "#542 v1 forward UX and v2 seams"
+    },
+    "A0021": {
+      "active": true,
+      "bytes": 668,
+      "created_at": "2026-11-28T03:26:29Z",
+      "evidence": "/tmp/opencode/g8/rev/u5/r5_*.out",
+      "id": "A0021",
+      "impact": "Round 5 fixes",
+      "origin": "8 helpers (rev.sh u5 r5)",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0021.md",
+      "purpose": "Re-review bdc25d4b",
+      "rerun_when": "message_action_bar.dart changes",
+      "sha256": "d419dd58843a3efa8ae10469e6c35b2b0fcea97c2065ae65039c26176f393b8d",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u5 #539 review round 5 reports"
     }
   },
   "checklist": [
@@ -791,17 +807,29 @@
     {
       "at": "2026-11-28T03:16:58Z",
       "text": "p542 handshakes: 8 READY (Claude-haiku, Claude-opus-F, Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg); Grok rc=1 out of credits (technical failure, excluded: helpers_r1 = 8)."
+    },
+    {
+      "at": "2026-11-28T03:24:27Z",
+      "text": "Review units: u6 #540 boundary e98a01f4 (key codewalk-540-message-image-20261128T032420Z-5148, metrics rvw_20261128T032426Z_5ad26b64); u7 #541 boundary a00460f9 (key codewalk-541-read-aloud-20261128T032420Z-72c3, metrics rvw_20261128T032426Z_5411f92b); 8 helpers each (Grok out of credits). #541 committed a00460f9 after fixing app_snack_bar guard (showAppSnackBar)."
+    },
+    {
+      "at": "2026-11-28T03:25:44Z",
+      "text": "u6 (#540) and u7 (#541) handshakes: 8/8 READY each."
+    },
+    {
+      "at": "2026-11-28T03:26:52Z",
+      "text": "u5 r5 judgment (A0021): accept all. G1 hint room from text scaler (scale(16)+14); G2 hint test asserts inside ClipRect, plus large text; G3 replace position listener + ScrollNotificationObserver with a post-frame recheck rearmed every frame while the bar shows (no ensureVisualUpdate, idle-free) so width-only resizes re-clip; G4 non-finite anchor -> hide; test skipOffstage:false; G5 absorber and hint sized by the pill's real height (FractionallySizedBox heightFactor 0.5; hint via FractionalTranslation), desktop compact density test. Round 6 re-review after fixes."
     }
   ],
-  "generation": 106,
-  "next_action": "Handshake p542 helpers (rev.sh hs), checkpoint READY results, then dispatch p1 after u5 r5 capture (one pending op at a time).",
+  "generation": 111,
+  "next_action": "Implement r5 fixes in message_action_bar.dart + gesture tests, gate, commit, round 6. Batch op_d9867bf20d60 (p542 + u6 + u7) running; waiter bk72b5cf9.",
   "pending_operation": {
-    "expected_bytes": 40000,
-    "expected_seconds": 600,
-    "id": "op_dfce3612db26",
+    "expected_bytes": 150000,
+    "expected_seconds": 1200,
+    "id": "op_d9867bf20d60",
     "kind": "subagent",
-    "prepared_at": "2026-11-28T03:14:21Z",
-    "purpose": "u5 #539 re-review round 5 on bdc25d4b (8 helpers, rev.sh u5 run r5 p5.txt helpers_r1)"
+    "prepared_at": "2026-11-28T03:26:33Z",
+    "purpose": "Batch: p542 planning (8 helpers, plan/p542 p1.txt) + u6 #540 review e98a01f4 + u7 #541 review a00460f9 (8 helpers each), concurrent"
   },
   "queued_followups": [],
   "request": {
@@ -824,7 +852,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T03:23:44Z",
+  "updated_at": "2026-11-28T03:26:52Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

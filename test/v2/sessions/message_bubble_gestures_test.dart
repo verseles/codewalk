@@ -68,6 +68,11 @@ Future<List<String>> _pump(WidgetTester tester, List<Widget> tiles) async {
 
 Finder get _bar => find.byKey(const ValueKey('message-action-bar'));
 
+/// The list's bounds the bar is clipped to.
+Rect _clip(WidgetTester tester) => tester.getRect(
+  find.ancestor(of: _bar, matching: find.byType(ClipRect)).first,
+);
+
 Finder _action(MessageActionId id) =>
     find.byKey(ValueKey('message-action-${id.name}'));
 
@@ -419,7 +424,10 @@ void main() {
     // list would drop the message.
     controller.jumpTo(5000);
     await tester.pumpAndSettle();
-    expect(_bar, findsNothing);
+    expect(
+      find.byKey(const ValueKey('message-action-bar'), skipOffstage: false),
+      findsNothing,
+    );
     await tester.tap(find.text('Fork from here'));
     await tester.pumpAndSettle();
     expect(forked, 1);
@@ -620,8 +628,53 @@ void main() {
     final bar = tester.getRect(_bar);
     expect(bar.top, lessThan(40));
     expect(hint.top, greaterThan(bar.bottom));
+    expect(_clip(tester).expandToInclude(hint), _clip(tester));
     await tester.pump(const Duration(seconds: 2));
   });
+
+  for (final (scale, below) in [(1.0, false), (2.0, true)]) {
+    testWidgets('at text size $scale, a button\'s name stays in the list', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: TextScaler.linear(scale)),
+            child: child!,
+          ),
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const SizedBox(height: 60),
+                  SessionTimelineTile(item: _agent('first line\n\nlast line')),
+                  const SizedBox(height: 1200),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.textContaining('last line'));
+      await tester.pumpAndSettle();
+      await tester.pump(kDoubleTapTimeout);
+      await tester.longPress(_action(MessageActionId.copy));
+      await tester.pump();
+      final hint = tester.getRect(
+        find.byKey(const ValueKey('message-action-hint')),
+      );
+      final bar = tester.getRect(_bar);
+      expect(bar.center.dy, lessThan(80));
+      expect(hint.top > bar.bottom, below);
+      expect(_clip(tester).expandToInclude(hint), _clip(tester));
+      await tester.pump(const Duration(seconds: 2));
+    });
+  }
 
   testWidgets('a waiting prompt is selectable but has no bar (#502)', (
     tester,
@@ -863,6 +916,92 @@ void main() {
       find.ancestor(of: _bar, matching: find.byType(ClipRect)).first,
     );
     expect(clip.top, 100);
+  });
+
+  testWidgets('with compact density, a fresh bar takes taps past the edge', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        // As on desktop: compact, with no padded tap targets.
+        theme: ThemeData(
+          visualDensity: VisualDensity.compact,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
+        localizationsDelegates: V2Localizations.localizationsDelegates,
+        supportedLocales: V2Localizations.supportedLocales,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 100),
+                SessionTimelineTile(item: _agent('first line\n\nlast line')),
+                SessionTimelineTile(item: _user('the next one')),
+                const SizedBox(height: 1200),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final next = find.byKey(const ValueKey('message-row-test/u'));
+    // Above the middle of the answer, so the bar takes its bottom edge.
+    await tester.tap(find.textContaining('first line'));
+    await tester.pump();
+    final bar = tester.getRect(_bar);
+    expect(bar.height, lessThan(48));
+    // Just past the answer's edge, in the next message's row.
+    final outer = Offset(bar.left + 20, bar.center.dy + 2);
+    expect(tester.getRect(next).contains(outer), isTrue);
+    final hit = tester.renderObject(next);
+    expect(
+      tester.hitTestOnBinding(outer).path.any((e) => e.target == hit),
+      isFalse,
+    );
+    await tester.pump(kDoubleTapTimeout);
+  });
+
+  testWidgets('the bar keeps to the list as a side panel opens', (
+    tester,
+  ) async {
+    final panel = ValueNotifier<double>(0);
+    addTearDown(panel.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: V2Localizations.localizationsDelegates,
+        supportedLocales: V2Localizations.supportedLocales,
+        home: Scaffold(
+          body: Row(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      SessionTimelineTile(item: _agent('the answer')),
+                      const SizedBox(height: 1200),
+                    ],
+                  ),
+                ),
+              ),
+              ValueListenableBuilder(
+                valueListenable: panel,
+                builder: (context, width, _) => SizedBox(width: width),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('the answer'));
+    await tester.pumpAndSettle();
+    expect(_clip(tester).right, 800);
+    panel.value = 300;
+    await tester.pumpAndSettle();
+    expect(_bar, findsOneWidget);
+    expect(_clip(tester).right, 500);
   });
 
   testWidgets('the bar keeps to the list as the list changes size', (

@@ -84,9 +84,6 @@ const messageBarHideDelay = Duration(milliseconds: 600);
 const _barHeight = 48.0;
 const _barMargin = 4.0;
 
-// The room a button's name takes above the pill: its gap and one line.
-const _hintRoom = 40.0;
-
 /// A long press that answers only where [allow] says so.
 class _CleanLongPress extends LongPressGestureRecognizer {
   _CleanLongPress({required this.allow, super.debugOwner})
@@ -195,14 +192,13 @@ class _MessageActionHostState extends State<MessageActionHost>
 
   // The mouse is over the bar, which then never hides under it.
   bool _overBar = false;
-  ScrollPosition? _position;
 
   // The three-dots menu is open: Escape is its own, and the list keeps the
   // message, whose choice would otherwise be lost.
   bool _menuOpen = false;
 
-  ScrollNotificationObserverState? _observer;
-  bool _recheckPending = false;
+  // A check of the bar against the list waits for the end of a frame.
+  bool _watching = false;
 
   // The list's bounds and the hint's side the bar was last built with.
   (Rect, bool)? _built;
@@ -221,15 +217,6 @@ class _MessageActionHostState extends State<MessageActionHost>
       _scrolling?.removeListener(_scrollChanged);
       _scrolling = scrolling?..addListener(_scrollChanged);
     }
-    if (!identical(position, _position)) {
-      _position?.removeListener(_moved);
-      _position = position?..addListener(_moved);
-    }
-    final observer = ScrollNotificationObserver.maybeOf(context);
-    if (!identical(observer, _observer)) {
-      _observer?.removeListener(_metrics);
-      _observer = observer?..addListener(_metrics);
-    }
   }
 
   @override
@@ -238,8 +225,6 @@ class _MessageActionHostState extends State<MessageActionHost>
   @override
   void dispose() {
     _scrolling?.removeListener(_scrollChanged);
-    _position?.removeListener(_moved);
-    _observer?.removeListener(_metrics);
     _hoverTimer?.cancel();
     _settling?.cancel();
     if (identical(_shown, this)) _shown = null;
@@ -256,31 +241,29 @@ class _MessageActionHostState extends State<MessageActionHost>
     _hide();
   }
 
-  /// The list resized, as when the composer grows.
-  void _metrics(ScrollNotification notification) {
-    if (notification.metrics.axis == Axis.vertical) _moved();
-  }
-
-  /// The list moved without a scroll gesture, as when it follows a
-  /// growing answer, or resized: once it is laid out, a bar whose edge left
-  /// the visible list goes, and one that stays keeps to the list as it is.
-  void _moved() {
-    if (!_portal.isShowing || _recheckPending) return;
-    _recheckPending = true;
-    WidgetsBinding.instance
-      ..addPostFrameCallback((_) {
-        _recheckPending = false;
-        if (mounted) _recheck();
-      })
-      ..ensureVisualUpdate();
+  /// While the bar shows, the end of each frame checks it against the list
+  /// as laid out. Whatever moved or resized the list or the message (a
+  /// growing answer, the composer, a side panel), a bar whose edge left the
+  /// list goes, and one that stays keeps to the list as it is. Frames come
+  /// only when something changes, so a bar at rest costs nothing.
+  void _watch() {
+    if (_watching) return;
+    _watching = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _watching = false;
+      if (!mounted || !_portal.isShowing) return;
+      _recheck();
+      if (_portal.isShowing) _watch();
+    });
   }
 
   void _recheck() {
-    if (!_portal.isShowing) return;
     final y = _edgeY;
     final viewport = _viewport;
     if (y == null || viewport == null) return;
-    if (y < viewport.top || y > viewport.bottom) {
+    // A message the list keeps out of sight, as while its menu is open,
+    // has no place on screen.
+    if (!y.isFinite || y < viewport.top || y > viewport.bottom) {
       _hide();
     } else if (_built != (viewport, _hintBelow(y, viewport))) {
       setState(() {});
@@ -300,9 +283,15 @@ class _MessageActionHostState extends State<MessageActionHost>
   }
 
   /// Whether a button's name goes below the bar whose middle is at [y],
-  /// for lack of room above it in the list.
-  static bool _hintBelow(double y, Rect viewport) =>
-      y - _barHeight / 2 - _hintRoom < viewport.top;
+  /// for lack of room above it in the list: its gap, its padding and one
+  /// line of small text at the current text size.
+  bool _hintBelow(double y, Rect viewport) {
+    final style = Theme.of(context).textTheme.bodySmall;
+    final line =
+        MediaQuery.textScalerOf(context).scale(style?.fontSize ?? 12) *
+        (style?.height ?? 1.4);
+    return y - _barHeight / 2 - (14 + line) < viewport.top;
+  }
 
   Rect? get _viewport {
     final box = Scrollable.maybeOf(context)?.context.findRenderObject();
@@ -348,6 +337,7 @@ class _MessageActionHostState extends State<MessageActionHost>
     _place(at);
     setState(() => _pinned = _pinned || pin);
     _portal.show();
+    _watch();
     _settling?.cancel();
     _settling = tapped
         ? Timer(kDoubleTapTimeout, () {
@@ -654,14 +644,16 @@ class _MessageActionHostState extends State<MessageActionHost>
             // Meanwhile the half of the bar past the message's edge takes
             // taps and does nothing, so they cannot reach the next message.
             if (_settling != null && _edge != _Edge.pinned)
-              Positioned(
-                left: 0,
-                right: 0,
-                top: _edge == _Edge.top ? 0 : _barHeight / 2,
-                height: _barHeight / 2,
-                child: TapRegion(
-                  groupId: this,
-                  child: const AbsorbPointer(child: SizedBox.expand()),
+              Positioned.fill(
+                child: FractionallySizedBox(
+                  alignment: _edge == _Edge.top
+                      ? Alignment.topCenter
+                      : Alignment.bottomCenter,
+                  heightFactor: 0.5,
+                  child: TapRegion(
+                    groupId: this,
+                    child: const AbsorbPointer(child: SizedBox.expand()),
+                  ),
                 ),
               ),
           ],
@@ -889,26 +881,35 @@ class _ActionPillState extends State<_ActionPill> {
             ),
           ),
           if (hint != null)
+            // Just past the pill, whatever height the density gives it.
             Positioned(
-              top: widget.hintBelow ? _barHeight + 6 : null,
-              bottom: widget.hintBelow ? null : _barHeight + 6,
+              top: widget.hintBelow ? null : 0,
+              bottom: widget.hintBelow ? 0 : null,
               left: widget.end ? null : 0,
               right: widget.end ? 0 : null,
-              child: ExcludeSemantics(
-                child: Material(
-                  key: const ValueKey('message-action-hint'),
-                  color: scheme.inverseSurface,
-                  borderRadius: BorderRadius.circular(4),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    child: Text(
-                      hint,
-                      maxLines: 1,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: scheme.onInverseSurface,
+              child: FractionalTranslation(
+                translation: Offset(0, widget.hintBelow ? 1 : -1),
+                child: Padding(
+                  padding: widget.hintBelow
+                      ? const EdgeInsets.only(top: 6)
+                      : const EdgeInsets.only(bottom: 6),
+                  child: ExcludeSemantics(
+                    child: Material(
+                      key: const ValueKey('message-action-hint'),
+                      color: scheme.inverseSurface,
+                      borderRadius: BorderRadius.circular(4),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        child: Text(
+                          hint,
+                          maxLines: 1,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onInverseSurface,
+                          ),
+                        ),
                       ),
                     ),
                   ),
