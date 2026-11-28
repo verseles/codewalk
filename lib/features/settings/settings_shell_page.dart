@@ -76,7 +76,12 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     final wide = context.windowSizeClass.isAtLeastExpanded;
     if (!_initialShown) {
       _initialShown = true;
-      _selected ??= widget.initial;
+      // A link to Read aloud where no voice service can run opens nothing.
+      final readAloud =
+          context.read<ReadAloudController?>()?.providers.isNotEmpty ?? false;
+      _selected ??= widget.initial == SettingsSection.readAloud && !readAloud
+          ? null
+          : widget.initial;
     }
     if (wide) {
       _selected ??= SettingsSection.appearance;
@@ -253,8 +258,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
     );
     // Only where some voice service can run: never on the Web for now.
     final readAloud =
-        (context.read<ReadAloudController?>()?.providers.isNotEmpty ??
-            false) &&
+        (context.read<ReadAloudController?>()?.providers.isNotEmpty ?? false) &&
         matches(
           l.readAloudTitle,
           '${l.readAloudEnableDescription} ${l.readAloudProvider} '

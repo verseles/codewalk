@@ -195,13 +195,15 @@ final class SpeechCancel {
   bool get cancelled => _cancelled;
 
   /// Runs [action] once this is cancelled, at once if it already is, as a
-  /// request that drops its connection.
-  void onCancel(void Function() action) {
+  /// request that drops its connection; the returned function forgets it,
+  /// once the connection is done anyway.
+  void Function() onCancel(void Function() action) {
     if (_cancelled) {
       action();
-    } else {
-      _actions.add(action);
+      return () {};
     }
+    _actions.add(action);
+    return () => _actions.remove(action);
   }
 
   void cancel() {
@@ -291,7 +293,24 @@ abstract interface class NativeSpeechEngine {
 }
 
 /// The API keys of the keyed providers, in the device's secure storage.
+/// Saved API keys, each for one [speechKeyScope].
 abstract interface class SpeechKeyStore {
-  Future<String?> read(SpeechProvider provider);
-  Future<void> write(SpeechProvider provider, String? key);
+  Future<String?> read(String scope);
+  Future<void> write(String scope, String? key);
+}
+
+/// The address a service is reached at when none is set.
+const speechDefaultBase = {
+  SpeechProvider.openAi: 'https://api.openai.com',
+  SpeechProvider.elevenLabs: 'https://api.elevenlabs.io',
+};
+
+/// What a saved key belongs to: its service and the origin it is sent to,
+/// so a key saved for one server never goes to another (#541).
+String speechKeyScope(SpeechProvider provider, String? baseUrl) {
+  final base = baseUrl ?? speechDefaultBase[provider];
+  final uri = base == null ? null : Uri.tryParse(base.trim());
+  if (uri == null || uri.host.isEmpty) return provider.name;
+  final port = uri.hasPort ? ':${uri.port}' : '';
+  return '${provider.name}@${uri.scheme}://${uri.host.toLowerCase()}$port';
 }

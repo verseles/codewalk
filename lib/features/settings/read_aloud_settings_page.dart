@@ -27,6 +27,8 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
   final _key = TextEditingController();
   final _phrase = TextEditingController();
   SpeechProvider? _shown;
+  // The service and address the key status was read for.
+  String? _keyScope;
   bool _keySaved = false;
   bool _loadingVoices = false;
   int _keyRead = 0;
@@ -97,23 +99,52 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
     if (next != null) await controller.update(next);
   }
 
-  /// Fills the fields from [settings] when another service is shown.
+  /// Fills the fields from [settings] when another service is shown, and
+  /// reads whether a key is saved for the service at its address: a key
+  /// belongs to one address and never goes to another.
   void _sync(ReadAloudController controller) {
     final settings = controller.settings;
-    if (_shown == settings.provider) return;
-    _shown = settings.provider;
-    _model.text = settings.model ?? '';
-    _baseUrl.text = settings.baseUrl ?? '';
-    _phrase.text = settings.testPhrase ?? '';
-    _key.clear();
+    if (_shown != settings.provider) {
+      _shown = settings.provider;
+      _model.text = settings.model ?? '';
+      _baseUrl.text = settings.baseUrl ?? '';
+      _phrase.text = settings.testPhrase ?? '';
+      _key.clear();
+    }
+    final scope = speechKeyScope(settings.provider, settings.baseUrl);
+    if (scope == _keyScope) return;
+    _keyScope = scope;
     _keySaved = false;
     final read = ++_keyRead;
     unawaited(
-      controller.keys.read(settings.provider).then((key) {
-        if (!mounted || read != _keyRead) return;
-        setState(() => _keySaved = key != null && key.isNotEmpty);
-      }),
+      controller.keys.read(scope).then(
+        (key) {
+          if (!mounted || read != _keyRead) return;
+          setState(() => _keySaved = key != null && key.isNotEmpty);
+        },
+        // Unreadable storage shows no saved key.
+        onError: (Object _) {},
+      ),
     );
+  }
+
+  /// Saves or clears the key of [scope], saying so if storage refuses.
+  Future<void> _writeKey(
+    ReadAloudController controller,
+    String scope,
+    String? value,
+  ) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final l10n = context.v2L10n;
+    try {
+      await controller.keys.write(scope, value);
+    } on Object {
+      showAppSnackBar(messenger, l10n.readAloudFailUnavailable);
+      return;
+    }
+    if (!mounted || _keyScope != scope) return;
+    if (value != null) _key.clear();
+    setState(() => _keySaved = value != null);
   }
 
   Future<void> _pickVoice(ReadAloudController controller) async {
@@ -124,15 +155,23 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
     final settings = controller.settings;
     setState(() => _loadingVoices = true);
     List<SpeechVoice> voices;
+    bool stale() {
+      final now = controller.settings;
+      return now.provider != settings.provider ||
+          now.baseUrl != settings.baseUrl;
+    }
+
     try {
       voices = await controller.voices();
     } on Object {
       voices = const [];
-      showAppSnackBar(messenger, l10n.readAloudVoicesFailed);
+      // A late failure of another service's list says nothing.
+      if (!stale()) showAppSnackBar(messenger, l10n.readAloudVoicesFailed);
     } finally {
       if (mounted) setState(() => _loadingVoices = false);
     }
-    if (!mounted) return;
+    // The list belongs to the service it came from.
+    if (!mounted || stale()) return;
     final options = <String, String>{
       '': l10n.readAloudVoiceDefault,
       for (final voice in voices)
@@ -354,10 +393,14 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
                         final value = _key.text.trim();
                         if (value.isEmpty) return;
                         await _commit(controller);
-                        await controller.keys.write(provider, value);
-                        if (!mounted || _shown != provider) return;
-                        _key.clear();
-                        setState(() => _keySaved = true);
+                        if (!mounted) return;
+                        // For the address that applies now.
+                        final now = controller.settings;
+                        await _writeKey(
+                          controller,
+                          speechKeyScope(now.provider, now.baseUrl),
+                          value,
+                        );
                       },
                       child: Text(l10n.readAloudSave),
                     ),
@@ -365,9 +408,9 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
                       TextButton(
                         key: const ValueKey('read_aloud_api_key_clear'),
                         onPressed: () async {
-                          await controller.keys.write(provider, null);
-                          if (!mounted || _shown != provider) return;
-                          setState(() => _keySaved = false);
+                          final scope = _keyScope;
+                          if (scope == null) return;
+                          await _writeKey(controller, scope, null);
                         },
                         child: Text(l10n.readAloudClear),
                       ),

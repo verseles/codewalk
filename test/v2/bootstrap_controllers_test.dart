@@ -89,6 +89,7 @@ void main() {
     '/settings?section=readAloud&token=secret',
     '/settings?section=read%20aloud',
     '/settings?section=readAloud#secret',
+    '/settings?section=%E2%82',
     'codewalk://s/host/%FF',
     'codewalk://s/%E2%82/session',
     '/s/host/%FF',

@@ -101,6 +101,9 @@ final class EdgeSpeech implements SpeechSynthesizer {
           rethrow;
         }
         voice = fallback;
+        if (cancel.cancelled) {
+          throw const SpeechException(SpeechFailure.unavailable, 'cancelled');
+        }
         audio = await _speakChunk(chunk, fallback, settings.rate, cancel);
       }
       out.add(audio);
@@ -116,9 +119,12 @@ final class EdgeSpeech implements SpeechSynthesizer {
     double rate,
     SpeechCancel cancel,
   ) async {
-    final socket = await _open(retry: true);
+    if (cancel.cancelled) {
+      throw const SpeechException(SpeechFailure.unavailable, 'cancelled');
+    }
+    final socket = await _open(retry: true, cancel: cancel);
     // A stop drops the connection at once.
-    cancel.onCancel(() => unawaited(socket.close()));
+    final forget = cancel.onCancel(() => unawaited(socket.close()));
     try {
       final date = edgeDate(DateTime.now().toUtc());
       socket
@@ -138,18 +144,28 @@ final class EdgeSpeech implements SpeechSynthesizer {
           '${edgeSsml(chunk, voice: voice, rate: rate)}',
         );
       final audio = BytesBuilder(copy: false);
+      var ended = false;
       await for (final message in socket.timeout(_read)) {
         if (cancel.cancelled) {
           throw const SpeechException(SpeechFailure.unavailable, 'cancelled');
         }
         if (message is String) {
           final path = edgeHeader(message, 'Path');
-          if (path == 'turn.end') break;
+          if (path == 'turn.end') {
+            ended = true;
+            break;
+          }
         } else if (message is List<int>) {
           final frame = edgeAudioFrame(Uint8List.fromList(message));
           if (frame != null) audio.add(frame);
         }
       }
+      if (cancel.cancelled) {
+        throw const SpeechException(SpeechFailure.unavailable, 'cancelled');
+      }
+      // A connection closed before the service said it was done would read
+      // only part of the message.
+      if (!ended) throw const SpeechException(SpeechFailure.offline, 'cut');
       final bytes = audio.takeBytes();
       if (bytes.isEmpty) throw const SpeechException(SpeechFailure.noAudio);
       return bytes;
@@ -161,12 +177,16 @@ final class EdgeSpeech implements SpeechSynthesizer {
       // The connection dropped midway.
       throw const SpeechException(SpeechFailure.offline);
     } finally {
+      forget();
       unawaited(socket.close());
     }
   }
 
   /// Opens the websocket by hand, to read a refusal's status and `Date`.
-  Future<WebSocket> _open({required bool retry}) async {
+  Future<WebSocket> _open({
+    required bool retry,
+    required SpeechCancel cancel,
+  }) async {
     final uri = Uri.https(_host, '$_path/edge/v1', {
       'TrustedClientToken': edgeTrustedClientToken,
       'ConnectionId': _hexId(),
@@ -174,6 +194,8 @@ final class EdgeSpeech implements SpeechSynthesizer {
       'Sec-MS-GEC-Version': _secVersion,
     });
     final client = _client()..connectionTimeout = _connect;
+    // A stop during the handshake drops it at once.
+    final forget = cancel.onCancel(() => client.close(force: true));
     try {
       final request = await client.getUrl(uri).timeout(_connect);
       request.followRedirects = false;
@@ -200,13 +222,14 @@ final class EdgeSpeech implements SpeechSynthesizer {
         return WebSocket.fromUpgradedSocket(socket, serverSide: false);
       }
       final date = response.headers.value(HttpHeaders.dateHeader);
-      await response.drain<void>();
+      // The refusal's body is not read: closing ends it.
       client.close(force: true);
       if (response.statusCode == HttpStatus.forbidden && retry) {
         final server = date == null ? null : _parseDate(date);
         if (server != null) {
           _skewSeconds += server - _now;
-          return await _open(retry: false);
+          forget();
+          return await _open(retry: false, cancel: cancel);
         }
       }
       // Edge takes no key: a refusal is the service's, not the user's.
@@ -228,6 +251,8 @@ final class EdgeSpeech implements SpeechSynthesizer {
     } on HttpException {
       client.close(force: true);
       throw const SpeechException(SpeechFailure.offline);
+    } finally {
+      forget();
     }
   }
 
@@ -251,13 +276,22 @@ final class EdgeSpeech implements SpeechSynthesizer {
       }).forEach(http.headers.set);
       final response = await http.close().timeout(_read);
       if (response.statusCode != HttpStatus.ok) {
-        await response.drain<void>();
         throw SpeechException(
           SpeechFailure.rejected,
           'HTTP ${response.statusCode}',
         );
       }
-      final body = await response.transform(utf8.decoder).join();
+      // One deadline and a size bound for the whole list.
+      final body = await () async {
+        final bytes = BytesBuilder(copy: false);
+        await for (final chunk in response) {
+          bytes.add(chunk);
+          if (bytes.length > 8 << 20) {
+            throw const SpeechException(SpeechFailure.rejected, 'voices');
+          }
+        }
+        return utf8.decode(bytes.takeBytes(), allowMalformed: true);
+      }().timeout(_read);
       return edgeVoices(body);
     } on SpeechException {
       rethrow;

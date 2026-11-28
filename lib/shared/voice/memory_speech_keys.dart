@@ -2,18 +2,18 @@ import 'read_aloud.dart';
 
 /// Keys kept in memory only, where no secure storage exists (Web, tests).
 final class MemorySpeechKeys implements SpeechKeyStore {
-  final _keys = <SpeechProvider, String>{};
+  final _keys = <String, String>{};
 
   @override
-  Future<String?> read(SpeechProvider provider) async => _keys[provider];
+  Future<String?> read(String scope) async => _keys[scope];
 
   @override
-  Future<void> write(SpeechProvider provider, String? key) async {
+  Future<void> write(String scope, String? key) async {
     final value = key?.trim();
     if (value == null || value.isEmpty) {
-      _keys.remove(provider);
+      _keys.remove(scope);
     } else {
-      _keys[provider] = value;
+      _keys[scope] = value;
     }
   }
 }

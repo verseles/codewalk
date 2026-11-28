@@ -86,11 +86,19 @@ class AppNavigationController extends ChangeNotifier {
     }
 
     // A Settings section, as a read-aloud failure's Settings button opens:
-    // its one name and nothing else.
-    final section = link.queryParametersAll['section'];
+    // its one name and nothing else. A query that cannot be decoded is no
+    // link of the app.
+    final List<String>? section;
+    final Map<String, List<String>> query;
+    try {
+      query = link.queryParametersAll;
+      section = query['section'];
+    } on FormatException {
+      return _unsupportedLink();
+    }
     if (local &&
         link.path == '/settings' &&
-        link.queryParametersAll.length == 1 &&
+        query.length == 1 &&
         section != null &&
         section.length == 1 &&
         RegExp(r'^[a-zA-Z]{1,40}$').hasMatch(section.single) &&

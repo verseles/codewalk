@@ -182,11 +182,11 @@ void main() {
     await controller.read('s|b', 'Second');
     await pumpEventQueue();
     expect(controller.active, 's|b');
-    expect(player.played, ['read-aloud:s|b']);
+    expect(player.played, [startsWith('read-aloud:s|b#')]);
     // The first one's audio, ready late, never plays.
     gate.complete();
     await first;
-    expect(player.played, ['read-aloud:s|b']);
+    expect(player.played, [startsWith('read-aloud:s|b#')]);
     expect(controller.active, 's|b');
   });
 
@@ -194,23 +194,72 @@ void main() {
     await controller.read('s|a', 'Hello');
     await pumpEventQueue();
     expect(controller.phase, ReadAloudPhase.playing);
-    // The player rests, paused, at the end of what played through.
+    // The player rests, paused, at the end of what played through, even
+    // with no duration known.
     player.emit(
-      const AudioPlaybackState(
-        activeId: 'read-aloud:s|a',
+      player.current.copyWith(
         status: AudioPlaybackStatus.paused,
-        position: Duration(seconds: 3),
-        duration: Duration(seconds: 3),
+        completed: true,
       ),
     );
     await pumpEventQueue();
     expect(controller.active, isNull);
     expect(controller.phase, ReadAloudPhase.idle);
-    // Read again, it starts over rather than resuming the end.
+    // Read again, it starts over under an id of its own, from memory.
     await controller.read('s|a', 'Hello');
     await pumpEventQueue();
-    expect(player.stops, 1);
+    expect(player.played, hasLength(2));
+    expect(player.played.first, isNot(player.played.last));
+    expect(synth.requests, hasLength(1));
     expect(controller.phase, ReadAloudPhase.playing);
+  });
+
+  test(
+    'an audio already playing does not end a reading being prepared',
+    () async {
+      player.emit(
+        const AudioPlaybackState(
+          activeId: 'attachment',
+          status: AudioPlaybackStatus.playing,
+        ),
+      );
+      final gate = synth.gate = Completer<void>();
+      final reading = controller.read('s|a', 'Hello');
+      await pumpEventQueue();
+      // The attachment's progress ticks on.
+      player.emit(
+        player.current.copyWith(position: const Duration(seconds: 1)),
+      );
+      await pumpEventQueue();
+      expect(controller.phase, ReadAloudPhase.preparing);
+      gate.complete();
+      expect(await reading, isNull);
+      expect(player.played, [startsWith('read-aloud:s|a#')]);
+    },
+  );
+
+  test('audio that cannot play is made again next time', () async {
+    player.fail = true;
+    expect(await controller.read('s|a', 'Hello'), SpeechFailure.unavailable);
+    player.fail = false;
+    await controller.read('s|a', 'Hello');
+    expect(synth.requests, hasLength(2));
+  });
+
+  test('a key is sent only to the address it was saved for', () async {
+    await keys.write(speechKeyScope(SpeechProvider.openAi, null), 'sk-public');
+    await controller.update(
+      controller.settings.copyWith(
+        provider: SpeechProvider.openAi,
+        baseUrl: 'https://private.example',
+      ),
+    );
+    await controller.read('s|a', 'Hello');
+    expect(synth.requests.last.apiKey, isNull);
+    expect(
+      speechKeyScope(SpeechProvider.openAi, 'https://API.openai.com/v1'),
+      speechKeyScope(SpeechProvider.openAi, null),
+    );
   });
 
   test('a player that cannot play says so', () async {
@@ -288,7 +337,10 @@ void main() {
   test(
     'choices persist without keys; changing voice stops the reading',
     () async {
-      await keys.write(SpeechProvider.openAi, 'sk-secret');
+      await keys.write(
+        speechKeyScope(SpeechProvider.openAi, null),
+        'sk-secret',
+      );
       await controller.read('s|a', 'Hello');
       await controller.update(
         controller.settings.copyWith(provider: SpeechProvider.openAi),

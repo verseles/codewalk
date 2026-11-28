@@ -166,7 +166,10 @@ void main() {
     );
     await tester.tap(find.byKey(const ValueKey('read_aloud_api_key_save')));
     await tester.pumpAndSettle();
-    expect(await keys.read(SpeechProvider.openAi), 'sk-test');
+    expect(
+      await keys.read(speechKeyScope(SpeechProvider.openAi, null)),
+      'sk-test',
+    );
     expect(
       backend.values.values.whereType<String>().any((v) => v.contains('sk-')),
       isFalse,
@@ -184,7 +187,10 @@ void main() {
     tester.view.physicalSize = const Size(800, 2000);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await keys.write(SpeechProvider.openAi, 'sk-test');
+    await keys.write(
+      speechKeyScope(SpeechProvider.openAi, 'https://tts.example'),
+      'sk-test',
+    );
     await tester.pumpWidget(app(const ReadAloudSettingsPage()));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('read_aloud_provider_openAi')));

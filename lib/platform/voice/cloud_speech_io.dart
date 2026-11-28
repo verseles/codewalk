@@ -28,10 +28,7 @@ final class CloudSpeech implements SpeechSynthesizer {
     SpeechProvider.nim: 2000,
   };
 
-  static const defaultBase = {
-    SpeechProvider.openAi: 'https://api.openai.com',
-    SpeechProvider.elevenLabs: 'https://api.elevenlabs.io',
-  };
+  static const defaultBase = speechDefaultBase;
   static const defaultModel = {
     SpeechProvider.openAi: 'gpt-4o-mini-tts',
     SpeechProvider.elevenLabs: 'eleven_multilingual_v2',
@@ -256,7 +253,7 @@ final class CloudSpeech implements SpeechSynthesizer {
   }) async {
     final client = _client()..connectionTimeout = _connect;
     // A stop drops the connection at once.
-    cancel.onCancel(() => client.close(force: true));
+    final forget = cancel.onCancel(() => client.close(force: true));
     try {
       // One deadline for the whole exchange, the body included.
       return await _exchange(
@@ -278,6 +275,7 @@ final class CloudSpeech implements SpeechSynthesizer {
     } on HttpException {
       throw const SpeechException(SpeechFailure.offline);
     } finally {
+      forget();
       client.close(force: true);
     }
   }

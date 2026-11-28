@@ -24,9 +24,13 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
   // Where the player plays from a file (iOS, macOS, Linux): the one file of
   // the audio now loaded, removed once another takes its place or playback
   // stops, so audio never piles up in the temporary folder (#541).
+  // The folder is this run's own, readable by this user only.
   File? _file;
   int _files = 0;
-  bool _swept = false;
+  Directory? _folder;
+
+  // Each start, stop or disposal supersedes the starts still under way.
+  int _op = 0;
 
   @override
   bool get supported => !_unsupportedRuntime;
@@ -72,6 +76,7 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
               _state.copyWith(
                 status: AudioPlaybackStatus.paused,
                 position: _state.duration,
+                completed: true,
               ),
             );
           case PlayerState.disposed:
@@ -95,6 +100,8 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
     required String mimeType,
   }) async {
     if (_disposed || _unsupportedRuntime) return;
+    final op = ++_op;
+    File? mine;
     try {
       final player = _ensurePlayer();
       if (_state.activeId == id) {
@@ -113,19 +120,34 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
       }
       await player.stop();
       await _release();
+      if (op != _op) return;
       _emit(
         AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.loading),
       );
-      await player.play(await _source(bytes, mimeType));
+      final (source, file) = await _source(bytes, mimeType);
+      mine = file;
+      // Stopped, replaced or disposed meanwhile: this audio never plays.
+      if (op != _op || _disposed) {
+        await _delete(file);
+        return;
+      }
+      _file = file;
+      await player.play(source);
     } on MissingPluginException {
       _unsupportedRuntime = true;
-      _emit(
-        AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.error),
-      );
+      if (op == _op) {
+        _emit(
+          AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.error),
+        );
+      }
     } on Object {
-      _emit(
-        AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.error),
-      );
+      if (op == _op) {
+        _emit(
+          AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.error),
+        );
+      } else {
+        await _delete(mine);
+      }
     }
   }
 
@@ -143,26 +165,11 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
   /// The player's source for [bytes]: the bytes themselves where the
   /// platform takes them, else a file of this app's own, which audioplayers
   /// would otherwise write and never remove.
-  Future<Source> _source(Uint8List bytes, String mimeType) async {
+  Future<(Source, File?)> _source(Uint8List bytes, String mimeType) async {
     if (kIsWeb || !(Platform.isIOS || Platform.isMacOS || Platform.isLinux)) {
-      return BytesSource(bytes, mimeType: mimeType);
+      return (BytesSource(bytes, mimeType: mimeType), null);
     }
-    final folder = Directory(
-      '${(await getTemporaryDirectory()).path}${Platform.pathSeparator}'
-      'codewalk_audio',
-    );
-    await folder.create(recursive: true);
-    if (!_swept) {
-      // Left behind by a run that ended abruptly.
-      _swept = true;
-      try {
-        await for (final entry in folder.list()) {
-          if (entry is File) await entry.delete();
-        }
-      } on FileSystemException {
-        // Swept next time.
-      }
-    }
+    final folder = _folder ??= await _createFolder();
     final extension = switch (mimeType) {
       'audio/wav' || 'audio/x-wav' => 'wav',
       'audio/ogg' => 'ogg',
@@ -174,24 +181,54 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
       '${folder.path}${Platform.pathSeparator}play-${_files++}.$extension',
     );
     await file.writeAsBytes(bytes, flush: true);
-    _file = file;
-    return DeviceFileSource(file.path, mimeType: mimeType);
+    return (DeviceFileSource(file.path, mimeType: mimeType), file);
   }
 
-  Future<void> _release() async {
+  /// This run's folder, made by the system for this user alone; folders of
+  /// runs that ended abruptly over a day ago go.
+  Future<Directory> _createFolder() async {
+    final temp = await getTemporaryDirectory();
+    try {
+      final now = DateTime.now();
+      await for (final entry in temp.list()) {
+        final name = entry.uri.pathSegments.where((s) => s.isNotEmpty).last;
+        if (entry is! Directory || !name.startsWith('codewalk_audio_')) {
+          continue;
+        }
+        try {
+          final changed = entry.statSync().modified;
+          if (now.difference(changed) > const Duration(days: 1)) {
+            await entry.delete(recursive: true);
+          }
+        } on FileSystemException {
+          // Another user's, or in use: left alone.
+        }
+      }
+    } on FileSystemException {
+      // Swept another time.
+    }
+    return temp.createTemp('codewalk_audio_');
+  }
+
+  Future<void> _release() {
     final file = _file;
     _file = null;
+    return _delete(file);
+  }
+
+  static Future<void> _delete(File? file) async {
     if (file == null) return;
     try {
       await file.delete();
     } on FileSystemException {
-      // Gone already, or swept on the next run.
+      // Gone already, or removed with the folder.
     }
   }
 
   @override
   Future<void> stop() async {
     if (_disposed) return;
+    _op++;
     try {
       await _player?.stop();
     } on Object {
@@ -205,6 +242,7 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
   Future<void> dispose() async {
     if (_disposed) return;
     _disposed = true;
+    _op++;
     for (final sub in _subscriptions) {
       await sub.cancel();
     }
@@ -216,6 +254,11 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
     }
     _player = null;
     await _release();
+    try {
+      await _folder?.delete(recursive: true);
+    } on FileSystemException {
+      // Swept by a later run.
+    }
     await _updates.close();
   }
 }

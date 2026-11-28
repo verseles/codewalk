@@ -9,12 +9,17 @@ final class AudioPlaybackState {
     this.status = AudioPlaybackStatus.idle,
     this.position = Duration.zero,
     this.duration = Duration.zero,
+    this.completed = false,
   });
 
   final String? activeId;
   final AudioPlaybackStatus status;
   final Duration position;
   final Duration duration;
+
+  /// The audio played to its end: it rests paused there, even where the
+  /// platform reports no duration.
+  final bool completed;
 
   bool isActive(String id) => activeId == id;
 
@@ -24,11 +29,13 @@ final class AudioPlaybackState {
     AudioPlaybackStatus? status,
     Duration? position,
     Duration? duration,
+    bool? completed,
   }) => AudioPlaybackState(
     activeId: clearActiveId ? null : (activeId ?? this.activeId),
     status: status ?? this.status,
     position: position ?? this.position,
     duration: duration ?? this.duration,
+    completed: completed ?? false,
   );
 
   @override
@@ -37,10 +44,12 @@ final class AudioPlaybackState {
       other.activeId == activeId &&
       other.status == status &&
       other.position == position &&
-      other.duration == duration;
+      other.duration == duration &&
+      other.completed == completed;
 
   @override
-  int get hashCode => Object.hash(activeId, status, position, duration);
+  int get hashCode =>
+      Object.hash(activeId, status, position, duration, completed);
 }
 
 /// Platform-isolated inline audio player port. Only one attachment plays at a

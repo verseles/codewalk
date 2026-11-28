@@ -56,6 +56,14 @@ class ReadAloudController extends ChangeNotifier {
   // Whether the reading in progress is the device engine's, whatever the
   // settings say by now.
   bool _activeNative = false;
+
+  // The player id of the reading in progress: its own for every reading, so
+  // a late step of an older one never touches a newer one's audio.
+  String? _playing;
+
+  // An audio already playing when the reading started; it keeps playing
+  // until the reading's audio takes the player.
+  String? _foreign;
   int _revision = 0;
   ReadAloudPhase _phase = ReadAloudPhase.idle;
   int _generation = 0;
@@ -107,12 +115,15 @@ class ReadAloudController extends ChangeNotifier {
         text: '',
         settings: settings,
         locale: locale(),
-        apiKey: await keys.read(settings.provider),
+        apiKey: await keys.read(
+          speechKeyScope(settings.provider, settings.baseUrl),
+        ),
       ),
     );
   }
 
   Future<void> load() async {
+    if (_disposed) return;
     Object? raw;
     try {
       raw = await _metadata?.read(settingsKey);
@@ -128,7 +139,7 @@ class ReadAloudController extends ChangeNotifier {
   }
 
   Future<void> update(ReadAloudSettings next) async {
-    if (next == _settings) return;
+    if (_disposed || next == _settings) return;
     final previous = _settings;
     _settings = next;
     final revision = ++_revision;
@@ -140,6 +151,7 @@ class ReadAloudController extends ChangeNotifier {
         !next.enabled) {
       await stop();
     }
+    if (_disposed) return;
     notifyListeners();
     // A later choice made while this one stopped the reading is stored
     // instead: an older one never overwrites it.
@@ -154,20 +166,30 @@ class ReadAloudController extends ChangeNotifier {
     if (speech.isEmpty) return SpeechFailure.noAudio;
     // This reading is the current one at once: a stop or another reading
     // from here on supersedes it, whatever it still awaits.
-    final previous = _active;
-    final previousNative = _activeNative;
+    final previous = _playing;
+    final previousNative = _activeNative && _active != null;
     final generation = ++_generation;
     _cancel?.cancel();
     final cancel = _cancel = SpeechCancel();
     final settings = _settings;
+    final id = _playing = 'read-aloud:$key#$generation';
+    final before = player?.current;
+    _foreign =
+        before?.activeId != null &&
+            !before!.activeId!.startsWith('read-aloud:') &&
+            (before.status == AudioPlaybackStatus.playing ||
+                before.status == AudioPlaybackStatus.loading)
+        ? before.activeId
+        : null;
     _active = key;
     _activeText = speech;
     _activeNative = settings.provider == SpeechProvider.system;
     _set(ReadAloudPhase.preparing);
     bool current() =>
         generation == _generation && !cancel.cancelled && !_disposed;
-    if (previous != null) await _silence(previous, native: previousNative);
+    String? cacheKey;
     try {
+      await _silence(previous, native: previousNative);
       if (!current()) return null;
       if (settings.provider == SpeechProvider.system) {
         final engine = native;
@@ -193,10 +215,12 @@ class ReadAloudController extends ChangeNotifier {
         throw const SpeechException(SpeechFailure.unavailable);
       }
       final language = locale();
-      final cacheKey = _cacheKey(key, speech, settings, language);
-      var audio = _cache.remove(cacheKey);
+      cacheKey = _cacheKey(key, speech, settings, language);
+      var audio = _cache[cacheKey];
       if (audio == null) {
-        final apiKey = await keys.read(settings.provider);
+        final apiKey = await keys.read(
+          speechKeyScope(settings.provider, settings.baseUrl),
+        );
         // Stopped meanwhile: no text leaves the device.
         if (!current()) return null;
         audio = await synth.synthesize(
@@ -208,16 +232,10 @@ class ReadAloudController extends ChangeNotifier {
           ),
           cancel,
         );
-        _remember(cacheKey, audio);
+        // Only the current reading's audio is kept.
         if (!current()) return null;
-      } else {
-        _cachedBytes -= audio.bytes.length;
-        _remember(cacheKey, audio);
       }
-      final id = _playerId(key);
-      // The player would resume an earlier audio of the same message.
-      if (output.current.activeId == id) await output.stop();
-      if (!current()) return null;
+      _remember(cacheKey, audio);
       await output.togglePlay(
         id: id,
         bytes: audio.bytes,
@@ -230,6 +248,8 @@ class ReadAloudController extends ChangeNotifier {
       }
       final state = output.current;
       if (state.activeId == id && state.status == AudioPlaybackStatus.error) {
+        // Audio that cannot play is made again next time.
+        _forget(cacheKey);
         _reset();
         return SpeechFailure.unavailable;
       }
@@ -246,11 +266,12 @@ class ReadAloudController extends ChangeNotifier {
     }
   }
 
-  /// Silences the audio of reading [key], once another took its place.
-  Future<void> _silence(String key, {required bool native}) async {
+  /// Silences the reading whose player id is [id], once another took its
+  /// place.
+  Future<void> _silence(String? id, {required bool native}) async {
     if (native) {
       await this.native?.stop();
-    } else if (player?.current.activeId == _playerId(key)) {
+    } else if (id != null && player?.current.activeId == id) {
       await player?.stop();
     }
   }
@@ -263,20 +284,22 @@ class ReadAloudController extends ChangeNotifier {
       await native?.stop();
       return;
     }
-    await _toggle(key, AudioPlaybackStatus.playing);
+    await _toggle(AudioPlaybackStatus.playing);
   }
 
-  /// Pauses or resumes the player's own audio of [key], when it is in [from].
-  Future<void> _toggle(String key, AudioPlaybackStatus from) async {
+  /// Pauses or resumes the reading's own audio, when it is in [from].
+  Future<void> _toggle(AudioPlaybackStatus from) async {
     final output = player;
+    final id = _playing;
     final state = output?.current;
     if (output == null ||
-        state?.activeId != _playerId(key) ||
+        id == null ||
+        state?.activeId != id ||
         state?.status != from) {
       return;
     }
     await output.togglePlay(
-      id: _playerId(key),
+      id: id,
       bytes: Uint8List(0),
       mimeType: 'audio/mpeg',
     );
@@ -289,7 +312,7 @@ class ReadAloudController extends ChangeNotifier {
       // The engine cannot resume: the message starts again.
       return read(key, _activeText ?? '');
     }
-    await _toggle(key, AudioPlaybackStatus.paused);
+    await _toggle(AudioPlaybackStatus.paused);
     return null;
   }
 
@@ -301,8 +324,9 @@ class ReadAloudController extends ChangeNotifier {
     _cancel = null;
     if (key == null) return;
     final wasNative = _activeNative;
+    final id = _playing;
     _reset();
-    await _silence(key, native: wasNative);
+    await _silence(id, native: wasNative);
   }
 
   /// Stops the reading of a message whose key [test] matches, as when its
@@ -313,13 +337,13 @@ class ReadAloudController extends ChangeNotifier {
   }
 
   void _playerChanged(AudioPlaybackState state) {
-    final key = _active;
-    if (key == null || _activeNative) return;
-    final id = _playerId(key);
+    final id = _playing;
+    if (_active == null || id == null || _activeNative) return;
     if (state.activeId != id) {
       final other =
           state.activeId != null &&
           !state.activeId!.startsWith('read-aloud:') &&
+          state.activeId != _foreign &&
           (state.status == AudioPlaybackStatus.loading ||
               state.status == AudioPlaybackStatus.playing);
       if (_phase == ReadAloudPhase.playing || _phase == ReadAloudPhase.paused) {
@@ -341,7 +365,9 @@ class ReadAloudController extends ChangeNotifier {
       case AudioPlaybackStatus.paused:
         // The player rests at the end of an audio that played through.
         final ended =
-            state.duration > Duration.zero && state.position >= state.duration;
+            state.completed ||
+            (state.duration > Duration.zero &&
+                state.position >= state.duration);
         if (ended) {
           _reset();
         } else {
@@ -355,8 +381,6 @@ class ReadAloudController extends ChangeNotifier {
         break;
     }
   }
-
-  static String _playerId(String key) => 'read-aloud:$key';
 
   String _cacheKey(
     String key,
@@ -375,6 +399,8 @@ class ReadAloudController extends ChangeNotifier {
   ]);
 
   void _remember(String key, SpeechAudio audio) {
+    // Most recent last; an entry replaced counts once.
+    _forget(key);
     _cache[key] = audio;
     _cachedBytes += audio.bytes.length;
     while (_cache.length > _cacheEntries || _cachedBytes > _cacheBytes) {
@@ -383,10 +409,17 @@ class ReadAloudController extends ChangeNotifier {
     }
   }
 
+  void _forget(String key) {
+    final old = _cache.remove(key);
+    if (old != null) _cachedBytes -= old.bytes.length;
+  }
+
   void _reset() {
     _active = null;
     _activeText = null;
     _activeNative = false;
+    _playing = null;
+    _foreign = null;
     _set(ReadAloudPhase.idle);
   }
 
