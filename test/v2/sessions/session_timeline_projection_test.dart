@@ -451,6 +451,31 @@ void main() {
         ),
         ['u1', 'stretch(r1,t1,t2)', 'stretch(t3)', 'pending(u1)'],
       );
+      // A subagent call that ended early stays on its own between them.
+      expect(
+        _shape(
+          SessionTimelinePresentation().project(
+            [
+              ...inFlight.take(5),
+              _tool('t3', 'm2'),
+              _tool('s1', 'm2', kind: ToolKind.subagent, ended: true),
+              _tool('t5', 'm2', ended: true),
+              _tool('t4', 'm2', status: ItemStatus.streaming),
+            ],
+            settled: false,
+            renderMode: ChatRenderMode.block,
+            expandTools: false,
+          ),
+        ),
+        [
+          'u1',
+          'stretch(r1,t1,t2)',
+          'stretch(t3)',
+          'agents(s1)',
+          'stretch(t5)',
+          'pending(u1)',
+        ],
+      );
       expect(
         SessionTimelinePresentation.heldText(
           inFlight,

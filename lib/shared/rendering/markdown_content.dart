@@ -101,6 +101,20 @@ class _MarkdownContentState extends State<MarkdownContent> {
   (String, bool, bool)? _linkedFor;
   List<bool> _linked = const [];
 
+  /// Where the trailing text goes, for the source last parsed for it: the
+  /// parse runs again only when the source or its syntax changes.
+  (String, bool, bool)? _inlineFor;
+  bool _inline = false;
+
+  bool _fitsInline(md.ExtensionSet extensionSet) {
+    final key = (widget.source, widget.allowBasicHtml, widget.enableMath);
+    if (_inlineFor != key) {
+      _inlineFor = key;
+      _inline = trailingFitsInline(widget.source, extensionSet);
+    }
+    return _inline;
+  }
+
   List<bool> _linkFlags(md.ExtensionSet extensionSet) {
     final key = (widget.source, widget.allowBasicHtml, widget.enableMath);
     if (_linkedFor != key) {
@@ -238,20 +252,22 @@ class _MarkdownContentState extends State<MarkdownContent> {
     );
     final trailing = widget.trailingText;
     _onTrailing = widget.onTapTrailing;
-    Widget? trailingButton() => trailing == null
+    Widget? trailingButton({bool semantics = true}) => trailing == null
         ? null
         : _TrailingButton(
             text: trailing,
             style: widget.trailingStyle,
             semanticsLabel: widget.trailingSemanticsLabel,
+            semantics: semantics,
             onTap: widget.onTapTrailing == null
                 ? null
                 : () => _onTrailing?.call(),
           );
-    final inline =
-        trailing != null && trailingFitsInline(widget.source, extensionSet);
+    final inline = trailing != null && _fitsInline(extensionSet);
     if (inline) {
-      builders[_TrailingSyntax.tag] = _TrailingBuilder(trailingButton()!);
+      builders[_TrailingSyntax.tag] = _TrailingBuilder(
+        trailingButton(semantics: false)!,
+      );
       extensionSet = md.ExtensionSet(extensionSet.blockSyntaxes, [
         _TrailingSyntax(),
         ...extensionSet.inlineSyntaxes,
@@ -267,7 +283,15 @@ class _MarkdownContentState extends State<MarkdownContent> {
     final markdown = MarkdownBody(
       // A new trailing text parses again: the body keeps its spans until
       // its data changes.
-      key: trailing == null ? null : ValueKey((trailing, inline)),
+      key: trailing == null
+          ? null
+          : ValueKey((
+              trailing,
+              inline,
+              widget.trailingSemanticsLabel,
+              widget.trailingStyle,
+              widget.onTapTrailing != null,
+            )),
       data: inline
           ? '${widget.source.trimRight()} $_trailingMark'
           : widget.source,
@@ -293,6 +317,7 @@ class _MarkdownContentState extends State<MarkdownContent> {
         children: [
           markdown,
           Semantics(
+            container: true,
             button: widget.onTapTrailing != null,
             label: widget.trailingSemanticsLabel ?? trailing,
             onTap: widget.onTapTrailing == null
@@ -321,49 +346,69 @@ class _MarkdownContentState extends State<MarkdownContent> {
 /// goes; a model's answer has no business using it.
 const _trailingMark = '\uE000';
 
-/// A link reference definition, which the parse keeps out of the document.
-final _linkReference = RegExp(r'^ {0,3}\[[^\]]+\]:');
-
-/// The block elements a trailing text never joins.
-const _blockTags = {
-  'pre', 'table', 'hr', 'blockquote', 'ul', 'ol', 'li', 'p', //
-  'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockMath', 'details',
+/// Where a trailing text may never sit, even when the marker reaches it.
+const _closedTags = {
+  'pre',
+  'code',
+  'table',
+  'thead',
+  'tbody',
+  'tr',
+  'th',
+  'td',
 };
 
 /// Whether [source] ends in running text that a trailing text can follow
-/// on the same line (#538): its parsed last block is a paragraph or an ATX
-/// heading, directly or as the end of a list item or a quote, its last line
-/// is that text (not a link reference definition), and it does not use the
-/// private marker itself.
+/// on the same line (#538). The source is parsed twice, as it is and with
+/// the marker after its last word: the marker must land as an inline element
+/// of the last block (a paragraph, a heading, a list item or quote ending in
+/// one) outside code and tables, while every block, and the text of the last
+/// one, stays as it was. A rule, a setext underline, closing heading hashes,
+/// a link reference definition (on one line or more), a fence (closed or
+/// not), raw HTML and a table all fail that test; so does a source that
+/// already uses the private marker.
 @visibleForTesting
 bool trailingFitsInline(String source, md.ExtensionSet extensionSet) {
   final trimmed = source.trimRight();
   if (trimmed.isEmpty || trimmed.contains(_trailingMark)) return false;
-  final lines = trimmed.split('\n');
-  if (_linkReference.hasMatch(lines.last)) return false;
-  final nodes = md.Document(
-    extensionSet: extensionSet,
+  List<md.Node> parse(String text, md.ExtensionSet set) => md.Document(
+    extensionSet: set,
     encodeHtml: false,
-  ).parseLines(lines);
-  var node = nodes.lastOrNull;
-  var top = true;
-  while (node is md.Element) {
-    switch (node.tag) {
-      case 'p':
-        return true;
-      case 'h1' || 'h2' || 'h3' || 'h4' || 'h5' || 'h6':
-        // A setext heading ends in its underline.
-        return lines.last.trimLeft().startsWith('#');
-      case 'ul' || 'ol' || 'li' || 'blockquote':
-        top = false;
-        node = node.children?.lastOrNull;
-      default:
-        // Inside a tight list item, an inline element ends the text.
-        return !top && !_blockTags.contains(node.tag);
-    }
+  ).parseLines(text.split('\n'));
+  final plain = parse(trimmed, extensionSet);
+  final marked = parse(
+    '$trimmed $_trailingMark',
+    md.ExtensionSet(extensionSet.blockSyntaxes, [
+      _TrailingSyntax(),
+      ...extensionSet.inlineSyntaxes,
+    ]),
+  );
+  if (plain.isEmpty || plain.length != marked.length) return false;
+  String shape(md.Node node) => node is md.Element
+      ? '<${node.tag}>${node.textContent}'
+      : node.textContent;
+  for (var i = 0; i < plain.length - 1; i++) {
+    if (shape(plain[i]) != shape(marked[i])) return false;
   }
-  // Raw HTML at the top is a block; text inside a tight list item is not.
-  return !top && node is md.Text;
+  final last = marked.last;
+  if (last is! md.Element || plain.last is! md.Element) return false;
+  if ((plain.last as md.Element).tag != last.tag ||
+      plain.last.textContent.trimRight() != last.textContent.trimRight()) {
+    return false;
+  }
+  // The marker element, reached through block and inline elements only.
+  bool reaches(md.Element element) {
+    if (_closedTags.contains(element.tag)) return false;
+    for (final child in element.children ?? const <md.Node>[]) {
+      if (child is md.Element &&
+          (child.tag == _TrailingSyntax.tag || reaches(child))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  return reaches(last);
 }
 
 class _TrailingSyntax extends md.InlineSyntax {
@@ -412,6 +457,7 @@ class _TrailingButton extends StatelessWidget {
     this.style,
     this.semanticsLabel,
     this.onTap,
+    this.semantics = true,
   });
 
   final String text;
@@ -419,10 +465,26 @@ class _TrailingButton extends StatelessWidget {
   final String? semanticsLabel;
   final VoidCallback? onTap;
 
+  /// Off inside a paragraph, whose semantics would merge it into the whole
+  /// answer: a node of its own below the body speaks for it there.
+  final bool semantics;
+
   @override
   Widget build(BuildContext context) {
     final label = Text(text, style: style, semanticsLabel: semanticsLabel);
     if (onTap == null) return SelectionContainer.disabled(child: label);
+    if (!semantics) {
+      return SelectionContainer.disabled(
+        child: ExcludeSemantics(
+          child: InkWell(
+            key: const ValueKey('message-trailing-stats'),
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(4),
+            child: label,
+          ),
+        ),
+      );
+    }
     return SelectionContainer.disabled(
       child: Semantics(
         button: true,

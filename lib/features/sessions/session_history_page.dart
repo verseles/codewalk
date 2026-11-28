@@ -175,6 +175,7 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                               row: row,
                               expandedAnchors: _expandedSubagentCalls,
                               onTapLink: tapLink,
+                              inlineStats: inlineStats,
                             );
                           }
                           if (row is SessionReportRow) {

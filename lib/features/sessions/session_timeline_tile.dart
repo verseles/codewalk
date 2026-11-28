@@ -371,7 +371,13 @@ class SessionTimelineTile extends StatelessWidget {
                               ],
                             ),
                           ),
-                          if (elapsed) MessageElapsedChip(message: message),
+                          if (elapsed)
+                            MessageElapsedChip(
+                              message: message,
+                              // An answer over the rich budget keeps the
+                              // speed in its details.
+                              tokensPerSecond: turnTokensPerSecond,
+                            ),
                         ],
                       ),
               )

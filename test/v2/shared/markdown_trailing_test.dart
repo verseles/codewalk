@@ -30,6 +30,11 @@ void main() {
         'Text\n\n---',
         'Title\n===',
         'Title\n---',
+        '# Title #',
+        '## Title ##',
+        'See [the doc][1].\n\n[1]: https://example.com\n  "The title"',
+        '> <div>quoted html</div>',
+        '- <!-- a comment -->',
         'See [the doc][1].\n\n[1]: https://example.com',
         '<details>open</details>',
         'An answer that uses  itself',
@@ -78,6 +83,14 @@ void main() {
       // A screen reader names it and can activate it.
       final named = find.bySemanticsLabel('Message Info, 138 tok/s, 28s');
       expect(named, findsOneWidget);
+      // The answer itself is not announced as a button.
+      expect(
+        tester
+            .getSemantics(find.bySemanticsLabel(RegExp('^All done here')))
+            .getSemanticsData()
+            .hasAction(SemanticsAction.tap),
+        isFalse,
+      );
       expect(
         tester
             .getSemantics(named)

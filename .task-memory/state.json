@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 9,
+  "artifact_seq": 10,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -144,6 +144,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "u4 review r1 (#536-#538)"
+    },
+    "A0010": {
+      "active": true,
+      "bytes": 799,
+      "created_at": "2026-11-28T00:05:12Z",
+      "evidence": "/tmp/opencode/g8/rev/u4/r2_*",
+      "id": "A0010",
+      "impact": "Fix round 2 for #538",
+      "origin": "6 helpers + native haiku/opus",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0010.md",
+      "purpose": "Re-review",
+      "rerun_when": "markdown_content.dart changes",
+      "sha256": "083045c5f13aa0d8179e92bb2d4857441582a94162a239c35742f5661ffc191c",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u4 re-review r2 (#536-#538 fix a612095d)"
     }
   },
   "checklist": [
@@ -527,9 +543,13 @@
     {
       "at": "2026-11-27T23:38:27Z",
       "text": "Owner (verbatim: 'é cota mesmo, tenta substituir subagentes nativos aqui mesmo'): Claude helpers are out of quota; replace helperClaude-haiku-5-max and helperClaude-opus-5-xhigh-F with native Claude Code subagents (Agent tool, subagent_type Plan = read-only, model haiku / opus) given the same canonical payload file, from u4 onward, until the helpers work again. Native results join the same prepared batch."
+    },
+    {
+      "at": "2026-11-27T23:56:14Z",
+      "text": "u4 r1 judgment: all findings accepted (no frontier override): trailing placement via AST check trailingFitsInline (paragraph/ATX heading/list or quote end; separate line otherwise; source untouched; literal U+E000 -> separate), focusable InkWell button in a WidgetSpan + accessibility node (markdown paragraph semantics exclude WidgetSpans), MarkdownBody keyed by trailing, budget-gated showsInlineTurnStats, elapsed chip suppressed on the message's other rows (stretch header, tool, reasoning) in live and history, Block-mode early calls summarized when !expandTools. Fix commit a612095d. Re-review r2 needed (rendering mechanism rework)."
     }
   ],
-  "generation": 52,
+  "generation": 55,
   "next_action": "#536 committed 5d2bc856; #537 538c0b0a; finish #538 then review #536-#538 together",
   "pending_operation": null,
   "queued_followups": [],
@@ -553,7 +573,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-27T23:47:27Z",
+  "updated_at": "2026-11-28T00:05:12Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

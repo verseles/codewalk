@@ -198,8 +198,13 @@ class SessionSubagentCalls extends StatefulWidget {
     required this.expandedAnchors,
     this.onOpenChild,
     this.onTapLink,
+    this.inlineStats = const {},
   });
   final SessionSubagentCallsRow row;
+
+  /// The messages whose final answer ends with its time: their calls show
+  /// no elapsed chip (#538).
+  final Set<MessageRef> inlineStats;
 
   /// The timeline owns these anchors so rebuilding a lazy row or prepending
   /// an older call to the same group preserves the reader's choice.
@@ -224,6 +229,7 @@ class _SessionSubagentCallsState extends State<SessionSubagentCalls> {
               .where((call) => call.messageHeader)
               .map((call) => call.item.meta.message)
               .nonNulls
+              .where((message) => !widget.inlineStats.contains(message.message))
               .firstOrNull;
     int count(ItemStatus status) =>
         calls.where((call) => call.item.status.known == status).length;
@@ -275,6 +281,9 @@ class _SessionSubagentCallsState extends State<SessionSubagentCalls> {
               key: ValueKey('call-detail-${call.item.id.value}'),
               item: call.item,
               messageHeader: call.messageHeader,
+              showElapsed: !widget.inlineStats.contains(
+                call.item.meta.message?.message,
+              ),
               onOpenChild: widget.onOpenChild,
               onTapLink: widget.onTapLink,
             ),

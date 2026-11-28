@@ -373,15 +373,29 @@ final class SessionTimelinePresentation {
     ];
     if (_expandTools) {
       early.forEach(out.emitSingle);
-    } else if (early.isNotEmpty) {
-      // Without expanded tools, calls that ended early are a summary too
-      // (#537).
-      out.stretch(
-        'work-${early.first.id.value}',
-        early,
-        runningCount: 0,
-        failedCount: early.where(_isFailedItem).length,
-      );
+    } else {
+      // Without expanded tools, a run of calls that ended early is a summary
+      // too; what never joins a stretch (a subagent call, a shell of unknown
+      // status) stays on its own (#537).
+      var index = 0;
+      while (index < early.length) {
+        if (!isCompactable(early[index])) {
+          out.emitSingle(early[index++]);
+          continue;
+        }
+        var stop = index + 1;
+        while (stop < early.length && isCompactable(early[stop])) {
+          stop++;
+        }
+        final run = early.sublist(index, stop);
+        out.stretch(
+          'work-${run.first.id.value}',
+          run,
+          runningCount: 0,
+          failedCount: run.where(_isFailedItem).length,
+        );
+        index = stop;
+      }
     }
     out.rows.add(
       SessionPendingRow(start > 0 ? items[start - 1].id : items[start].id),

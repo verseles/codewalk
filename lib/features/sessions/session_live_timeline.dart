@@ -970,6 +970,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               ),
             SessionSubagentCallsRow() => SessionSubagentCalls(
               row: row,
+              inlineStats: inlineStats,
               expandedAnchors: _expandedSubagentCalls,
               onOpenChild: widget.onOpenChild,
               onTapLink:
