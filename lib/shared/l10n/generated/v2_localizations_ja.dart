@@ -942,6 +942,109 @@ class V2LocalizationsJa extends V2Localizations {
       'このデバイスやネットワークの外のアドレスには https を使ってください';
 
   @override
+  String get messageForward => '転送';
+
+  @override
+  String get messageForwardTitle => '転送先…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return '転送元: $origin';
+  }
+
+  @override
+  String get messageForwardSearch => '会話を検索';
+
+  @override
+  String messageForwardSelected(int count) {
+    return '$count 件選択';
+  }
+
+  @override
+  String get messageForwardNoProjects => '開いているプロジェクトはありません';
+
+  @override
+  String get messageForwardNoSessions => '開いているプロジェクトに他の会話はありません';
+
+  @override
+  String get messageForwardNoMatch => '一致する会話はありません';
+
+  @override
+  String get messageForwardLoadFailed => '会話を読み込めませんでした';
+
+  @override
+  String get messageForwardOffline => 'サーバーはオフラインです';
+
+  @override
+  String get messageForwardStop => '停止';
+
+  @override
+  String get messageForwardSending => '送信中…';
+
+  @override
+  String get messageForwardQueued => 'キュー待ち';
+
+  @override
+  String get messageForwardSent => '送信済み';
+
+  @override
+  String get messageForwardUnconfirmed => '未確認: 開いて確認してください。自動で再送されることはありません。';
+
+  @override
+  String get messageForwardStopped => '送信前に停止';
+
+  @override
+  String get messageForwardMissGone => '未送信: 会話が削除またはアーカイブされました';
+
+  @override
+  String get messageForwardMissBusy => '未送信: 会話がビジーのままでした';
+
+  @override
+  String get messageForwardMissCapacity => '未送信: 開いている会話が多すぎます';
+
+  @override
+  String get messageForwardMissUnavailable => '未送信: この会話は受け取れません';
+
+  @override
+  String get messageForwardMissRefused => '未送信: サーバーが拒否しました';
+
+  @override
+  String get messageForwardMissOffline => '未送信: サーバーはオフラインです';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count 件の会話に転送しました',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return '$total 件中 $done 件に送信';
+  }
+
+  @override
+  String get messageForwardNow => '今';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count 分';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count 時間';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count 日';
+  }
+
+  @override
   String get readAloudApiKey => 'API キー';
 
   @override

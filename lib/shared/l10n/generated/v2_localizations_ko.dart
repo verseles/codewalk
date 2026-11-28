@@ -944,6 +944,110 @@ class V2LocalizationsKo extends V2Localizations {
   String get readAloudBaseUrlInsecure => '이 기기나 네트워크 밖의 주소에는 https를 사용하세요';
 
   @override
+  String get messageForward => '전달';
+
+  @override
+  String get messageForwardTitle => '전달 대상…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return '전달 원본: $origin';
+  }
+
+  @override
+  String get messageForwardSearch => '대화 검색';
+
+  @override
+  String messageForwardSelected(int count) {
+    return '$count개 선택됨';
+  }
+
+  @override
+  String get messageForwardNoProjects => '열린 프로젝트가 없습니다';
+
+  @override
+  String get messageForwardNoSessions => '열린 프로젝트에 다른 대화가 없습니다';
+
+  @override
+  String get messageForwardNoMatch => '일치하는 대화가 없습니다';
+
+  @override
+  String get messageForwardLoadFailed => '대화를 불러올 수 없습니다';
+
+  @override
+  String get messageForwardOffline => '서버가 오프라인입니다';
+
+  @override
+  String get messageForwardStop => '중지';
+
+  @override
+  String get messageForwardSending => '보내는 중…';
+
+  @override
+  String get messageForwardQueued => '대기열';
+
+  @override
+  String get messageForwardSent => '보냄';
+
+  @override
+  String get messageForwardUnconfirmed =>
+      '확인되지 않음: 열어서 확인하세요. 자동으로 다시 보내지 않습니다.';
+
+  @override
+  String get messageForwardStopped => '보내기 전에 중지됨';
+
+  @override
+  String get messageForwardMissGone => '보내지 않음: 대화가 없어졌거나 보관되었습니다';
+
+  @override
+  String get messageForwardMissBusy => '보내지 않음: 대화가 계속 사용 중이었습니다';
+
+  @override
+  String get messageForwardMissCapacity => '보내지 않음: 열린 대화가 너무 많습니다';
+
+  @override
+  String get messageForwardMissUnavailable => '보내지 않음: 이 대화는 받을 수 없습니다';
+
+  @override
+  String get messageForwardMissRefused => '보내지 않음: 서버가 거부했습니다';
+
+  @override
+  String get messageForwardMissOffline => '보내지 않음: 서버가 오프라인입니다';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '대화 $count개에 전달했습니다',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return '$total개 중 $done개에 보냄';
+  }
+
+  @override
+  String get messageForwardNow => '지금';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count분';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count시간';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count일';
+  }
+
+  @override
   String get readAloudApiKey => 'API 키';
 
   @override

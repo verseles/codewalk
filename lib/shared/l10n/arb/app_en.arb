@@ -1200,6 +1200,156 @@
   "@readAloudBaseUrlInsecure": {
     "description": "V2 read aloud (#541)"
   },
+  "messageForward": "Forward",
+  "@messageForward": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardTitle": "Forward to…",
+  "@messageForwardTitle": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardFrom": "Forwarded from: {origin}",
+  "@messageForwardFrom": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      }
+    }
+  },
+  "messageForwardSearch": "Search conversations",
+  "@messageForwardSearch": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSelected": "{count} selected",
+  "@messageForwardSelected": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardNoProjects": "No open projects",
+  "@messageForwardNoProjects": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardNoSessions": "No other conversations in your open projects",
+  "@messageForwardNoSessions": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardNoMatch": "No conversations match",
+  "@messageForwardNoMatch": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardLoadFailed": "The conversations could not be loaded",
+  "@messageForwardLoadFailed": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardOffline": "The server is offline",
+  "@messageForwardOffline": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardStop": "Stop",
+  "@messageForwardStop": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSending": "Sending…",
+  "@messageForwardSending": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardQueued": "Queued",
+  "@messageForwardQueued": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSent": "Sent",
+  "@messageForwardSent": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardUnconfirmed": "Not confirmed: open it to check. It is never sent again on its own.",
+  "@messageForwardUnconfirmed": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardStopped": "Stopped before sending",
+  "@messageForwardStopped": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissGone": "Not sent: the conversation is gone or archived",
+  "@messageForwardMissGone": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissBusy": "Not sent: the conversation stayed busy",
+  "@messageForwardMissBusy": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissCapacity": "Not sent: too many conversations are open",
+  "@messageForwardMissCapacity": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissUnavailable": "Not sent: this conversation cannot receive it",
+  "@messageForwardMissUnavailable": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissRefused": "Not sent: the server refused it",
+  "@messageForwardMissRefused": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissOffline": "Not sent: the server is offline",
+  "@messageForwardMissOffline": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardDone": "{count, plural, =1{Forwarded to 1 conversation} other{Forwarded to {count} conversations}}",
+  "@messageForwardDone": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardPartial": "Sent to {done} of {total}",
+  "@messageForwardPartial": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardNow": "now",
+  "@messageForwardNow": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMinutes": "{count} min",
+  "@messageForwardMinutes": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardHours": "{count} h",
+  "@messageForwardHours": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardDays": "{count} d",
+  "@messageForwardDays": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "readAloudApiKey": "API key",
   "@readAloudApiKey": {
     "description": "V2 read aloud (#541)"

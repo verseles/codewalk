@@ -106,6 +106,10 @@ class _OpenBarIntent extends Intent {
   const _OpenBarIntent();
 }
 
+class _ForwardIntent extends Intent {
+  const _ForwardIntent();
+}
+
 class _CloseBarIntent extends Intent {
   const _CloseBarIntent();
 }
@@ -739,10 +743,24 @@ class _MessageActionHostState extends State<MessageActionHost>
               _OpenBarIntent(),
           // Only while the bar shows; otherwise Escape goes on as before.
           SingleActivator(LogicalKeyboardKey.escape): _CloseBarIntent(),
+          // Forward, as in v1 (#542).
+          SingleActivator(LogicalKeyboardKey.keyF, control: true, shift: true):
+              _ForwardIntent(),
+          SingleActivator(LogicalKeyboardKey.keyF, meta: true, shift: true):
+              _ForwardIntent(),
         },
         actions: {
           _OpenBarIntent: CallbackAction<_OpenBarIntent>(
             onInvoke: (_) => _show(pin: true, focus: true),
+          ),
+          _ForwardIntent: CallbackAction<_ForwardIntent>(
+            onInvoke: (_) {
+              final forward = _all
+                  .where((action) => action.id == MessageActionId.forward)
+                  .firstOrNull;
+              if (forward != null) _run(forward);
+              return null;
+            },
           ),
           _CloseBarIntent: _CloseBarAction(this),
         },

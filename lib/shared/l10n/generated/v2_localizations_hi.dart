@@ -986,6 +986,116 @@ class V2LocalizationsHi extends V2Localizations {
       'इस डिवाइस या नेटवर्क से बाहर के पतों के लिए https का उपयोग करें';
 
   @override
+  String get messageForward => 'फ़ॉरवर्ड करें';
+
+  @override
+  String get messageForwardTitle => 'इसमें फ़ॉरवर्ड करें…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return 'यहाँ से फ़ॉरवर्ड किया गया: $origin';
+  }
+
+  @override
+  String get messageForwardSearch => 'बातचीत खोजें';
+
+  @override
+  String messageForwardSelected(int count) {
+    return '$count चुने गए';
+  }
+
+  @override
+  String get messageForwardNoProjects => 'कोई खुला प्रोजेक्ट नहीं';
+
+  @override
+  String get messageForwardNoSessions =>
+      'आपके खुले प्रोजेक्ट में कोई अन्य बातचीत नहीं';
+
+  @override
+  String get messageForwardNoMatch => 'कोई बातचीत मेल नहीं खाती';
+
+  @override
+  String get messageForwardLoadFailed => 'बातचीत लोड नहीं हो सकीं';
+
+  @override
+  String get messageForwardOffline => 'सर्वर ऑफ़लाइन है';
+
+  @override
+  String get messageForwardStop => 'रोकें';
+
+  @override
+  String get messageForwardSending => 'भेजा जा रहा है…';
+
+  @override
+  String get messageForwardQueued => 'कतार में';
+
+  @override
+  String get messageForwardSent => 'भेजा गया';
+
+  @override
+  String get messageForwardUnconfirmed =>
+      'पुष्टि नहीं हुई: जाँचने के लिए खोलें। यह अपने आप फिर कभी नहीं भेजा जाता।';
+
+  @override
+  String get messageForwardStopped => 'भेजने से पहले रोका गया';
+
+  @override
+  String get messageForwardMissGone =>
+      'नहीं भेजा गया: बातचीत हट गई या संग्रहीत है';
+
+  @override
+  String get messageForwardMissBusy => 'नहीं भेजा गया: बातचीत व्यस्त रही';
+
+  @override
+  String get messageForwardMissCapacity =>
+      'नहीं भेजा गया: बहुत सारी बातचीत खुली हैं';
+
+  @override
+  String get messageForwardMissUnavailable =>
+      'नहीं भेजा गया: यह बातचीत इसे प्राप्त नहीं कर सकती';
+
+  @override
+  String get messageForwardMissRefused =>
+      'नहीं भेजा गया: सर्वर ने अस्वीकार किया';
+
+  @override
+  String get messageForwardMissOffline => 'नहीं भेजा गया: सर्वर ऑफ़लाइन है';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count बातचीत में फ़ॉरवर्ड किया गया',
+      one: '1 बातचीत में फ़ॉरवर्ड किया गया',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return '$total में से $done को भेजा गया';
+  }
+
+  @override
+  String get messageForwardNow => 'अभी';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count मिनट';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count घंटे';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count दिन';
+  }
+
+  @override
   String get readAloudApiKey => 'API कुंजी';
 
   @override

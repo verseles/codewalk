@@ -998,6 +998,118 @@ class V2LocalizationsEs extends V2Localizations {
       'Usa https para direcciones fuera de este dispositivo o red';
 
   @override
+  String get messageForward => 'Reenviar';
+
+  @override
+  String get messageForwardTitle => 'Reenviar a…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return 'Reenviado desde: $origin';
+  }
+
+  @override
+  String get messageForwardSearch => 'Buscar conversaciones';
+
+  @override
+  String messageForwardSelected(int count) {
+    return '$count seleccionadas';
+  }
+
+  @override
+  String get messageForwardNoProjects => 'No hay proyectos abiertos';
+
+  @override
+  String get messageForwardNoSessions =>
+      'No hay otras conversaciones en tus proyectos abiertos';
+
+  @override
+  String get messageForwardNoMatch => 'Ninguna conversación coincide';
+
+  @override
+  String get messageForwardLoadFailed =>
+      'No se pudieron cargar las conversaciones';
+
+  @override
+  String get messageForwardOffline => 'El servidor está sin conexión';
+
+  @override
+  String get messageForwardStop => 'Detener';
+
+  @override
+  String get messageForwardSending => 'Enviando…';
+
+  @override
+  String get messageForwardQueued => 'En cola';
+
+  @override
+  String get messageForwardSent => 'Enviado';
+
+  @override
+  String get messageForwardUnconfirmed =>
+      'Sin confirmar: ábrela para comprobarlo. Nunca se vuelve a enviar sola.';
+
+  @override
+  String get messageForwardStopped => 'Detenido antes de enviar';
+
+  @override
+  String get messageForwardMissGone =>
+      'No enviado: la conversación ya no existe o está archivada';
+
+  @override
+  String get messageForwardMissBusy =>
+      'No enviado: la conversación siguió ocupada';
+
+  @override
+  String get messageForwardMissCapacity =>
+      'No enviado: hay demasiadas conversaciones abiertas';
+
+  @override
+  String get messageForwardMissUnavailable =>
+      'No enviado: esta conversación no puede recibirlo';
+
+  @override
+  String get messageForwardMissRefused => 'No enviado: el servidor lo rechazó';
+
+  @override
+  String get messageForwardMissOffline =>
+      'No enviado: el servidor está sin conexión';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Reenviado a $count conversaciones',
+      one: 'Reenviado a 1 conversación',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return 'Enviado a $done de $total';
+  }
+
+  @override
+  String get messageForwardNow => 'ahora';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count h';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count d';
+  }
+
+  @override
   String get readAloudApiKey => 'Clave de API';
 
   @override

@@ -926,6 +926,109 @@ class V2LocalizationsZh extends V2Localizations {
   String get readAloudBaseUrlInsecure => '此设备或网络之外的地址请使用 https';
 
   @override
+  String get messageForward => '转发';
+
+  @override
+  String get messageForwardTitle => '转发到…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return '转发自：$origin';
+  }
+
+  @override
+  String get messageForwardSearch => '搜索对话';
+
+  @override
+  String messageForwardSelected(int count) {
+    return '已选 $count 个';
+  }
+
+  @override
+  String get messageForwardNoProjects => '没有打开的项目';
+
+  @override
+  String get messageForwardNoSessions => '打开的项目中没有其他对话';
+
+  @override
+  String get messageForwardNoMatch => '没有匹配的对话';
+
+  @override
+  String get messageForwardLoadFailed => '无法加载对话';
+
+  @override
+  String get messageForwardOffline => '服务器离线';
+
+  @override
+  String get messageForwardStop => '停止';
+
+  @override
+  String get messageForwardSending => '正在发送…';
+
+  @override
+  String get messageForwardQueued => '已排队';
+
+  @override
+  String get messageForwardSent => '已发送';
+
+  @override
+  String get messageForwardUnconfirmed => '未确认：打开它查看。它永远不会自动重新发送。';
+
+  @override
+  String get messageForwardStopped => '发送前已停止';
+
+  @override
+  String get messageForwardMissGone => '未发送：对话已不存在或已归档';
+
+  @override
+  String get messageForwardMissBusy => '未发送：对话一直忙碌';
+
+  @override
+  String get messageForwardMissCapacity => '未发送：打开的对话太多';
+
+  @override
+  String get messageForwardMissUnavailable => '未发送：此对话无法接收';
+
+  @override
+  String get messageForwardMissRefused => '未发送：服务器拒绝了';
+
+  @override
+  String get messageForwardMissOffline => '未发送：服务器离线';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '已转发到 $count 个对话',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return '已发送到 $done/$total 个';
+  }
+
+  @override
+  String get messageForwardNow => '刚刚';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count 分钟';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count 小时';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count 天';
+  }
+
+  @override
   String get readAloudApiKey => 'API 密钥';
 
   @override

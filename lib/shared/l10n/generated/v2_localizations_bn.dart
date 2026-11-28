@@ -979,6 +979,116 @@ class V2LocalizationsBn extends V2Localizations {
       'এই ডিভাইস বা নেটওয়ার্কের বাইরের ঠিকানার জন্য https ব্যবহার করুন';
 
   @override
+  String get messageForward => 'ফরওয়ার্ড';
+
+  @override
+  String get messageForwardTitle => 'এতে ফরওয়ার্ড…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return 'যেখান থেকে ফরওয়ার্ড: $origin';
+  }
+
+  @override
+  String get messageForwardSearch => 'কথোপকথন খুঁজুন';
+
+  @override
+  String messageForwardSelected(int count) {
+    return '$countটি নির্বাচিত';
+  }
+
+  @override
+  String get messageForwardNoProjects => 'কোনো খোলা প্রজেক্ট নেই';
+
+  @override
+  String get messageForwardNoSessions =>
+      'আপনার খোলা প্রজেক্টে অন্য কোনো কথোপকথন নেই';
+
+  @override
+  String get messageForwardNoMatch => 'কোনো কথোপকথন মেলেনি';
+
+  @override
+  String get messageForwardLoadFailed => 'কথোপকথন লোড করা যায়নি';
+
+  @override
+  String get messageForwardOffline => 'সার্ভার অফলাইন';
+
+  @override
+  String get messageForwardStop => 'থামান';
+
+  @override
+  String get messageForwardSending => 'পাঠানো হচ্ছে…';
+
+  @override
+  String get messageForwardQueued => 'সারিতে';
+
+  @override
+  String get messageForwardSent => 'পাঠানো হয়েছে';
+
+  @override
+  String get messageForwardUnconfirmed =>
+      'নিশ্চিত নয়: যাচাই করতে খুলুন। এটি নিজে থেকে আর কখনো পাঠানো হয় না।';
+
+  @override
+  String get messageForwardStopped => 'পাঠানোর আগে থামানো হয়েছে';
+
+  @override
+  String get messageForwardMissGone =>
+      'পাঠানো হয়নি: কথোপকথনটি নেই বা আর্কাইভ করা';
+
+  @override
+  String get messageForwardMissBusy => 'পাঠানো হয়নি: কথোপকথনটি ব্যস্ত ছিল';
+
+  @override
+  String get messageForwardMissCapacity =>
+      'পাঠানো হয়নি: অনেক বেশি কথোপকথন খোলা';
+
+  @override
+  String get messageForwardMissUnavailable =>
+      'পাঠানো হয়নি: এই কথোপকথন এটি গ্রহণ করতে পারে না';
+
+  @override
+  String get messageForwardMissRefused =>
+      'পাঠানো হয়নি: সার্ভার প্রত্যাখ্যান করেছে';
+
+  @override
+  String get messageForwardMissOffline => 'পাঠানো হয়নি: সার্ভার অফলাইন';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countটি কথোপকথনে ফরওয়ার্ড করা হয়েছে',
+      one: '১টি কথোপকথনে ফরওয়ার্ড করা হয়েছে',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return '$totalটির মধ্যে $doneটিতে পাঠানো হয়েছে';
+  }
+
+  @override
+  String get messageForwardNow => 'এখন';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count মিনিট';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count ঘণ্টা';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count দিন';
+  }
+
+  @override
   String get readAloudApiKey => 'API কী';
 
   @override

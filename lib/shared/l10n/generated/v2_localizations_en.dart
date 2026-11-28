@@ -985,6 +985,116 @@ class V2LocalizationsEn extends V2Localizations {
       'Use https for addresses outside this device or network';
 
   @override
+  String get messageForward => 'Forward';
+
+  @override
+  String get messageForwardTitle => 'Forward to…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return 'Forwarded from: $origin';
+  }
+
+  @override
+  String get messageForwardSearch => 'Search conversations';
+
+  @override
+  String messageForwardSelected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get messageForwardNoProjects => 'No open projects';
+
+  @override
+  String get messageForwardNoSessions =>
+      'No other conversations in your open projects';
+
+  @override
+  String get messageForwardNoMatch => 'No conversations match';
+
+  @override
+  String get messageForwardLoadFailed =>
+      'The conversations could not be loaded';
+
+  @override
+  String get messageForwardOffline => 'The server is offline';
+
+  @override
+  String get messageForwardStop => 'Stop';
+
+  @override
+  String get messageForwardSending => 'Sending…';
+
+  @override
+  String get messageForwardQueued => 'Queued';
+
+  @override
+  String get messageForwardSent => 'Sent';
+
+  @override
+  String get messageForwardUnconfirmed =>
+      'Not confirmed: open it to check. It is never sent again on its own.';
+
+  @override
+  String get messageForwardStopped => 'Stopped before sending';
+
+  @override
+  String get messageForwardMissGone =>
+      'Not sent: the conversation is gone or archived';
+
+  @override
+  String get messageForwardMissBusy => 'Not sent: the conversation stayed busy';
+
+  @override
+  String get messageForwardMissCapacity =>
+      'Not sent: too many conversations are open';
+
+  @override
+  String get messageForwardMissUnavailable =>
+      'Not sent: this conversation cannot receive it';
+
+  @override
+  String get messageForwardMissRefused => 'Not sent: the server refused it';
+
+  @override
+  String get messageForwardMissOffline => 'Not sent: the server is offline';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Forwarded to $count conversations',
+      one: 'Forwarded to 1 conversation',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return 'Sent to $done of $total';
+  }
+
+  @override
+  String get messageForwardNow => 'now';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count min';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count h';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count d';
+  }
+
+  @override
   String get readAloudApiKey => 'API key';
 
   @override

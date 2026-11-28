@@ -675,6 +675,156 @@
   "@readAloudBaseUrlInsecure": {
     "description": "V2 read aloud (#541)"
   },
+  "messageForward": "Inoltra",
+  "@messageForward": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardTitle": "Inoltra a…",
+  "@messageForwardTitle": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardFrom": "Inoltrato da: {origin}",
+  "@messageForwardFrom": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      }
+    }
+  },
+  "messageForwardSearch": "Cerca conversazioni",
+  "@messageForwardSearch": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSelected": "{count} selezionate",
+  "@messageForwardSelected": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardNoProjects": "Nessun progetto aperto",
+  "@messageForwardNoProjects": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardNoSessions": "Nessun’altra conversazione nei tuoi progetti aperti",
+  "@messageForwardNoSessions": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardNoMatch": "Nessuna conversazione corrisponde",
+  "@messageForwardNoMatch": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardLoadFailed": "Impossibile caricare le conversazioni",
+  "@messageForwardLoadFailed": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardOffline": "Il server è offline",
+  "@messageForwardOffline": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardStop": "Interrompi",
+  "@messageForwardStop": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSending": "Invio…",
+  "@messageForwardSending": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardQueued": "In coda",
+  "@messageForwardQueued": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSent": "Inviato",
+  "@messageForwardSent": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardUnconfirmed": "Non confermato: aprila per verificare. Non viene mai reinviato da solo.",
+  "@messageForwardUnconfirmed": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardStopped": "Interrotto prima dell’invio",
+  "@messageForwardStopped": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissGone": "Non inviato: la conversazione non c’è più o è archiviata",
+  "@messageForwardMissGone": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissBusy": "Non inviato: la conversazione è rimasta occupata",
+  "@messageForwardMissBusy": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissCapacity": "Non inviato: troppe conversazioni aperte",
+  "@messageForwardMissCapacity": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissUnavailable": "Non inviato: questa conversazione non può riceverlo",
+  "@messageForwardMissUnavailable": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissRefused": "Non inviato: il server l’ha rifiutato",
+  "@messageForwardMissRefused": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissOffline": "Non inviato: il server è offline",
+  "@messageForwardMissOffline": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardDone": "{count, plural, =1{Inoltrato a 1 conversazione} other{Inoltrato a {count} conversazioni}}",
+  "@messageForwardDone": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardPartial": "Inviato a {done} su {total}",
+  "@messageForwardPartial": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardNow": "ora",
+  "@messageForwardNow": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMinutes": "{count} min",
+  "@messageForwardMinutes": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardHours": "{count} h",
+  "@messageForwardHours": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardDays": "{count} g",
+  "@messageForwardDays": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "readAloudApiKey": "Chiave API",
   "@readAloudApiKey": {
     "description": "V2 read aloud (#541)"

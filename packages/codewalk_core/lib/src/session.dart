@@ -93,6 +93,7 @@ final class SessionSummary {
     this.createdAt,
     this.outcome,
     this.view,
+    this.archivedAt,
   });
   final SessionInfo info;
   final ExecutionState? execution;
@@ -109,6 +110,9 @@ final class SessionSummary {
   /// carries no marker, and the info it projects still equals the info of
   /// the later read.
   final SessionViewMarker? view;
+
+  /// When the session was archived, when the record says it was.
+  final DateTime? archivedAt;
 }
 
 /// How a session's last run ended.

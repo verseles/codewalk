@@ -1895,6 +1895,174 @@ abstract class V2Localizations {
   /// **'Use https for addresses outside this device or network'**
   String get readAloudBaseUrlInsecure;
 
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Forward'**
+  String get messageForward;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Forward to…'**
+  String get messageForwardTitle;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Forwarded from: {origin}'**
+  String messageForwardFrom(String origin);
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Search conversations'**
+  String get messageForwardSearch;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String messageForwardSelected(int count);
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'No open projects'**
+  String get messageForwardNoProjects;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'No other conversations in your open projects'**
+  String get messageForwardNoSessions;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations match'**
+  String get messageForwardNoMatch;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'The conversations could not be loaded'**
+  String get messageForwardLoadFailed;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'The server is offline'**
+  String get messageForwardOffline;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get messageForwardStop;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Sending…'**
+  String get messageForwardSending;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Queued'**
+  String get messageForwardQueued;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Sent'**
+  String get messageForwardSent;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Not confirmed: open it to check. It is never sent again on its own.'**
+  String get messageForwardUnconfirmed;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Stopped before sending'**
+  String get messageForwardStopped;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent: the conversation is gone or archived'**
+  String get messageForwardMissGone;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent: the conversation stayed busy'**
+  String get messageForwardMissBusy;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent: too many conversations are open'**
+  String get messageForwardMissCapacity;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent: this conversation cannot receive it'**
+  String get messageForwardMissUnavailable;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent: the server refused it'**
+  String get messageForwardMissRefused;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Not sent: the server is offline'**
+  String get messageForwardMissOffline;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Forwarded to 1 conversation} other{Forwarded to {count} conversations}}'**
+  String messageForwardDone(int count);
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to {done} of {total}'**
+  String messageForwardPartial(int done, int total);
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get messageForwardNow;
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'{count} min'**
+  String messageForwardMinutes(int count);
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'{count} h'**
+  String messageForwardHours(int count);
+
+  /// V2 forward a message (#542)
+  ///
+  /// In en, this message translates to:
+  /// **'{count} d'**
+  String messageForwardDays(int count);
+
   /// V2 read aloud (#541)
   ///
   /// In en, this message translates to:

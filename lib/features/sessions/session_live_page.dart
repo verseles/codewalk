@@ -26,6 +26,7 @@ import '../../shared/widgets/route_covered.dart';
 import '../voice/read_aloud_actions.dart';
 import '../voice/read_aloud_controller.dart';
 import 'message_action_bar.dart';
+import 'message_forward_dialog.dart';
 import 'session_attachment_scope.dart';
 import 'session_composer.dart';
 import 'session_composer_status.dart';
@@ -381,7 +382,13 @@ class _SessionLivePageState extends State<SessionLivePage>
     };
     final owner = turn.owner;
     final read = readAloudAction(context, c.session, item);
-    if (!settled || owner == null) return [?read];
+    final forward = forwardMessageAction(
+      context,
+      source: c.summary,
+      profile: c.profile,
+      item: item,
+    );
+    if (!settled || owner == null) return [?read, ?forward];
     final catalog = context.read<SessionsController?>();
     final row = catalog?.findSession(c.session);
     // Only a session the list shows can fork, as the command checks; and
@@ -393,6 +400,7 @@ class _SessionLivePageState extends State<SessionLivePage>
         c.turn.port?.state.staged != true;
     return [
       ?read,
+      ?forward,
       if (c.turn.canUndo)
         turn.latest
             ? MessageAction(

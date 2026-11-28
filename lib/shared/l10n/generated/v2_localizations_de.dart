@@ -1004,6 +1004,119 @@ class V2LocalizationsDe extends V2Localizations {
       'Verwende https für Adressen außerhalb dieses Geräts oder Netzwerks';
 
   @override
+  String get messageForward => 'Weiterleiten';
+
+  @override
+  String get messageForwardTitle => 'Weiterleiten an…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return 'Weitergeleitet von: $origin';
+  }
+
+  @override
+  String get messageForwardSearch => 'Unterhaltungen suchen';
+
+  @override
+  String messageForwardSelected(int count) {
+    return '$count ausgewählt';
+  }
+
+  @override
+  String get messageForwardNoProjects => 'Keine offenen Projekte';
+
+  @override
+  String get messageForwardNoSessions =>
+      'Keine anderen Unterhaltungen in deinen offenen Projekten';
+
+  @override
+  String get messageForwardNoMatch => 'Keine Unterhaltung passt';
+
+  @override
+  String get messageForwardLoadFailed =>
+      'Die Unterhaltungen konnten nicht geladen werden';
+
+  @override
+  String get messageForwardOffline => 'Der Server ist offline';
+
+  @override
+  String get messageForwardStop => 'Stopp';
+
+  @override
+  String get messageForwardSending => 'Wird gesendet…';
+
+  @override
+  String get messageForwardQueued => 'In der Warteschlange';
+
+  @override
+  String get messageForwardSent => 'Gesendet';
+
+  @override
+  String get messageForwardUnconfirmed =>
+      'Nicht bestätigt: Öffne sie zum Prüfen. Sie wird nie von selbst erneut gesendet.';
+
+  @override
+  String get messageForwardStopped => 'Vor dem Senden gestoppt';
+
+  @override
+  String get messageForwardMissGone =>
+      'Nicht gesendet: Die Unterhaltung ist weg oder archiviert';
+
+  @override
+  String get messageForwardMissBusy =>
+      'Nicht gesendet: Die Unterhaltung blieb beschäftigt';
+
+  @override
+  String get messageForwardMissCapacity =>
+      'Nicht gesendet: Zu viele Unterhaltungen sind offen';
+
+  @override
+  String get messageForwardMissUnavailable =>
+      'Nicht gesendet: Diese Unterhaltung kann sie nicht empfangen';
+
+  @override
+  String get messageForwardMissRefused =>
+      'Nicht gesendet: Der Server hat abgelehnt';
+
+  @override
+  String get messageForwardMissOffline =>
+      'Nicht gesendet: Der Server ist offline';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'An $count Unterhaltungen weitergeleitet',
+      one: 'An 1 Unterhaltung weitergeleitet',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return 'An $done von $total gesendet';
+  }
+
+  @override
+  String get messageForwardNow => 'jetzt';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count Min.';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count Std.';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count T.';
+  }
+
+  @override
   String get readAloudApiKey => 'API-Schlüssel';
 
   @override

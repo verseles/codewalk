@@ -675,6 +675,156 @@
   "@readAloudBaseUrlInsecure": {
     "description": "V2 read aloud (#541)"
   },
+  "messageForward": "Переслать",
+  "@messageForward": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardTitle": "Переслать в…",
+  "@messageForwardTitle": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardFrom": "Переслано из: {origin}",
+  "@messageForwardFrom": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      }
+    }
+  },
+  "messageForwardSearch": "Поиск бесед",
+  "@messageForwardSearch": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSelected": "Выбрано: {count}",
+  "@messageForwardSelected": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardNoProjects": "Нет открытых проектов",
+  "@messageForwardNoProjects": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardNoSessions": "В открытых проектах нет других бесед",
+  "@messageForwardNoSessions": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardNoMatch": "Нет подходящих бесед",
+  "@messageForwardNoMatch": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardLoadFailed": "Не удалось загрузить беседы",
+  "@messageForwardLoadFailed": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardOffline": "Сервер недоступен",
+  "@messageForwardOffline": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardStop": "Остановить",
+  "@messageForwardStop": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSending": "Отправка…",
+  "@messageForwardSending": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardQueued": "В очереди",
+  "@messageForwardQueued": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSent": "Отправлено",
+  "@messageForwardSent": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardUnconfirmed": "Не подтверждено: откройте, чтобы проверить. Повторно само не отправляется.",
+  "@messageForwardUnconfirmed": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardStopped": "Остановлено до отправки",
+  "@messageForwardStopped": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissGone": "Не отправлено: беседа удалена или в архиве",
+  "@messageForwardMissGone": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissBusy": "Не отправлено: беседа оставалась занятой",
+  "@messageForwardMissBusy": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissCapacity": "Не отправлено: открыто слишком много бесед",
+  "@messageForwardMissCapacity": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissUnavailable": "Не отправлено: эта беседа не может принять сообщение",
+  "@messageForwardMissUnavailable": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissRefused": "Не отправлено: сервер отклонил",
+  "@messageForwardMissRefused": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissOffline": "Не отправлено: сервер недоступен",
+  "@messageForwardMissOffline": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardDone": "{count, plural, =1{Переслано в 1 беседу} few{Переслано в {count} беседы} many{Переслано в {count} бесед} other{Переслано в {count} бесед}}",
+  "@messageForwardDone": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardPartial": "Отправлено в {done} из {total}",
+  "@messageForwardPartial": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardNow": "сейчас",
+  "@messageForwardNow": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMinutes": "{count} мин",
+  "@messageForwardMinutes": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardHours": "{count} ч",
+  "@messageForwardHours": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardDays": "{count} д",
+  "@messageForwardDays": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "readAloudApiKey": "API-ключ",
   "@readAloudApiKey": {
     "description": "V2 read aloud (#541)"

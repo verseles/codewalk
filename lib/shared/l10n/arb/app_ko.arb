@@ -675,6 +675,156 @@
   "@readAloudBaseUrlInsecure": {
     "description": "V2 read aloud (#541)"
   },
+  "messageForward": "전달",
+  "@messageForward": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardTitle": "전달 대상…",
+  "@messageForwardTitle": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardFrom": "전달 원본: {origin}",
+  "@messageForwardFrom": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "origin": {
+        "type": "String"
+      }
+    }
+  },
+  "messageForwardSearch": "대화 검색",
+  "@messageForwardSearch": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSelected": "{count}개 선택됨",
+  "@messageForwardSelected": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardNoProjects": "열린 프로젝트가 없습니다",
+  "@messageForwardNoProjects": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardNoSessions": "열린 프로젝트에 다른 대화가 없습니다",
+  "@messageForwardNoSessions": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardNoMatch": "일치하는 대화가 없습니다",
+  "@messageForwardNoMatch": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardLoadFailed": "대화를 불러올 수 없습니다",
+  "@messageForwardLoadFailed": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardOffline": "서버가 오프라인입니다",
+  "@messageForwardOffline": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardStop": "중지",
+  "@messageForwardStop": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSending": "보내는 중…",
+  "@messageForwardSending": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardQueued": "대기열",
+  "@messageForwardQueued": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardSent": "보냄",
+  "@messageForwardSent": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardUnconfirmed": "확인되지 않음: 열어서 확인하세요. 자동으로 다시 보내지 않습니다.",
+  "@messageForwardUnconfirmed": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardStopped": "보내기 전에 중지됨",
+  "@messageForwardStopped": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissGone": "보내지 않음: 대화가 없어졌거나 보관되었습니다",
+  "@messageForwardMissGone": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissBusy": "보내지 않음: 대화가 계속 사용 중이었습니다",
+  "@messageForwardMissBusy": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissCapacity": "보내지 않음: 열린 대화가 너무 많습니다",
+  "@messageForwardMissCapacity": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissUnavailable": "보내지 않음: 이 대화는 받을 수 없습니다",
+  "@messageForwardMissUnavailable": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissRefused": "보내지 않음: 서버가 거부했습니다",
+  "@messageForwardMissRefused": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMissOffline": "보내지 않음: 서버가 오프라인입니다",
+  "@messageForwardMissOffline": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardDone": "{count, plural, other{대화 {count}개에 전달했습니다}}",
+  "@messageForwardDone": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardPartial": "{total}개 중 {done}개에 보냄",
+  "@messageForwardPartial": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardNow": "지금",
+  "@messageForwardNow": {
+    "description": "V2 forward a message (#542)"
+  },
+  "messageForwardMinutes": "{count}분",
+  "@messageForwardMinutes": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardHours": "{count}시간",
+  "@messageForwardHours": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageForwardDays": "{count}일",
+  "@messageForwardDays": {
+    "description": "V2 forward a message (#542)",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "readAloudApiKey": "API 키",
   "@readAloudApiKey": {
     "description": "V2 read aloud (#541)"

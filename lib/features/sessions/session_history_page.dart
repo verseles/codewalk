@@ -12,6 +12,7 @@ import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../voice/read_aloud_actions.dart';
 import '../voice/read_aloud_controller.dart';
+import 'message_forward_dialog.dart';
 import 'session_attachment_scope.dart';
 import 'session_history_controller.dart';
 import 'session_report_group.dart';
@@ -222,6 +223,12 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                             ),
                             actions: [
                               ?readAloudAction(context, c.session, item),
+                              ?forwardMessageAction(
+                                context,
+                                source: c.summary,
+                                profile: c.profile,
+                                item: item,
+                              ),
                             ],
                           );
                         },

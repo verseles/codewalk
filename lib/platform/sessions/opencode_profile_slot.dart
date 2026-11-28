@@ -102,7 +102,9 @@ final class OpenCodeProfileSlot {
   final Set<String> answered;
   final IoEndpointHttpTransport _transport;
   late final OpenCodeSessionReader _reader;
-  final _store = SessionStore(maxSessions: 8);
+  // One watch more than the eight warm tabs, so a lease of a moment, as a
+  // forwarded message's (#542), always fits.
+  final _store = SessionStore(maxSessions: 9);
   IoSseRecovery? _connection;
   OpenCodeStreamOwner? _owner;
   StreamSubscription<OpenCodeStreamUpdate>? _subscription;

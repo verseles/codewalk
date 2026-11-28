@@ -90,6 +90,7 @@ SessionSummary projectOpenCodeSession(Object? value, HarnessRef harness) {
     updatedAt: updated,
     createdAt: created,
     outcome: outcome,
+    archivedAt: _optionalEpoch(time['archived']),
   );
 }
 

@@ -992,6 +992,117 @@ class V2LocalizationsRu extends V2Localizations {
       'Используйте https для адресов вне этого устройства или сети';
 
   @override
+  String get messageForward => 'Переслать';
+
+  @override
+  String get messageForwardTitle => 'Переслать в…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return 'Переслано из: $origin';
+  }
+
+  @override
+  String get messageForwardSearch => 'Поиск бесед';
+
+  @override
+  String messageForwardSelected(int count) {
+    return 'Выбрано: $count';
+  }
+
+  @override
+  String get messageForwardNoProjects => 'Нет открытых проектов';
+
+  @override
+  String get messageForwardNoSessions => 'В открытых проектах нет других бесед';
+
+  @override
+  String get messageForwardNoMatch => 'Нет подходящих бесед';
+
+  @override
+  String get messageForwardLoadFailed => 'Не удалось загрузить беседы';
+
+  @override
+  String get messageForwardOffline => 'Сервер недоступен';
+
+  @override
+  String get messageForwardStop => 'Остановить';
+
+  @override
+  String get messageForwardSending => 'Отправка…';
+
+  @override
+  String get messageForwardQueued => 'В очереди';
+
+  @override
+  String get messageForwardSent => 'Отправлено';
+
+  @override
+  String get messageForwardUnconfirmed =>
+      'Не подтверждено: откройте, чтобы проверить. Повторно само не отправляется.';
+
+  @override
+  String get messageForwardStopped => 'Остановлено до отправки';
+
+  @override
+  String get messageForwardMissGone =>
+      'Не отправлено: беседа удалена или в архиве';
+
+  @override
+  String get messageForwardMissBusy =>
+      'Не отправлено: беседа оставалась занятой';
+
+  @override
+  String get messageForwardMissCapacity =>
+      'Не отправлено: открыто слишком много бесед';
+
+  @override
+  String get messageForwardMissUnavailable =>
+      'Не отправлено: эта беседа не может принять сообщение';
+
+  @override
+  String get messageForwardMissRefused => 'Не отправлено: сервер отклонил';
+
+  @override
+  String get messageForwardMissOffline => 'Не отправлено: сервер недоступен';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Переслано в $count бесед',
+      many: 'Переслано в $count бесед',
+      few: 'Переслано в $count беседы',
+      one: 'Переслано в 1 беседу',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return 'Отправлено в $done из $total';
+  }
+
+  @override
+  String get messageForwardNow => 'сейчас';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count мин';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count ч';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count д';
+  }
+
+  @override
   String get readAloudApiKey => 'API-ключ';
 
   @override

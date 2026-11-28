@@ -977,6 +977,115 @@ class V2LocalizationsAr extends V2Localizations {
       'استخدم https للعناوين خارج هذا الجهاز أو الشبكة';
 
   @override
+  String get messageForward => 'إعادة توجيه';
+
+  @override
+  String get messageForwardTitle => 'إعادة توجيه إلى…';
+
+  @override
+  String messageForwardFrom(String origin) {
+    return 'أُعيد توجيهها من: $origin';
+  }
+
+  @override
+  String get messageForwardSearch => 'البحث في المحادثات';
+
+  @override
+  String messageForwardSelected(int count) {
+    return 'تم تحديد $count';
+  }
+
+  @override
+  String get messageForwardNoProjects => 'لا توجد مشاريع مفتوحة';
+
+  @override
+  String get messageForwardNoSessions =>
+      'لا توجد محادثات أخرى في مشاريعك المفتوحة';
+
+  @override
+  String get messageForwardNoMatch => 'لا توجد محادثات مطابقة';
+
+  @override
+  String get messageForwardLoadFailed => 'تعذر تحميل المحادثات';
+
+  @override
+  String get messageForwardOffline => 'الخادم غير متصل';
+
+  @override
+  String get messageForwardStop => 'إيقاف';
+
+  @override
+  String get messageForwardSending => 'جارٍ الإرسال…';
+
+  @override
+  String get messageForwardQueued => 'في قائمة الانتظار';
+
+  @override
+  String get messageForwardSent => 'أُرسلت';
+
+  @override
+  String get messageForwardUnconfirmed =>
+      'غير مؤكدة: افتحها للتحقق. لا تُرسل مرة أخرى تلقائيًا.';
+
+  @override
+  String get messageForwardStopped => 'أُوقفت قبل الإرسال';
+
+  @override
+  String get messageForwardMissGone =>
+      'لم تُرسل: المحادثة لم تعد موجودة أو أُرشفت';
+
+  @override
+  String get messageForwardMissBusy => 'لم تُرسل: ظلت المحادثة مشغولة';
+
+  @override
+  String get messageForwardMissCapacity =>
+      'لم تُرسل: هناك محادثات مفتوحة كثيرة جدًا';
+
+  @override
+  String get messageForwardMissUnavailable =>
+      'لم تُرسل: لا يمكن لهذه المحادثة استلامها';
+
+  @override
+  String get messageForwardMissRefused => 'لم تُرسل: رفضها الخادم';
+
+  @override
+  String get messageForwardMissOffline => 'لم تُرسل: الخادم غير متصل';
+
+  @override
+  String messageForwardDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'أُعيد توجيهها إلى $count محادثات',
+      one: 'أُعيد توجيهها إلى محادثة واحدة',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageForwardPartial(int done, int total) {
+    return 'أُرسلت إلى $done من $total';
+  }
+
+  @override
+  String get messageForwardNow => 'الآن';
+
+  @override
+  String messageForwardMinutes(int count) {
+    return '$count د';
+  }
+
+  @override
+  String messageForwardHours(int count) {
+    return '$count س';
+  }
+
+  @override
+  String messageForwardDays(int count) {
+    return '$count ي';
+  }
+
+  @override
   String get readAloudApiKey => 'مفتاح API';
 
   @override

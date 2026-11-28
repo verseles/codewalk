@@ -277,11 +277,23 @@ void main() {
             ...row('ses_bare'),
             'time': {'updated': 2000},
           },
+          {
+            ...row('ses_archived'),
+            'time': {'created': 1000, 'updated': 2000, 'archived': 3000},
+          },
         ]),
       ),
     );
     final reader = OpenCodeSessionReader(transport, harness: harness);
-    final [done, odd, bare] = (await reader.listSessions(SessionQuery())).items;
+    final [done, odd, bare, archived] = (await reader.listSessions(
+      SessionQuery(),
+    )).items;
+    // An archived session says when (#542); the others are not archived.
+    expect(
+      archived.archivedAt,
+      DateTime.fromMillisecondsSinceEpoch(3000, isUtc: true),
+    );
+    expect(done.archivedAt, isNull);
     expect(
       done.createdAt,
       DateTime.fromMillisecondsSinceEpoch(1000, isUtc: true),
