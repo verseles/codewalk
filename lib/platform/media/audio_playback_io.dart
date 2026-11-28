@@ -27,7 +27,10 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
   // The folder is this run's own, readable by this user only.
   File? _file;
   int _files = 0;
-  Directory? _folder;
+  Future<Directory>? _folder;
+
+  // The id of a start still under way, which a stop for another id spares.
+  String? _starting;
 
   // Each start, stop or disposal supersedes the starts still under way.
   int _op = 0;
@@ -102,6 +105,7 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
     if (_disposed || _unsupportedRuntime) return;
     final op = ++_op;
     File? mine;
+    _starting = id;
     try {
       final player = _ensurePlayer();
       if (_state.activeId == id) {
@@ -136,18 +140,25 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
     } on MissingPluginException {
       _unsupportedRuntime = true;
       if (op == _op) {
-        _emit(
-          AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.error),
-        );
-      }
-    } on Object {
-      if (op == _op) {
+        await _release();
         _emit(
           AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.error),
         );
       } else {
         await _delete(mine);
       }
+    } on Object {
+      if (op == _op) {
+        // Audio that cannot play leaves no file behind.
+        await _release();
+        _emit(
+          AudioPlaybackState(activeId: id, status: AudioPlaybackStatus.error),
+        );
+      } else {
+        await _delete(mine);
+      }
+    } finally {
+      if (op == _op) _starting = null;
     }
   }
 
@@ -169,7 +180,13 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
     if (kIsWeb || !(Platform.isIOS || Platform.isMacOS || Platform.isLinux)) {
       return (BytesSource(bytes, mimeType: mimeType), null);
     }
-    final folder = _folder ??= await _createFolder();
+    // One folder per run, even for starts that overlap; made again if the
+    // system removed it meanwhile.
+    var folder = await (_folder ??= _createFolder());
+    if (!folder.existsSync()) {
+      final again = _folder = _createFolder();
+      folder = await again;
+    }
     final extension = switch (mimeType) {
       'audio/wav' || 'audio/x-wav' => 'wav',
       'audio/ogg' => 'ogg',
@@ -226,14 +243,23 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
   }
 
   @override
-  Future<void> stop() async {
+  Future<void> stop({String? id}) async {
     if (_disposed) return;
-    _op++;
+    // Only that audio: not another one playing, nor one starting in its
+    // place.
+    if (id != null &&
+        (_state.activeId != id || (_starting != null && _starting != id))) {
+      return;
+    }
+    final op = ++_op;
+    _starting = null;
     try {
       await _player?.stop();
     } on Object {
       // Best-effort stop.
     }
+    // A start made meanwhile owns the player and its file.
+    if (op != _op) return;
     await _release();
     _emit(const AudioPlaybackState());
   }
@@ -255,7 +281,7 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
     _player = null;
     await _release();
     try {
-      await _folder?.delete(recursive: true);
+      await (await _folder)?.delete(recursive: true);
     } on FileSystemException {
       // Swept by a later run.
     }

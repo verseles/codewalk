@@ -115,9 +115,7 @@ class ReadAloudController extends ChangeNotifier {
         text: '',
         settings: settings,
         locale: locale(),
-        apiKey: await keys.read(
-          speechKeyScope(settings.provider, settings.baseUrl),
-        ),
+        apiKey: await _key(settings),
       ),
     );
   }
@@ -218,9 +216,7 @@ class ReadAloudController extends ChangeNotifier {
       cacheKey = _cacheKey(key, speech, settings, language);
       var audio = _cache[cacheKey];
       if (audio == null) {
-        final apiKey = await keys.read(
-          speechKeyScope(settings.provider, settings.baseUrl),
-        );
+        final apiKey = await _key(settings);
         // Stopped meanwhile: no text leaves the device.
         if (!current()) return null;
         audio = await synth.synthesize(
@@ -242,14 +238,20 @@ class ReadAloudController extends ChangeNotifier {
         mimeType: audio.mimeType,
       );
       if (!current()) {
-        // Stopped or replaced while the player started: this audio goes.
-        if (output.current.activeId == id) await output.stop();
+        // Stopped or replaced while the player started: this audio goes,
+        // and only this one.
+        await output.stop(id: id);
         return null;
       }
       final state = output.current;
       if (state.activeId == id && state.status == AudioPlaybackStatus.error) {
         // Audio that cannot play is made again next time.
         _forget(cacheKey);
+        _reset();
+        return SpeechFailure.unavailable;
+      }
+      if (state.activeId != id) {
+        // The player never took this audio.
         _reset();
         return SpeechFailure.unavailable;
       }
@@ -271,8 +273,22 @@ class ReadAloudController extends ChangeNotifier {
   Future<void> _silence(String? id, {required bool native}) async {
     if (native) {
       await this.native?.stop();
-    } else if (id != null && player?.current.activeId == id) {
-      await player?.stop();
+    } else if (id != null) {
+      await player?.stop(id: id);
+    }
+  }
+
+  /// The saved key of [settings]' service at its address; none for a
+  /// service that takes no key, whose reading never waits on storage.
+  Future<String?> _key(ReadAloudSettings settings) async {
+    if (!settings.provider.keyed) return null;
+    try {
+      return await keys.read(
+        speechKeyScope(settings.provider, settings.baseUrl),
+      );
+    } on Object {
+      // Unreadable storage: as if no key were saved.
+      return null;
     }
   }
 
@@ -339,6 +355,14 @@ class ReadAloudController extends ChangeNotifier {
   void _playerChanged(AudioPlaybackState state) {
     final id = _playing;
     if (_active == null || id == null || _activeNative) return;
+    // An attachment that was playing as the reading started and then paused
+    // or stopped loses its pass: starting it again claims the player.
+    if (_foreign != null &&
+        state.activeId == _foreign &&
+        state.status != AudioPlaybackStatus.playing &&
+        state.status != AudioPlaybackStatus.loading) {
+      _foreign = null;
+    }
     if (state.activeId != id) {
       final other =
           state.activeId != null &&

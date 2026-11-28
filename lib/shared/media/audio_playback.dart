@@ -66,6 +66,9 @@ abstract interface class AudioPlaybackPort {
   });
 
   Future<void> seek(Duration position);
-  Future<void> stop();
+
+  /// Stops what plays; with [id], only that audio, and never one already
+  /// starting in its place.
+  Future<void> stop({String? id});
   Future<void> dispose();
 }

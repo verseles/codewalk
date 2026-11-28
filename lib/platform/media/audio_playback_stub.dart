@@ -2,7 +2,8 @@ import 'dart:typed_data';
 
 import '../../shared/media/audio_playback.dart';
 
-AudioPlaybackPort createAudioPlaybackPort() => const _UnsupportedAudioPlayback();
+AudioPlaybackPort createAudioPlaybackPort() =>
+    const _UnsupportedAudioPlayback();
 
 final class _UnsupportedAudioPlayback implements AudioPlaybackPort {
   const _UnsupportedAudioPlayback();
@@ -27,7 +28,7 @@ final class _UnsupportedAudioPlayback implements AudioPlaybackPort {
   Future<void> seek(Duration position) async {}
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop({String? id}) async {}
 
   @override
   Future<void> dispose() async {}

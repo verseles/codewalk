@@ -310,7 +310,11 @@ const speechDefaultBase = {
 String speechKeyScope(SpeechProvider provider, String? baseUrl) {
   final base = baseUrl ?? speechDefaultBase[provider];
   final uri = base == null ? null : Uri.tryParse(base.trim());
-  if (uri == null || uri.host.isEmpty) return provider.name;
-  final port = uri.hasPort ? ':${uri.port}' : '';
-  return '${provider.name}@${uri.scheme}://${uri.host.toLowerCase()}$port';
+  if (uri == null ||
+      uri.host.isEmpty ||
+      (uri.scheme != 'http' && uri.scheme != 'https')) {
+    return provider.name;
+  }
+  // The origin keeps IPv6 hosts in brackets, so no two origins share one.
+  return '${provider.name}@${uri.origin}';
 }

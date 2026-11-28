@@ -87,7 +87,8 @@ final class FakePlayer implements AudioPlaybackPort {
   Future<void> seek(Duration position) async {}
 
   @override
-  Future<void> stop() async {
+  Future<void> stop({String? id}) async {
+    if (id != null && current.activeId != id) return;
     stops++;
     emit(const AudioPlaybackState());
   }
@@ -262,6 +263,27 @@ void main() {
     );
   });
 
+  test('IPv6 servers each keep their own key', () {
+    expect(
+      speechKeyScope(SpeechProvider.openAi, 'http://[fd00::1]:80'),
+      isNot(speechKeyScope(SpeechProvider.openAi, 'http://[fd00::1:80]')),
+    );
+  });
+
+  test('a service that takes no key never waits on the key storage', () async {
+    final broken = ReadAloudController(
+      metadata: V2MetadataStore(backend: backend),
+      keys: _BrokenKeys(),
+      synthesizer: (_) => synth,
+      locale: () => 'pt-BR',
+      player: player,
+    );
+    addTearDown(broken.dispose);
+    expect(broken.settings.provider, SpeechProvider.edge);
+    expect(await broken.read('s|a', 'Hello'), isNull);
+    expect(await broken.voices(), hasLength(1));
+  });
+
   test('a player that cannot play says so', () async {
     player.fail = true;
     expect(await controller.read('s|a', 'Hello'), SpeechFailure.unavailable);
@@ -354,4 +376,13 @@ void main() {
       expect(await controller.voices(), hasLength(1));
     },
   );
+}
+
+final class _BrokenKeys implements SpeechKeyStore {
+  @override
+  Future<String?> read(String scope) => throw StateError('locked keyring');
+
+  @override
+  Future<void> write(String scope, String? key) =>
+      throw StateError('locked keyring');
 }
