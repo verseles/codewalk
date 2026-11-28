@@ -26,6 +26,7 @@ import '../shared/l10n/l10n_bridge.dart';
 import '../shared/media/attachment_picker.dart';
 import '../shared/media/audio_playback.dart';
 import '../shared/media/location_fix_source.dart';
+import '../shared/media/message_image.dart';
 import '../shared/sessions/session_attachments.dart';
 import '../shared/sessions/session_history_source.dart';
 import '../shared/sessions/session_live_source.dart';
@@ -75,6 +76,7 @@ class AppDependencies {
     this.mapUriLauncher,
     this.audioPlayback,
     this.locationFixSource,
+    this.messageImages,
     this.workspaceDrafts,
     this.projectContexts,
     this.desktopWindow,
@@ -150,6 +152,9 @@ class AppDependencies {
   final MapUriLauncher? mapUriLauncher;
   final AudioPlaybackPort? audioPlayback;
   final LocationFixSource? locationFixSource;
+
+  /// Shares or saves a message's image (#540).
+  final MessageImageSink? messageImages;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;

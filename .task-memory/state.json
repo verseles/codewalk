@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 16,
+  "artifact_seq": 17,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -256,6 +256,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "u5 r1 review #539 (4ea5b87a)"
+    },
+    "A0017": {
+      "active": true,
+      "bytes": 895,
+      "created_at": "2026-11-28T02:17:35Z",
+      "evidence": "/tmp/opencode/g8/rev/u5/r2_*.out",
+      "id": "A0017",
+      "impact": "Second fix round",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0017.md",
+      "purpose": "Re-review round 2",
+      "rerun_when": "message_action_bar or fork code changes",
+      "sha256": "115db5492453b1260bbfcb6243eb18701d2b09306b2bca2b73b40505d0d808c7",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u5 r2 re-review #539 (386397ce)"
     }
   },
   "checklist": [
@@ -695,9 +711,13 @@
     {
       "at": "2026-11-28T01:57:01Z",
       "text": "u5 r1 judged. Accept: Escape closes from anywhere (HardwareKeyboard handler while shown); Fork only when catalog.lists(session) and no staged revert; canRedoAll/canCompact need a port; overflow cancel restores pin + hide timer; bar on the edge away from the trigger + ignore bar presses for kDoubleTapTimeout after a tap open; hover only over the content; menu re-resolves the action by id at run; drag beyond slop or scroll cancels the tap; edges need both viewport bounds; semantics actions go through _run; refocus message after a keyboard action; fork navigates via router.go(sessionTabLocation(ref)) after saving the draft (tabs.open alone does not show it; verified sessions_page _openLive); MessageTurn doc split; highlighted code RichText registers with SelectionArea; post-fork test. Reject: accepted-without-ref notice (OpenCode always returns the session)."
+    },
+    {
+      "at": "2026-11-28T02:17:42Z",
+      "text": "u5 r2 judged. Accept: Escape scoped to the host (enabled Action only while shown; focus in message or bar), drop the global HardwareKeyboard handler; outside-dismissed menu keeps the bar unpinned when hidden; no hide timer while the pointer is on the bar; bar ignores pointers while settling so a double tap's second tap selects the word; fork navigates only if the route is unchanged; hide when a scroll (incl. jumpTo) moves the anchor edge out of the viewport; BEHAVIOR placement/Escape wording; tests for fork guards. Reject: hover bar covering characters (owner's half-in/out; selection can start elsewhere and hides the bar)."
     }
   ],
-  "generation": 84,
+  "generation": 88,
   "next_action": "Handshake u5 helpers, then dispatch round 1 + native stand-ins",
   "pending_operation": null,
   "queued_followups": [],
@@ -721,7 +741,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T02:07:45Z",
+  "updated_at": "2026-11-28T02:19:59Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -770,6 +790,13 @@
       "check": "#539 fix round 1 gate",
       "criterion": null,
       "evidence": "analyze 4/4 budget; full suite +2631 ~4 -0 (goldens fixed by 835a6995). Log /tmp/opencode/g8/gate539b.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T02:19:59Z",
+      "check": "#540 gate (analyze + full suite + l10n check)",
+      "criterion": null,
+      "evidence": "analyze 4/4 budget; full suite +2637 ~4 -0; l10n --check ok; pubspec.lock adds only share_plus 13.2.1 + interface 7.2.0. Log /tmp/opencode/g8/gate540.log",
       "outcome": "pass"
     }
   ]

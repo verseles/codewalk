@@ -577,6 +577,26 @@
   "@messageForkUncertain": {
     "description": "V2 message action bar (#539)"
   },
+  "messageShareImage": "مشاركة كصورة",
+  "@messageShareImage": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageSaveImage": "حفظ كصورة",
+  "@messageSaveImage": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageTooLong": "طويلة جدًا لمشاركتها كصورة",
+  "@messageImageTooLong": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageFailed": "تعذر إنشاء الصورة",
+  "@messageImageFailed": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageSaved": "تم حفظ الصورة",
+  "@messageImageSaved": {
+    "description": "V2 message image sharing (#540)"
+  },
   "composerSendNow": "أرسل الآن",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

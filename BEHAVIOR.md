@@ -604,13 +604,21 @@ description of this code.
 - **Then** its text is always selectable: a long press on words, a double tap or a double click selects natively, with handles and the platform's selection menu; no message copies itself on a double tap any more, and a tap that only clears a selection does nothing else
 - **When** the user taps the message where the tap has no other function (its words, its padding, or its row beside it), long presses a clean area (the padding, a line's empty end, or the row beside the bubble), presses the Menu key or Shift+F10 on the focused message (messages join keyboard traversal and show a focus outline), or right clicks the row beside it
 - **Then** a horizontal bar of icons opens, half inside and half outside the message's top edge on the message's own side, or its bottom edge when the top has no room in the visible list, or near the top of what is visible for a message taller than the list; it stays inside the list, so it never covers the composer or the header
-- **Then** the bar offers, in this order, Copy all text, Undo this turn, and a vertical three-dots menu with Rewind and edit from here and Fork from here; Forward, Read aloud and Share as image join between them as their units land (#540, #541, #542); an action that cannot run is left out, never shown dead, and the three dots hide when their menu would be empty
+- **Then** the bar offers, in this order, Copy all text, Share as image (#540), Undo this turn, and a vertical three-dots menu with Rewind and edit from here and Fork from here; Forward and Read aloud join between Copy and Share as their units land (#541, #542); an action that cannot run is left out, never shown dead, and the three dots hide when their menu would be empty
 - **Then** Copy all copies the canonical text, Markdown kept, and says so; Undo this turn shows on the latest confirmed turn's prompt and its complete answers, and Rewind and edit from here on an older turn's, both only in the live view and while the session can revert (a session without the turn port cannot); Fork from here shows where the server can fork the listed session: on a prompt it copies the history before that prompt into a new session, opens it and puts the prompt in its message box; on an answer it keeps the answer's whole turn, up to the next prompt; an uncertain fork is never sent again and says the fork may exist
 - **Then** a long press on a bar button, a mouse resting on it or the keyboard focus names it above the bar, without running it; screen readers get every action of the bar as actions on the message, and each button by its name
 - **Then** with a mouse, resting on a message for 150 ms shows its bar and leaving both the message and the bar hides it 600 ms later, so the pointer can reach it; a click keeps it open
 - **Then** one bar shows at a time; it closes on a tap outside it, Escape (the focus returns to the message), a scroll, a new selection, or once one of its actions runs; a streaming answer offers Copy only, and a prompt still waiting offers no bar at all (#502), though its text is selectable
 - **When** the user taps inline `code` in a message
 - **Then** only that code is copied, with the same notice; code inside a link's text keeps opening the link, fenced code blocks keep their own copy button, and none of these, nor links, file paths, the elapsed chip or attachments, opens the bar
+
+### V2 message image
+
+- **Given** a whole message (a sent prompt, or a finished answer whose start history kept) and a platform that can take images (#540)
+- **When** the user picks Share as image in its action bar
+- **Then** the message alone (its card or its text with its clock, never the bar, the focus outline or the rest of the timeline) becomes a PNG on the theme's surface with a 16-pixel margin, at the screen's density up to 3x, smaller when needed to stay within 8192 by 4096 pixels; a message too tall even at half size says "Too long to share as an image" and copying still works
+- **Then** on Android, macOS and Windows the system share sheet receives the file alone (no text that a target could take instead), written to this app's own share folder, whose images older than a day are removed on the next share; on Linux, whose share sheet takes no files, the button reads Save as image and the system save dialog writes the PNG where the user chooses, then says "Image saved"
+- **Then** a streaming answer, a waiting prompt and the Web offer no image; a failure says "The image could not be made" and never shares text instead
 
 ### V2 message elapsed time and details
 

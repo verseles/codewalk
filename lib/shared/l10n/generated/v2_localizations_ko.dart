@@ -872,6 +872,21 @@ class V2LocalizationsKo extends V2Localizations {
   String get messageForkUncertain => '분기가 생성되었을 수 있습니다. 대화 목록을 확인하세요.';
 
   @override
+  String get messageShareImage => '이미지로 공유';
+
+  @override
+  String get messageSaveImage => '이미지로 저장';
+
+  @override
+  String get messageImageTooLong => '너무 길어서 이미지로 만들 수 없습니다';
+
+  @override
+  String get messageImageFailed => '이미지를 만들 수 없습니다';
+
+  @override
+  String get messageImageSaved => '이미지를 저장했습니다';
+
+  @override
   String get composerSendNow => '지금 보내기';
 
   @override

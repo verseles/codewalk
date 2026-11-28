@@ -27,6 +27,7 @@ import '../platform/endpoints/probe_factory.dart';
 import '../platform/media/attachment_picker_factory.dart';
 import '../platform/media/audio_playback_factory.dart';
 import '../platform/media/location_fix_factory.dart';
+import '../platform/media/message_image_sink_factory.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/pairing/qr_input.dart';
 import '../platform/profiles/endpoint_profile_store.dart';
@@ -58,6 +59,7 @@ import '../shared/l10n/l10n_bridge.dart';
 import '../shared/media/attachment_picker.dart';
 import '../shared/media/audio_playback.dart';
 import '../shared/media/location_fix_source.dart';
+import '../shared/media/message_image.dart';
 import '../shared/releases/release_source.dart';
 import '../shared/releases/update_selector.dart';
 import '../shared/sessions/session_actions.dart';
@@ -111,6 +113,7 @@ AppDependencies createAppDependencies({
   MapUriLauncher? mapUriLauncher,
   AudioPlaybackPort? audioPlayback,
   LocationFixSource? locationFixSource,
+  MessageImageSink? messageImages,
 }) {
   WidgetsFlutterBinding.ensureInitialized();
   final locator = GetIt.asNewInstance();
@@ -383,6 +386,7 @@ AppDependencies createAppDependencies({
     mapUriLauncher: mapUriLauncher ?? createMapUriLauncher(),
     audioPlayback: audioPlayback ?? createAudioPlaybackPort(),
     locationFixSource: locationFixSource ?? createLocationFixSource(),
+    messageImages: messageImages ?? createMessageImageSink(),
     unrestrictedOwnership: unrestrictedOwnership,
     pairing: locator<PairingController>(),
     diagnostics: locator<DiagnosticsController>(),

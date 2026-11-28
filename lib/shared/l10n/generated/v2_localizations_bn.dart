@@ -906,6 +906,21 @@ class V2LocalizationsBn extends V2Localizations {
       'ফর্কটি হয়তো তৈরি হয়েছে। আপনার কথোপকথনগুলো দেখুন।';
 
   @override
+  String get messageShareImage => 'ছবি হিসেবে শেয়ার করুন';
+
+  @override
+  String get messageSaveImage => 'ছবি হিসেবে সংরক্ষণ করুন';
+
+  @override
+  String get messageImageTooLong => 'ছবি বানানোর জন্য খুব লম্বা';
+
+  @override
+  String get messageImageFailed => 'ছবি তৈরি করা যায়নি';
+
+  @override
+  String get messageImageSaved => 'ছবি সংরক্ষিত হয়েছে';
+
+  @override
   String get composerSendNow => 'এখনই পাঠান';
 
   @override

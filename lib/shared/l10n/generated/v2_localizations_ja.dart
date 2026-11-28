@@ -869,6 +869,21 @@ class V2LocalizationsJa extends V2Localizations {
   String get messageForkUncertain => '分岐が作成された可能性があります。会話一覧を確認してください。';
 
   @override
+  String get messageShareImage => '画像として共有';
+
+  @override
+  String get messageSaveImage => '画像として保存';
+
+  @override
+  String get messageImageTooLong => '長すぎて画像にできません';
+
+  @override
+  String get messageImageFailed => '画像を作成できませんでした';
+
+  @override
+  String get messageImageSaved => '画像を保存しました';
+
+  @override
   String get composerSendNow => '今すぐ送信';
 
   @override

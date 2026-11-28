@@ -1103,6 +1103,26 @@
   "@messageForkUncertain": {
     "description": "V2 message action bar (#539)"
   },
+  "messageShareImage": "Share as image",
+  "@messageShareImage": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageSaveImage": "Save as image",
+  "@messageSaveImage": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageTooLong": "Too long to share as an image",
+  "@messageImageTooLong": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageFailed": "The image could not be made",
+  "@messageImageFailed": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageSaved": "Image saved",
+  "@messageImageSaved": {
+    "description": "V2 message image sharing (#540)"
+  },
   "composerSendNow": "Send now",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

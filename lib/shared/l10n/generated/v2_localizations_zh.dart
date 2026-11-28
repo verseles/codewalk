@@ -854,6 +854,21 @@ class V2LocalizationsZh extends V2Localizations {
   String get messageForkUncertain => '分支可能已创建。请检查你的对话。';
 
   @override
+  String get messageShareImage => '以图片分享';
+
+  @override
+  String get messageSaveImage => '保存为图片';
+
+  @override
+  String get messageImageTooLong => '内容太长，无法生成图片';
+
+  @override
+  String get messageImageFailed => '无法生成图片';
+
+  @override
+  String get messageImageSaved => '图片已保存';
+
+  @override
   String get composerSendNow => '立即发送';
 
   @override

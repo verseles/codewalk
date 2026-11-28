@@ -578,6 +578,26 @@
   "@messageForkUncertain": {
     "description": "V2 message action bar (#539)"
   },
+  "messageShareImage": "इमेज के रूप में शेयर करें",
+  "@messageShareImage": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageSaveImage": "इमेज के रूप में सहेजें",
+  "@messageSaveImage": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageTooLong": "इमेज बनाने के लिए बहुत लंबा है",
+  "@messageImageTooLong": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageFailed": "इमेज नहीं बन सकी",
+  "@messageImageFailed": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageSaved": "इमेज सहेजी गई",
+  "@messageImageSaved": {
+    "description": "V2 message image sharing (#540)"
+  },
   "composerSendNow": "अभी भेजें",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

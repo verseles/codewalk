@@ -918,6 +918,21 @@ class V2LocalizationsRu extends V2Localizations {
       'Ответвление могло быть создано. Проверьте список бесед.';
 
   @override
+  String get messageShareImage => 'Поделиться как изображением';
+
+  @override
+  String get messageSaveImage => 'Сохранить как изображение';
+
+  @override
+  String get messageImageTooLong => 'Слишком длинное для изображения';
+
+  @override
+  String get messageImageFailed => 'Не удалось создать изображение';
+
+  @override
+  String get messageImageSaved => 'Изображение сохранено';
+
+  @override
   String get composerSendNow => 'Отправить сейчас';
 
   @override

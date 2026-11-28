@@ -578,6 +578,26 @@
   "@messageForkUncertain": {
     "description": "V2 message action bar (#539)"
   },
+  "messageShareImage": "ছবি হিসেবে শেয়ার করুন",
+  "@messageShareImage": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageSaveImage": "ছবি হিসেবে সংরক্ষণ করুন",
+  "@messageSaveImage": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageTooLong": "ছবি বানানোর জন্য খুব লম্বা",
+  "@messageImageTooLong": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageFailed": "ছবি তৈরি করা যায়নি",
+  "@messageImageFailed": {
+    "description": "V2 message image sharing (#540)"
+  },
+  "messageImageSaved": "ছবি সংরক্ষিত হয়েছে",
+  "@messageImageSaved": {
+    "description": "V2 message image sharing (#540)"
+  },
   "composerSendNow": "এখনই পাঠান",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

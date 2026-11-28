@@ -62,6 +62,9 @@ dependencies:
 
   # File picker
   file_picker: ^12.2.0
+
+  # Message image sharing (#540). 13.3.0 shipped broken Android sources.
+  share_plus: ">=13.2.1 <13.3.0"
   # ColorScheme type reported by dynamic_color 2.x (converted at the
   # DynamicColorBuilder boundary in main.dart).
   material_ui: ^1.1.1

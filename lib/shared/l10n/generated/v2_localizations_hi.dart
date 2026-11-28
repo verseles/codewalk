@@ -913,6 +913,21 @@ class V2LocalizationsHi extends V2Localizations {
       'फ़ोर्क शायद बन गया है। अपनी बातचीत देखें।';
 
   @override
+  String get messageShareImage => 'इमेज के रूप में शेयर करें';
+
+  @override
+  String get messageSaveImage => 'इमेज के रूप में सहेजें';
+
+  @override
+  String get messageImageTooLong => 'इमेज बनाने के लिए बहुत लंबा है';
+
+  @override
+  String get messageImageFailed => 'इमेज नहीं बन सकी';
+
+  @override
+  String get messageImageSaved => 'इमेज सहेजी गई';
+
+  @override
   String get composerSendNow => 'अभी भेजें';
 
   @override

@@ -145,6 +145,9 @@ class _MessageActionHostState extends State<MessageActionHost> {
   static _MessageActionHostState? _shown;
 
   final _content = GlobalKey();
+  // Inside the message's own repaint boundary: actions run from here, so a
+  // share can find the boundary that holds the message alone (#540).
+  final _capture = GlobalKey();
   final _link = LayerLink();
   final _portal = OverlayPortalController();
   final _firstButton = FocusNode(debugLabel: 'message bar');
@@ -399,7 +402,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
   void _run(MessageAction action) {
     if (_settling != null) return;
     _hide(refocus: _barHasFocus);
-    action.onSelected(context);
+    action.onSelected(_capture.currentContext ?? context);
   }
 
   Future<void> _more(BuildContext button, List<MessageAction> overflow) async {
@@ -563,7 +566,10 @@ class _MessageActionHostState extends State<MessageActionHost> {
                 borderRadius: BorderRadius.circular(12),
               )
             : const BoxDecoration(),
-        child: widget.child,
+        // The message alone, without the focus outline or the bar.
+        child: RepaintBoundary(
+          child: KeyedSubtree(key: _capture, child: widget.child),
+        ),
       ),
     );
     content = SelectionArea(

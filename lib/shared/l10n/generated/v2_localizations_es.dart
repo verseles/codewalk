@@ -923,6 +923,22 @@ class V2LocalizationsEs extends V2Localizations {
       'Es posible que la bifurcación se haya creado. Revisa tus conversaciones.';
 
   @override
+  String get messageShareImage => 'Compartir como imagen';
+
+  @override
+  String get messageSaveImage => 'Guardar como imagen';
+
+  @override
+  String get messageImageTooLong =>
+      'Demasiado larga para compartir como imagen';
+
+  @override
+  String get messageImageFailed => 'No se pudo crear la imagen';
+
+  @override
+  String get messageImageSaved => 'Imagen guardada';
+
+  @override
   String get composerSendNow => 'Enviar ahora';
 
   @override

@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/media/message_image.dart';
 import '../../shared/rendering/canonical_message_body.dart';
 import '../../shared/rendering/message_render_budget.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import 'message_action_bar.dart';
+import 'message_image_share.dart';
 import 'session_attachment_strip.dart';
 import 'session_compaction_note.dart';
 import 'session_error_card.dart';
@@ -502,6 +504,7 @@ class SessionTimelineTile extends StatelessWidget {
         // A prompt still on its way has no actions of its own (#502); its
         // text stays selectable.
         if (text != null && !waiting) {
+          final imageMode = messageImageMode(context);
           return MessageActionHost(
             key: ValueKey('message-row-${item.id.value}'),
             end: isUser,
@@ -513,6 +516,25 @@ class SessionTimelineTile extends StatelessWidget {
                   label: l10n.messageCopyAll,
                   icon: Symbols.content_copy,
                   onSelected: (context) => copyConversationText(context, text),
+                ),
+              // The whole message only: never a streaming answer or one
+              // whose start history lost (#540).
+              if (imageMode != MessageImageMode.none &&
+                  switch (item) {
+                    AssistantText(:final complete, :final prefixMissing) =>
+                      complete && !prefixMissing,
+                    _ => true,
+                  })
+                MessageAction(
+                  id: MessageActionId.shareImage,
+                  label: imageMode == MessageImageMode.save
+                      ? l10n.messageSaveImage
+                      : l10n.messageShareImage,
+                  icon: imageMode == MessageImageMode.save
+                      ? Symbols.download
+                      : Symbols.share,
+                  onSelected: (context) =>
+                      unawaited(shareMessageImage(context)),
                 ),
               ...actions,
             ],

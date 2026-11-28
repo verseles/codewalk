@@ -903,6 +903,21 @@ class V2LocalizationsAr extends V2Localizations {
   String get messageForkUncertain => 'ربما تم إنشاء التفرع. تحقق من محادثاتك.';
 
   @override
+  String get messageShareImage => 'مشاركة كصورة';
+
+  @override
+  String get messageSaveImage => 'حفظ كصورة';
+
+  @override
+  String get messageImageTooLong => 'طويلة جدًا لمشاركتها كصورة';
+
+  @override
+  String get messageImageFailed => 'تعذر إنشاء الصورة';
+
+  @override
+  String get messageImageSaved => 'تم حفظ الصورة';
+
+  @override
   String get composerSendNow => 'أرسل الآن';
 
   @override

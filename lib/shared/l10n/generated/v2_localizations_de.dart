@@ -929,6 +929,21 @@ class V2LocalizationsDe extends V2Localizations {
       'Die Abzweigung wurde möglicherweise erstellt. Prüfe deine Unterhaltungen.';
 
   @override
+  String get messageShareImage => 'Als Bild teilen';
+
+  @override
+  String get messageSaveImage => 'Als Bild speichern';
+
+  @override
+  String get messageImageTooLong => 'Zu lang für ein Bild';
+
+  @override
+  String get messageImageFailed => 'Das Bild konnte nicht erstellt werden';
+
+  @override
+  String get messageImageSaved => 'Bild gespeichert';
+
+  @override
   String get composerSendNow => 'Jetzt senden';
 
   @override

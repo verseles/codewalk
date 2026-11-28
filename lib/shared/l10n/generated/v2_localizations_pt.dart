@@ -920,6 +920,21 @@ class V2LocalizationsPt extends V2Localizations {
       'A bifurcação pode ter sido criada. Confira suas conversas.';
 
   @override
+  String get messageShareImage => 'Compartilhar como imagem';
+
+  @override
+  String get messageSaveImage => 'Salvar como imagem';
+
+  @override
+  String get messageImageTooLong => 'Longa demais para virar imagem';
+
+  @override
+  String get messageImageFailed => 'Não foi possível gerar a imagem';
+
+  @override
+  String get messageImageSaved => 'Imagem salva';
+
+  @override
   String get composerSendNow => 'Enviar agora';
 
   @override

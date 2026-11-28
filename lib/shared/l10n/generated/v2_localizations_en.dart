@@ -911,6 +911,21 @@ class V2LocalizationsEn extends V2Localizations {
       'The fork may have been created. Check your conversations.';
 
   @override
+  String get messageShareImage => 'Share as image';
+
+  @override
+  String get messageSaveImage => 'Save as image';
+
+  @override
+  String get messageImageTooLong => 'Too long to share as an image';
+
+  @override
+  String get messageImageFailed => 'The image could not be made';
+
+  @override
+  String get messageImageSaved => 'Image saved';
+
+  @override
   String get composerSendNow => 'Send now';
 
   @override

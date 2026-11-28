@@ -76,6 +76,7 @@ VOICE = {
 }
 
 BUBBLE_KEYS = ('messageCopyAll', 'messageActions', 'messageMoreActions', 'messageForkUncertain')
+IMAGE_KEYS = ('messageShareImage', 'messageSaveImage', 'messageImageTooLong', 'messageImageFailed', 'messageImageSaved')
 BUBBLE = {
     "en": ("Copy all text", "Message actions", "More actions", "The fork may have been created. Check your conversations."),
     "pt": ("Copiar todo o texto", "Ações da mensagem", "Mais ações", "A bifurcação pode ter sido criada. Confira suas conversas."),
@@ -91,4 +92,20 @@ BUBBLE = {
     "bn": ("সব লেখা কপি করুন", "বার্তার কাজ", "আরও কাজ", "ফর্কটি হয়তো তৈরি হয়েছে। আপনার কথোপকথনগুলো দেখুন।"),
     "ar": ("نسخ النص بالكامل", "إجراءات الرسالة", "إجراءات أخرى", "ربما تم إنشاء التفرع. تحقق من محادثاتك."),
     "ur": ("پورا متن کاپی کریں", "پیغام کے اقدامات", "مزید اقدامات", "ہو سکتا ہے فورک بن گیا ہو۔ اپنی گفتگو دیکھیں۔"),
+}
+IMAGE = {
+    "en": ("Share as image", "Save as image", "Too long to share as an image", "The image could not be made", "Image saved"),
+    "pt": ("Compartilhar como imagem", "Salvar como imagem", "Longa demais para virar imagem", "Não foi possível gerar a imagem", "Imagem salva"),
+    "es": ("Compartir como imagen", "Guardar como imagen", "Demasiado larga para compartir como imagen", "No se pudo crear la imagen", "Imagen guardada"),
+    "fr": ("Partager en image", "Enregistrer en image", "Trop long pour être partagé en image", "Impossible de créer l’image", "Image enregistrée"),
+    "de": ("Als Bild teilen", "Als Bild speichern", "Zu lang für ein Bild", "Das Bild konnte nicht erstellt werden", "Bild gespeichert"),
+    "it": ("Condividi come immagine", "Salva come immagine", "Troppo lungo per un’immagine", "Impossibile creare l’immagine", "Immagine salvata"),
+    "ru": ("Поделиться как изображением", "Сохранить как изображение", "Слишком длинное для изображения", "Не удалось создать изображение", "Изображение сохранено"),
+    "ja": ("画像として共有", "画像として保存", "長すぎて画像にできません", "画像を作成できませんでした", "画像を保存しました"),
+    "ko": ("이미지로 공유", "이미지로 저장", "너무 길어서 이미지로 만들 수 없습니다", "이미지를 만들 수 없습니다", "이미지를 저장했습니다"),
+    "zh": ("以图片分享", "保存为图片", "内容太长，无法生成图片", "无法生成图片", "图片已保存"),
+    "hi": ("इमेज के रूप में शेयर करें", "इमेज के रूप में सहेजें", "इमेज बनाने के लिए बहुत लंबा है", "इमेज नहीं बन सकी", "इमेज सहेजी गई"),
+    "bn": ("ছবি হিসেবে শেয়ার করুন", "ছবি হিসেবে সংরক্ষণ করুন", "ছবি বানানোর জন্য খুব লম্বা", "ছবি তৈরি করা যায়নি", "ছবি সংরক্ষিত হয়েছে"),
+    "ar": ("مشاركة كصورة", "حفظ كصورة", "طويلة جدًا لمشاركتها كصورة", "تعذر إنشاء الصورة", "تم حفظ الصورة"),
+    "ur": ("تصویر کے طور پر شیئر کریں", "تصویر کے طور پر محفوظ کریں", "تصویر بنانے کے لیے بہت لمبا ہے", "تصویر نہیں بن سکی", "تصویر محفوظ ہو گئی"),
 }

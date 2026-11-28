@@ -1757,6 +1757,36 @@ abstract class V2Localizations {
   /// **'The fork may have been created. Check your conversations.'**
   String get messageForkUncertain;
 
+  /// V2 message image sharing (#540)
+  ///
+  /// In en, this message translates to:
+  /// **'Share as image'**
+  String get messageShareImage;
+
+  /// V2 message image sharing (#540)
+  ///
+  /// In en, this message translates to:
+  /// **'Save as image'**
+  String get messageSaveImage;
+
+  /// V2 message image sharing (#540)
+  ///
+  /// In en, this message translates to:
+  /// **'Too long to share as an image'**
+  String get messageImageTooLong;
+
+  /// V2 message image sharing (#540)
+  ///
+  /// In en, this message translates to:
+  /// **'The image could not be made'**
+  String get messageImageFailed;
+
+  /// V2 message image sharing (#540)
+  ///
+  /// In en, this message translates to:
+  /// **'Image saved'**
+  String get messageImageSaved;
+
   /// V2 waiting messages (#486)
   ///
   /// In en, this message translates to:

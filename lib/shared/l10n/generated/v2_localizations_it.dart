@@ -923,6 +923,21 @@ class V2LocalizationsIt extends V2Localizations {
       'La diramazione potrebbe essere stata creata. Controlla le conversazioni.';
 
   @override
+  String get messageShareImage => 'Condividi come immagine';
+
+  @override
+  String get messageSaveImage => 'Salva come immagine';
+
+  @override
+  String get messageImageTooLong => 'Troppo lungo per un’immagine';
+
+  @override
+  String get messageImageFailed => 'Impossibile creare l’immagine';
+
+  @override
+  String get messageImageSaved => 'Immagine salvata';
+
+  @override
   String get composerSendNow => 'Invia ora';
 
   @override

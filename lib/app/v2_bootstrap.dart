@@ -25,6 +25,7 @@ import '../shared/l10n/l10n_bridge.dart';
 import '../shared/media/attachment_picker.dart';
 import '../shared/media/audio_playback.dart';
 import '../shared/media/location_fix_source.dart';
+import '../shared/media/message_image.dart';
 import '../shared/sessions/permission_mode.dart';
 import '../shared/sessions/session_attachments.dart';
 import '../shared/sessions/session_history_source.dart';
@@ -149,6 +150,7 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
         ),
         Provider<MapUriLauncher?>.value(value: dependencies.mapUriLauncher),
         Provider<AudioPlaybackPort?>.value(value: dependencies.audioPlayback),
+        Provider<MessageImageSink?>.value(value: dependencies.messageImages),
         Provider<LocationFixSource?>.value(
           value: dependencies.locationFixSource,
         ),

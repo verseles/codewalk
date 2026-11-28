@@ -910,6 +910,21 @@ class V2LocalizationsUr extends V2Localizations {
       'ہو سکتا ہے فورک بن گیا ہو۔ اپنی گفتگو دیکھیں۔';
 
   @override
+  String get messageShareImage => 'تصویر کے طور پر شیئر کریں';
+
+  @override
+  String get messageSaveImage => 'تصویر کے طور پر محفوظ کریں';
+
+  @override
+  String get messageImageTooLong => 'تصویر بنانے کے لیے بہت لمبا ہے';
+
+  @override
+  String get messageImageFailed => 'تصویر نہیں بن سکی';
+
+  @override
+  String get messageImageSaved => 'تصویر محفوظ ہو گئی';
+
+  @override
   String get composerSendNow => 'ابھی بھیجیں';
 
   @override
