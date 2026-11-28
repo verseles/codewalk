@@ -170,6 +170,7 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
     required EndpointProfile profile,
     required EndpointCredential credential,
     required SessionRef session,
+    bool watching = true,
   }) async {
     if (_closed) throw const SessionLiveException(SessionLiveFailure.cancelled);
     if (session.harnessRef !=
@@ -200,7 +201,7 @@ final class _NativeLiveDirectory implements SessionLiveDirectory {
           current.isClosed) {
         throw const SessionLiveException(SessionLiveFailure.sourceChanged);
       }
-      return current.lease(session);
+      return current.lease(session, watching: watching);
     } on Object {
       if (current.handles.isEmpty && identical(_slots[key], current)) {
         _slots.remove(key);

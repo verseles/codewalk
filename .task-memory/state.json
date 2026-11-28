@@ -959,10 +959,14 @@
     {
       "at": "2026-11-28T05:10:43Z",
       "text": "u7 #541 r3 judged (A0026): accepted IPv6 scope via Uri.origin; keyless Edge skips key storage (+ error tolerant); key save/clear bound to intended scope, abort if changed, write outdates reads; port stop({id}) spares a newer start, superseded stop leaves new file/state, failed play releases file; shared folder future, recreate if removed; foreign pass expires on pause; start not taken -> unavailable (3a5ee0aa). Native engine ownership: latent (system provider not offered), covered by id-scoped stop. Round 4 needed (port API change)."
+    },
+    {
+      "at": "2026-11-28T05:32:51Z",
+      "text": "Judged #541 r4 (A0027): accepted stop of pending start, superseded-state recheck, folder retry, foreign pass on any state change, key save during switch, tests; rejected 1-day sweep (tradeoff, dissent sent to Sol-F in r5). Fix d1816c75. Judged #542 r1: accepted double-send guard, picked-row snapshot+dedupe, failure-first picker, error->unavailable/unconfirmed, Stop halts waits, watching:false lease (no auto-approve), isCurrent holds, history pop, SafeArea, health listener, warm composer reload; rejected separate archive check (dissent in r2). Metrics recorded u7 r4, u8 r1."
     }
   ],
-  "generation": 136,
-  "next_action": "On gate: commit #542; on r2: capture, judge, fix; then #542 review unit u8 (8 helpers + native stand-in).",
+  "generation": 138,
+  "next_action": "Session tests running (bzxv93agu); then commit #542 fixes, dispatch u7 r5 + u8 r2 re-reviews, continue #547 tests",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -985,7 +989,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T05:24:07Z",
+  "updated_at": "2026-11-28T05:38:43Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1090,6 +1094,13 @@
       "check": "#541 r4 fixes: voice tests + analyze + mutation",
       "criterion": null,
       "evidence": "flutter test test/v2/voice 35 passed; analyze 4 (budget); foreign-pass test fails with fix reverted",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T05:38:43Z",
+      "check": "#542 r1 fixes: test/v2/sessions + analyze",
+      "criterion": null,
+      "evidence": "sessions suite: forward/dialog/directory tests pass; only unrelated fails: 3 capsule goldens (#543 status change, regen on x86), #501 mic test (#545 delay), store readback (#547 WIP). analyze 4 (budget). Guard mutation fails directory test.",
       "outcome": "pass"
     }
   ]

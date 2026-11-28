@@ -186,10 +186,14 @@ abstract interface class SessionLiveDirectory {
     String? changingProfile,
   });
 
+  /// A lease of [session]. One not [watching] (a forward's, #542) is held
+  /// with no screen on the session: it never lets the session's requests be
+  /// answered on the user's behalf.
   Future<SessionLiveHandle> open({
     required EndpointProfile profile,
     required EndpointCredential credential,
     required SessionRef session,
+    bool watching = true,
   });
 
   /// The session lifecycle feed of one selected profile, sharing the

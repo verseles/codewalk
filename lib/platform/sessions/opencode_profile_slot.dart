@@ -312,7 +312,7 @@ final class OpenCodeProfileSlot {
     }
   }
 
-  OpenCodeLiveHandle lease(SessionRef session) {
+  OpenCodeLiveHandle lease(SessionRef session, {bool watching = true}) {
     final owner = _owner;
     if (owner == null || _closing != null) {
       throw const SessionLiveException(SessionLiveFailure.cancelled);
@@ -346,7 +346,7 @@ final class OpenCodeProfileSlot {
     }
     _selection?.open(session);
     _turns?.open(session);
-    final handle = OpenCodeLiveHandle(this, session);
+    final handle = OpenCodeLiveHandle(this, session, watching: watching);
     handles.add(handle);
     // A session that is already live reads its rules and catalog now.
     _considerUnrestrictedRead(session, view(session));
@@ -1283,10 +1283,13 @@ final class OpenCodeProfileSlot {
   }
 
   /// Answers every eligible resident request of a watched session once. Only
-  /// called for a session with a lease and a current live state, so a session
-  /// nobody is looking at is never answered on the user's behalf.
+  /// for a session with a watching lease and a current live state, so a
+  /// session nobody is looking at is never answered on the user's behalf.
   void _autoApprove(SessionRef ref) {
     if (isClosed) return;
+    if (!handles.any((handle) => handle.session == ref && handle.watching)) {
+      return;
+    }
     final requests = view(ref).state?.interactions;
     if (requests == null || requests.isEmpty) return;
     for (final request in requests.toList()) {

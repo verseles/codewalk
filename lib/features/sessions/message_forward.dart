@@ -147,6 +147,9 @@ class MessageForwardRun extends ChangeNotifier {
   bool _stopped = false;
   bool _detached = false;
 
+  /// Completes on Stop, ending at once the wait for the target in progress.
+  Completer<void> _halt = Completer<void>();
+
   bool get running => _running;
   bool get stopped => _stopped;
   int get done => targets.where((target) => target.done).length;
@@ -159,6 +162,7 @@ class MessageForwardRun extends ChangeNotifier {
     if (_running) return;
     _running = true;
     _stopped = false;
+    _halt = Completer<void>();
     _notify();
     try {
       for (final target in targets) {
@@ -192,13 +196,14 @@ class MessageForwardRun extends ChangeNotifier {
   /// No target starts after this; one already posting ends as it does.
   void stop() {
     _stopped = true;
+    if (!_halt.isCompleted) _halt.complete();
     _notify();
   }
 
   /// The dialog went: nothing more starts, and nothing is reported.
   void detach() {
     _detached = true;
-    _stopped = true;
+    stop();
   }
 
   void _notify() {
@@ -217,37 +222,52 @@ class MessageForwardRun extends ChangeNotifier {
     target.status = ForwardStatus.sending;
     _notify();
     SessionLiveHandle? lease;
+    var posting = false;
     try {
       final opening = open(target.ref);
+      final halted = _halt.future;
       try {
-        lease = await opening.timeout(readyTimeout);
+        lease = await Future.any<SessionLiveHandle?>([
+          opening,
+          halted.then((_) => null),
+        ]).timeout(readyTimeout);
       } on TimeoutException {
         // A lease that arrives late is closed at once.
         unawaited(opening.then((late) => late.close(), onError: (Object _) {}));
         rethrow;
+      }
+      if (lease == null) {
+        // Stopped while it opened.
+        unawaited(opening.then((late) => late.close(), onError: (Object _) {}));
+        target.status = ForwardStatus.stopped;
+        return;
       }
       if (_stopped) {
         target.status = ForwardStatus.stopped;
         return;
       }
       final miss = await _ready(lease);
-      if (miss != null) return _fail(target, miss);
       if (_stopped) {
         target.status = ForwardStatus.stopped;
         return;
       }
+      if (miss != null) return _fail(target, miss);
       final opened = lease;
-      final outbox = opened.outbox!;
+      final outbox = opened.outbox;
+      if (outbox == null) return _fail(target, ForwardMiss.unavailable);
+      posting = true;
       final submission = await outbox.submit(
         session: target.ref,
         commandId: mintCommandId(),
         draft: PromptDraft(text: text),
         delivery: Delivery.queue,
-        // Checked again right before the post: a stop, a staged undo or an
-        // archive meanwhile keeps the prompt from going.
+        // Checked again right before the post: a stop, a staged undo, a
+        // hold (a model change, a stop of its turn) or an archive meanwhile
+        // keeps the prompt from going.
         isCurrent: () =>
             !_stopped &&
             !(opened.turnActions?.state.staged ?? false) &&
+            !_holds(opened) &&
             available(target.ref),
       );
       final entry = submission.entry;
@@ -296,11 +316,30 @@ class MessageForwardRun extends ChangeNotifier {
             : ForwardMiss.unavailable,
       );
     } on TimeoutException {
-      _fail(target, ForwardMiss.busy);
+      if (_stopped) {
+        target.status = ForwardStatus.stopped;
+      } else {
+        _fail(target, ForwardMiss.busy);
+      }
+    } on Object {
+      // Anything else: never sent if it failed before the post, else never
+      // sent again from here, as with no answer.
+      if (posting) {
+        target.status = ForwardStatus.unconfirmed;
+      } else {
+        _fail(target, ForwardMiss.unavailable);
+      }
     } finally {
       lease?.close();
     }
   }
+
+  /// Whether something holds [lease]'s sends: a model or agent change, a
+  /// stop of its turn, a turn action under way.
+  static bool _holds(SessionLiveHandle lease) =>
+      lease.stopState.busy ||
+      lease.selectionState.holdsSend ||
+      (lease.turnActions?.state.holdsSend ?? false);
 
   /// Waits until [lease] can take a prompt; the reason it cannot otherwise.
   Future<ForwardMiss?> _ready(SessionLiveHandle lease) async {
@@ -321,22 +360,23 @@ class MessageForwardRun extends ChangeNotifier {
       return null;
     }
 
-    bool holds() =>
-        lease.stopState.busy ||
-        lease.selectionState.holdsSend ||
-        (lease.turnActions?.state.holdsSend ?? false);
-
     bool ready(SessionLiveView view) =>
         view.phase == SessionLivePhase.live &&
         !view.stale &&
         lease.outbox != null &&
-        !holds();
+        !_holds(lease);
 
     final first = lease.current;
     final missNow = check(first);
     if (missNow != null) return missNow;
     if (ready(first)) return null;
     final result = Completer<ForwardMiss?>();
+    // A stop ends the wait; the caller tells it apart.
+    unawaited(
+      _halt.future.then((_) {
+        if (!result.isCompleted) result.complete(ForwardMiss.busy);
+      }),
+    );
     final subscription = lease.updates.listen((view) {
       if (result.isCompleted) return;
       final miss = check(view);

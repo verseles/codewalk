@@ -26,8 +26,12 @@ final class OpenCodeLiveHandle
         SessionAttachmentSource,
         SessionPlanSource,
         SessionUsageSource {
-  OpenCodeLiveHandle(this._slot, this.session);
+  OpenCodeLiveHandle(this._slot, this.session, {this.watching = true});
   final OpenCodeProfileSlot _slot;
+
+  /// Whether a screen holds this lease; one that does not never lets the
+  /// session's requests be answered on the user's behalf (#542).
+  final bool watching;
   @override
   final SessionRef session;
   final _controller = StreamController<SessionLiveView>.broadcast();

@@ -80,6 +80,7 @@ final class ScriptedLiveBridge implements SessionLiveDirectory {
     required EndpointProfile profile,
     required EndpointCredential credential,
     required SessionRef session,
+    bool watching = true,
   }) async {
     if (session != ref) {
       throw const SessionLiveException(SessionLiveFailure.incompatibleResponse);

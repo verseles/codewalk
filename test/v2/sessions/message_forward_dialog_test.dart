@@ -2,7 +2,9 @@ import 'package:codewalk/features/sessions/message_forward_dialog.dart';
 import 'package:codewalk/features/sessions/session_timeline_tile.dart';
 import 'package:codewalk/features/sessions/sessions_controller.dart';
 import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
+import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
+import 'package:codewalk/shared/widgets/app_indeterminate_progress.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/gestures.dart';
 // ignore: deprecated_member_use
@@ -43,9 +45,17 @@ void main() {
     );
   }
 
+  List<SessionSummary> rows({bool one = true}) => [
+    source.row('src', title: 'Source', directory: '/work/app'),
+    if (one) source.row('one', title: 'Fix the build', directory: '/work/app'),
+    source.row('two', title: 'Write docs', directory: '/work/app'),
+    source.row('three', title: 'Ship it', directory: '/work/lib'),
+  ];
+
   Future<void> pump(
     WidgetTester tester, {
     bool offline = false,
+    bool fail = false,
     void Function(int count)? onDone,
   }) async {
     tester.view.physicalSize = const Size(800, 1200);
@@ -56,12 +66,11 @@ void main() {
     await rig.sessions.initialize();
     final loading = rig.sessions.selectProfile('profile_a');
     source = rig.sources.single;
-    source.respond([
-      source.row('src', title: 'Source', directory: '/work/app'),
-      source.row('one', title: 'Fix the build', directory: '/work/app'),
-      source.row('two', title: 'Write docs', directory: '/work/app'),
-      source.row('three', title: 'Ship it', directory: '/work/lib'),
-    ]);
+    if (fail) {
+      source.fail(SessionCatalogFailure.authenticationRequired);
+    } else {
+      source.respond(rows());
+    }
     await loading;
     await tester.pumpWidget(
       MaterialApp(
@@ -159,6 +168,47 @@ void main() {
     // Only the one not sent to goes again; then the dialog closes.
     expect(outbox.calls, hasLength(2));
     expect(find.byKey(const ValueKey('forward_results')), findsNothing);
+  });
+
+  testWidgets('Forward pressed twice sends once to each', (tester) async {
+    await pump(tester);
+    await tester.tap(target('one'));
+    await tester.pump();
+    final send = tester.widget<FilledButton>(
+      find.byKey(const ValueKey('forward_send')),
+    );
+    send.onPressed!();
+    send.onPressed!();
+    await tester.pumpAndSettle();
+    expect(
+      outbox.calls.where((call) => call.startsWith('submit')),
+      hasLength(1),
+    );
+  });
+
+  testWidgets('a pick that leaves the list says it is gone', (tester) async {
+    await pump(tester);
+    await tester.tap(target('one'));
+    await tester.tap(target('two'));
+    await tester.pump();
+    final refreshing = rig.sessions.refresh();
+    source.respond(rows(one: false));
+    await refreshing;
+    await tester.pump();
+    expect(find.text('2 selected'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('forward_send')));
+    await tester.pumpAndSettle();
+    expect(find.text('Sent to 1 of 2'), findsOneWidget);
+    expect(
+      find.text('Not sent: the conversation is gone or archived'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a list that cannot be read offers Retry', (tester) async {
+    await pump(tester, fail: true);
+    expect(find.byType(AppIndeterminateRing), findsNothing);
+    expect(find.byKey(const ValueKey('forward_retry_load')), findsOneWidget);
   });
 
   testWidgets('offline, nothing can be forwarded', (tester) async {

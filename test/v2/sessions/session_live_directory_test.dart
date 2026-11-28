@@ -1882,6 +1882,42 @@ void main() {
       a.close();
     });
 
+    test('a lease with no screen answers nothing on its own (#542)', () async {
+      server.permissions.add({
+        'id': 'per_1',
+        'sessionID': 'ses_one',
+        'action': 'read',
+        'resources': ['src/a.txt'],
+      });
+      final policy = await defaultOnStore();
+      final directory = createSessionLiveDirectory(permissionModes: policy)!;
+      addTearDown(directory.close);
+      final a = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+        watching: false,
+      );
+      await until(
+        a,
+        (v) => v.phase == SessionLivePhase.live && v.state != null,
+      );
+      await server.execution('ses_one', 'started');
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      expect(server.replies, isEmpty);
+      // A screen on it answers at the next change.
+      final b = await directory.open(
+        profile: p,
+        credential: credential,
+        session: ref('ses_one'),
+      );
+      await server.execution('ses_one', 'idle');
+      await waitForReplies(1);
+      expect(server.replies.single, '{"decision":"once"}');
+      a.close();
+      b.close();
+    });
+
     test(
       'reopening after the last close never replays an uncertain reply',
       () async {

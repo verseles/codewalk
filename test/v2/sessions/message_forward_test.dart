@@ -347,6 +347,88 @@ void main() {
       },
     );
 
+    test('Stop ends at once the wait of the target in progress', () async {
+      final forward = MessageForwardRun(
+        text: 'x',
+        targets: [_row('a'), _row('b')],
+        open: (ref) async {
+          final handle = LiveHandle(ref, outbox: outbox)
+            ..selectionState = const SessionSelectionState(
+              phase: SessionSelectionPhase.pending,
+            )
+            ..emit(
+              SessionLiveView(
+                session: ref,
+                phase: SessionLivePhase.live,
+                state: liveState(ref),
+              ),
+            );
+          handles[ref] = handle;
+          return handle;
+        },
+        available: (_) => true,
+        readyTimeout: const Duration(hours: 1),
+      );
+      final running = forward.run();
+      await pumpEventQueue();
+      forward.stop();
+      await running.timeout(const Duration(seconds: 1));
+      expect(forward.targets.map((target) => target.status), [
+        ForwardStatus.stopped,
+        ForwardStatus.stopped,
+      ]);
+      expect(handles.values.single.closes, 1);
+    });
+
+    test('Stop while a lease opens closes it when it comes', () async {
+      final opening = Completer<SessionLiveHandle>();
+      final forward = MessageForwardRun(
+        text: 'x',
+        targets: [_row('a')],
+        open: (_) => opening.future,
+        available: (_) => true,
+        readyTimeout: const Duration(hours: 1),
+      );
+      final running = forward.run();
+      await pumpEventQueue();
+      forward.stop();
+      await running.timeout(const Duration(seconds: 1));
+      expect(forward.targets.single.status, ForwardStatus.stopped);
+      final late = LiveHandle(_ref('a'), outbox: outbox);
+      opening.complete(late);
+      await pumpEventQueue();
+      expect(late.closes, 1);
+      expect(outbox.calls, isEmpty);
+    });
+
+    test('a hold that comes before the post keeps it unsent', () async {
+      final hold = outbox.holdSubmit = Completer<void>();
+      final forward = run(['a']);
+      final running = forward.run();
+      await pumpEventQueue();
+      handles.values.single.selectionState = const SessionSelectionState(
+        phase: SessionSelectionPhase.pending,
+      );
+      hold.complete();
+      await running;
+      expect(forward.targets.single.miss, ForwardMiss.busy);
+    });
+
+    test('an unexpected error fails only its own target', () async {
+      final forward = MessageForwardRun(
+        text: 'x',
+        targets: [_row('a'), _row('b')],
+        open: (ref) async {
+          if (ref.nativeId == 'ses_a') throw StateError('broken');
+          return open(ref);
+        },
+        available: (_) => true,
+      );
+      await forward.run();
+      expect(forward.targets.first.miss, ForwardMiss.unavailable);
+      expect(forward.targets.last.status, ForwardStatus.queued);
+    });
+
     test('a lease that cannot open says why', () async {
       final forward = MessageForwardRun(
         text: 'x',

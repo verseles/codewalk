@@ -606,6 +606,14 @@ class SessionTabsController extends ChangeNotifier {
   List<SessionLiveController> get warmViews => List.unmodifiable(_warm.values);
 
   /// Disposes a view after the frame, once the page that showed it is gone.
+  /// A prompt was recorded for [ref] from elsewhere, as by a forward
+  /// (#542): its warm conversation reads its outbox again, so the prompt
+  /// shows there with what can be done about it.
+  void outboxChanged(SessionRef ref) {
+    final live = _warm[ref];
+    if (live != null && !live.disposed) unawaited(live.composer.reload());
+  }
+
   void _release(SessionLiveController? live) {
     if (live == null) return;
     WidgetsBinding.instance

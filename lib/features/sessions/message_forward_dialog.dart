@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:codewalk_core/codewalk_core.dart';
+import 'package:codewalk_core/codewalk_core.dart' hide Page;
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -20,6 +20,7 @@ import 'message_action_bar.dart';
 import 'message_forward.dart';
 import 'project_contexts_controller.dart';
 import 'session_tab_strip.dart';
+import 'session_tabs_controller.dart';
 import 'sessions_controller.dart';
 
 /// Forward for [item] of [source] in its bar (#542): a sent prompt or a
@@ -67,8 +68,10 @@ Future<void> showForwardMessageDialog(
   final hosts = context.read<HostsController>();
   final health = context.read<EndpointHealthController?>();
   final contexts = context.read<ProjectContextsController?>();
+  final tabs = context.read<SessionTabsController?>();
   final messenger = ScaffoldMessenger.maybeOf(context);
   final router = GoRouter.maybeOf(context);
+  final root = Navigator.of(context, rootNavigator: true);
   final l10n = context.v2L10n;
   final compact = WindowSizeClass.fromWidth(
     MediaQuery.sizeOf(context).width,
@@ -84,6 +87,7 @@ Future<void> showForwardMessageDialog(
         source: source.info.ref,
         catalog: catalog,
         contexts: contexts,
+        health: health,
         provenance: provenance,
         text: text,
         offline: () =>
@@ -95,19 +99,28 @@ Future<void> showForwardMessageDialog(
               SessionLiveFailure.authenticationRequired,
             );
           }
+          // Only for the moment of the send: nothing is answered on the
+          // user's behalf while it is open.
           return directory.open(
             profile: profile,
             credential: credential,
             session: session,
+            watching: false,
           );
         },
+        onForwarded: tabs?.outboxChanged,
         onDone: (count) =>
             showAppSnackBar(messenger, l10n.messageForwardDone(count)),
         onOpen: router == null
             ? null
-            : (ref) => router.go(sessionTabLocation(ref)),
+            : (ref) {
+                // A page shown over the conversations, as a history, goes
+                // too.
+                root.popUntil((route) => route.settings is Page);
+                router.go(sessionTabLocation(ref));
+              },
       );
-      if (compact) return Dialog.fullscreen(child: dialog);
+      if (compact) return Dialog.fullscreen(child: SafeArea(child: dialog));
       return Dialog(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 560, maxHeight: 640),
@@ -128,7 +141,9 @@ class ForwardMessageDialog extends StatefulWidget {
     required this.provenance,
     required this.text,
     required this.open,
+    this.health,
     this.offline,
+    this.onForwarded,
     this.onDone,
     this.onOpen,
     this.readyTimeout = const Duration(seconds: 20),
@@ -137,10 +152,16 @@ class ForwardMessageDialog extends StatefulWidget {
   final SessionRef source;
   final SessionsController catalog;
   final ProjectContextsController? contexts;
+
+  /// Tells when [offline] may have changed.
+  final Listenable? health;
   final String provenance;
   final String text;
   final Future<SessionLiveHandle> Function(SessionRef session) open;
   final bool Function()? offline;
+
+  /// A target whose outbox now records the message.
+  final void Function(SessionRef session)? onForwarded;
 
   /// Every target received it, with their count.
   final void Function(int count)? onDone;
@@ -155,7 +176,9 @@ class ForwardMessageDialog extends StatefulWidget {
 
 class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
   final _query = TextEditingController();
-  final _selected = <SessionRef>{};
+  // Each pick keeps its row, so one that leaves the list still goes and
+  // reports why it was not sent to.
+  final _selected = <SessionRef, SessionSummary>{};
   MessageForwardRun? _run;
 
   @override
@@ -163,12 +186,14 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
     super.initState();
     widget.catalog.addListener(_changed);
     widget.contexts?.addListener(_changed);
+    widget.health?.addListener(_changed);
   }
 
   @override
   void dispose() {
     widget.catalog.removeListener(_changed);
     widget.contexts?.removeListener(_changed);
+    widget.health?.removeListener(_changed);
     _run?.removeListener(_changed);
     _run?.detach();
     _query.dispose();
@@ -206,21 +231,21 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
   }
 
   Future<void> _send(List<ForwardGroup> groups) async {
-    final rows = [
+    // One run, however many times Forward is pressed before it shows.
+    if (_run != null || _selected.isEmpty) return;
+    // Once each, in the list's order; a pick hidden by the search, or no
+    // longer listed, still goes.
+    final rows = <SessionRef, SessionSummary>{
       for (final group in groups)
         for (final row in group.rows ?? const <SessionSummary>[])
-          if (_selected.contains(row.info.ref)) row,
-    ];
-    // A selection hidden by the search still goes.
-    for (final ref in _selected) {
-      if (rows.any((row) => row.info.ref == ref)) continue;
-      final row = widget.catalog.findSession(ref);
-      if (row != null) rows.add(row);
+          if (_selected.containsKey(row.info.ref)) row.info.ref: row,
+    };
+    for (final MapEntry(key: ref, value: picked) in _selected.entries) {
+      rows.putIfAbsent(ref, () => widget.catalog.findSession(ref) ?? picked);
     }
-    if (rows.isEmpty) return;
     final run = _run = MessageForwardRun(
       text: forwardedText(provenance: widget.provenance, text: widget.text),
-      targets: rows,
+      targets: rows.values.toList(),
       open: widget.open,
       available: _available,
       offline: widget.offline,
@@ -233,13 +258,19 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
 
   Future<void> _retry() async {
     final run = _run;
-    if (run == null) return;
+    if (run == null || run.running) return;
     await run.retryFailed();
     _finish(run);
   }
 
   void _finish(MessageForwardRun run) {
-    if (!mounted || !run.allDone) return;
+    if (!mounted || !identical(run, _run)) return;
+    for (final target in run.targets) {
+      if (target.done || target.status == ForwardStatus.unconfirmed) {
+        widget.onForwarded?.call(target.ref);
+      }
+    }
+    if (!run.allDone) return;
     Navigator.of(context).pop();
     widget.onDone?.call(run.targets.length);
   }
@@ -282,12 +313,9 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
     );
     final loading = groups.any((group) => group.rows == null);
     final none = groups.every((group) => group.rows?.isEmpty ?? true);
+    final catalog = widget.catalog;
     Widget body;
-    if (directories.isEmpty) {
-      body = _Notice(l10n.messageForwardNoProjects);
-    } else if (none && loading) {
-      body = const Center(child: AppIndeterminateRing(size: 24));
-    } else if (none && widget.catalog.failure != null) {
+    if (none && catalog.failure != null && !catalog.loading) {
       body = Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -295,11 +323,15 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
           const SizedBox(height: 8),
           TextButton(
             key: const ValueKey('forward_retry_load'),
-            onPressed: () => unawaited(widget.catalog.refresh()),
+            onPressed: () => unawaited(catalog.refresh()),
             child: Text(l10n.chatRetry),
           ),
         ],
       );
+    } else if (none && (loading || catalog.loading)) {
+      body = const Center(child: AppIndeterminateRing(size: 24));
+    } else if (directories.isEmpty) {
+      body = _Notice(l10n.messageForwardNoProjects);
     } else if (none) {
       body = _Notice(
         _query.text.trim().isEmpty
@@ -330,10 +362,10 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
                     key: ValueKey('forward_target_${row.info.ref.storageKey}'),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 4),
                     controlAffinity: ListTileControlAffinity.leading,
-                    value: _selected.contains(row.info.ref),
+                    value: _selected.containsKey(row.info.ref),
                     onChanged: (value) => setState(() {
                       if (value ?? false) {
-                        _selected.add(row.info.ref);
+                        _selected[row.info.ref] = row;
                       } else {
                         _selected.remove(row.info.ref);
                       }

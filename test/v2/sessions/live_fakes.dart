@@ -407,6 +407,7 @@ class LiveDirectory implements SessionLiveDirectory {
     required EndpointProfile profile,
     required EndpointCredential credential,
     required SessionRef session,
+    bool watching = true,
   }) {
     credentials.add(credential);
     final completer = Completer<SessionLiveHandle>();
