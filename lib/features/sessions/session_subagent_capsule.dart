@@ -376,31 +376,49 @@ final class ShellSightings extends ChangeNotifier {
   // Each name's start and end, and whether the start is only a guess from
   // an unconfirmed listing (never seen running).
   final _times = <String, (DateTime, DateTime?, bool)>{};
+
+  // The names each shell was listed under together.
+  final _links = <String, Set<String>>{};
   Timer? _timer;
   DateTime? _timerAt;
   bool _disposed = false;
 
+  /// Whether [state]'s shells are known well enough that one missing from
+  /// them has ended: read, and with the server's shell list read where it
+  /// is observed.
+  static bool settledFor(SessionState? state, {required bool observed}) =>
+      state != null && (!observed || state.shellsObserved);
+
   /// The shells of [entries], all the session's, that ran long enough by
-  /// [now] to show.
-  List<CapsuleShellEntry> shown(List<CapsuleShellEntry> entries, DateTime now) {
+  /// [now] to show. Only a [settled] list ends the shells it no longer
+  /// holds.
+  List<CapsuleShellEntry> shown(
+    List<CapsuleShellEntry> entries,
+    DateTime now, {
+    bool settled = true,
+  }) {
     final listed = <String>{};
     final shown = [
       for (final entry in entries)
         if (_shown(entry, now, listed)) entry,
     ];
-    // A shell seen running that is gone from a list that still has others
-    // ended then; an empty list (a view being read again) tells nothing.
-    if (entries.isNotEmpty) {
+    // A shell seen running that is gone from a settled list ended then; a
+    // list being read again tells nothing, and a name gone while another
+    // name of the same shell is listed ends nothing either.
+    if (settled) {
       for (final MapEntry(:key, :value) in _times.entries.toList()) {
-        if (value.$2 == null && !listed.contains(key)) {
-          _times[key] = (value.$1, now, value.$3);
-        }
+        if (value.$2 != null || listed.contains(key)) continue;
+        if (_links[key]?.any(listed.contains) ?? false) continue;
+        _times[key] = (value.$1, now, value.$3);
       }
     }
     if (_times.length > _kept) {
       for (final key in _times.keys.toList()) {
         if (_times.length <= _kept) break;
-        if (!listed.contains(key)) _times.remove(key);
+        if (!listed.contains(key)) {
+          _times.remove(key);
+          _links.remove(key);
+        }
       }
     }
     _arm(entries, now);
@@ -441,11 +459,13 @@ final class ShellSightings extends ChangeNotifier {
     final start = entry.startedAt ?? seen?.$1 ?? (_active(entry) ? now : null);
     if (start == null) return true;
     final end = _active(entry) ? null : entry.completedAt ?? seen?.$2 ?? now;
-    for (final key in _keys(entry)) {
+    final names = _keys(entry);
+    for (final key in names) {
       // Rewritten as the newest, so a listed shell is the last to go.
       _times
         ..remove(key)
         ..[key] = (start, end, guess && !entry.isRunning);
+      (_links[key] ??= <String>{}).addAll(names);
       listed.add(key);
     }
     if (end != null && guess && !entry.isRunning) return true;
@@ -720,7 +740,11 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
       );
       // A quick command never shows; one that runs on shows once it is
       // five seconds old.
-      final shells = widget.live.shellSightings.shown(every, now);
+      final shells = widget.live.shellSightings.shown(
+        every,
+        now,
+        settled: ShellSightings.settledFor(state, observed: _canObserveShells),
+      );
       final visible =
           state != null && (children.isNotEmpty || shells.isNotEmpty);
       // The timeline keeps room for the chip only while it shows.
@@ -1127,6 +1151,7 @@ class _SubagentPopinState extends State<_SubagentPopin> {
         confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
       ),
       now,
+      settled: ShellSightings.settledFor(state, observed: _canObserveShells),
     );
     final isLive =
         widget.live.phase == SessionLivePhase.live &&
@@ -1175,6 +1200,10 @@ class _SubagentPopinState extends State<_SubagentPopin> {
                 confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
               ),
               now,
+              settled: ShellSightings.settledFor(
+                state,
+                observed: _canObserveShells,
+              ),
             );
             final hasShells = shells.isNotEmpty;
             final activeSubagents = <(WorkItem, WorkStatus)>[];

@@ -895,7 +895,7 @@ void main() {
       );
       expect(sightings.shown([entry('long', running: true)], at(2)), isEmpty);
       // A view read again lists nothing: that ends nothing.
-      expect(sightings.shown(const [], at(3)), isEmpty);
+      expect(sightings.shown(const [], at(3), settled: false), isEmpty);
       expect(
         keys(
           sightings.shown([
@@ -905,6 +905,10 @@ void main() {
         ),
         ['long'],
       );
+      // The only shell gone from a settled list ended then too.
+      expect(sightings.shown([entry('solo', running: true)], at(10)), isEmpty);
+      expect(sightings.shown(const [], at(11)), isEmpty);
+      expect(sightings.shown([entry('solo')], at(20)), isEmpty);
       // Only guessed from an unconfirmed listing, then found ended: history.
       expect(
         sightings.shown([entry('old', unconfirmed: true)], at(8)),
