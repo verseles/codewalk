@@ -869,14 +869,30 @@
       "outcome": "Pushed group 8; goldens 4347e56b; notes 9b515862; release v2.14.0 cut (7701bc96, tag pushed), watch-release + watch-ci running; #534 #536-#553 closed with comments; #527 all 51 ticked; follow-ups #554-#557",
       "status": "done",
       "validation": "local gate green; goldens equal x86 renders; release dry run ok"
+    },
+    {
+      "depends": [],
+      "id": "CONT1",
+      "label": "Close #527",
+      "outcome": "#527 closed with comment",
+      "status": "done",
+      "validation": "gh: closed"
+    },
+    {
+      "depends": [],
+      "id": "CONT2",
+      "label": "Add rules 2-5 to project AGENTS.md and rule 1 to global AGENTS.md, commit and push",
+      "outcome": "Project AGENTS.md: dart format only changed files, --no-ext-diff (GIT_EXTERNAL_DIFF=difft), registrant alphabetical, goldens compared by decoded RGB. Global AGENTS.md: same-model native stand-in rule",
+      "status": "done",
+      "validation": "docs-only; v2.14.0 CI and release green on 7701bc96"
     }
   ],
   "completion": {
-    "at": "2026-11-28T07:59:36Z",
+    "at": "2026-11-28T14:06:57Z",
     "by": "agent",
-    "delivered": "Group 8 (#532-#553) implemented, reviewed to convergence, pushed; goldens regenerated on x86; v2.14.0 cut and tagged; issues closed, #527 ticked; follow-ups #554-#557 created",
-    "residual_risk": "Release workflow and CI results pending (watchers notify via hey); Linux preview smoke has not run on group 8 since goldens blocked CI; #527 closure awaits owner",
-    "validation": "flutter analyze within budget, full suite green, core 357 + harness 725 pass, l10n check ok, golden tests pass with x86 renders, release dry run ok"
+    "delivered": "#527 closed; approved rules 2-5 in project AGENTS.md; rule 1 (same-model native stand-in) in global AGENTS.md",
+    "residual_risk": "Commit pushed with the queued follow-up",
+    "validation": "docs-only; CI and Release for v2.14.0 green"
   },
   "contract": {
     "complete_when": [
@@ -1210,12 +1226,25 @@
     {
       "at": "2026-11-28T07:58:04Z",
       "text": "R0001 resolved: x86 Goldens run 46123352062 at e8ad29a7 rendered all 36 goldens; the 10 differing PNGs committed in 4347e56b, so every committed golden equals its x86 render in RGB. Release proceeds per project rule (local gate decides, CI safety net via make watch-ci; release.yml has its own Linux smoke and verify before publish)."
+    },
+    {
+      "at": "2026-11-28T14:03:55Z",
+      "text": "Completed milestone preserved at 2026-11-28T07:59:36Z by agent: delivered=Group 8 (#532-#553) implemented, reviewed to convergence, pushed; goldens regenerated on x86; v2.14.0 cut and tagged; issues closed, #527 ticked; follow-ups #554-#557 created | validation=flutter analyze within budget, full suite green, core 357 + harness 725 pass, l10n check ok, golden tests pass with x86 renders, release dry run ok | residual_risk=Release workflow and CI results pending (watchers notify via hey); Linux preview smoke has not run on group 8 since goldens blocked CI; #527 closure awaits owner"
+    },
+    {
+      "at": "2026-11-28T14:03:55Z",
+      "text": "Continuation request: fecha. Aceito os itens 2 a 5. O 1 tem que ser no AGENTS global e tem que estar disponivel, um helper Claude Opus só pode ser substituido por igual modelo nativamente local para o subagente. | reason: Direct follow-up of the group 8 flow: close #527 and add the approved evergreen rules"
     }
   ],
-  "generation": 199,
+  "generation": 204,
   "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
   "pending_operation": null,
-  "queued_followups": [],
+  "queued_followups": [
+    {
+      "at": "2026-11-28T14:06:24Z",
+      "request": "em desktop novas instalacoes devem comecar com abas, mobile o contrario. faz"
+    }
+  ],
   "request": {
     "bytes": 13157,
     "path": "requests/tm_20261127T213730Z_22ec9025.txt",
@@ -1236,7 +1265,7 @@
   "status": "completed",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T07:59:36Z",
+  "updated_at": "2026-11-28T14:06:57Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
