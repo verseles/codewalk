@@ -2,6 +2,49 @@
 
 Release notes for tagged CodeWalk versions. GitHub Issues remain the canonical tracker for planned work and acceptance criteria.
 
+## v2.14.0 - 2026-11-28
+
+> 📣 CodeWalk 2.14.0 gives every message a floating action bar (copy, share as image, read aloud, forward, undo, rewind, fork), a tidier sidebar around the active project, calmer timelines and composer, one top bar in Settings, and the GitHub theme on new installs.
+
+### Messages
+
+- Message text is always selectable: a long press, double tap or double click selects words natively, and no message copies itself on a double tap any more (`#539`).
+- Tapping a message (or long pressing a clean area, the Menu key, Shift+F10 or a right click beside it) opens a floating bar on its own side with Copy all, Forward, Read aloud, Share as image, Undo this turn and a menu with Rewind and edit from here and Fork from here. On desktop, resting the mouse on a message shows it. Actions that cannot run are left out (`#539`).
+- Share as image turns the message alone into a PNG on the theme's surface and opens the share sheet (Android, macOS, Windows) or a Save dialog (Linux) (`#540`).
+- Read aloud speaks a message with Microsoft Edge's voices by default, no key needed, or with OpenAI-compatible, ElevenLabs or NVIDIA NIM voices using your own key. A pill pauses, resumes or stops it, and Settings > Read aloud picks the service, voice, speed and a test phrase. Keys stay in secure storage (`#541`).
+- Forward sends a message to one or more other conversations, each marked "Forwarded from: project / title", and reports Queued, Sent, Not sent with the reason, Stopped or Not confirmed for each; an unconfirmed send is never repeated blindly (`#542`).
+
+### Timeline
+
+- Tool calls and reasoning start as one-line summaries, also while they run; Display > Expanded tools brings back the step-by-step rows (`#537`).
+- Tokens per second is on by default and shows as `138tps 28s` right after the answer's last word, without icons (`#538`).
+- On phones the timeline keeps a 12 dp side margin, up from 8 dp (`#536`).
+
+### Sidebar
+
+- The sidebar starts with the active project: its first five conversations (the one on screen always among them), then the other open projects by recency with up to three previews. The Recent sessions section is gone (`#534`).
+- The server and Settings row sits 8 dp from the top, with sync notices below it, and the confusing stale-list notices are gone (`#532`, `#533`).
+- Without session tabs, the toolbar shows the conversation's title led by its project's icon, which opens the project picker (`#535`).
+
+### Composer
+
+- The composer no longer shows "Subagents running": the robot capsule counts them (`#543`).
+- A shell command joins the capsule's count only after running for 5 seconds, so quick commands no longer make it flicker (`#544`).
+- After a send, the mic waits 1.5 seconds before taking Send's place, so it no longer jumps back and forth (`#545`).
+- Dictating opens the composer expanded without the keyboard and lets the text grow to three lines (`#546`).
+- Switching to a model picks the effort variant you last used with it on this server, in any project (`#547`).
+- Composer tips are now real tips about what the app does, with a tappable link to the menu or setting they mention (`#548`).
+
+### Tasks
+
+- The task widget is titled "Tasks" without repeating the count, and its list opens by default with five rows centered on the task in progress (`#549`, `#550`).
+
+### Settings and appearance
+
+- Settings has one top bar with the only back button and title: an open section shows its name there, and no section repeats it below (`#551`).
+- The release news card has an X to dismiss it, is titled "What's new", and once seen in Settings it is gone on the next visit (`#552`).
+- New installs start on the GitHub theme; existing installs keep theirs (`#553`).
+
 ## v2.13.0 - 2026-11-27
 
 > 📣 CodeWalk 2.13.0 puts Version and updates and the release history on one Settings screen: your version and update controls first, the history right below, and the Changelog shortcuts land straight on it.
