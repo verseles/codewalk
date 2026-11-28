@@ -1545,10 +1545,6 @@
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
   },
-  "liveChildrenRunning": "چل رہے ذیلی ایجنٹ: {count}",
-  "@liveChildrenRunning": {
-    "description": "V2 live read-only session view"
-  },
   "liveSelection": "ماڈل اور ایجنٹ",
   "@liveSelection": {
     "description": "V2 live session model and agent selection"

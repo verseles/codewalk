@@ -646,9 +646,13 @@ class _SessionComposerState extends State<SessionComposer> {
                       key: _voice,
                       text: _text,
                       enabled: voiceEnabled,
-                      onListening: (listening) {
-                        if (mounted) setState(() => _dictating = listening);
-                      },
+                      // Told once the tree is free: a dictation can end
+                      // while it builds, as when the server goes offline.
+                      onListening: (listening) => scheduleMicrotask(() {
+                        if (mounted && _dictating != listening) {
+                          setState(() => _dictating = listening);
+                        }
+                      }),
                     ),
                     voiceTakesAction: voiceTakesAction,
                     listening: _dictating,
@@ -669,10 +673,11 @@ class _SessionComposerState extends State<SessionComposer> {
                           minLines: 1,
                           // A closed phone composer stays one line.
                           // Dictated words show up to three lines, as
-                          // they come (#546).
+                          // they come; a field with the focus keeps its
+                          // own limit (#546).
                           maxLines: !open
                               ? 1
-                              : _dictating
+                              : _dictating && !_focus.hasFocus
                               ? 3
                               : 4,
                           keyboardType: TextInputType.multiline,

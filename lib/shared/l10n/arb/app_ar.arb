@@ -1544,10 +1544,6 @@
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
   },
-  "liveChildrenRunning": "الوكلاء الفرعيون قيد التشغيل: {count}",
-  "@liveChildrenRunning": {
-    "description": "V2 live read-only session view"
-  },
   "liveSelection": "النموذج والوكيل",
   "@liveSelection": {
     "description": "V2 live session model and agent selection"

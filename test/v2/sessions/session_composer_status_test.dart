@@ -325,7 +325,7 @@ void main() {
         keyboard: true,
         readAloud: true,
       );
-      expect(all.length, plain.length + 5, reason: '$locale');
+      expect(all.length, plain.length + 7, reason: '$locale');
       // The link sits where the language puts its label.
       final linked = all.where((tip) => tip.link != null).toList();
       expect(linked.map((tip) => tip.link), [
@@ -344,6 +344,57 @@ void main() {
         composerTips(l10n, display: true).length - 1,
       );
     }
+  });
+
+  testWidgets('a cut linked tip keeps its link in the whole text (#548)', (
+    tester,
+  ) async {
+    final l10n = await _l10n(tester);
+    tester.view.physicalSize = const Size(240, 640);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final preferences = AppPreferencesController();
+    addTearDown(preferences.dispose);
+    preferences.setShowSessionTabs(false);
+    await tester.pumpWidget(
+      ChangeNotifierProvider<AppPreferencesController?>.value(
+        value: preferences,
+        child: MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(
+            body: ChatAppearance(
+              mathRendering: true,
+              conversationTextScale: 1,
+              composerTips: true,
+              child: SessionComposerStatus(
+                activity: (
+                  kind: ComposerStatusKind.working,
+                  label: 'Reasoning...',
+                ),
+                pick: (_) => 0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump(SessionComposerStatus.showDelay);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('composer-status-more')));
+    await tester.pumpAndSettle();
+    final link = find.byKey(const ValueKey('composer-status-whole-link'));
+    expect(
+      find.descendant(of: link, matching: find.text(l10n.chatDisplayMenu)),
+      findsOneWidget,
+    );
+    await tester.tap(link);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('composer-status-whole')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('workspace-display-sheet')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a tip about a menu opens it from its link (#548)', (

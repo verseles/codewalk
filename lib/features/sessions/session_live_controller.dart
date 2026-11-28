@@ -27,6 +27,7 @@ import 'session_live_scroll.dart';
 import 'session_selection_cycle.dart';
 import 'session_selection_host.dart';
 import 'session_selection_memory.dart';
+import 'session_subagent_capsule.dart';
 import 'session_timeline_search.dart';
 import 'session_turn_controller.dart';
 
@@ -171,6 +172,13 @@ class SessionLiveController extends ChangeNotifier
 
   /// The turn actions and draft provenance controller.
   late final turn = SessionTurnController(live: this, commandIds: _commandIds);
+
+  /// When this session's shells were seen to start and end (#544).
+  final shellSightings = ShellSightings();
+
+  /// Whether the sub-agents and shells chip shows, so the timeline keeps
+  /// room for it only then (#544).
+  final capsuleShown = ValueNotifier<bool>(false);
 
   /// The stored draft is shown once it is read, unless the user has typed
   /// meanwhile: what they typed is theirs, and is saved from the first key.
@@ -1357,6 +1365,7 @@ class SessionLiveController extends ChangeNotifier
     _detach();
     scroll.dispose();
     search.dispose();
+    capsuleShown.dispose();
     _composer?.dispose();
     turn.dispose();
     draft.removeListener(_draftChanged);

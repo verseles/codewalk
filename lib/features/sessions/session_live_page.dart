@@ -749,6 +749,7 @@ class _SessionLivePageState extends State<SessionLivePage>
                                       onOpen: _openRosterChild,
                                     )
                                   : null,
+                              bottomEndOverlayShown: c.capsuleShown,
                               highlight: search.open ? search.current : null,
                               reveals: search.reveals,
                               onOpenChild: _openChild,

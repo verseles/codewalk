@@ -1545,10 +1545,6 @@
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
   },
-  "liveChildrenRunning": "Subagentes em execução: {count}",
-  "@liveChildrenRunning": {
-    "description": "V2 live read-only session view"
-  },
   "liveSelection": "Modelo e agente",
   "@liveSelection": {
     "description": "V2 live session model and agent selection"

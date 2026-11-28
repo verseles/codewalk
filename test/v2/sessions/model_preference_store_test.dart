@@ -261,6 +261,37 @@ void main() {
     expect(store.agentModel('server-a', '/work/app', 'plan'), isNull);
   });
 
+  test(
+    'a record from before the server row answers from its projects',
+    () async {
+      backend.values[ModelPreferenceStore.key] = jsonEncode({
+        'favorites': <String, Object?>{},
+        'recents': <Object?>[],
+        'history': [
+          [
+            'variant',
+            'server-a',
+            '/work/old',
+            'p/a',
+            ['low'],
+          ],
+          [
+            'variant',
+            'server-a',
+            '/work/new',
+            'p/a',
+            ['high', 'low'],
+          ],
+        ],
+      });
+      final store = await load();
+      expect(store.unreadable, isFalse);
+      // The newest project row (#547).
+      expect(store.lastVariant('server-a', 'p/a'), 'high');
+      expect(store.lastVariant('server-b', 'p/a'), isNull);
+    },
+  );
+
   test('the previous pick follows the new one, so cycling goes back', () async {
     final store = await load();
     await store.recordRecent('server-a', '/work', 'p/b', previous: 'p/a');

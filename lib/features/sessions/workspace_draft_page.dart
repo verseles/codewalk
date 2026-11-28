@@ -54,6 +54,19 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
   final _composerFocus = FocusNode();
   late final _commands = SessionCommandMenu(widget.controller.draft);
 
+  /// A dictation is under way: the composer opens and shows its words, as
+  /// the live one does (#546).
+  bool _dictating = false;
+
+  void _listening(bool listening) {
+    // Told once the tree is free: a dictation can end while it builds.
+    scheduleMicrotask(() {
+      if (mounted && _dictating != listening) {
+        setState(() => _dictating = listening);
+      }
+    });
+  }
+
   /// The field row's height, which the `/` picker above it leaves free.
   double _fieldHeight = composerActionSize;
 
@@ -363,7 +376,9 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                                     key: _voice,
                                     text: c.draft,
                                     enabled: !c.sending && !c.endpointOffline,
+                                    onListening: _listening,
                                   ),
+                                  listening: _dictating,
                                   chip: SessionModelChip(live: c.selection),
                                   field: (context, open) => Focus(
                                     // A physical Enter sends; Shift+Enter
@@ -403,8 +418,16 @@ class _WorkspaceDraftPageState extends State<WorkspaceDraftPage> {
                                         readOnly: c.endpointOffline,
                                         minLines: 1,
                                         // A closed phone composer stays
-                                        // one line.
-                                        maxLines: open ? 6 : 1,
+                                        // one line; dictated words show up
+                                        // to three lines as they come, the
+                                        // field keeping its focus limit
+                                        // where it has the focus (#546).
+                                        maxLines: !open
+                                            ? 1
+                                            : _dictating &&
+                                                  !_composerFocus.hasFocus
+                                            ? 3
+                                            : 6,
                                         keyboardType: TextInputType.multiline,
                                         textCapitalization:
                                             TextCapitalization.sentences,

@@ -1639,11 +1639,6 @@ class V2LocalizationsJa extends V2Localizations {
   }
 
   @override
-  String liveChildrenRunning(Object count) {
-    return '実行中のサブエージェント: $count';
-  }
-
-  @override
   String get liveSelection => 'モデルとエージェント';
 
   @override

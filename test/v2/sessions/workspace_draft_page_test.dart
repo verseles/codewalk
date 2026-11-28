@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/composer_input.dart';
 import 'package:codewalk/features/sessions/session_agent_color.dart';
 import 'package:codewalk/features/sessions/session_live_page.dart';
 import 'package:codewalk/platform/sessions/session_draft_store.dart';
@@ -15,6 +16,7 @@ import 'package:codewalk/shared/sessions/session_actions.dart';
 import 'package:codewalk/shared/sessions/session_catalog_source.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/sessions/session_unrestricted.dart';
+import 'package:codewalk/shared/voice/speech_dictation.dart';
 import 'package:codewalk_core/codewalk_core.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
@@ -95,6 +97,7 @@ void main() {
     PayloadStore Function(PayloadStore)? workspacePayloads,
     PayloadStore Function(PayloadStore)? sessionPayloads,
     DraftDefaults defaults = const DraftDefaults(),
+    SpeechDictation? dictation,
   }) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
@@ -126,6 +129,7 @@ void main() {
         index: metadata,
       ),
       workspaceDraftStore: store,
+      speechDictation: dictation,
     );
     app.preferences.setLocale(locale);
     await tester.pumpWidget(
@@ -327,6 +331,29 @@ void main() {
       tester.element(find.byKey(const ValueKey('live-model-chip'))),
     ).colorScheme.surface,
   );
+
+  testWidgets('a dictation opens the draft composer, keyboard closed (#546)', (
+    tester,
+  ) async {
+    final dictation = FakeDictation();
+    await open(tester, dictation: dictation);
+    final field = find.byKey(const ValueKey('workspace-draft-text'));
+    int maxLines() => tester.widget<TextField>(field).maxLines!;
+    expect(maxLines(), 1);
+    await tester.pump(ComposerFrame.voiceTakeDelay);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('composer-voice-button')));
+    // The listening mic breathes, so the frames never settle.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(dictation.starts, 1);
+    // Open with three lines for the words, and no keyboard.
+    expect(maxLines(), 3);
+    expect(tester.widget<TextField>(field).focusNode!.hasFocus, isFalse);
+    await tester.tap(find.byKey(const ValueKey('composer-voice-button')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+  });
 
   testWidgets('the draft shows the defaults with the composer chips', (
     tester,

@@ -1545,10 +1545,6 @@
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
   },
-  "liveChildrenRunning": "実行中のサブエージェント: {count}",
-  "@liveChildrenRunning": {
-    "description": "V2 live read-only session view"
-  },
   "liveSelection": "モデルとエージェント",
   "@liveSelection": {
     "description": "V2 live session model and agent selection"

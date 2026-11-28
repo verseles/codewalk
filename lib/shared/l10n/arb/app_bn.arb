@@ -1545,10 +1545,6 @@
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
   },
-  "liveChildrenRunning": "চলমান সাব-এজেন্ট: {count}",
-  "@liveChildrenRunning": {
-    "description": "V2 live read-only session view"
-  },
   "liveSelection": "মডেল ও এজেন্ট",
   "@liveSelection": {
     "description": "V2 live session model and agent selection"

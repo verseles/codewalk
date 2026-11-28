@@ -1705,11 +1705,6 @@ class V2LocalizationsAr extends V2Localizations {
   }
 
   @override
-  String liveChildrenRunning(Object count) {
-    return 'الوكلاء الفرعيون قيد التشغيل: $count';
-  }
-
-  @override
   String get liveSelection => 'النموذج والوكيل';
 
   @override

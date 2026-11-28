@@ -1642,11 +1642,6 @@ class V2LocalizationsKo extends V2Localizations {
   }
 
   @override
-  String liveChildrenRunning(Object count) {
-    return '실행 중인 하위 에이전트: $count';
-  }
-
-  @override
   String get liveSelection => '모델 및 에이전트';
 
   @override

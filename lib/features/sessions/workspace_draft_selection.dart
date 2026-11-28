@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 
@@ -8,6 +10,7 @@ import '../../shared/sessions/session_selection.dart';
 import '../../shared/sessions/session_unrestricted.dart';
 import 'session_live_controller.dart';
 import 'session_selection_host.dart';
+import 'session_selection_memory.dart';
 
 /// A New Chat draft's agent, model and variant, picked with the same chips
 /// and menus as an open session. Nothing reaches the server before the first
@@ -108,6 +111,20 @@ final class WorkspaceDraftSelection extends ChangeNotifier
       modelProviderId: model.providerId,
       modelVariant: variant,
     );
+    // The variant picked here is the one the model comes back with (#547).
+    if ((_profileId(), _project()) case (final profile?, final project?)) {
+      final store = modelPreferences;
+      if (store != null) {
+        unawaited(
+          store.recordVariant(
+            profile,
+            project,
+            modelPreferenceKey(model.providerId, model.id),
+            variant ?? ModelPreferenceStore.autoVariant,
+          ),
+        );
+      }
+    }
     _notify();
   }
 

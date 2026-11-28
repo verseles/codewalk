@@ -156,8 +156,20 @@ ToolCall _shellTool(
   ShellStatus shellStatus = ShellStatus.running,
   int? exitCode,
   bool background = false,
+  bool streaming = false,
 }) => ToolCall(
-  meta: liveMeta(parent, itemId),
+  meta: streaming
+      ? ItemMeta(
+          id: ItemId(itemId),
+          generation: 'g1',
+          status: const OpenValue.known(ItemStatus.streaming),
+          source: SourceProvenance(
+            harness: parent.harnessRef,
+            version: '2.0.22',
+            nativeType: 'tool',
+          ),
+        )
+      : liveMeta(parent, itemId),
   kind: const OpenValue.known(ToolKind.shell),
   rawName: 'shell',
   input: CanonicalValue({'command': command}),
@@ -485,8 +497,9 @@ void main() {
   testWidgets(
     'settled background shell ToolCall leaves Active when absent from state.shells, canObserve=false omits running timeline shells, unknown ShellWork stays Active, and non-sh_ ShellRun deduplicates',
     (tester) async {
+      var now = DateTime.utc(2026, 11, 19, 1, 0, 10);
       final port = _FakeShellPort(canObserve: true, canStop: true);
-      final rig = await _mount(tester, shellPort: port);
+      final rig = await _mount(tester, shellPort: port, clock: () => now);
 
       // Settled background ToolCall whose shellId sh_bg is NOT in state.shells
       // must land in Completed rather than sticking in Active.
@@ -549,6 +562,11 @@ void main() {
           ),
         ),
       );
+      await _settle(tester);
+      // The timeline-only shell reports no start: it counts five seconds
+      // after it was first seen running (#544).
+      now = now.add(shellShownAfter);
+      await tester.pump(shellShownAfter);
       await _settle(tester);
 
       // Badge counts streamingTimelineOnly + customWork = 2 (NOT settledBgTool, NOT unknownWork).
@@ -846,6 +864,47 @@ void main() {
       expect(find.text(l10n.liveSubagentsUnknown), findsWidgets);
     },
   );
+  testWidgets('a shell with no start counts from when it is first seen', (
+    tester,
+  ) async {
+    var now = DateTime.utc(2026, 11, 19, 1, 0, 10);
+    final port = _FakeShellPort();
+    final rig = await _mount(tester, shellPort: port, clock: () => now);
+    void emit(List<TimelineItem> items) => rig.handle.emit(
+      SessionLiveView(
+        session: rig.parent,
+        phase: SessionLivePhase.live,
+        state: liveState(rig.parent, items: items),
+      ),
+    );
+    // A quick command known only from the timeline: seen running, then done
+    // two seconds later. It never shows, and the chip keeps no room.
+    emit([_shellTool(rig.parent, 'i_quick', streaming: true)]);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('subagent-capsule')), findsNothing);
+    now = now.add(const Duration(seconds: 2));
+    emit([
+      _shellTool(
+        rig.parent,
+        'i_quick',
+        shellStatus: ShellStatus.exited,
+        exitCode: 0,
+      ),
+    ]);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('subagent-capsule')), findsNothing);
+    expect(rig.live.capsuleShown.value, isFalse);
+    // One that runs on shows five seconds after it was first seen.
+    emit([_shellTool(rig.parent, 'i_long', streaming: true)]);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('subagent-capsule')), findsNothing);
+    now = now.add(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 5));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('subagent-capsule')), findsOneWidget);
+    expect(rig.live.capsuleShown.value, isTrue);
+  });
+
   testWidgets('a shell shows in the chip only after five seconds (#544)', (
     tester,
   ) async {

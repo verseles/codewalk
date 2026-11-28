@@ -1731,11 +1731,6 @@ class V2LocalizationsRu extends V2Localizations {
   }
 
   @override
-  String liveChildrenRunning(Object count) {
-    return 'Выполняется субагентов: $count';
-  }
-
-  @override
   String get liveSelection => 'Модель и агент';
 
   @override

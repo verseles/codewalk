@@ -1545,10 +1545,6 @@
   "@liveRetryingIn": {
     "description": "V2 live read-only session view"
   },
-  "liveChildrenRunning": "실행 중인 하위 에이전트: {count}",
-  "@liveChildrenRunning": {
-    "description": "V2 live read-only session view"
-  },
   "liveSelection": "모델 및 에이전트",
   "@liveSelection": {
     "description": "V2 live session model and agent selection"

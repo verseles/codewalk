@@ -88,6 +88,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.onOpenReportChild,
     this.onTapLink,
     this.bottomEndOverlay,
+    this.bottomEndOverlayShown,
     this.bottomStartOverlay,
     this.emptyBuilder,
     this.messageActions,
@@ -132,6 +133,10 @@ class SessionLiveTimeline extends StatefulWidget {
 
   /// A floating action above the footer, below the timeline's jump controls.
   final Widget? bottomEndOverlay;
+
+  /// Whether [bottomEndOverlay] shows now; the timeline keeps room for it
+  /// only then. Null: whenever there is one.
+  final ValueListenable<bool>? bottomEndOverlayShown;
 
   /// A floating control at the footer's start, such as the read-aloud
   /// controls (#541); it takes no room while it shows nothing.
@@ -264,6 +269,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
   @override
   void initState() {
     super.initState();
+    widget.bottomEndOverlayShown?.addListener(_overlayChanged);
     widget.scroll.controller.addListener(widget.scroll.onViewportChanged);
     if (widget.scroll.timelineMemory case final _Memory memory) {
       // The session is shown again: the rows open around the same center, so
@@ -279,9 +285,22 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     }
   }
 
+  /// Whether the floating action shows, so its room is kept.
+  bool get _overlayShown =>
+      widget.bottomEndOverlay != null &&
+      (widget.bottomEndOverlayShown?.value ?? true);
+
+  void _overlayChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void didUpdateWidget(covariant SessionLiveTimeline old) {
     super.didUpdateWidget(old);
+    if (old.bottomEndOverlayShown != widget.bottomEndOverlayShown) {
+      old.bottomEndOverlayShown?.removeListener(_overlayChanged);
+      widget.bottomEndOverlayShown?.addListener(_overlayChanged);
+    }
     if (old.scroll != widget.scroll) {
       old.scroll.controller.removeListener(old.scroll.onViewportChanged);
       widget.scroll.controller.addListener(widget.scroll.onViewportChanged);
@@ -405,6 +424,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
 
   @override
   void dispose() {
+    widget.bottomEndOverlayShown?.removeListener(_overlayChanged);
     _liveItems.dispose();
     widget.scroll.controller.removeListener(widget.scroll.onViewportChanged);
     widget.scroll.timelineMemory = (
@@ -863,7 +883,7 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                         ),
                         // Content can scroll clear of the floating action without
                         // giving up any of the timeline viewport beside it.
-                        if (widget.bottomEndOverlay != null && rows.isNotEmpty)
+                        if (_overlayShown && rows.isNotEmpty)
                           const SliverToBoxAdapter(child: SizedBox(height: 56)),
                         if (rows.isEmpty && widget.emptyBuilder != null)
                           SliverFillRemaining(
@@ -892,13 +912,12 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
             PositionedDirectional(
               top: 0,
               end: 16,
-              bottom: widget.bottomEndOverlay == null ? 16 : 4,
+              bottom: _overlayShown ? 4 : 16,
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   // Short timelines keep all controls reachable side by side.
                   final horizontal =
-                      widget.bottomEndOverlay != null &&
-                      constraints.maxHeight < 156;
+                      _overlayShown && constraints.maxHeight < 156;
                   return Align(
                     alignment: AlignmentDirectional.bottomEnd,
                     widthFactor: 1,
@@ -917,7 +936,8 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                           ),
                         if (_showJumpControl) _jumpToLatest(context),
                         if (widget.bottomEndOverlay case final overlay?) ...[
-                          if (_showJumpControl || _showJumpToFirst)
+                          if (_overlayShown &&
+                              (_showJumpControl || _showJumpToFirst))
                             SizedBox(
                               height: horizontal ? 0 : 8,
                               width: horizontal ? 8 : 0,

@@ -1717,11 +1717,6 @@ class V2LocalizationsUr extends V2Localizations {
   }
 
   @override
-  String liveChildrenRunning(Object count) {
-    return 'چل رہے ذیلی ایجنٹ: $count';
-  }
-
-  @override
   String get liveSelection => 'ماڈل اور ایجنٹ';
 
   @override

@@ -1615,11 +1615,6 @@ class V2LocalizationsZh extends V2Localizations {
   }
 
   @override
-  String liveChildrenRunning(Object count) {
-    return '运行中的子代理：$count';
-  }
-
-  @override
   String get liveSelection => '模型和代理';
 
   @override

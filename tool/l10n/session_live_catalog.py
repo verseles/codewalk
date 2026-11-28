@@ -63,7 +63,7 @@ NEW_KEYS = (
     "liveRetry", "liveOlderLoading",
     "liveToolOutput", "liveToolDone", "liveToolInterrupted", "liveToolValueShortened", "liveShellExitCode",
     "liveShellTimedOut", "liveShellKilled", "liveShellOutputPartial",
-    "liveRetrying", "liveRetryingIn", "liveChildrenRunning",
+    "liveRetrying", "liveRetryingIn",
     "liveSourceChanged",
     "liveStepInterrupted",
     "liveExecutionUnconfirmed",

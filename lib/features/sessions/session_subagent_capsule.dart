@@ -161,33 +161,6 @@ ShellStatus? _shellReportStatus(ShellReport report) {
 /// - Any shell ID in [confirmedRemovedShellIds] (previously observed live and
 ///   subsequently stopped/deleted) is immediately suppressed from Active even
 ///   if its timeline `ToolCall` is momentarily still streaming.
-/// How long a shell runs before the chip counts and shows it (#544), so
-/// quick commands never make the count jump.
-const shellShownAfter = Duration(seconds: 5);
-
-/// Whether [entry] ran long enough by [now] for the chip: a shell of
-/// unknown start always does.
-bool shellShown(CapsuleShellEntry entry, DateTime now) {
-  final started = entry.startedAt;
-  if (started == null) return true;
-  final end = entry.isRunning ? now : entry.completedAt;
-  if (end == null) return true;
-  return end.difference(started) >= shellShownAfter;
-}
-
-/// When the next running shell of [entries] reaches [shellShownAfter].
-DateTime? nextShellShown(List<CapsuleShellEntry> entries, DateTime now) {
-  DateTime? next;
-  for (final entry in entries) {
-    final started = entry.startedAt;
-    if (!entry.isRunning || started == null) continue;
-    final at = started.add(shellShownAfter);
-    if (!at.isAfter(now)) continue;
-    if (next == null || at.isBefore(next)) next = at;
-  }
-  return next;
-}
-
 List<CapsuleShellEntry> sessionShellEntries(
   SessionState? state, {
   required bool canObserveShells,
@@ -384,6 +357,56 @@ List<CapsuleShellEntry> sessionShellEntries(
 }
 
 /// Whether the floating robot capsule should be displayed for [state].
+/// How long a shell runs before the chip counts and shows it (#544), so
+/// quick commands never make the count jump.
+const shellShownAfter = Duration(seconds: 5);
+
+/// When each shell of a session was seen to start and end, for one whose
+/// own times are not known (#544): a shell that reports no start counts
+/// from when it was first seen running, and a quick one never shows, even
+/// once its live record gives way to a timeline row without times. A shell
+/// that had ended before it was ever seen, as in history, shows.
+final class ShellSightings {
+  static const _bound = 256;
+  final _times = <String, (DateTime, DateTime?)>{};
+
+  /// The shells of [entries] that ran long enough by [now] to show.
+  List<CapsuleShellEntry> shown(
+    List<CapsuleShellEntry> entries,
+    DateTime now,
+  ) => [
+    for (final entry in entries)
+      if (_shown(entry, now)) entry,
+  ];
+
+  /// When the next running shell of [entries] reaches [shellShownAfter].
+  DateTime? next(List<CapsuleShellEntry> entries, DateTime now) {
+    DateTime? next;
+    for (final entry in entries) {
+      final started = entry.startedAt ?? _times[entry.key]?.$1;
+      if (!entry.isRunning || started == null) continue;
+      final at = started.add(shellShownAfter);
+      if (!at.isAfter(now)) continue;
+      if (next == null || at.isBefore(next)) next = at;
+    }
+    return next;
+  }
+
+  /// Forgets every shell, as when the session changes.
+  void clear() => _times.clear();
+
+  bool _shown(CapsuleShellEntry entry, DateTime now) {
+    final seen = _times[entry.key];
+    final start = entry.startedAt ?? seen?.$1 ?? (entry.isRunning ? now : null);
+    if (start == null) return true;
+    final end = entry.isRunning ? null : entry.completedAt ?? seen?.$2 ?? now;
+    _times.remove(entry.key);
+    _times[entry.key] = (start, end);
+    if (_times.length > _bound) _times.remove(_times.keys.first);
+    return (end ?? now).difference(start) >= shellShownAfter;
+  }
+}
+
 bool hasSessionCapsuleActivity(
   SessionState? state, {
   required bool canObserveShells,
@@ -470,6 +493,11 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
   void dispose() {
     _shown?.cancel();
     _focus.dispose();
+    // Gone with its activity: the timeline gives its room back.
+    final live = widget.live;
+    scheduleMicrotask(() {
+      if (!live.disposed) live.capsuleShown.value = false;
+    });
     super.dispose();
   }
 
@@ -619,14 +647,18 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
       );
       // A quick command never shows; one that runs on shows once it is
       // five seconds old.
-      final shells = [
-        for (final shell in every)
-          if (shellShown(shell, now)) shell,
-      ];
-      _armShown(nextShellShown(every, now), now);
-      if (state == null || (children.isEmpty && shells.isEmpty)) {
-        return const SizedBox.shrink();
+      final sightings = widget.live.shellSightings;
+      final shells = sightings.shown(every, now);
+      _armShown(sightings.next(every, now), now);
+      final visible =
+          state != null && (children.isNotEmpty || shells.isNotEmpty);
+      // The timeline keeps room for the chip only while it shows.
+      if (widget.live.capsuleShown.value != visible) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!widget.live.disposed) widget.live.capsuleShown.value = visible;
+        });
       }
+      if (!visible) return const SizedBox.shrink();
       final activeSubagents = children
           .where(
             (work) => subagentIsActive(
@@ -1017,14 +1049,14 @@ class _SubagentPopinState extends State<_SubagentPopin> {
     final state = widget.live.state;
     final initialSubagents = subagentWork(state);
     final now = widget.live.clock().toUtc();
-    final initialShells = [
-      for (final shell in sessionShellEntries(
+    final initialShells = widget.live.shellSightings.shown(
+      sessionShellEntries(
         state,
         canObserveShells: _canObserveShells,
         confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
-      ))
-        if (shellShown(shell, now)) shell,
-    ];
+      ),
+      now,
+    );
     final isLive =
         widget.live.phase == SessionLivePhase.live &&
         widget.live.view?.stale != true &&
@@ -1062,14 +1094,14 @@ class _SubagentPopinState extends State<_SubagentPopin> {
             final state = widget.live.state;
             final rows = subagentWork(state);
             final now = widget.live.clock().toUtc();
-            final shells = [
-              for (final shell in sessionShellEntries(
+            final shells = widget.live.shellSightings.shown(
+              sessionShellEntries(
                 state,
                 canObserveShells: _canObserveShells,
                 confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
-              ))
-                if (shellShown(shell, now)) shell,
-            ];
+              ),
+              now,
+            );
             final hasShells = shells.isNotEmpty;
             final activeSubagents = <(WorkItem, WorkStatus)>[];
             final completedSubagents = <(WorkItem, WorkStatus)>[];

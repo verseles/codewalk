@@ -1023,10 +1023,14 @@
     {
       "at": "2026-11-28T06:06:28Z",
       "text": "#541 converged: Sol-F r6 approve; its remaining suggestion (resume failure message) implemented 1226a32d; re-review skipped (small change reusing SpeechFailure.unavailable, new test). #542 converged: r3 single consensus item (notFound->gone, no task->unavailable) + small layout/autofocus/search fixes add5ef96; re-review skipped (narrow, tested: dialog notFound test, run tests). u7 and u8 helper sessions closed. Metrics u7 r6, u8 r3 recorded."
+    },
+    {
+      "at": "2026-11-28T06:29:42Z",
+      "text": "Judged 8.3 r1 (A0030): accepted A draft dictation, B unknown-start shells via ShellSightings, C timeline room via live.capsuleShown, D linked tip in More dialog, F doc, G lastVariant falls back to newest project row, H draft picks record variant, J no 4->3 shrink with focus, K deferred onListening, L keyboard tips w/o kIsWeb + preferences-only tips, N docs, O drop liveChildrenRunning. Rejected: E mic delay at mount (dissent to Sol-F), I '*' row eviction (bounded LRU, downgrade-safe), M stale tip until rotation. Metrics u9 r1 recorded. Also committed #549 da98f660, #550 ffb96bb8, #551 c0878a6a, #552 6f0a7e25."
     }
   ],
-  "generation": 149,
-  "next_action": "Dispatch u9 r1 (8.3 #543-#548) to 6 helpers + native stand-in reviewer",
+  "generation": 151,
+  "next_action": "v2 suite running (bhlosxy38); then commit 8.3 fixes, dispatch u9 r2 re-review, then #553",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -1049,7 +1053,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T06:18:58Z",
+  "updated_at": "2026-11-28T06:36:20Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1175,6 +1179,13 @@
       "check": "Full flutter test at d35cf9de",
       "criterion": null,
       "evidence": "all pass except expected goldens: appearance desktop_light/dark (#541 settings entry), subagent capsule x3 (#543 status line); regen on x86 via goldens.yml after push. log /tmp/opencode/g8/full.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T06:36:20Z",
+      "check": "8.3 r1 fixes: test/v2 suite + analyze + l10n check",
+      "criterion": null,
+      "evidence": "v2: all pass except expected goldens (appearance x4: #541/#551 settings; capsule x3: #543); analyze 4 (budget); l10n check OK. log /tmp/opencode/g8/v2.log",
       "outcome": "pass"
     }
   ]

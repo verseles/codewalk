@@ -186,9 +186,22 @@ final class ModelPreferenceStore extends ChangeNotifier {
   );
 
   /// The variant last used with [model] on [server], in any project, or
-  /// null for Auto or none yet.
+  /// null for Auto or none yet. A record from before the server kept its
+  /// own row answers with its project's most recent one.
   String? lastVariant(String server, String model) {
-    final last = _values(_Kind.variant, server, _anyProject, model).firstOrNull;
+    var last = _values(_Kind.variant, server, _anyProject, model).firstOrNull;
+    if (last == null) {
+      // Rows are kept oldest first: the newest project row is the last.
+      for (final row in _saved.history.reversed) {
+        if (row.kind == _Kind.variant &&
+            row.server == server &&
+            row.scope == model &&
+            row.values.isNotEmpty) {
+          last = row.values.first;
+          break;
+        }
+      }
+    }
     return last == null || last == autoVariant ? null : last;
   }
 

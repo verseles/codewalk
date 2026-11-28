@@ -24,9 +24,9 @@ import 'session_tool_details_dialog.dart';
 
 /// What the conversation's status bar reports (#133, #468), the only place
 /// a conversation shows its state: a view that is not live, a wait for the
-/// user, an interruption, a retry, the call or the reasoning in flight,
-/// running sub-agents, the assistant working, or the session waiting for a
-/// prompt.
+/// user, an interruption, a retry, the call or the reasoning in flight, the
+/// assistant working, or the session waiting for a prompt; running
+/// sub-agents live in their own chip (#543).
 enum ComposerStatusKind {
   connection,
   attention,
@@ -86,9 +86,10 @@ ComposerTip _linked(
 
 /// The tips the slot rotates while the assistant works: things the app does
 /// that are easy to miss (#548), each only where it applies: the Display
-/// menu where there is one ([display]), and tabs only while hidden
-/// ([tabsShown]); keys where there is a keyboard ([keyboard]); the voice
-/// where messages can be read aloud ([readAloud]).
+/// menu, the delivery choice and pins where the app's preferences are
+/// ([display]), and tabs only while hidden ([tabsShown]); keys where there
+/// is a keyboard ([keyboard]); the voice where messages can be read aloud
+/// ([readAloud]).
 List<ComposerTip> composerTips(
   V2Localizations l10n, {
   bool display = false,
@@ -102,7 +103,7 @@ List<ComposerTip> composerTips(
       l10n.chatDisplayMenu,
       ComposerTipLink.display,
     ),
-  ComposerTip(l10n.composerTipHoldSend),
+  if (display) ComposerTip(l10n.composerTipHoldSend),
   ComposerTip(l10n.composerTipMessageBar),
   ComposerTip(l10n.composerTipContinue),
   ComposerTip(l10n.composerTipSelectWord),
@@ -115,7 +116,7 @@ List<ComposerTip> composerTips(
       ComposerTipLink.shortcuts,
     ),
   ComposerTip(l10n.composerTipSlash),
-  ComposerTip(l10n.composerTipPin),
+  if (display) ComposerTip(l10n.composerTipPin),
   if (readAloud)
     _linked(
       l10n.composerTipVoice,
@@ -185,8 +186,8 @@ ComposerActivity? composerActivity(SessionState? state, V2Localizations l10n) {
 /// What the status bar reports for [live], most urgent first (BEHAVIOR.md,
 /// V2 conversation status bar): a view that is not live, a question or
 /// approval waiting for the user, an interruption, a retry, the work in
-/// flight, running sub-agents, a last turn that failed or was interrupted,
-/// then the session idle.
+/// flight, a last turn that failed or was interrupted, then the session
+/// idle; never running sub-agents, which their chip counts (#543).
 ComposerActivity? liveStatus(SessionLiveController live, V2Localizations l10n) {
   ComposerActivity status(ComposerStatusKind kind, String label) =>
       (kind: kind, label: label);
@@ -409,8 +410,8 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
       context.v2L10n,
       display: preferences != null,
       tabsShown: preferences?.showSessionTabs ?? false,
+      // A phone's browser has no keys to tell of either.
       keyboard:
-          kIsWeb ||
           (preferences?.hasPhysicalKeyboard ?? false) ||
           const {
             TargetPlatform.linux,
@@ -664,7 +665,12 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                                 textStyle: style,
                               ),
-                              onPressed: () => _showWhole(context, shown.label),
+                              onPressed: () => _showWhole(
+                                context,
+                                shown.label,
+                                tip: shown.tip?.link == null ? null : shown.tip,
+                                follow: _follow,
+                              ),
                               child: Text(
                                 context.v2L10n.chatMessageShowMoreCompact,
                               ),
@@ -698,8 +704,14 @@ bool _overflows(
   return cut;
 }
 
-/// Shows the whole of a status the bar had to cut.
-void _showWhole(BuildContext context, String text) {
+/// Shows the whole of a status the bar had to cut. A tip with a link
+/// keeps it there as a button, so a cut line never hides it (#548).
+void _showWhole(
+  BuildContext context,
+  String text, {
+  ComposerTip? tip,
+  VoidCallback? follow,
+}) {
   final l10n = context.v2L10n;
   unawaited(
     showDialog<void>(
@@ -708,6 +720,15 @@ void _showWhole(BuildContext context, String text) {
         key: const ValueKey('composer-status-whole'),
         content: Text(text),
         actions: [
+          if (tip != null && follow != null)
+            TextButton(
+              key: const ValueKey('composer-status-whole-link'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                follow();
+              },
+              child: Text(tip.label),
+            ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(l10n.chatClose),

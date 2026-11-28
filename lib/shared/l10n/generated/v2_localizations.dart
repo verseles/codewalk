@@ -3197,12 +3197,6 @@ abstract class V2Localizations {
   /// **'Retrying in {time}'**
   String liveRetryingIn(Object time);
 
-  /// V2 live read-only session view
-  ///
-  /// In en, this message translates to:
-  /// **'Sub-agents running: {count}'**
-  String liveChildrenRunning(Object count);
-
   /// V2 live session model and agent selection
   ///
   /// In en, this message translates to:

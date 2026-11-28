@@ -1740,11 +1740,6 @@ class V2LocalizationsPt extends V2Localizations {
   }
 
   @override
-  String liveChildrenRunning(Object count) {
-    return 'Subagentes em execução: $count';
-  }
-
-  @override
   String get liveSelection => 'Modelo e agente';
 
   @override

@@ -1720,11 +1720,6 @@ class V2LocalizationsHi extends V2Localizations {
   }
 
   @override
-  String liveChildrenRunning(Object count) {
-    return 'चल रहे सब-एजेंट: $count';
-  }
-
-  @override
   String get liveSelection => 'मॉडल और एजेंट';
 
   @override
