@@ -478,16 +478,10 @@ class AppPreferencesController extends ChangeNotifier {
         _themePreset = OpenCodeThemePreset.github;
         _revisions['themePreset'] = 0;
         // Written before the load ends, to narrow the moment a stop could
-        // leave a marked storage without it; a write that fails leaves the
-        // theme for this run only.
-        try {
-          await store.write(
-            'cw2.settings.themePreset',
-            openCodeThemePresetKey(OpenCodeThemePreset.github),
-          );
-        } on Object {
-          // The next run starts as an existing install.
-        }
+        // leave a marked storage without it; a write that fails is told
+        // and retried like any other save.
+        _persist('themePreset', _values['themePreset'], 0);
+        await flush();
         if (_disposed) return;
       }
       final language = value('locale');

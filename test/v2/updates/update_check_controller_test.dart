@@ -1,11 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:codewalk/features/settings/release_news_card.dart';
 import 'package:codewalk/features/settings/update_check_controller.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
+import 'package:codewalk/shared/l10n/generated/v2_localizations.dart';
 import 'package:codewalk/shared/releases/release_source.dart';
 import 'package:codewalk/shared/releases/update_selector.dart';
+// ignore: deprecated_member_use
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
 class MemoryBackend implements MetadataBackend {
   final values = <String, Object>{};
@@ -408,6 +413,61 @@ void main() {
     expect(updates.visibleNews, isNull);
     expect(updates.automaticNewsNotice, isNull);
     updates.dispose();
+  });
+
+  testWidgets('news is seen only once it is on screen', (tester) async {
+    installed = '2.0.0-beta.2';
+    final updates = controller();
+    addTearDown(updates.dispose);
+    await tester.runAsync(() async {
+      await updates.setChannel(UpdateChannel.beta);
+      final entries = jsonDecode(listing(['v2.0.0-beta.2'])) as List;
+      for (final entry in entries) {
+        (entry as Map)['published_at'] = '2026-11-04T12:00:00Z';
+        entry['body'] = '> 📣 News for ${entry['tag_name']}';
+      }
+      final check = updates.check();
+      await answer(jsonEncode(entries));
+      await check;
+    });
+    tester.view.physicalSize = const Size(400, 600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      ChangeNotifierProvider<UpdateCheckController?>.value(
+        value: updates,
+        child: MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(
+            body: ListView(
+              children: [
+                // Below the screen, but within the list's cache.
+                const SizedBox(height: 700),
+                ReleaseNewsCard(onHistory: () {}),
+                const SizedBox(height: 1200),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(updates.visibleNews, isNotNull);
+    expect(
+      find.byKey(const ValueKey('updates_news'), skipOffstage: false),
+      findsOneWidget,
+    );
+    updates.leaveNews();
+    expect(updates.visibleNews, isNotNull, reason: 'built, never on screen');
+    tester
+        .state<ScrollableState>(find.byType(Scrollable).first)
+        .position
+        .jumpTo(300);
+    await tester.runAsync(pumpEventQueue);
+    await tester.pumpAndSettle();
+    updates.leaveNews();
+    expect(updates.visibleNews, isNull);
   });
 
   test('silent failure preserves a previously found update', () async {

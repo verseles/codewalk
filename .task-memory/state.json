@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 32,
+  "artifact_seq": 33,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -512,6 +512,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "8.3 r3 + 8.4-8.6 r1 reviews"
+    },
+    "A0033": {
+      "active": true,
+      "bytes": 689,
+      "created_at": "2026-11-28T07:19:37Z",
+      "evidence": "/tmp/opencode/g8/rev/u9/r4_*.out, /tmp/opencode/g8/rev/u10/r2_*.out",
+      "id": "A0033",
+      "impact": "Small fixes; news visibility must be resolved (persisted -F objection)",
+      "origin": "6 helpers each",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0033.md",
+      "purpose": "Re-review 5ed8a987 and 64f6b0af",
+      "rerun_when": "after fixes",
+      "sha256": "658186ed21cc0ec71043a40adf93f66083302923a2dc7d7229fe83c9154b27d8",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "8.3 r4 + 8.4-8.6 r2"
     }
   },
   "checklist": [
@@ -1063,10 +1079,14 @@
     {
       "at": "2026-11-28T06:49:10Z",
       "text": "8.3 r2 judged (A0031): all accepted except draft write race (sugg); fix a2e05556; Sol-F agreed with mic-at-mount. #553 committed (createdThisRun + GitHub default). Unit u10 (8.4-8.6 #549-#553: da98f660 ffb96bb8 c0878a6a 6f0a7e25 + #553 commit) metrics rvw_20261128T064823Z_9e20b158, key codewalk-g8-tasks-settings-theme-20261128T064818Z-4812; handshakes READY x6, Grok out of credits (excluded)."
+    },
+    {
+      "at": "2026-11-28T07:14:29Z",
+      "text": "Judged 8.3 r3 + 8.4-8.6 r1 (A0032). 8.3: accepted retention (512, oldest-first), earliest-start reconciliation, pop-in guard + timer cancel, per-link recognizers -> 5ed8a987. 8.4-8.6: accepted viewport centering, news dismissed despite leave, no workspace notice for seen news, awaited first-run theme write -> 64f6b0af; rejected seen-while-scrolled (dissent to Sol-F), double bar during transition (sugg), card widget test (sugg). Metrics u9 r3, u10 r1 recorded."
     }
   ],
-  "generation": 157,
-  "next_action": "Full suite running (be72kmsho); then dispatch u9 r3 + u10 r1 + native stand-in for u10",
+  "generation": 160,
+  "next_action": "Dispatch u9 r4 + u10 r2",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -1089,7 +1109,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T07:07:54Z",
+  "updated_at": "2026-11-28T07:19:37Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

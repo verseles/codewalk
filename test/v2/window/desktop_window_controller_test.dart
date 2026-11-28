@@ -153,7 +153,8 @@ void main() {
     await first.initialize();
     expect(first.integratedWindowChrome, isTrue);
     expect(first.windowCloseAction, WindowCloseAction.close);
-    expect(backend.writes, ['cw2.schema']);
+    // A new install writes its first-run theme (#553).
+    expect(backend.writes, ['cw2.schema', 'cw2.settings.themePreset']);
     first.setIntegratedWindowChrome(false);
     first.setWindowCloseAction(WindowCloseAction.minimize);
     await first.flush();

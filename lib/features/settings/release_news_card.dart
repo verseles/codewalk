@@ -23,15 +23,60 @@ class ReleaseNewsCard extends StatefulWidget {
 }
 
 class _ReleaseNewsCardState extends State<ReleaseNewsCard> {
+  UpdateCheckController? _checks;
+  ScrollPosition? _position;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final position = Scrollable.maybeOf(context)?.position;
+    if (!identical(position, _position)) {
+      _position?.removeListener(_look);
+      _position = position;
+      position?.addListener(_look);
+    }
+  }
+
+  @override
+  void dispose() {
+    _position?.removeListener(_look);
+    super.dispose();
+  }
+
+  bool _looking = false;
+
+  /// Looks once the frame is laid out: a scroll is told before it moves
+  /// the card.
+  void _look() {
+    if (_looking) return;
+    _looking = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _looking = false;
+      _lookNow();
+    });
+  }
+
+  /// Seen once some of it is on screen, not merely built off it: the next
+  /// visit does not show it again.
+  void _lookNow() {
+    final checks = _checks;
+    if (!mounted || checks == null || checks.visibleNews == null) return;
+    final card = context.findRenderObject();
+    final view = Scrollable.maybeOf(context)?.context.findRenderObject();
+    if (card is! RenderBox || !card.attached || !card.hasSize) return;
+    if (view is RenderBox && view.attached && view.hasSize) {
+      final top = card.localToGlobal(Offset.zero, ancestor: view).dy;
+      if (top >= view.size.height || top + card.size.height <= 0) return;
+    }
+    unawaited(checks.newsSeen());
+  }
+
   @override
   Widget build(BuildContext context) {
-    final checks = context.watch<UpdateCheckController?>();
+    final checks = _checks = context.watch<UpdateCheckController?>();
     final news = checks?.visibleNews;
     if (news == null) return const SizedBox.shrink();
-    // Shown: the next visit does not show it again.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) unawaited(checks!.newsSeen());
-    });
+    _look();
     final l = context.v2L10n;
     return Card(
       key: const ValueKey('updates_news'),

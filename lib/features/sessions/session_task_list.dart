@@ -116,6 +116,14 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
       setState(() => _keyboardOpen = open);
       _maybeScheduleAutoScroll();
     }
+    // A window of another size shows another number of rows.
+    _recenter();
+  }
+
+  /// Centers the task in progress again after the layout changed.
+  void _recenter() {
+    _lastScrollTarget = null;
+    _maybeScheduleAutoScroll();
   }
 
   @override
@@ -325,7 +333,13 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
         : Builder(
             // Inside the conversation's text scale, as the rows are.
             builder: (context) {
-              final extent = _rowExtent = _rowExtentOf(context);
+              final extent = _rowExtentOf(context);
+              if (extent != _rowExtent) {
+                // Rows of another height move the task in progress: it is
+                // centered again.
+                if (_rowExtent > 0) _recenter();
+                _rowExtent = extent;
+              }
               return ConstrainedBox(
                 constraints: BoxConstraints(
                   maxHeight: min(

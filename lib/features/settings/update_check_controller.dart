@@ -235,9 +235,12 @@ final class UpdateCheckController extends ChangeNotifier {
     _dismissedNewsTag = tag;
   }
 
-  /// Settings closed: news seen there no longer shows.
+  /// Settings closed: news seen there no longer shows this run, even if
+  /// its dismissal is still being written.
   void leaveNews() {
-    if (_disposed || _showingNews == null) return;
+    final seen = _showingNews;
+    if (_disposed || seen == null) return;
+    _dismissedNewsTag = seen;
     _showingNews = null;
     notifyListeners();
   }

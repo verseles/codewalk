@@ -151,6 +151,38 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(shown(), contains(6));
+    // Larger text moves the rows: the task in progress is centered again,
+    // in the same panel.
+    final scale = ValueNotifier<double>(1);
+    addTearDown(scale.dispose);
+    Widget scaled() => _wrap(
+      ValueListenableBuilder<double>(
+        valueListenable: scale,
+        builder: (context, value, _) => MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(textScaler: TextScaler.linear(value)),
+          child: Scaffold(
+            body: Align(
+              alignment: Alignment.topCenter,
+              child: SessionTaskListPanel(
+                plan: plan(6),
+                collapsed: false,
+                maxListHeight: 60,
+                onToggleCollapsed: () {},
+              ),
+            ),
+          ),
+        ),
+      ),
+      disableAnimations: true,
+    );
+    await tester.pumpWidget(scaled());
+    await tester.pumpAndSettle();
+    expect(shown(), contains(6));
+    scale.value = 1.6;
+    await tester.pumpAndSettle();
+    expect(shown(), contains(6));
     await show(5);
     // Another task in progress: the list turns to it.
     await show(6);
