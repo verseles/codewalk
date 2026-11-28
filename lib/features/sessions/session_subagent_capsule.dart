@@ -372,7 +372,10 @@ final class ShellSightings extends ChangeNotifier {
   // retry, a live record gone before its row ends); past this many, those
   // of shells no longer listed go, oldest first.
   static const _kept = 512;
-  final _times = <String, (DateTime, DateTime?)>{};
+
+  // Each name's start and end, and whether the start is only a guess from
+  // an unconfirmed listing (never seen running).
+  final _times = <String, (DateTime, DateTime?, bool)>{};
   Timer? _timer;
   DateTime? _timerAt;
   bool _disposed = false;
@@ -385,6 +388,15 @@ final class ShellSightings extends ChangeNotifier {
       for (final entry in entries)
         if (_shown(entry, now, listed)) entry,
     ];
+    // A shell seen running that is gone from a list that still has others
+    // ended then; an empty list (a view being read again) tells nothing.
+    if (entries.isNotEmpty) {
+      for (final MapEntry(:key, :value) in _times.entries.toList()) {
+        if (value.$2 == null && !listed.contains(key)) {
+          _times[key] = (value.$1, now, value.$3);
+        }
+      }
+    }
     if (_times.length > _kept) {
       for (final key in _times.keys.toList()) {
         if (_times.length <= _kept) break;
@@ -405,17 +417,17 @@ final class ShellSightings extends ChangeNotifier {
   static bool _active(CapsuleShellEntry entry) =>
       entry.isRunning || entry.isUnconfirmed;
 
-  /// The earliest start any name of [entry] was seen with, and an end seen
-  /// with it.
-  (DateTime, DateTime?)? _seen(CapsuleShellEntry entry) {
-    (DateTime, DateTime?)? seen;
+  /// The earliest start any name of [entry] was seen with, an end seen
+  /// with it, and whether that start is only a guess.
+  (DateTime, DateTime?, bool)? _seen(CapsuleShellEntry entry) {
+    (DateTime, DateTime?, bool)? seen;
     for (final key in _keys(entry)) {
       final times = _times[key];
       if (times == null) continue;
       if (seen == null || times.$1.isBefore(seen.$1)) {
-        seen = (times.$1, times.$2 ?? seen?.$2);
+        seen = (times.$1, times.$2 ?? seen?.$2, times.$3 && (seen?.$3 ?? true));
       } else {
-        seen = (seen.$1, seen.$2 ?? times.$2);
+        seen = (seen.$1, seen.$2 ?? times.$2, seen.$3 && times.$3);
       }
     }
     return seen;
@@ -423,6 +435,9 @@ final class ShellSightings extends ChangeNotifier {
 
   bool _shown(CapsuleShellEntry entry, DateTime now, Set<String> listed) {
     final seen = _seen(entry);
+    // An unconfirmed listing only guesses a start; a shell never seen
+    // running that turns out ended is history, and shows.
+    final guess = entry.startedAt == null && (seen?.$3 ?? !entry.isRunning);
     final start = entry.startedAt ?? seen?.$1 ?? (_active(entry) ? now : null);
     if (start == null) return true;
     final end = _active(entry) ? null : entry.completedAt ?? seen?.$2 ?? now;
@@ -430,9 +445,10 @@ final class ShellSightings extends ChangeNotifier {
       // Rewritten as the newest, so a listed shell is the last to go.
       _times
         ..remove(key)
-        ..[key] = (start, end);
+        ..[key] = (start, end, guess && !entry.isRunning);
       listed.add(key);
     }
+    if (end != null && guess && !entry.isRunning) return true;
     return (end ?? now).difference(start) >= shellShownAfter;
   }
 
@@ -575,7 +591,9 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
     final openingRect =
         anchor.localToGlobal(Offset.zero, ancestor: overlay) & anchor.size;
     _open = true;
-    final parent = widget.live.session;
+    // The dialog may outlive this chip: it keeps what it needs.
+    final live = widget.live;
+    final parent = live.session;
     final themes = InheritedTheme.capture(
       from: context,
       to: Navigator.of(context, rootNavigator: true).context,
@@ -624,7 +642,7 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
                     ? rect.left
                     : rect.right - width;
                 final panel = _SubagentPopin(
-                  live: widget.live,
+                  live: live,
                   parent: parent,
                   confirmedRemovedFor: _confirmedRemovedFor,
                   onAction: (selected) =>

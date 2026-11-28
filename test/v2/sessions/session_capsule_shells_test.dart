@@ -864,6 +864,56 @@ void main() {
       expect(find.text(l10n.liveSubagentsUnknown), findsWidgets);
     },
   );
+  test(
+    'sightings: a shell gone from the list ended then; a guess is history',
+    () {
+      final sightings = ShellSightings();
+      addTearDown(sightings.dispose);
+      final t0 = DateTime.utc(2026, 11, 19, 1);
+      DateTime at(int seconds) => t0.add(Duration(seconds: seconds));
+      CapsuleShellEntry entry(
+        String key, {
+        bool running = false,
+        bool unconfirmed = false,
+      }) => CapsuleShellEntry(
+        key: key,
+        command: 'x',
+        isRunning: running,
+        isUnconfirmed: unconfirmed,
+      );
+      List<String> keys(List<CapsuleShellEntry> shown) => [
+        for (final shell in shown) shell.key,
+      ];
+      // A quick shell leaves the list at two seconds while another runs on;
+      // its untimed end arriving later keeps it out.
+      expect(
+        sightings.shown([
+          entry('quick', running: true),
+          entry('long', running: true),
+        ], t0),
+        isEmpty,
+      );
+      expect(sightings.shown([entry('long', running: true)], at(2)), isEmpty);
+      // A view read again lists nothing: that ends nothing.
+      expect(sightings.shown(const [], at(3)), isEmpty);
+      expect(
+        keys(
+          sightings.shown([
+            entry('quick'),
+            entry('long', running: true),
+          ], at(7)),
+        ),
+        ['long'],
+      );
+      // Only guessed from an unconfirmed listing, then found ended: history.
+      expect(
+        sightings.shown([entry('old', unconfirmed: true)], at(8)),
+        isEmpty,
+      );
+      expect(keys(sightings.shown([entry('old')], at(9))), ['old']);
+    },
+  );
+
   testWidgets('a shell with no start counts from when it is first seen', (
     tester,
   ) async {
