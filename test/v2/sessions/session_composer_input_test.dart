@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:codewalk/app/app_dependencies.dart';
 import 'package:codewalk/app/composition_root.dart';
 import 'package:codewalk/app/v2_bootstrap.dart';
+import 'package:codewalk/features/sessions/composer_input.dart';
 import 'package:codewalk/shared/sessions/session_live_source.dart';
 import 'package:codewalk/shared/voice/speech_dictation.dart';
 import 'package:codewalk_core/codewalk_core.dart';
@@ -248,7 +249,10 @@ void main() {
       dictation: FakeDictation(),
     );
     final mic = find.byKey(const ValueKey('composer-voice-button'));
-    // Idle and empty: the mic is where Send is, and Send takes no tap.
+    // Idle and empty, after a moment (#545): the mic is where Send is, and
+    // Send takes no tap.
+    await tester.pump(ComposerFrame.voiceTakeDelay);
+    await tester.pumpAndSettle();
     expect(tester.getRect(mic).center, tester.getRect(_send).center);
     expect(_send.hitTestable(), findsNothing);
     expect(_continues.hitTestable(), findsNothing);
