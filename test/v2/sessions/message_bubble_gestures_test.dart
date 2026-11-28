@@ -735,4 +735,45 @@ void main() {
     // The code's own word, not the paragraph's above it.
     expect(copied.single, contains('final'));
   });
+
+  testWidgets('the bar never reaches past the list', (tester) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: V2Localizations.localizationsDelegates,
+        supportedLocales: V2Localizations.supportedLocales,
+        home: Scaffold(
+          body: Column(
+            children: [
+              const SizedBox(height: 100, child: Placeholder()),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: controller,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      SessionTimelineTile(item: _agent('the answer')),
+                      const SizedBox(height: 1200),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('the answer'));
+    await tester.pumpAndSettle();
+    expect(_bar, findsOneWidget);
+    // The list moves the message under the header, its anchor still in it.
+    controller.jumpTo(30);
+    await tester.pump();
+    final clip = tester.getRect(
+      find.ancestor(of: _bar, matching: find.byType(ClipRect)).first,
+    );
+    expect(clip.top, 100);
+  });
 }

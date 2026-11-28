@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 17,
+  "artifact_seq": 18,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -272,6 +272,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "u5 r2 re-review #539 (386397ce)"
+    },
+    "A0018": {
+      "active": true,
+      "bytes": 643,
+      "created_at": "2026-11-28T02:41:10Z",
+      "evidence": "/tmp/opencode/g8/rev/u5/r3_*.out",
+      "id": "A0018",
+      "impact": "Third fix round",
+      "origin": "8 helpers",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0018.md",
+      "purpose": "Re-review round 3",
+      "rerun_when": "message_action_bar/fork code changes",
+      "sha256": "c675c67c7ea77fec831f4c3225412292e9e44b83f9dcc45db3bcd0fd722ec500",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u5 r3 re-review #539 (00abe9cb)"
     }
   },
   "checklist": [
@@ -715,10 +731,22 @@
     {
       "at": "2026-11-28T02:17:42Z",
       "text": "u5 r2 judged. Accept: Escape scoped to the host (enabled Action only while shown; focus in message or bar), drop the global HardwareKeyboard handler; outside-dismissed menu keeps the bar unpinned when hidden; no hide timer while the pointer is on the bar; bar ignores pointers while settling so a double tap's second tap selects the word; fork navigates only if the route is unchanged; hide when a scroll (incl. jumpTo) moves the anchor edge out of the viewport; BEHAVIOR placement/Escape wording; tests for fork guards. Reject: hover bar covering characters (owner's half-in/out; selection can start elsewhere and hides the bar)."
+    },
+    {
+      "at": "2026-11-28T02:34:57Z",
+      "text": "#541 research: Edge read-aloud requires Sec-MS-GEC v2 since Oct 2026 (v1 token -> 403); only public reimplementation is edge-tts drm.py (LGPLv3, labelled DRM; compatible with CodeWalk AGPL-3.0 with notices). flutter_tts 4.2.5: Windows crash before main on some machines (#640), Windows CMake needs nuget + network, AGP9 builtInKotlin incompatibility -> decision: no System provider this release (follow-up). Asking owner Q3 on Edge (a port v2 token / c no Edge, cloud only)."
+    },
+    {
+      "at": "2026-11-28T02:41:10Z",
+      "text": "u5 r3 judged, all accepted: clip the bar to the list viewport (Positioned.fromRect + ClipRect around the follower) so it never covers header/composer whatever moves it; IgnorePointer wraps the whole overlay child while settling; an overflow choice runs even if the bar was hidden meanwhile; fork navigates only if the page route is current and the location unchanged; _overBar resets on hide; guard test simplified."
+    },
+    {
+      "at": "2026-11-28T02:45:37Z",
+      "text": "Owner Q3 = a: port the edge-tts Sec-MS-GEC v2 token (LGPLv3, keep attribution; compatible with AGPL-3.0) and keep Microsoft Edge as the default read-aloud provider. System voice (flutter_tts) deferred to a follow-up."
     }
   ],
-  "generation": 89,
-  "next_action": "Handshake u5 helpers, then dispatch round 1 + native stand-ins",
+  "generation": 95,
+  "next_action": "Port edge-tts drm.py v2 token to Dart with its test vector; Edge websocket synthesizer; finish #541 wiring after #539 gate",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -741,7 +769,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T02:30:32Z",
+  "updated_at": "2026-11-28T02:49:34Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -804,6 +832,13 @@
       "check": "#539 fix round 2 gate",
       "criterion": null,
       "evidence": "analyze 4/4 budget; full suite +2641 ~4 -0. Log /tmp/opencode/g8/gate539c.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T02:49:34Z",
+      "check": "#539 fix round 3 gate",
+      "criterion": null,
+      "evidence": "analyze 4/4; suite +2641 ~4 -1, the 1 = app_indeterminate_progress_test flagging the uncommitted #541 WIP settings page (not part of the #539 commit). Log /tmp/opencode/g8/gate539d.log",
       "outcome": "pass"
     }
   ]

@@ -454,8 +454,10 @@ class _SessionLivePageState extends State<SessionLivePage>
     }
     // The workspace shows a session through its route, as a list row does;
     // the route opens its tab.
+    // Still on this page, with nothing opened over it.
     if (mounted &&
         router != null &&
+        (ModalRoute.of(context)?.isCurrent ?? true) &&
         router.routerDelegate.currentConfiguration.uri == from) {
       router.go(sessionTabLocation(ref));
     }

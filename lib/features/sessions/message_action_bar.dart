@@ -311,6 +311,8 @@ class _MessageActionHostState extends State<MessageActionHost> {
 
   void _hide({bool refocus = false}) {
     _hoverTimer?.cancel();
+    // A bar that goes reports no exit of the mouse.
+    _overBar = false;
     if (identical(_shown, this)) _shown = null;
     if (!_portal.isShowing) return;
     _portal.hide();
@@ -461,17 +463,20 @@ class _MessageActionHostState extends State<MessageActionHost> {
     );
     _menuOpen = false;
     if (!mounted) return;
+    // The action as it is now: the message may have changed meanwhile, as
+    // when a newer turn moved a fork's cut. It runs even if the bar went
+    // away meanwhile, as when the list followed a growing answer.
+    final action = _all.where((a) => a.id == chosen).firstOrNull;
+    if (action != null) {
+      _settling?.cancel();
+      _settling = null;
+      _run(action);
+      return;
+    }
     // A tap outside the menu also closed the bar: it stays closed, ready
     // for the mouse again.
     if (!_portal.isShowing) {
       setState(() => _pinned = false);
-      return;
-    }
-    // The action as it is now: the message may have changed meanwhile, as
-    // when a newer turn moved a fork's cut.
-    final action = _all.where((a) => a.id == chosen).firstOrNull;
-    if (action != null) {
-      _run(action);
       return;
     }
     // A dismissed menu leaves the bar as it was: a bar the mouse showed
@@ -511,7 +516,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
       return _firstButton;
     }
 
-    return Align(
+    final follower = Align(
       alignment: Alignment.topLeft,
       child: CompositedTransformFollower(
         link: _link,
@@ -519,34 +524,36 @@ class _MessageActionHostState extends State<MessageActionHost> {
         targetAnchor: targetAnchor,
         followerAnchor: followerAnchor,
         offset: Offset(inset, _edge == _Edge.pinned ? _pinnedDy : 0),
-        child: TapRegion(
-          groupId: this,
-          child: MouseRegion(
-            onEnter: (_) {
-              _overBar = true;
-              _hoverTimer?.cancel();
-            },
-            onExit: (event) {
-              _overBar = false;
-              _hoverExit(event);
-            },
-            child: Shortcuts(
-              shortcuts: const {
-                SingleActivator(LogicalKeyboardKey.escape): _CloseBarIntent(),
+        // While a double tap may still land, its second tap goes through to
+        // the words, which it selects.
+        child: IgnorePointer(
+          ignoring: _settling != null,
+          child: TapRegion(
+            groupId: this,
+            child: MouseRegion(
+              onEnter: (_) {
+                _overBar = true;
+                _hoverTimer?.cancel();
               },
-              child: Actions(
-                actions: {_CloseBarIntent: _CloseBarAction(this)},
-                child: FocusTraversalGroup(
-                  child: Focus(
-                    focusNode: _barFocus,
-                    child: Semantics(
-                      container: true,
-                      explicitChildNodes: true,
-                      label: l10n.messageActions,
-                      // While a double tap may still land, its second tap
-                      // goes through to the words, which it selects.
-                      child: IgnorePointer(
-                        ignoring: _settling != null,
+              onExit: (event) {
+                _overBar = false;
+                _hoverExit(event);
+              },
+              child: Shortcuts(
+                shortcuts: const {
+                  SingleActivator(LogicalKeyboardKey.escape): _CloseBarIntent(),
+                },
+                child: Actions(
+                  actions: {_CloseBarIntent: _CloseBarAction(this)},
+                  child: FocusTraversalGroup(
+                    child: Focus(
+                      focusNode: _barFocus,
+                      child: Semantics(
+                        container: true,
+                        explicitChildNodes: true,
+                        label: l10n.messageActions,
+                        // While a double tap may still land, its second tap
+                        // goes through to the words, which it selects.
                         child: _ActionPill(
                           end: widget.end,
                           maxWidth: (viewportWidth - 16).clamp(
@@ -584,6 +591,26 @@ class _MessageActionHostState extends State<MessageActionHost> {
           ),
         ),
       ),
+    );
+    return _withinList(context, follower);
+  }
+
+  /// Keeps [bar] inside the visible list: whatever moves the message, the
+  /// bar never covers the header or the composer.
+  Widget _withinList(BuildContext context, Widget bar) {
+    final viewport = _viewport;
+    final overlay = Overlay.maybeOf(context)?.context.findRenderObject();
+    if (viewport == null || overlay is! RenderBox || !overlay.hasSize) {
+      return bar;
+    }
+    final origin = overlay.globalToLocal(viewport.topLeft);
+    return Stack(
+      children: [
+        Positioned.fromRect(
+          rect: origin & viewport.size,
+          child: ClipRect(child: bar),
+        ),
+      ],
     );
   }
 

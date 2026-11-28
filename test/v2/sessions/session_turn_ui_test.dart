@@ -287,82 +287,77 @@ void main() {
     },
   );
 
-  for (final (name, child, staged) in const [('a staged undo', false, true)]) {
-    testWidgets('no Fork from here for $name (#539)', (tester) async {
-      final actions = FakeActionSource();
-      final rig = CatalogRig(actions: actions);
-      await rig.save('a');
-      await rig.sessions.initialize();
-      final loading = rig.sessions.selectProfile('profile_a');
-      final source = rig.sources.single;
-      final root = source.row('one');
-      // A child is found, but the list's rows hold only roots.
-      final kid = source.row('kid', parent: 'one');
-      source.respond([root, kid]);
-      await loading;
-      final summary = child ? kid : root;
-      final directory = LiveDirectory();
-      final ref = summary.info.ref;
-      final live = SessionLiveController(
-        hosts: rig.hosts,
-        profile: profile('a'),
-        summary: summary,
-        directory: directory,
-      );
-      addTearDown(live.dispose);
-      final port = _FakePort();
-      final start = live.start();
-      final handle = directory.grant(ref, turnActions: port);
-      await start;
-      final user1 = _turn('msg_1', ref: ref, text: 'First user prompt');
-      final user2 = _turn('msg_2', ref: ref, text: 'Second user prompt');
-      if (staged) {
-        port.state = SessionTurnState(
-          phase: SessionTurnPhase.idle,
-          revert: RevertState(
-            kind: const OpenValue.known(RevertKind.staged),
-            boundary: user2.id,
-            anchor: user2.meta.anchor!,
-          ),
-        );
-      }
-      handle.emit(
-        SessionLiveView(
-          session: ref,
-          phase: SessionLivePhase.live,
-          state: liveState(
-            ref,
-            items: [
-              user1,
-              _answer('ans_1', ref: ref, text: 'First response'),
-              user2,
-            ],
-          ),
+  testWidgets('no Fork from here while an undo is staged (#539)', (
+    tester,
+  ) async {
+    final actions = FakeActionSource();
+    final rig = CatalogRig(actions: actions);
+    await rig.save('a');
+    await rig.sessions.initialize();
+    final loading = rig.sessions.selectProfile('profile_a');
+    final source = rig.sources.single;
+    final summary = source.row('one');
+    source.respond([summary]);
+    await loading;
+    final directory = LiveDirectory();
+    final ref = summary.info.ref;
+    final live = SessionLiveController(
+      hosts: rig.hosts,
+      profile: profile('a'),
+      summary: summary,
+      directory: directory,
+    );
+    addTearDown(live.dispose);
+    final port = _FakePort();
+    final start = live.start();
+    final handle = directory.grant(ref, turnActions: port);
+    await start;
+    final user1 = _turn('msg_1', ref: ref, text: 'First user prompt');
+    final user2 = _turn('msg_2', ref: ref, text: 'Second user prompt');
+    port.state = SessionTurnState(
+      phase: SessionTurnPhase.idle,
+      revert: RevertState(
+        kind: const OpenValue.known(RevertKind.staged),
+        boundary: user2.id,
+        anchor: user2.meta.anchor!,
+      ),
+    );
+    handle.emit(
+      SessionLiveView(
+        session: ref,
+        phase: SessionLivePhase.live,
+        state: liveState(
+          ref,
+          items: [
+            user1,
+            _answer('ans_1', ref: ref, text: 'First response'),
+            user2,
+          ],
         ),
-      );
-      await tester.pumpWidget(
-        ChangeNotifierProvider<SessionsController?>.value(
-          value: rig.sessions,
-          child: MaterialApp(
-            localizationsDelegates: V2Localizations.localizationsDelegates,
-            supportedLocales: V2Localizations.supportedLocales,
-            home: Scaffold(body: SessionLivePage(controller: live)),
-          ),
+      ),
+    );
+    await tester.pumpWidget(
+      ChangeNotifierProvider<SessionsController?>.value(
+        value: rig.sessions,
+        child: MaterialApp(
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(body: SessionLivePage(controller: live)),
         ),
-      );
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(rig.sessions.findSession(ref), isNotNull);
+    await tester.tap(find.text('First response'));
+    await tester.pumpAndSettle();
+    await tester.pump(kDoubleTapTimeout);
+    final more = find.byKey(const ValueKey('message-action-more'));
+    if (more.evaluate().isNotEmpty) {
+      await tester.tap(more);
       await tester.pumpAndSettle();
-      expect(rig.sessions.findSession(ref), isNotNull);
-      await tester.tap(find.text('First response'));
-      await tester.pumpAndSettle();
-      await tester.pump(kDoubleTapTimeout);
-      final more = find.byKey(const ValueKey('message-action-more'));
-      if (more.evaluate().isNotEmpty) {
-        await tester.tap(more);
-        await tester.pumpAndSettle();
-      }
-      expect(find.byKey(const ValueKey('message-action-fork')), findsNothing);
-    });
-  }
+    }
+    expect(find.byKey(const ValueKey('message-action-fork')), findsNothing);
+  });
 
   testWidgets(
     'a prompt\'s fork opens the new session with the prompt in its box',
