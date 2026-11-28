@@ -4,6 +4,7 @@ import 'package:codewalk_core/codewalk_core.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../shared/sessions/command_ids.dart';
+import '../../shared/sessions/prompt_outbox.dart';
 import '../../shared/sessions/server_path.dart';
 import '../../shared/sessions/session_live_source.dart';
 import '../../shared/sessions/session_turn_actions.dart';
@@ -126,6 +127,7 @@ class MessageForwardRun extends ChangeNotifier {
     required List<SessionSummary> targets,
     required this.open,
     required this.available,
+    this.confirm,
     this.offline,
     this.readyTimeout = const Duration(seconds: 20),
   }) : targets = [for (final row in targets) ForwardTarget(row)];
@@ -138,6 +140,10 @@ class MessageForwardRun extends ChangeNotifier {
 
   /// Whether the target is still listed and not archived.
   final bool Function(SessionRef session) available;
+
+  /// Reads the target again from its server right before the post: false
+  /// when it was archived or deleted meanwhile; throws when it cannot tell.
+  final Future<bool> Function(SessionRef session)? confirm;
 
   /// Whether the server is known to be offline now.
   final bool Function()? offline;
@@ -222,7 +228,6 @@ class MessageForwardRun extends ChangeNotifier {
     target.status = ForwardStatus.sending;
     _notify();
     SessionLiveHandle? lease;
-    var posting = false;
     try {
       final opening = open(target.ref);
       final halted = _halt.future;
@@ -252,24 +257,51 @@ class MessageForwardRun extends ChangeNotifier {
         return;
       }
       if (miss != null) return _fail(target, miss);
+      final confirm = this.confirm;
+      if (confirm != null) {
+        // The list learns of an archive a moment after the server.
+        final bool? listed;
+        try {
+          listed = await Future.any<bool?>([
+            confirm(target.ref),
+            _halt.future.then((_) => null),
+          ]).timeout(readyTimeout);
+        } on Object {
+          return _fail(target, ForwardMiss.unavailable);
+        }
+        if (_stopped || listed == null) {
+          target.status = ForwardStatus.stopped;
+          return;
+        }
+        if (!listed) return _fail(target, ForwardMiss.gone);
+      }
       final opened = lease;
       final outbox = opened.outbox;
       if (outbox == null) return _fail(target, ForwardMiss.unavailable);
-      posting = true;
-      final submission = await outbox.submit(
-        session: target.ref,
-        commandId: mintCommandId(),
-        draft: PromptDraft(text: text),
-        delivery: Delivery.queue,
-        // Checked again right before the post: a stop, a staged undo, a
-        // hold (a model change, a stop of its turn) or an archive meanwhile
-        // keeps the prompt from going.
-        isCurrent: () =>
-            !_stopped &&
-            !(opened.turnActions?.state.staged ?? false) &&
-            !_holds(opened) &&
-            available(target.ref),
-      );
+      final OutboxSubmission submission;
+      try {
+        submission = await outbox.submit(
+          session: target.ref,
+          commandId: mintCommandId(),
+          draft: PromptDraft(text: text),
+          delivery: Delivery.queue,
+          // Checked again right before the post: a stop, a staged undo, a
+          // hold (a model change, a stop of its turn) or an archive meanwhile
+          // keeps the prompt from going.
+          isCurrent: () =>
+              !_stopped &&
+              opened.current.phase == SessionLivePhase.live &&
+              !opened.current.stale &&
+              !(opened.turnActions?.state.staged ?? false) &&
+              !_holds(opened) &&
+              available(target.ref),
+        );
+      } on Object {
+        // Thrown while the post was under way, whatever the error: it may
+        // have gone, so it is never sent again from here.
+        target.status = ForwardStatus.unconfirmed;
+        return;
+      }
       final entry = submission.entry;
       if (entry == null) {
         if (submission.refusal == 'cancelledBeforeSend') {
@@ -322,13 +354,8 @@ class MessageForwardRun extends ChangeNotifier {
         _fail(target, ForwardMiss.busy);
       }
     } on Object {
-      // Anything else: never sent if it failed before the post, else never
-      // sent again from here, as with no answer.
-      if (posting) {
-        target.status = ForwardStatus.unconfirmed;
-      } else {
-        _fail(target, ForwardMiss.unavailable);
-      }
+      // Anything else, before the post: never sent.
+      _fail(target, ForwardMiss.unavailable);
     } finally {
       lease?.close();
     }

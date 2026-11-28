@@ -108,6 +108,26 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Pumps until the run ends, answering each target's read again as the
+  /// server has it.
+  Future<void> settle(WidgetTester tester) async {
+    for (var i = 0; i < 20; i++) {
+      await tester.pump();
+      for (final (ref, task) in source.reads) {
+        if (task.completion.isCompleted) continue;
+        final row = rows().where((row) => row.info.ref == ref).firstOrNull;
+        if (row == null) {
+          task.completion.completeError(
+            const SessionCatalogException(SessionCatalogFailure.unavailable),
+          );
+        } else {
+          task.completion.complete(row);
+        }
+      }
+    }
+    await tester.pumpAndSettle();
+  }
+
   Finder target(String id) => find.byKey(
     ValueKey('forward_target_${source.row(id).info.ref.storageKey}'),
   );
@@ -138,7 +158,7 @@ void main() {
     expect(target('one'), findsNothing);
     expect(target('two'), findsOneWidget);
     await tester.tap(send);
-    await tester.pumpAndSettle();
+    await settle(tester);
     expect(outbox.calls, hasLength(2));
     expect(
       outbox.calls.first,
@@ -155,7 +175,7 @@ void main() {
     await tester.tap(target('two'));
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('forward_send')));
-    await tester.pumpAndSettle();
+    await settle(tester);
     expect(find.text('Sent to 1 of 2'), findsOneWidget);
     expect(
       find.text('Not sent: the conversation is gone or archived'),
@@ -164,7 +184,7 @@ void main() {
     expect(find.text('Queued'), findsOneWidget);
     gone.clear();
     await tester.tap(find.byKey(const ValueKey('forward_retry')));
-    await tester.pumpAndSettle();
+    await settle(tester);
     // Only the one not sent to goes again; then the dialog closes.
     expect(outbox.calls, hasLength(2));
     expect(find.byKey(const ValueKey('forward_results')), findsNothing);
@@ -179,7 +199,7 @@ void main() {
     );
     send.onPressed!();
     send.onPressed!();
-    await tester.pumpAndSettle();
+    await settle(tester);
     expect(
       outbox.calls.where((call) => call.startsWith('submit')),
       hasLength(1),
@@ -197,7 +217,7 @@ void main() {
     await tester.pump();
     expect(find.text('2 selected'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('forward_send')));
-    await tester.pumpAndSettle();
+    await settle(tester);
     expect(find.text('Sent to 1 of 2'), findsOneWidget);
     expect(
       find.text('Not sent: the conversation is gone or archived'),

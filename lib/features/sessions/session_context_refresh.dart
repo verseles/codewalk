@@ -26,6 +26,7 @@ final class SessionContextRefresh {
   SessionContextRefresh({
     required this.read,
     required this.publish,
+    this.failed,
     this.minInterval = const Duration(seconds: 10),
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
@@ -38,6 +39,9 @@ final class SessionContextRefresh {
   /// was closed or the server changed meanwhile.
   final void Function(String directory, SessionContextSnapshot snapshot)
   publish;
+
+  /// Told when a pass ends with a read that failed.
+  final void Function()? failed;
   final Duration minInterval;
   final DateTime Function() _now;
 
@@ -50,6 +54,10 @@ final class SessionContextRefresh {
   DateTime? _earliest;
   Timer? _timer;
   SessionCatalogTask? _task;
+
+  /// Whether the last pass had a read that failed; the next good pass, or a
+  /// [refresh], clears it.
+  bool get failing => _failures > 0;
 
   /// The open contexts the list does not show. A context new to the set is
   /// read at once; one that left it stops being read.
@@ -134,6 +142,7 @@ final class SessionContextRefresh {
         _failures = failed ? _failures + 1 : 0;
         _earliest = _now().add(minInterval);
         if (_again && _failures < 3) _schedule(immediate: false);
+        if (failed) this.failed?.call();
       }
     }
   }

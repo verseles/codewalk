@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 27,
+  "artifact_seq": 28,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -432,6 +432,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "#541 r4 + #542 r1 reviews"
+    },
+    "A0028": {
+      "active": true,
+      "bytes": 918,
+      "created_at": "2026-11-28T05:50:03Z",
+      "evidence": "/tmp/opencode/g8/rev/u7/r5_*.out, /tmp/opencode/g8/rev/u8/r2_*.out",
+      "id": "A0028",
+      "impact": "Small fix round for both",
+      "origin": "6 helpers each",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0028.md",
+      "purpose": "Re-review d1816c75 and 8c6e88f1",
+      "rerun_when": "after fixes",
+      "sha256": "733c80336ced786e87b91b8f64471e8d9d75ce9b5c6a96bb4e30c1dd22a53260",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "#541 r5 + #542 r2 re-reviews"
     }
   },
   "checklist": [
@@ -965,16 +981,9 @@
       "text": "Judged #541 r4 (A0027): accepted stop of pending start, superseded-state recheck, folder retry, foreign pass on any state change, key save during switch, tests; rejected 1-day sweep (tradeoff, dissent sent to Sol-F in r5). Fix d1816c75. Judged #542 r1: accepted double-send guard, picked-row snapshot+dedupe, failure-first picker, error->unavailable/unconfirmed, Stop halts waits, watching:false lease (no auto-approve), isCurrent holds, history pop, SafeArea, health listener, warm composer reload; rejected separate archive check (dissent in r2). Metrics recorded u7 r4, u8 r1."
     }
   ],
-  "generation": 140,
+  "generation": 141,
   "next_action": "Session tests running (bzxv93agu); then commit #542 fixes, dispatch u7 r5 + u8 r2 re-reviews, continue #547 tests",
-  "pending_operation": {
-    "expected_bytes": 30000,
-    "expected_seconds": 900,
-    "id": "op_004a84496ed3",
-    "kind": "subagent",
-    "prepared_at": "2026-11-28T05:38:46Z",
-    "purpose": "Re-review #541 r5 (d1816c75) and #542 r2 (8c6e88f1) with 6 helpers each"
-  },
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -996,7 +1005,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T05:42:39Z",
+  "updated_at": "2026-11-28T05:50:03Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

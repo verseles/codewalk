@@ -230,6 +230,14 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
     return row != null && forwardTargetAllowed(row, widget.source);
   }
 
+  /// The target as its server has it now; an archive the list has not
+  /// learned yet counts.
+  Future<bool> _confirm(SessionRef ref) async {
+    final task = widget.catalog.read(ref);
+    if (task == null) return _available(ref);
+    return forwardTargetAllowed(await task.result, widget.source);
+  }
+
   Future<void> _send(List<ForwardGroup> groups) async {
     // One run, however many times Forward is pressed before it shows.
     if (_run != null || _selected.isEmpty) return;
@@ -248,6 +256,7 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
       targets: rows.values.toList(),
       open: widget.open,
       available: _available,
+      confirm: _confirm,
       offline: widget.offline,
       readyTimeout: widget.readyTimeout,
     )..addListener(_changed);
@@ -283,20 +292,28 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
       canPop: !(run?.running ?? false),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.messageForwardTitle,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 8),
-            _Preview(provenance: widget.provenance, text: widget.text),
-            const SizedBox(height: 12),
-            Expanded(
-              child: run == null ? _picker(context, l10n) : _results(l10n, run),
-            ),
-          ],
+        child: LayoutBuilder(
+          // A short window, as a phone on its side with the keyboard up,
+          // keeps the list and its buttons and leaves the preview out.
+          builder: (context, constraints) => Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.messageForwardTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 8),
+              if (constraints.maxHeight >= 400) ...[
+                _Preview(provenance: widget.provenance, text: widget.text),
+                const SizedBox(height: 12),
+              ],
+              Expanded(
+                child: run == null
+                    ? _picker(context, l10n)
+                    : _results(l10n, run),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -314,20 +331,26 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
     final loading = groups.any((group) => group.rows == null);
     final none = groups.every((group) => group.rows?.isEmpty ?? true);
     final catalog = widget.catalog;
+    // A read that failed, of the list or of another open project: what is
+    // still unread offers Retry instead of a spinner.
+    final failed =
+        (catalog.failure != null || catalog.contextsFailing) &&
+        !catalog.loading;
+    Widget retry(Key key) => Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(l10n.messageForwardLoadFailed),
+        const SizedBox(height: 8),
+        TextButton(
+          key: key,
+          onPressed: () => unawaited(catalog.refresh()),
+          child: Text(l10n.chatRetry),
+        ),
+      ],
+    );
     Widget body;
-    if (none && catalog.failure != null && !catalog.loading) {
-      body = Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(l10n.messageForwardLoadFailed),
-          const SizedBox(height: 8),
-          TextButton(
-            key: const ValueKey('forward_retry_load'),
-            onPressed: () => unawaited(catalog.refresh()),
-            child: Text(l10n.chatRetry),
-          ),
-        ],
-      );
+    if (none && failed) {
+      body = retry(const ValueKey('forward_retry_load'));
     } else if (none && (loading || catalog.loading)) {
       body = const Center(child: AppIndeterminateRing(size: 24));
     } else if (directories.isEmpty) {
@@ -352,9 +375,11 @@ class _ForwardMessageDialogState extends State<ForwardMessageDialog> {
                 ),
               ),
               if (group.rows == null)
-                const Padding(
-                  padding: EdgeInsets.all(12),
-                  child: Center(child: AppIndeterminateRing(size: 20)),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: failed
+                      ? retry(ValueKey('forward_retry_${group.directory}'))
+                      : const Center(child: AppIndeterminateRing(size: 20)),
                 )
               else
                 for (final row in group.rows!)

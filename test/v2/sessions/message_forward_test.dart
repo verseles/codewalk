@@ -217,12 +217,14 @@ void main() {
     MessageForwardRun run(
       List<String> ids, {
       bool Function()? offline,
+      Future<bool> Function(SessionRef session)? confirm,
       Duration timeout = const Duration(seconds: 20),
     }) => MessageForwardRun(
       text: 'Forwarded from: app / Src\n\nhello',
       targets: [for (final id in ids) _row(id)],
       open: open,
       available: (ref) => !gone.contains(ref),
+      confirm: confirm,
       offline: offline,
       readyTimeout: timeout,
     );
@@ -408,6 +410,45 @@ void main() {
       await pumpEventQueue();
       handles.values.single.selectionState = const SessionSelectionState(
         phase: SessionSelectionPhase.pending,
+      );
+      hold.complete();
+      await running;
+      expect(forward.targets.single.miss, ForwardMiss.busy);
+    });
+
+    test('an error once the post started is never sent again', () async {
+      outbox.submitError = TimeoutException('no answer');
+      final forward = run(['a']);
+      await forward.run();
+      expect(forward.targets.single.status, ForwardStatus.unconfirmed);
+      final calls = outbox.calls.length;
+      await forward.retryFailed();
+      expect(outbox.calls, hasLength(calls));
+    });
+
+    test('the server tells of an archive the list has not seen', () async {
+      final archived = run(['a'], confirm: (_) async => false);
+      await archived.run();
+      expect(archived.targets.single.miss, ForwardMiss.gone);
+      final unknown = run(['b'], confirm: (_) async => throw StateError('x'));
+      await unknown.run();
+      expect(unknown.targets.single.miss, ForwardMiss.unavailable);
+      expect(outbox.calls, isEmpty);
+    });
+
+    test('a lease no longer live before the post keeps it unsent', () async {
+      final hold = outbox.holdSubmit = Completer<void>();
+      final forward = run(['a']);
+      final running = forward.run();
+      await pumpEventQueue();
+      final handle = handles.values.single;
+      handle.emit(
+        SessionLiveView(
+          session: handle.session,
+          phase: SessionLivePhase.live,
+          stale: true,
+          state: liveState(handle.session),
+        ),
       );
       hold.complete();
       await running;

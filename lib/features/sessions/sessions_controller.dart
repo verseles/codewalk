@@ -130,8 +130,13 @@ class SessionsController extends ChangeNotifier {
   late final _contextRefresh = SessionContextRefresh(
     read: _readContext,
     publish: _publishContext,
+    failed: _notify,
     now: _now,
   );
+
+  /// Whether the last read of the open contexts the list does not show had
+  /// one that failed; [refresh] reads them again.
+  bool get contextsFailing => _contextRefresh.failing;
 
   /// The last page read ended the list: the endpoint keeps a next cursor on
   /// a short last page, so a short page ends it too.

@@ -28,6 +28,37 @@ void main() {
     refresh = create();
   });
 
+  testWidgets('a pass with a failed read says so until a good one', (
+    tester,
+  ) async {
+    var failures = 0;
+    refresh = SessionContextRefresh(
+      read: (directory) {
+        final task = CatalogTask();
+        reads.add((directory, task));
+        return task;
+      },
+      publish: (directory, snapshot) => published.add((directory, snapshot)),
+      failed: () => failures++,
+      now: () => clock,
+    );
+    refresh.track(['/a']);
+    await tester.pump(Duration.zero);
+    reads.single.$2.completion.completeError(
+      const SessionCatalogException(SessionCatalogFailure.unavailable),
+    );
+    await tester.pump();
+    expect(refresh.failing, isTrue);
+    expect(failures, 1);
+    refresh.refresh();
+    expect(refresh.failing, isFalse);
+    await tester.pump(Duration.zero);
+    reads.last.$2.completion.complete(Page(items: const []));
+    await tester.pump();
+    expect(refresh.failing, isFalse);
+    expect(failures, 1);
+  });
+
   testWidgets('contexts are read one at a time and new ones at once', (
     tester,
   ) async {

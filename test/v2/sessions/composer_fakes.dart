@@ -13,6 +13,9 @@ final class FakeOutbox implements PromptOutbox {
   SubmissionKind submitState = SubmissionKind.admitted;
   String? submitReason;
   String? submitRefusal;
+
+  /// Thrown by a submit once it is under way.
+  Object? submitError;
   Completer<void>? holdSubmit;
   Completer<void>? holdAfterRecord;
   Completer<void>? holdReconcile;
@@ -47,6 +50,7 @@ final class FakeOutbox implements PromptOutbox {
     if (isCurrent?.call() == false) {
       return const OutboxSubmission.refused('cancelledBeforeSend');
     }
+    if (submitError case final error?) throw error;
     if (submitRefusal case final refusal?) {
       return OutboxSubmission.refused(refusal);
     }

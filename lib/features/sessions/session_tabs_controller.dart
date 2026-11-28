@@ -605,7 +605,6 @@ class SessionTabsController extends ChangeNotifier {
   /// Observing these views never opens a lease or changes their warm order.
   List<SessionLiveController> get warmViews => List.unmodifiable(_warm.values);
 
-  /// Disposes a view after the frame, once the page that showed it is gone.
   /// A prompt was recorded for [ref] from elsewhere, as by a forward
   /// (#542): its warm conversation reads its outbox again, so the prompt
   /// shows there with what can be done about it.
@@ -614,6 +613,7 @@ class SessionTabsController extends ChangeNotifier {
     if (live != null && !live.disposed) unawaited(live.composer.reload());
   }
 
+  /// Disposes a view after the frame, once the page that showed it is gone.
   void _release(SessionLiveController? live) {
     if (live == null) return;
     WidgetsBinding.instance
