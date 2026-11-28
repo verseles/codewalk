@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
@@ -57,6 +58,10 @@ class SessionTaskListPanel extends StatefulWidget {
     return baseHeader + wrapAllowance + listMaxHeightFor(bodyHeight);
   }
 
+  /// The rows the expanded list shows at once; a longer list scrolls, with
+  /// the task in progress in the middle (#550).
+  static const visibleRows = 5;
+
   /// Scrollable list height cap for a viewport of [bodyHeight] logical pixels.
   static double listMaxHeightFor(double bodyHeight) =>
       min(220.0, max(72.0, bodyHeight * 0.28));
@@ -83,8 +88,10 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
   static const _scrollDuration = Duration(milliseconds: 200);
 
   final _scrollController = ScrollController();
-  final _itemKeys = <String, GlobalKey>{};
   bool _keyboardOpen = false;
+
+  /// The height of one row as last laid out.
+  double _rowExtent = 0;
   String? _lastScrollTarget;
   bool _wasCollapsed = true;
 
@@ -114,7 +121,6 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
   @override
   void didUpdateWidget(covariant SessionTaskListPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _pruneItemKeys();
     _maybeScheduleAutoScroll();
   }
 
@@ -146,17 +152,6 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
 
   String _entryKey(int index, PlanEntry entry) => '$index:${entry.id}';
 
-  void _pruneItemKeys() {
-    final entries = widget.plan.entries;
-    final keys = {
-      for (var i = 0; i < entries.length; i++) _entryKey(i, entries[i]),
-    };
-    _itemKeys.removeWhere((key, _) => !keys.contains(key));
-  }
-
-  GlobalKey _keyFor(int index, PlanEntry entry) =>
-      _itemKeys.putIfAbsent(_entryKey(index, entry), GlobalKey.new);
-
   void _maybeScheduleAutoScroll() {
     final collapsed = _effectiveCollapsed(context);
     final entries = widget.plan.entries;
@@ -175,17 +170,43 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
     if (!justExpanded && target == _lastScrollTarget) return;
     _lastScrollTarget = target;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _effectiveCollapsed(context)) return;
-      final itemContext = _itemKeys[rowKey]?.currentContext;
-      if (itemContext == null) return;
-      final animate = AppIndeterminate.motion(context);
-      Scrollable.ensureVisible(
-        itemContext,
-        alignment: 0.35,
-        duration: animate ? _scrollDuration : Duration.zero,
-        curve: Curves.easeOut,
-      );
+      if (!mounted ||
+          _effectiveCollapsed(context) ||
+          !_scrollController.hasClients) {
+        return;
+      }
+      // The task in progress in the middle: two rows before it, two after.
+      final position = _scrollController.position;
+      final offset =
+          ((currentIndex - SessionTaskListPanel.visibleRows ~/ 2) * _rowExtent)
+              .clamp(0.0, position.maxScrollExtent)
+              .toDouble();
+      if (AppIndeterminate.motion(context)) {
+        unawaited(
+          _scrollController.animateTo(
+            offset,
+            duration: _scrollDuration,
+            curve: Curves.easeOut,
+          ),
+        );
+      } else {
+        _scrollController.jumpTo(offset);
+      }
     });
+  }
+
+  /// The height of one row: a line of its text or its icon, whichever is
+  /// taller, and its padding, at the text size in effect.
+  static double _rowExtentOf(BuildContext context) {
+    final painter = TextPainter(
+      text: TextSpan(text: 'Ag', style: Theme.of(context).textTheme.bodySmall),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final line = painter.height;
+    painter.dispose();
+    return max(line, 17.0) + 10.0;
   }
 
   String _collapsedSummary(
@@ -253,9 +274,7 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
       currentIndex,
       compact: compact,
     );
-    final headerTitle = collapsed
-        ? summaryText
-        : l10n.sessionTodoTasks;
+    final headerTitle = collapsed ? summaryText : l10n.sessionTodoTasks;
     final progressSemantic = l10n.sessionTodoProgressSemantic(
       progress.completed,
       displayTotal,
@@ -301,25 +320,40 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
 
     final expandedBody = collapsed
         ? const SizedBox.shrink()
-        : ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: listMaxHeight),
-            child: Scrollbar(
-              controller: _scrollController,
-              thumbVisibility: entries.length > 5,
-              child: SingleChildScrollView(
-                key: const ValueKey('session-todo-list'),
-                controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var i = 0; i < entries.length; i++)
-                      _buildRow(context, i, entries[i], l10n),
-                  ],
+        : Builder(
+            // Inside the conversation's text scale, as the rows are.
+            builder: (context) {
+              final extent = _rowExtent = _rowExtentOf(context);
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: min(
+                    listMaxHeight,
+                    extent * SessionTaskListPanel.visibleRows + 10,
+                  ),
                 ),
-              ),
-            ),
+                child: Scrollbar(
+                  controller: _scrollController,
+                  thumbVisibility:
+                      entries.length > SessionTaskListPanel.visibleRows,
+                  child: SingleChildScrollView(
+                    key: const ValueKey('session-todo-list'),
+                    controller: _scrollController,
+                    padding: const EdgeInsets.fromLTRB(6, 4, 6, 6),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (var i = 0; i < entries.length; i++)
+                          SizedBox(
+                            height: extent,
+                            child: _buildRow(context, i, entries[i], l10n),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           );
 
     return ConversationTextScale(
@@ -588,7 +622,7 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
     );
 
     return KeyedSubtree(
-      key: _keyFor(index, entry),
+      key: ValueKey(_entryKey(index, entry)),
       child: Semantics(
         label: '${entry.title}, ${_statusLabel(l10n, status)}',
         excludeSemantics: true,
@@ -608,10 +642,12 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
                 Padding(padding: const EdgeInsets.only(top: 1), child: icon),
                 const SizedBox(width: 8),
                 Expanded(
+                  // One line each, so five rows show five tasks; the whole
+                  // title stays in the row's label.
                   child: Text(
                     entry.title,
                     style: textStyle,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),

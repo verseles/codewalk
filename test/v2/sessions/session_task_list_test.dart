@@ -80,6 +80,66 @@ Widget _wrap(
 }
 
 void main() {
+  testWidgets('five rows show, the task in progress in the middle (#550)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    PlanSnapshot plan(int active) => _plan([
+      for (var i = 0; i < 10; i++)
+        _entry(
+          '$i',
+          'Task number $i',
+          i < active
+              ? PlanStatus.completed
+              : i == active
+              ? PlanStatus.inProgress
+              : PlanStatus.pending,
+        ),
+    ]);
+    Future<void> show(int active) async {
+      await tester.pumpWidget(
+        _wrap(
+          Scaffold(
+            body: Align(
+              alignment: Alignment.topCenter,
+              child: SessionTaskListPanel(
+                plan: plan(active),
+                collapsed: false,
+                onToggleCollapsed: () {},
+              ),
+            ),
+          ),
+          disableAnimations: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Set<int> shown() {
+      final list = tester.getRect(
+        find.byKey(const ValueKey('session-todo-list')),
+      );
+      return {
+        for (var i = 0; i < 10; i++)
+          if (list.contains(
+            tester.getCenter(find.byKey(ValueKey('session-todo-item-$i'))),
+          ))
+            i,
+      };
+    }
+
+    await show(5);
+    expect(shown(), {3, 4, 5, 6, 7});
+    // Another task in progress: the list turns to it.
+    await show(6);
+    expect(shown(), {4, 5, 6, 7, 8});
+    // Near the end, the last five.
+    await show(9);
+    expect(shown(), {5, 6, 7, 8, 9});
+  });
+
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group(
