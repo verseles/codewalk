@@ -351,6 +351,8 @@ void main() {
     await tester.tap(find.text('First response'));
     await tester.pumpAndSettle();
     await tester.pump(kDoubleTapTimeout);
+    expect(find.byKey(const ValueKey('message-action-bar')), findsOneWidget);
+    expect(find.byKey(const ValueKey('message-action-copy')), findsOneWidget);
     final more = find.byKey(const ValueKey('message-action-more'));
     if (more.evaluate().isNotEmpty) {
       await tester.tap(more);

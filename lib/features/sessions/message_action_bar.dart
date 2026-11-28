@@ -84,6 +84,9 @@ const messageBarHideDelay = Duration(milliseconds: 600);
 const _barHeight = 48.0;
 const _barMargin = 4.0;
 
+// The room a button's name takes above the pill: its gap and one line.
+const _hintRoom = 40.0;
+
 /// A long press that answers only where [allow] says so.
 class _CleanLongPress extends LongPressGestureRecognizer {
   _CleanLongPress({required this.allow, super.debugOwner})
@@ -160,7 +163,8 @@ class MessageActionHost extends StatefulWidget {
 
 enum _Edge { top, bottom, pinned }
 
-class _MessageActionHostState extends State<MessageActionHost> {
+class _MessageActionHostState extends State<MessageActionHost>
+    with AutomaticKeepAliveClientMixin {
   static _MessageActionHostState? _shown;
 
   final _content = GlobalKey();
@@ -193,8 +197,15 @@ class _MessageActionHostState extends State<MessageActionHost> {
   bool _overBar = false;
   ScrollPosition? _position;
 
-  // The three-dots menu is open: Escape is its own.
+  // The three-dots menu is open: Escape is its own, and the list keeps the
+  // message, whose choice would otherwise be lost.
   bool _menuOpen = false;
+
+  ScrollNotificationObserverState? _observer;
+  bool _recheckPending = false;
+
+  // The list's bounds and the hint's side the bar was last built with.
+  (Rect, bool)? _built;
 
   // The press being tracked as a possible tap.
   Offset? _downAt;
@@ -214,12 +225,21 @@ class _MessageActionHostState extends State<MessageActionHost> {
       _position?.removeListener(_moved);
       _position = position?..addListener(_moved);
     }
+    final observer = ScrollNotificationObserver.maybeOf(context);
+    if (!identical(observer, _observer)) {
+      _observer?.removeListener(_metrics);
+      _observer = observer?..addListener(_metrics);
+    }
   }
+
+  @override
+  bool get wantKeepAlive => _menuOpen;
 
   @override
   void dispose() {
     _scrolling?.removeListener(_scrollChanged);
     _position?.removeListener(_moved);
+    _observer?.removeListener(_metrics);
     _hoverTimer?.cancel();
     _settling?.cancel();
     if (identical(_shown, this)) _shown = null;
@@ -236,21 +256,53 @@ class _MessageActionHostState extends State<MessageActionHost> {
     _hide();
   }
 
+  /// The list resized, as when the composer grows.
+  void _metrics(ScrollNotification notification) {
+    if (notification.metrics.axis == Axis.vertical) _moved();
+  }
+
   /// The list moved without a scroll gesture, as when it follows a
-  /// growing answer: a bar whose edge left the visible list goes.
+  /// growing answer, or resized: once it is laid out, a bar whose edge left
+  /// the visible list goes, and one that stays keeps to the list as it is.
   void _moved() {
+    if (!_portal.isShowing || _recheckPending) return;
+    _recheckPending = true;
+    WidgetsBinding.instance
+      ..addPostFrameCallback((_) {
+        _recheckPending = false;
+        if (mounted) _recheck();
+      })
+      ..ensureVisualUpdate();
+  }
+
+  void _recheck() {
     if (!_portal.isShowing) return;
-    final box = _contentBox;
+    final y = _edgeY;
     final viewport = _viewport;
-    if (box == null || viewport == null) return;
+    if (y == null || viewport == null) return;
+    if (y < viewport.top || y > viewport.bottom) {
+      _hide();
+    } else if (_built != (viewport, _hintBelow(y, viewport))) {
+      setState(() {});
+    }
+  }
+
+  /// The middle of the bar, which sits on [_edge], in global coordinates.
+  double? get _edgeY {
+    final box = _contentBox;
+    if (box == null) return null;
     final top = box.localToGlobal(Offset.zero).dy;
-    final y = switch (_edge) {
+    return switch (_edge) {
       _Edge.top => top,
       _Edge.bottom => top + box.size.height,
       _Edge.pinned => top + _pinnedDy,
     };
-    if (y < viewport.top || y > viewport.bottom) _hide();
   }
+
+  /// Whether a button's name goes below the bar whose middle is at [y],
+  /// for lack of room above it in the list.
+  static bool _hintBelow(double y, Rect viewport) =>
+      y - _barHeight / 2 - _hintRoom < viewport.top;
 
   Rect? get _viewport {
     final box = Scrollable.maybeOf(context)?.context.findRenderObject();
@@ -443,6 +495,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
     final wasPinned = _pinned;
     setState(() => _pinned = true);
     _menuOpen = true;
+    updateKeepAlive();
     final chosen = await showMenu<MessageActionId>(
       context: context,
       position: RelativeRect.fromRect(rect, Offset.zero & overlay.size),
@@ -463,6 +516,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
     );
     _menuOpen = false;
     if (!mounted) return;
+    updateKeepAlive();
     // The action as it is now: the message may have changed meanwhile, as
     // when a newer turn moved a fork's cut. It runs even if the bar went
     // away meanwhile, as when the list followed a growing answer.
@@ -501,6 +555,9 @@ class _MessageActionHostState extends State<MessageActionHost> {
         if (a.overflow) a,
     ];
     final viewportWidth = MediaQuery.sizeOf(context).width;
+    final viewport = _viewport;
+    final y = _edgeY;
+    final hintBelow = y != null && viewport != null && _hintBelow(y, viewport);
     final targetAnchor = switch (_edge) {
       _Edge.bottom => widget.end ? Alignment.bottomRight : Alignment.bottomLeft,
       _ => widget.end ? Alignment.topRight : Alignment.topLeft,
@@ -524,63 +581,69 @@ class _MessageActionHostState extends State<MessageActionHost> {
         targetAnchor: targetAnchor,
         followerAnchor: followerAnchor,
         offset: Offset(inset, _edge == _Edge.pinned ? _pinnedDy : 0),
-        // While a double tap may still land, its second tap goes through to
-        // the words, which it selects.
-        child: IgnorePointer(
-          ignoring: _settling != null,
-          child: TapRegion(
-            groupId: this,
-            child: MouseRegion(
-              onEnter: (_) {
-                _overBar = true;
-                _hoverTimer?.cancel();
-              },
-              onExit: (event) {
-                _overBar = false;
-                _hoverExit(event);
-              },
-              child: Shortcuts(
-                shortcuts: const {
-                  SingleActivator(LogicalKeyboardKey.escape): _CloseBarIntent(),
-                },
-                child: Actions(
-                  actions: {_CloseBarIntent: _CloseBarAction(this)},
-                  child: FocusTraversalGroup(
-                    child: Focus(
-                      focusNode: _barFocus,
-                      child: Semantics(
-                        container: true,
-                        explicitChildNodes: true,
-                        label: l10n.messageActions,
-                        // While a double tap may still land, its second tap
-                        // goes through to the words, which it selects.
-                        child: _ActionPill(
-                          end: widget.end,
-                          maxWidth: (viewportWidth - 16).clamp(
-                            _barHeight,
-                            double.infinity,
+        child: Stack(
+          children: [
+            // While a double tap may still land, its second tap goes through
+            // to the words, which it selects.
+            IgnorePointer(
+              ignoring: _settling != null,
+              child: TapRegion(
+                groupId: this,
+                child: MouseRegion(
+                  onEnter: (_) {
+                    _overBar = true;
+                    _hoverTimer?.cancel();
+                  },
+                  onExit: (event) {
+                    _overBar = false;
+                    _hoverExit(event);
+                  },
+                  child: Shortcuts(
+                    shortcuts: const {
+                      SingleActivator(LogicalKeyboardKey.escape):
+                          _CloseBarIntent(),
+                    },
+                    child: Actions(
+                      actions: {_CloseBarIntent: _CloseBarAction(this)},
+                      child: FocusTraversalGroup(
+                        child: Focus(
+                          focusNode: _barFocus,
+                          child: Semantics(
+                            container: true,
+                            explicitChildNodes: true,
+                            label: l10n.messageActions,
+                            // While a double tap may still land, its second tap
+                            // goes through to the words, which it selects.
+                            child: _ActionPill(
+                              end: widget.end,
+                              hintBelow: hintBelow,
+                              maxWidth: (viewportWidth - 16).clamp(
+                                _barHeight,
+                                double.infinity,
+                              ),
+                              buttons: [
+                                for (final action in primary)
+                                  _PillButton(
+                                    key: ValueKey(
+                                      'message-action-${action.id.name}',
+                                    ),
+                                    focusNode: focusFor(),
+                                    label: action.label,
+                                    icon: action.icon,
+                                    onPressed: (_) => _run(action),
+                                  ),
+                                if (overflow.isNotEmpty)
+                                  _PillButton(
+                                    key: const ValueKey('message-action-more'),
+                                    focusNode: focusFor(),
+                                    label: l10n.messageMoreActions,
+                                    icon: Symbols.more_vert,
+                                    onPressed: (button) =>
+                                        unawaited(_more(button, overflow)),
+                                  ),
+                              ],
+                            ),
                           ),
-                          buttons: [
-                            for (final action in primary)
-                              _PillButton(
-                                key: ValueKey(
-                                  'message-action-${action.id.name}',
-                                ),
-                                focusNode: focusFor(),
-                                label: action.label,
-                                icon: action.icon,
-                                onPressed: (_) => _run(action),
-                              ),
-                            if (overflow.isNotEmpty)
-                              _PillButton(
-                                key: const ValueKey('message-action-more'),
-                                focusNode: focusFor(),
-                                label: l10n.messageMoreActions,
-                                icon: Symbols.more_vert,
-                                onPressed: (button) =>
-                                    unawaited(_more(button, overflow)),
-                              ),
-                          ],
                         ),
                       ),
                     ),
@@ -588,17 +651,30 @@ class _MessageActionHostState extends State<MessageActionHost> {
                 ),
               ),
             ),
-          ),
+            // Meanwhile the half of the bar past the message's edge takes
+            // taps and does nothing, so they cannot reach the next message.
+            if (_settling != null && _edge != _Edge.pinned)
+              Positioned(
+                left: 0,
+                right: 0,
+                top: _edge == _Edge.top ? 0 : _barHeight / 2,
+                height: _barHeight / 2,
+                child: TapRegion(
+                  groupId: this,
+                  child: const AbsorbPointer(child: SizedBox.expand()),
+                ),
+              ),
+          ],
         ),
       ),
     );
-    return _withinList(context, follower);
+    _built = viewport == null ? null : (viewport, hintBelow);
+    return _withinList(context, follower, viewport);
   }
 
-  /// Keeps [bar] inside the visible list: whatever moves the message, the
-  /// bar never covers the header or the composer.
-  Widget _withinList(BuildContext context, Widget bar) {
-    final viewport = _viewport;
+  /// Keeps [bar] inside the visible list, [viewport]: whatever moves the
+  /// message, the bar never covers the header or the composer.
+  Widget _withinList(BuildContext context, Widget bar, Rect? viewport) {
     final overlay = Overlay.maybeOf(context)?.context.findRenderObject();
     if (viewport == null || overlay is! RenderBox || !overlay.hasSize) {
       return bar;
@@ -616,6 +692,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final all = _all;
     Widget content = KeyedSubtree(
       key: _content,
@@ -737,16 +814,20 @@ class _MessageActionHostState extends State<MessageActionHost> {
 }
 
 /// The bar's pill. A long press, a hover or the focus on a button names it
-/// above the pill, without an overlay of its own, which could not follow
+/// above the pill (below it when the list has no room above), without an overlay of its own, which could not follow
 /// the message (#539).
 class _ActionPill extends StatefulWidget {
   const _ActionPill({
     required this.end,
+    required this.hintBelow,
     required this.maxWidth,
     required this.buttons,
   });
 
   final bool end;
+
+  /// The list leaves no room for a name above the pill: it goes below.
+  final bool hintBelow;
   final double maxWidth;
   final List<_PillButton> buttons;
 
@@ -809,7 +890,8 @@ class _ActionPillState extends State<_ActionPill> {
           ),
           if (hint != null)
             Positioned(
-              bottom: _barHeight + 6,
+              top: widget.hintBelow ? _barHeight + 6 : null,
+              bottom: widget.hintBelow ? null : _barHeight + 6,
               left: widget.end ? null : 0,
               right: widget.end ? 0 : null,
               child: ExcludeSemantics(

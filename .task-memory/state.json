@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 18,
+  "artifact_seq": 19,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -288,6 +288,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "u5 r3 re-review #539 (00abe9cb)"
+    },
+    "A0019": {
+      "active": true,
+      "bytes": 849,
+      "created_at": "2026-11-28T03:00:05Z",
+      "evidence": "/tmp/opencode/g8/rev/u5/r4_*.out",
+      "id": "A0019",
+      "impact": "Round 4 judgment and fixes",
+      "origin": "8 helpers (rev.sh u5 r4)",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0019.md",
+      "purpose": "Re-review 13044164",
+      "rerun_when": "message_action_bar.dart or _forkFrom change",
+      "sha256": "bf84e3866324e783efed2843b138a0c8a052e8d9de317c482fbd6cb2290b3f5d",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u5 #539 review round 4 reports"
     }
   },
   "checklist": [
@@ -743,10 +759,14 @@
     {
       "at": "2026-11-28T02:45:37Z",
       "text": "Owner Q3 = a: port the edge-tts Sec-MS-GEC v2 token (LGPLv3, keep attribution; compatible with AGPL-3.0) and keep Microsoft Edge as the default read-aloud provider. System voice (flutter_tts) deferred to a follow-up."
+    },
+    {
+      "at": "2026-11-28T03:01:23Z",
+      "text": "u5 r4 judgment (A0019): accept F1 hint below pill when no room above in list; F2 keep row alive while overflow menu open (AutomaticKeepAliveClientMixin); F3+F9 post-frame recheck on scroll and ScrollMetricsNotification (Scaffold ScrollNotificationObserver) re-reads clip rect, hides if anchor left; F4 fork skips navigation when root navigator can pop (same rule as composer_voice_button _covered, shared helper); F5 absorb taps on bar half outside bubble while settling (inside TapRegion group); F6 observable pass-through test via hit test; F7 positive control fork test; F8 menu choice after list jump test. Rejected: none. Significant change -> round 5 re-review."
     }
   ],
-  "generation": 95,
-  "next_action": "Port edge-tts drm.py v2 token to Dart with its test vector; Edge websocket synthesizer; finish #541 wiring after #539 gate",
+  "generation": 98,
+  "next_action": "Implement u5 r4 fixes F1-F9 in message_action_bar.dart, session_live_page _forkFrom (stage only #539 hunks; #541 WIP shares the file), tests; gate; commit; round 5.",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -769,7 +789,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T02:49:34Z",
+  "updated_at": "2026-11-28T03:01:23Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

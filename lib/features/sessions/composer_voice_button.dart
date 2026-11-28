@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/voice/speech_dictation.dart';
 import '../../shared/widgets/app_snack_bar.dart';
+import '../../shared/widgets/route_covered.dart';
 import 'composer_input.dart';
 
 /// The composer's mic (#307, native slice): a tap dictates into [text]
@@ -146,7 +147,7 @@ class ComposerVoiceButtonState extends State<ComposerVoiceButton>
     if (!mounted || _written == null) return;
     // A page, sheet or dialog over the composer ends the dictation: nothing
     // is written into a field the user cannot see.
-    if (_covered()) {
+    if (routeCovered(context)) {
       cancel();
       return;
     }
@@ -161,19 +162,6 @@ class ComposerVoiceButtonState extends State<ComposerVoiceButton>
       text: text,
       selection: TextSelection.collapsed(offset: head.length),
     );
-  }
-
-  /// Whether something sits over the composer: a route above its own, or,
-  /// since every app route lives in one shell, anything the root navigator
-  /// can pop (the model picker, a dialog, a page pushed over the shell).
-  bool _covered() {
-    if (ModalRoute.isCurrentOf(context) == false) return true;
-    final own = Navigator.maybeOf(context);
-    final root = Navigator.maybeOf(context, rootNavigator: true);
-    return own != null &&
-        root != null &&
-        !identical(own, root) &&
-        root.canPop();
   }
 
   /// Levels arrive in decibels on a scale each platform sets, so the button

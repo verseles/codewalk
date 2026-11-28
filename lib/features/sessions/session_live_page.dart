@@ -22,6 +22,7 @@ import '../../shared/shortcuts/shortcut_action.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
+import '../../shared/widgets/route_covered.dart';
 import 'message_action_bar.dart';
 import 'session_attachment_scope.dart';
 import 'session_composer.dart';
@@ -454,10 +455,10 @@ class _SessionLivePageState extends State<SessionLivePage>
     }
     // The workspace shows a session through its route, as a list row does;
     // the route opens its tab.
-    // Still on this page, with nothing opened over it.
+    // Still on this page, with nothing opened over it, a dialog included.
     if (mounted &&
         router != null &&
-        (ModalRoute.of(context)?.isCurrent ?? true) &&
+        !routeCovered(context) &&
         router.routerDelegate.currentConfiguration.uri == from) {
       router.go(sessionTabLocation(ref));
     }

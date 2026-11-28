@@ -312,17 +312,34 @@ void main() {
   testWidgets('a fresh bar lets a double tap through, then takes presses', (
     tester,
   ) async {
-    await _pump(tester, [SessionTimelineTile(item: _agent('the answer'))]);
-    await tester.tap(find.text('the answer'));
+    await _pump(tester, [
+      SessionTimelineTile(item: _user('the question')),
+      SessionTimelineTile(item: _agent('the answer')),
+    ]);
+    final answer = find.byKey(const ValueKey('message-row-test/a'));
+    final question = find.byKey(const ValueKey('message-row-test/u'));
+    bool reaches(Offset at, Finder target) {
+      final hit = tester.renderObject(target);
+      return tester.hitTestOnBinding(at).path.any((e) => e.target == hit);
+    }
+
+    // In the lower part of the answer, so the bar sits on its top edge.
+    final rect = tester.getRect(answer);
+    await tester.tapAt(Offset(rect.left + 40, rect.bottom - 4));
     await tester.pump();
-    bool ignoring() => tester
-        .widget<IgnorePointer>(
-          find.ancestor(of: _bar, matching: find.byType(IgnorePointer)).first,
-        )
-        .ignoring;
-    expect(ignoring(), isTrue);
+    final bar = tester.getRect(_bar);
+    expect(bar.center.dy, moreOrLessEquals(rect.top, epsilon: 1));
+    // The half over the answer lets its second tap through to the words.
+    final inner = Offset(bar.left + 20, bar.bottom - 6);
+    expect(reaches(inner, answer), isTrue);
+    expect(reaches(inner, _bar), isFalse);
+    // The half past its edge takes the tap, which reaches no other message.
+    final outer = Offset(bar.left + 20, bar.top + 6);
+    expect(tester.getRect(question).contains(outer), isTrue);
+    expect(reaches(outer, question), isFalse);
     await tester.pump(kDoubleTapTimeout);
-    expect(ignoring(), isFalse);
+    expect(reaches(inner, _bar), isTrue);
+    expect(reaches(outer, _bar), isTrue);
   });
 
   testWidgets('the bar goes when the list moves its edge out of view', (
@@ -354,11 +371,60 @@ void main() {
     expect(_bar, findsOneWidget);
     // As the list follows a growing answer: no scroll gesture.
     controller.jumpTo(150);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(_bar, findsOneWidget);
     controller.jumpTo(400);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(_bar, findsNothing);
+  });
+
+  testWidgets('a choice in the menu runs after the list let the message go', (
+    tester,
+  ) async {
+    var forked = 0;
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: V2Localizations.localizationsDelegates,
+        supportedLocales: V2Localizations.supportedLocales,
+        home: Scaffold(
+          body: ListView.builder(
+            controller: controller,
+            itemCount: 40,
+            itemBuilder: (context, index) => index == 0
+                ? SessionTimelineTile(
+                    item: _user('my prompt'),
+                    actions: [
+                      MessageAction(
+                        id: MessageActionId.fork,
+                        label: 'Fork from here',
+                        icon: Icons.call_split,
+                        overflow: true,
+                        onSelected: (_) => forked++,
+                      ),
+                    ],
+                  )
+                : const SizedBox(height: 300),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('my prompt'));
+    await tester.pumpAndSettle();
+    await tester.pump(kDoubleTapTimeout);
+    await tester.tap(find.byKey(const ValueKey('message-action-more')));
+    await tester.pumpAndSettle();
+    // As a growing answer carries the list far away: the bar goes, and the
+    // list would drop the message.
+    controller.jumpTo(5000);
+    await tester.pumpAndSettle();
+    expect(_bar, findsNothing);
+    await tester.tap(find.text('Fork from here'));
+    await tester.pumpAndSettle();
+    expect(forked, 1);
+    // Once the choice is made, the list lets the message go.
+    expect(find.text('my prompt', skipOffstage: false), findsNothing);
   });
 
   testWidgets('a menu closed by a tap outside leaves the bar ready for the '
@@ -533,6 +599,28 @@ void main() {
     expect(_bar, findsOneWidget);
     await tester.pump(const Duration(seconds: 2));
     expect(find.byKey(const ValueKey('message-action-hint')), findsNothing);
+  });
+
+  testWidgets('near the top of the list, a button is named below the bar', (
+    tester,
+  ) async {
+    await _pump(tester, [
+      const SizedBox(height: 30),
+      SessionTimelineTile(item: _agent('first line\n\nlast line')),
+    ]);
+    // Below the middle of the message, so the bar takes its top edge.
+    await tester.tap(find.textContaining('last line'));
+    await tester.pumpAndSettle();
+    await tester.pump(kDoubleTapTimeout);
+    await tester.longPress(_action(MessageActionId.copy));
+    await tester.pump();
+    final hint = tester.getRect(
+      find.byKey(const ValueKey('message-action-hint')),
+    );
+    final bar = tester.getRect(_bar);
+    expect(bar.top, lessThan(40));
+    expect(hint.top, greaterThan(bar.bottom));
+    await tester.pump(const Duration(seconds: 2));
   });
 
   testWidgets('a waiting prompt is selectable but has no bar (#502)', (
@@ -775,5 +863,51 @@ void main() {
       find.ancestor(of: _bar, matching: find.byType(ClipRect)).first,
     );
     expect(clip.top, 100);
+  });
+
+  testWidgets('the bar keeps to the list as the list changes size', (
+    tester,
+  ) async {
+    final composer = ValueNotifier<double>(100);
+    addTearDown(composer.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: V2Localizations.localizationsDelegates,
+        supportedLocales: V2Localizations.supportedLocales,
+        home: Scaffold(
+          body: Column(
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 40),
+                      SessionTimelineTile(item: _agent('the answer')),
+                      const SizedBox(height: 1200),
+                    ],
+                  ),
+                ),
+              ),
+              ValueListenableBuilder(
+                valueListenable: composer,
+                builder: (context, height, _) => SizedBox(height: height),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('the answer'));
+    await tester.pumpAndSettle();
+    Rect clip() => tester.getRect(
+      find.ancestor(of: _bar, matching: find.byType(ClipRect)).first,
+    );
+    expect(clip().bottom, 500);
+    // The composer grows, as with a longer prompt.
+    composer.value = 250;
+    await tester.pumpAndSettle();
+    expect(_bar, findsOneWidget);
+    expect(clip().bottom, 350);
   });
 }
