@@ -78,23 +78,27 @@ class AppShell extends StatelessWidget {
       // later visit to the list stays there.
       context.read<SessionTabsController?>()?.takeLaunchTab();
       final title = switch (location) {
-        '/settings' => l10n.settingsTitle,
         '/hosts' || '/pair' => l10n.settingsServersTitle,
         _ => 'CodeWalk',
       };
       return _banded(
         band,
         Scaffold(
-          appBar: AppBar(
-            // A page opened from the list returns to it; one opened by a link
-            // has nothing under it and goes to the list.
-            leading: BackButton(
-              key: const ValueKey('workspace-back'),
-              onPressed: () =>
-                  context.canPop() ? context.pop() : context.go('/sessions'),
-            ),
-            title: Text(title),
-          ),
+          // Settings bring their own bar, which knows the open section
+          // (#551).
+          appBar: location == '/settings'
+              ? null
+              : AppBar(
+                  // A page opened from the list returns to it; one opened by
+                  // a link has nothing under it and goes to the list.
+                  leading: BackButton(
+                    key: const ValueKey('workspace-back'),
+                    onPressed: () => context.canPop()
+                        ? context.pop()
+                        : context.go('/sessions'),
+                  ),
+                  title: Text(title),
+                ),
           body: child,
         ),
       );

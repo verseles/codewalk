@@ -31,8 +31,6 @@ class BehaviorSettingsPage extends StatelessWidget {
           key: const ValueKey('behavior_settings_list'),
           padding: const EdgeInsets.all(16),
           children: [
-            Text(l.settingsBehaviorTitle, style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 12),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),

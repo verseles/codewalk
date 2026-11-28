@@ -190,9 +190,6 @@ class V2LocalizationsZh extends V2Localizations {
   String get settingsAppearanceSearchPreset => '搜索预设调色板';
 
   @override
-  String get settingsAppearanceSectionTitle => '外观';
-
-  @override
   String get settingsAppearanceSystem => '系统';
 
   @override
@@ -380,9 +377,6 @@ class V2LocalizationsZh extends V2Localizations {
 
   @override
   String get shortcutsErrorUnsupportedKey => '不支持的快捷键';
-
-  @override
-  String get shortcutsKeyboardShortcuts => '键盘快捷键';
 
   @override
   String get shortcutsPressKeyCombination => '现在请按下组合键';

@@ -201,9 +201,6 @@ class V2LocalizationsFr extends V2Localizations {
       'Rechercher une palette prédéfinie';
 
   @override
-  String get settingsAppearanceSectionTitle => 'Apparence';
-
-  @override
   String get settingsAppearanceSystem => 'Système';
 
   @override
@@ -408,9 +405,6 @@ class V2LocalizationsFr extends V2Localizations {
   @override
   String get shortcutsErrorUnsupportedKey =>
       'Touche de raccourci non prise en charge';
-
-  @override
-  String get shortcutsKeyboardShortcuts => 'Raccourcis clavier';
 
   @override
   String get shortcutsPressKeyCombination =>

@@ -169,6 +169,59 @@ void main() {
     );
   }
 
+  for (final width in [390.0, 1280.0]) {
+    settingsTest('one bar holds the back button and the title, $width (#551)', (
+      tester,
+    ) async {
+      await mount(tester, width: width);
+      Finder title(String text) => find.byWidgetPredicate(
+        (widget) =>
+            widget is Text &&
+            widget.key == const ValueKey('settings_title') &&
+            widget.data == text,
+      );
+      expect(title('Settings'), findsOneWidget);
+      // The list does not say Settings again.
+      expect(find.text('Settings'), findsOneWidget);
+      if (width > 840) {
+        // A wide window titles its open section once, above it.
+        expect(
+          find.byKey(const ValueKey('settings_section_title')),
+          findsOneWidget,
+        );
+        expect(find.byKey(const ValueKey('workspace-back')), findsOneWidget);
+        return;
+      }
+      for (final (section, name) in [
+        ('appearance', 'Appearance'),
+        ('behavior', 'Behavior'),
+        ('about', 'About'),
+      ]) {
+        await select(tester, section);
+        // Narrow: the bar names the section and goes back to the list, its
+        // only back button; nothing below repeats either.
+        expect(title(name), findsOneWidget);
+        expect(find.text('Settings'), findsNothing);
+        expect(find.byKey(const ValueKey('workspace-back')), findsNothing);
+        expect(find.byType(BackButton), findsNothing);
+        expect(
+          find.byKey(const ValueKey('settings_detail_back')),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byType(ListView).last,
+            matching: find.text(name),
+          ),
+          findsNothing,
+        );
+        await tester.tap(find.byKey(const ValueKey('settings_detail_back')));
+        await tester.pumpAndSettle();
+        expect(title('Settings'), findsOneWidget);
+      }
+    });
+  }
+
   settingsTest(
     'compact search/detail/back preserves the query and actual controls',
     (tester) async {
@@ -546,7 +599,7 @@ void main() {
       addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
       await mount(tester, width: width, locale: const Locale('ar'));
       expect(
-        Directionality.of(tester.element(find.byType(Scaffold))),
+        Directionality.of(tester.element(find.byType(Scaffold).first)),
         TextDirection.rtl,
       );
       expect(tester.takeException(), isNull);

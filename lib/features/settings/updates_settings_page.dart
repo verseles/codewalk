@@ -141,8 +141,6 @@ class _UpdatesSettingsPageState extends State<UpdatesSettingsPage> {
     final l = context.v2L10n;
     final theme = Theme.of(context);
     final children = <Widget>[
-      Text(l.settingsGroupVersionUpdates, style: theme.textTheme.headlineSmall),
-      const SizedBox(height: 12),
       Text(l.updatesDescription),
       const SizedBox(height: 16),
     ];

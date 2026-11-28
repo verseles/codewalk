@@ -199,9 +199,6 @@ class V2LocalizationsUr extends V2Localizations {
   String get settingsAppearanceSearchPreset => 'پیش سیٹ پیلیٹ تلاش کریں۔';
 
   @override
-  String get settingsAppearanceSectionTitle => 'ظاہری شکل';
-
-  @override
   String get settingsAppearanceSystem => 'سسٹم';
 
   @override
@@ -400,9 +397,6 @@ class V2LocalizationsUr extends V2Localizations {
 
   @override
   String get shortcutsErrorUnsupportedKey => 'غیر تعاون یافتہ شارٹ کٹ کلید';
-
-  @override
-  String get shortcutsKeyboardShortcuts => 'کی بورڈ شارٹ کٹس';
 
   @override
   String get shortcutsPressKeyCombination => 'اب کلیدوں کا مجموعہ دبائیں';

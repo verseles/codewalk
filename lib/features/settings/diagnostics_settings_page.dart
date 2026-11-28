@@ -73,8 +73,6 @@ class _DiagnosticsSettingsPageState extends State<DiagnosticsSettingsPage> {
       key: const ValueKey('settings_logs_page'),
       padding: const EdgeInsets.all(24),
       children: [
-        Text(l.logsAppLogs, style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 12),
         Text(l.diagnosticsPrivacy),
         SwitchListTile(
           key: const ValueKey('settings_logging_enabled'),

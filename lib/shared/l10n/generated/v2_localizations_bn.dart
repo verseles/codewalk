@@ -200,9 +200,6 @@ class V2LocalizationsBn extends V2Localizations {
   String get settingsAppearanceSearchPreset => 'প্রিসেট প্যালেট অনুসন্ধান করুন';
 
   @override
-  String get settingsAppearanceSectionTitle => 'চেহারা';
-
-  @override
   String get settingsAppearanceSystem => 'সিস্টেম';
 
   @override
@@ -400,9 +397,6 @@ class V2LocalizationsBn extends V2Localizations {
 
   @override
   String get shortcutsErrorUnsupportedKey => 'অসমর্থিত শর্টকাট কী';
-
-  @override
-  String get shortcutsKeyboardShortcuts => 'কীবোর্ড শর্টকাট';
 
   @override
   String get shortcutsPressKeyCombination => 'এখন কী কম্বিনেশন টিপুন';

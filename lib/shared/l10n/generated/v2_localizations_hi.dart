@@ -198,9 +198,6 @@ class V2LocalizationsHi extends V2Localizations {
   String get settingsAppearanceSearchPreset => 'प्रीसेट पैलेट खोजें';
 
   @override
-  String get settingsAppearanceSectionTitle => 'रूप-रंग';
-
-  @override
   String get settingsAppearanceSystem => 'सिस्टम';
 
   @override
@@ -398,9 +395,6 @@ class V2LocalizationsHi extends V2Localizations {
 
   @override
   String get shortcutsErrorUnsupportedKey => 'असमर्थित शॉर्टकट कुंजी';
-
-  @override
-  String get shortcutsKeyboardShortcuts => 'कीबोर्ड शॉर्टकट';
 
   @override
   String get shortcutsPressKeyCombination => 'अब की-कॉम्बिनेशन दबाएँ';

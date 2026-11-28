@@ -200,9 +200,6 @@ class V2LocalizationsEs extends V2Localizations {
   String get settingsAppearanceSearchPreset => 'Buscar paleta predefinida';
 
   @override
-  String get settingsAppearanceSectionTitle => 'Apariencia';
-
-  @override
   String get settingsAppearanceSystem => 'Sistema';
 
   @override
@@ -403,9 +400,6 @@ class V2LocalizationsEs extends V2Localizations {
 
   @override
   String get shortcutsErrorUnsupportedKey => 'Tecla de atajo no compatible';
-
-  @override
-  String get shortcutsKeyboardShortcuts => 'Atajos de teclado';
 
   @override
   String get shortcutsPressKeyCombination =>

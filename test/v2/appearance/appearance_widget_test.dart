@@ -124,7 +124,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(
-      Directionality.of(tester.element(find.byType(Scaffold))),
+      Directionality.of(tester.element(find.byType(Scaffold).first)),
       TextDirection.rtl,
     );
     expect(tester.takeException(), isNull);

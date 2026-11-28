@@ -200,9 +200,6 @@ class V2LocalizationsAr extends V2Localizations {
   String get settingsAppearanceSearchPreset => 'البحث عن لوحة ألوان جاهزة';
 
   @override
-  String get settingsAppearanceSectionTitle => 'المظهر';
-
-  @override
   String get settingsAppearanceSystem => 'النظام';
 
   @override
@@ -400,9 +397,6 @@ class V2LocalizationsAr extends V2Localizations {
 
   @override
   String get shortcutsErrorUnsupportedKey => 'مفتاح اختصار غير مدعوم';
-
-  @override
-  String get shortcutsKeyboardShortcuts => 'اختصارات لوحة المفاتيح';
 
   @override
   String get shortcutsPressKeyCombination => 'اضغط مجموعة المفاتيح الآن';

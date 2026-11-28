@@ -198,9 +198,6 @@ class V2LocalizationsEn extends V2Localizations {
   String get settingsAppearanceSearchPreset => 'Search preset palette';
 
   @override
-  String get settingsAppearanceSectionTitle => 'Appearance';
-
-  @override
   String get settingsAppearanceSystem => 'System';
 
   @override
@@ -399,9 +396,6 @@ class V2LocalizationsEn extends V2Localizations {
 
   @override
   String get shortcutsErrorUnsupportedKey => 'Unsupported shortcut key';
-
-  @override
-  String get shortcutsKeyboardShortcuts => 'Keyboard shortcuts';
 
   @override
   String get shortcutsPressKeyCombination => 'Press the key combination now';

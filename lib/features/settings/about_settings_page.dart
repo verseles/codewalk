@@ -71,10 +71,6 @@ class AboutSettingsPage extends StatelessWidget {
           key: const ValueKey('about_settings_list'),
           padding: const EdgeInsets.all(16),
           children: [
-            Text(
-              l.settingsAboutTitle,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
             if (checks != null && checks.supported) ...[
               ListTile(
                 title: Text(

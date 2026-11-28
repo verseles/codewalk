@@ -201,9 +201,6 @@ class V2LocalizationsRu extends V2Localizations {
       'Поиск предустановленной палитры';
 
   @override
-  String get settingsAppearanceSectionTitle => 'Внешний вид';
-
-  @override
   String get settingsAppearanceSystem => 'Системная';
 
   @override
@@ -404,9 +401,6 @@ class V2LocalizationsRu extends V2Localizations {
 
   @override
   String get shortcutsErrorUnsupportedKey => 'Неподдерживаемая клавиша';
-
-  @override
-  String get shortcutsKeyboardShortcuts => 'Горячие клавиши';
 
   @override
   String get shortcutsPressKeyCombination => 'Нажмите комбинацию клавиш сейчас';

@@ -214,10 +214,6 @@
   "@settingsAppearanceSearchPreset": {
     "description": "CodeWalk UI string — settingsAppearanceSearchPreset"
   },
-  "settingsAppearanceSectionTitle": "Appearance",
-  "@settingsAppearanceSectionTitle": {
-    "description": "CodeWalk UI string — settingsAppearanceSectionTitle"
-  },
   "settingsAppearanceSystem": "System",
   "@settingsAppearanceSystem": {
     "description": "CodeWalk UI string — settingsAppearanceSystem"
@@ -471,10 +467,6 @@
   "shortcutsErrorUnsupportedKey": "Unsupported shortcut key",
   "@shortcutsErrorUnsupportedKey": {
     "description": "CodeWalk UI string — shortcutsErrorUnsupportedKey"
-  },
-  "shortcutsKeyboardShortcuts": "Keyboard shortcuts",
-  "@shortcutsKeyboardShortcuts": {
-    "description": "CodeWalk UI string — shortcutsKeyboardShortcuts"
   },
   "shortcutsPressKeyCombination": "Press the key combination now",
   "@shortcutsPressKeyCombination": {

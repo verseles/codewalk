@@ -461,12 +461,6 @@ abstract class V2Localizations {
   /// **'Search preset palette'**
   String get settingsAppearanceSearchPreset;
 
-  /// CodeWalk UI string — settingsAppearanceSectionTitle
-  ///
-  /// In en, this message translates to:
-  /// **'Appearance'**
-  String get settingsAppearanceSectionTitle;
-
   /// CodeWalk UI string — settingsAppearanceSystem
   ///
   /// In en, this message translates to:
@@ -832,12 +826,6 @@ abstract class V2Localizations {
   /// In en, this message translates to:
   /// **'Unsupported shortcut key'**
   String get shortcutsErrorUnsupportedKey;
-
-  /// CodeWalk UI string — shortcutsKeyboardShortcuts
-  ///
-  /// In en, this message translates to:
-  /// **'Keyboard shortcuts'**
-  String get shortcutsKeyboardShortcuts;
 
   /// CodeWalk UI string — shortcutsPressKeyCombination
   ///

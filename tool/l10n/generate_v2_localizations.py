@@ -72,7 +72,7 @@ KEYS = {
     "unsupportedLink",
 }
 APPEARANCE_KEYS = {
-    "settingsAppearanceSectionTitle", "settingsAppearanceTheme",
+    "settingsAppearanceTheme",
     "settingsAppearanceThemeDescription", "settingsAppearanceSystem",
     "settingsAppearanceLight", "settingsAppearanceDark",
     "settingsAppearanceCodeWalkClassic", "settingsAppearanceOpenCodePresets",
@@ -117,7 +117,7 @@ SETTINGS_KEYS = {
     "settingsNavigationSearchHint", "settingsShortcutsTitle",
     "settingsShortcutsDescription", "settingsShortcutsSearch",
     "settingsShortcutsEdit", "settingsShortcutsReset",
-    "settingsProvenanceCodeWalkLocal", "shortcutsKeyboardShortcuts",
+    "settingsProvenanceCodeWalkLocal",
     "shortcutsSearchEditBindings", "shortcutsTheseBindingsStored",
     "shortcutsReset", "shortcutsApply", "shortcutsSetShortcutWidget",
     "shortcutsPressKeyCombination", "shortcutsErrorInvalid",

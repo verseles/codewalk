@@ -286,8 +286,6 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
           key: const ValueKey('read_aloud_settings_list'),
           padding: const EdgeInsets.all(16),
           children: [
-            Text(l10n.readAloudTitle, style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 12),
             card([
               SwitchListTile(
                 key: const ValueKey('read_aloud_enabled'),

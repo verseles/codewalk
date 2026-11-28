@@ -40,10 +40,6 @@ class AppearanceSettingsPage extends StatelessWidget {
           key: const ValueKey('appearance_settings_list'),
           padding: const EdgeInsets.all(16),
           children: [
-            Text(
-              l.settingsAppearanceSectionTitle,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
             if (p.hasPersistenceError)
               Card(
                 child: Padding(

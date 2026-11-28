@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../app/app_keyboard_shortcuts.dart';
 import '../../app/app_preferences_controller.dart';
 import '../../app/desktop_window_controller.dart';
+import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
 import '../../shared/layout/window_size_class.dart';
 import '../../shared/releases/apk_update.dart';
@@ -174,51 +175,89 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
         _ => const AppearanceSettingsPage(),
       },
     );
+    // One bar on top, the only place with a back button and a title
+    // (#551): a section open on a narrow window names it and goes back to
+    // the list; otherwise it says Settings and leaves them. A wide window
+    // titles its open section above it.
+    final inSection = !wide && section != null;
     return KeyboardActionScope(
-      handlers: {if (!wide && section != null) ShortcutAction.escape: _back},
+      handlers: {if (inSection) ShortcutAction.escape: _back},
       child: PopScope(
-        canPop: wide || section == null,
+        canPop: !inSection,
         onPopInvokedWithResult: (didPop, result) {
-          if (!didPop && !wide && section != null) _back();
+          if (!didPop && inSection) _back();
         },
-        child: wide
-            ? Row(
-                children: [
-                  SizedBox(
-                    width: 320,
-                    child: _master(context, supportsShortcuts),
+        child: Scaffold(
+          appBar: AppBar(
+            leading: inSection
+                ? IconButton(
+                    key: const ValueKey('settings_detail_back'),
+                    focusNode: _backFocus,
+                    tooltip: l.settingsBack,
+                    onPressed: _back,
+                    icon: const Icon(Symbols.arrow_back),
+                  )
+                // A page opened from the list returns to it; one opened by a
+                // link has nothing under it and goes to the list.
+                : BackButton(
+                    key: const ValueKey('workspace-back'),
+                    onPressed: () => context.canPop()
+                        ? context.pop()
+                        : context.go('/sessions'),
                   ),
-                  const VerticalDivider(width: 1),
-                  Expanded(child: detail),
-                ],
-              )
-            : section == null
-            ? _master(context, supportsShortcuts)
-            : Column(
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        key: const ValueKey('settings_detail_back'),
-                        focusNode: _backFocus,
-                        tooltip: l.settingsBack,
-                        onPressed: _back,
-                        icon: const Icon(Symbols.arrow_back),
+            title: Text(
+              inSection ? _sectionTitle(l, section) : l.settingsTitle,
+              key: const ValueKey('settings_title'),
+            ),
+          ),
+          body: wide
+              ? Row(
+                  children: [
+                    SizedBox(
+                      width: 320,
+                      child: _master(context, supportsShortcuts),
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (section != null)
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              child: Text(
+                                _sectionTitle(l, section),
+                                key: const ValueKey('settings_section_title'),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.headlineSmall,
+                              ),
+                            ),
+                          Expanded(child: detail),
+                        ],
                       ),
-                      Expanded(
-                        child: Text(
-                          l.settingsTitle,
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Expanded(child: detail),
-                ],
-              ),
+                    ),
+                  ],
+                )
+              : section == null
+              ? _master(context, supportsShortcuts)
+              : detail,
+        ),
       ),
     );
   }
+
+  /// The name of [section], as the list gives it.
+  static String _sectionTitle(V2Localizations l, SettingsSection section) =>
+      switch (section) {
+        SettingsSection.appearance => l.settingsAppearanceTitle,
+        SettingsSection.behavior => l.settingsBehaviorTitle,
+        SettingsSection.readAloud => l.readAloudTitle,
+        SettingsSection.shortcuts => l.settingsShortcutsTitle,
+        SettingsSection.logs => l.logsAppLogs,
+        SettingsSection.updates => l.settingsGroupVersionUpdates,
+        SettingsSection.about => l.settingsAboutTitle,
+      };
 
   Widget _master(BuildContext context, bool supportsShortcuts) {
     final l = context.v2L10n;
@@ -293,8 +332,6 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       key: const ValueKey('settings_destinations'),
       padding: const EdgeInsets.all(16),
       children: [
-        Text(l.settingsTitle, style: Theme.of(context).textTheme.headlineSmall),
-        const SizedBox(height: 12),
         if (update != null && checks?.target != null)
           UpdateCandidateCard(
             target: checks!.target!,

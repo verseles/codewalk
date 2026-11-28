@@ -841,10 +841,10 @@ description of this code.
 
 - **Given** the user opens `/settings` in the explicit v2 app
 - **When** the viewport is below 840 logical pixels
-- **Then** a grouped, localized destination list opens first; selecting Appearance, Behavior or Shortcuts opens its detail with a back action
+- **Then** one bar on top holds the only back button and the only title (#551): the list, under "Settings", says it nowhere else, and its back button leaves Settings; selecting a section shows its name in that bar, whose back button returns to the list, and no section repeats its name or a second back row below it
 - **Then** detail Back, system Back and the configured Escape action return to the list while retaining its search query
 - **When** the viewport is at least 840 logical pixels
-- **Then** a 320-pixel destination rail and detail appear side by side, with Appearance selected initially
+- **Then** a 320-pixel destination rail and detail appear side by side, with Appearance selected initially; the bar says "Settings" and leaves them, and the open section's name heads the detail once, in the same style for every section
 - **Then** filtering matches localized destination titles, descriptions and groups without replacing the open wide detail
 - **Then** resizing preserves selection, list search, detail form state and pending shortcut-capture choices
 - **Then** Servers opens the existing hosts route; Help exposes App Logs, Version and updates (with the release history below the update controls) and About, while other unimplemented feature settings remain with their owning Issues

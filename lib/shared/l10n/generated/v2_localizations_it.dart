@@ -201,9 +201,6 @@ class V2LocalizationsIt extends V2Localizations {
   String get settingsAppearanceSearchPreset => 'Cerca tavolozza predefinita';
 
   @override
-  String get settingsAppearanceSectionTitle => 'Aspetto';
-
-  @override
   String get settingsAppearanceSystem => 'Sistema';
 
   @override
@@ -404,9 +401,6 @@ class V2LocalizationsIt extends V2Localizations {
   @override
   String get shortcutsErrorUnsupportedKey =>
       'Tasto di scorciatoia non supportato';
-
-  @override
-  String get shortcutsKeyboardShortcuts => 'Scorciatoie da tastiera';
 
   @override
   String get shortcutsPressKeyCombination =>

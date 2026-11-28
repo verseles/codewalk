@@ -66,7 +66,7 @@ void main() {
       dependencies.preferences.setLocale(const Locale('pt', 'BR'));
       await tester.pumpAndSettle();
       expect(find.text('Configurações'), findsWidgets);
-      final context = tester.element(find.byType(Scaffold));
+      final context = tester.element(find.byType(Scaffold).first);
       expect(Theme.of(context).brightness, Brightness.dark);
       expect(Theme.of(context).visualDensity, VisualDensity.compact);
       expect(Localizations.localeOf(context), const Locale('pt'));
@@ -158,7 +158,7 @@ void main() {
       await tester.pumpWidget(CodeWalkV2Bootstrap(dependencies: first));
       await tester.pumpAndSettle();
       expect(
-        Directionality.of(tester.element(find.byType(Scaffold))),
+        Directionality.of(tester.element(find.byType(Scaffold).first)),
         TextDirection.rtl,
       );
 

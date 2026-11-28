@@ -297,7 +297,9 @@ void main() {
     tester.view.physicalSize = const Size(390, 1000);
     await tester.pumpAndSettle();
     await select(tester, 'updates');
-    tester.view.physicalSize = const Size(390, 520);
+    // Short enough that the history starts below the first screen (#551
+    // took the page's own title away).
+    tester.view.physicalSize = const Size(390, 440);
     await tester.pumpAndSettle();
     expect(
       historyHeading(tester).top,

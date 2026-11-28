@@ -196,9 +196,6 @@ class V2LocalizationsKo extends V2Localizations {
   String get settingsAppearanceSearchPreset => '프리셋 팔레트 검색';
 
   @override
-  String get settingsAppearanceSectionTitle => '화면 표시';
-
-  @override
   String get settingsAppearanceSystem => '시스템';
 
   @override
@@ -388,9 +385,6 @@ class V2LocalizationsKo extends V2Localizations {
 
   @override
   String get shortcutsErrorUnsupportedKey => '지원하지 않는 단축키';
-
-  @override
-  String get shortcutsKeyboardShortcuts => '키보드 단축키';
 
   @override
   String get shortcutsPressKeyCombination => '지금 키 조합을 누르세요';
