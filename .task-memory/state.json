@@ -866,28 +866,34 @@
       ],
       "id": "S24",
       "label": "Group 8 docs, #527 check-off, push and minor release",
-      "outcome": "",
-      "status": "current",
-      "validation": ""
+      "outcome": "Pushed group 8; goldens 4347e56b; notes 9b515862; release v2.14.0 cut (7701bc96, tag pushed), watch-release + watch-ci running; #534 #536-#553 closed with comments; #527 all 51 ticked; follow-ups #554-#557",
+      "status": "done",
+      "validation": "local gate green; goldens equal x86 renders; release dry run ok"
     }
   ],
-  "completion": null,
+  "completion": {
+    "at": "2026-11-28T07:59:36Z",
+    "by": "agent",
+    "delivered": "Group 8 (#532-#553) implemented, reviewed to convergence, pushed; goldens regenerated on x86; v2.14.0 cut and tagged; issues closed, #527 ticked; follow-ups #554-#557 created",
+    "residual_risk": "Release workflow and CI results pending (watchers notify via hey); Linux preview smoke has not run on group 8 since goldens blocked CI; #527 closure awaits owner",
+    "validation": "flutter analyze within budget, full suite green, core 357 + harness 725 pass, l10n check ok, golden tests pass with x86 renders, release dry run ok"
+  },
   "contract": {
     "complete_when": [
       {
-        "evidence": null,
+        "evidence": "gh: #532 #533 #535 closed earlier; #534 #536-#553 closed with commit comments",
         "id": "C1",
         "text": "all 22 items delivered and their issues closed",
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "#527 body: 51 checked, 0 unchecked",
         "id": "C2",
         "text": "#527 group 8 fully checked",
         "waived": false
       },
       {
-        "evidence": null,
+        "evidence": "make release V=stable -> 7701bc96, tag v2.14.0 pushed; make watch-release started",
         "id": "C3",
         "text": "final release cut with watch-release started",
         "waived": false
@@ -1206,8 +1212,8 @@
       "text": "R0001 resolved: x86 Goldens run 46123352062 at e8ad29a7 rendered all 36 goldens; the 10 differing PNGs committed in 4347e56b, so every committed golden equals its x86 render in RGB. Release proceeds per project rule (local gate decides, CI safety net via make watch-ci; release.yml has its own Linux smoke and verify before publish)."
     }
   ],
-  "generation": 194,
-  "next_action": "make release V=stable (dry run first), make watch-release, close issues and tick #527",
+  "generation": 199,
+  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -1227,10 +1233,10 @@
   ],
   "schema": 1,
   "started_at": "2026-11-27T21:37:30Z",
-  "status": "in_progress",
+  "status": "completed",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T07:58:04Z",
+  "updated_at": "2026-11-28T07:59:36Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1384,6 +1390,27 @@
       "check": "x86 goldens run 46123352062",
       "criterion": null,
       "evidence": "10 PNGs differ in RGB (appearance x4 from #551, capsule/popin x6 from #543 status line removed); visually checked; local golden tests pass with them",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T07:59:36Z",
+      "check": "Group 8 issues closed",
+      "criterion": "C1",
+      "evidence": "gh: #532 #533 #535 closed earlier; #534 #536-#553 closed with commit comments",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T07:59:36Z",
+      "check": "#527 group 8 ticked",
+      "criterion": "C2",
+      "evidence": "#527 body: 51 checked, 0 unchecked",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T07:59:36Z",
+      "check": "Release cut",
+      "criterion": "C3",
+      "evidence": "make release V=stable -> 7701bc96, tag v2.14.0 pushed; make watch-release started",
       "outcome": "pass"
     }
   ]
