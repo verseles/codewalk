@@ -394,7 +394,11 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
   Timer? _hide;
   Timer? _rotation;
   int? _tip;
-  late final _linkTap = TapGestureRecognizer()..onTap = _follow;
+  // One per destination, so a tip still fading out opens its own.
+  late final _linkTaps = {
+    for (final link in ComposerTipLink.values)
+      link: TapGestureRecognizer()..onTap = () => _open(link),
+  };
 
   @override
   void didChangeDependencies() {
@@ -420,12 +424,6 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
           }.contains(defaultTargetPlatform),
       readAloud: context.read<ReadAloudController?>()?.offered ?? false,
     );
-  }
-
-  /// Opens where the tip shown leads.
-  void _follow() {
-    final link = _shown?.tip?.link;
-    if (link != null) _open(link);
   }
 
   /// Opens where [link] leads.
@@ -455,7 +453,9 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
     _show?.cancel();
     _hide?.cancel();
     _rotation?.cancel();
-    _linkTap.dispose();
+    for (final tap in _linkTaps.values) {
+      tap.dispose();
+    }
     super.dispose();
   }
 
@@ -622,7 +622,7 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
                                     TextSpan(text: shown.tip!.before),
                                     TextSpan(
                                       text: shown.tip!.label,
-                                      recognizer: _linkTap,
+                                      recognizer: _linkTaps[shown.tip!.link!],
                                       mouseCursor: SystemMouseCursors.click,
                                       style: TextStyle(
                                         color: scheme.primary,

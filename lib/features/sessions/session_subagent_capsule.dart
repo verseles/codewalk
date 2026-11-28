@@ -368,20 +368,29 @@ const shellShownAfter = Duration(seconds: 5);
 /// before it was ever seen, as in history, shows. It tells its listeners
 /// when a running shell reaches [shellShownAfter].
 final class ShellSightings extends ChangeNotifier {
+  // Sightings outlive a shell's absence from one update to the next (a
+  // retry, a live record gone before its row ends); past this many, those
+  // of shells no longer listed go, oldest first.
+  static const _kept = 512;
   final _times = <String, (DateTime, DateTime?)>{};
   Timer? _timer;
   DateTime? _timerAt;
   bool _disposed = false;
 
   /// The shells of [entries], all the session's, that ran long enough by
-  /// [now] to show; the sightings of shells no longer among them go.
+  /// [now] to show.
   List<CapsuleShellEntry> shown(List<CapsuleShellEntry> entries, DateTime now) {
-    final kept = <String>{};
+    final listed = <String>{};
     final shown = [
       for (final entry in entries)
-        if (_shown(entry, now, kept)) entry,
+        if (_shown(entry, now, listed)) entry,
     ];
-    _times.removeWhere((key, _) => !kept.contains(key));
+    if (_times.length > _kept) {
+      for (final key in _times.keys.toList()) {
+        if (_times.length <= _kept) break;
+        if (!listed.contains(key)) _times.remove(key);
+      }
+    }
     _arm(entries, now);
     return shown;
   }
@@ -396,21 +405,33 @@ final class ShellSightings extends ChangeNotifier {
   static bool _active(CapsuleShellEntry entry) =>
       entry.isRunning || entry.isUnconfirmed;
 
+  /// The earliest start any name of [entry] was seen with, and an end seen
+  /// with it.
   (DateTime, DateTime?)? _seen(CapsuleShellEntry entry) {
+    (DateTime, DateTime?)? seen;
     for (final key in _keys(entry)) {
-      if (_times[key] case final seen?) return seen;
+      final times = _times[key];
+      if (times == null) continue;
+      if (seen == null || times.$1.isBefore(seen.$1)) {
+        seen = (times.$1, times.$2 ?? seen?.$2);
+      } else {
+        seen = (seen.$1, seen.$2 ?? times.$2);
+      }
     }
-    return null;
+    return seen;
   }
 
-  bool _shown(CapsuleShellEntry entry, DateTime now, Set<String> kept) {
+  bool _shown(CapsuleShellEntry entry, DateTime now, Set<String> listed) {
     final seen = _seen(entry);
     final start = entry.startedAt ?? seen?.$1 ?? (_active(entry) ? now : null);
     if (start == null) return true;
     final end = _active(entry) ? null : entry.completedAt ?? seen?.$2 ?? now;
     for (final key in _keys(entry)) {
-      _times[key] = (start, end);
-      kept.add(key);
+      // Rewritten as the newest, so a listed shell is the last to go.
+      _times
+        ..remove(key)
+        ..[key] = (start, end);
+      listed.add(key);
     }
     return (end ?? now).difference(start) >= shellShownAfter;
   }
@@ -427,12 +448,15 @@ final class ShellSightings extends ChangeNotifier {
       if (!at.isAfter(now)) continue;
       if (next == null || at.isBefore(next)) next = at;
     }
-    final pending = _timerAt;
-    if (_disposed ||
-        next == null ||
-        (pending != null && !next.isBefore(pending))) {
+    if (next == null) {
+      // Nothing left to wait for.
+      _timer?.cancel();
+      _timer = null;
+      _timerAt = null;
       return;
     }
+    final pending = _timerAt;
+    if (_disposed || (pending != null && !next.isBefore(pending))) return;
     _timer?.cancel();
     _timerAt = next;
     _timer = Timer(next.difference(now), () {
@@ -503,6 +527,8 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
   bool _open = false;
 
   Set<String> _confirmedRemovedFor(SessionState? state) {
+    // A pop-in left open after its chip went asks nothing of it.
+    if (!mounted) return const {};
     final session = widget.live.session;
     if (_observedSession != session) {
       _observedSession = session;

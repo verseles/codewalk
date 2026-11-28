@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 31,
+  "artifact_seq": 32,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -496,6 +496,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "8.3 review r2"
+    },
+    "A0032": {
+      "active": true,
+      "bytes": 964,
+      "created_at": "2026-11-28T07:07:54Z",
+      "evidence": "/tmp/opencode/g8/rev/u9/r3_*.out, /tmp/opencode/g8/rev/u10/r1_*.out",
+      "id": "A0032",
+      "impact": "Fix rounds for both units",
+      "origin": "6 helpers each + native stand-in (u10)",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0032.md",
+      "purpose": "Re-review a2e05556; initial review da98f660..f9a8bf0c",
+      "rerun_when": "after fixes",
+      "sha256": "6fd58e4358892d26442284d1b8b1cdef8ba26fbe4249d98181579a8ece4862d1",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "8.3 r3 + 8.4-8.6 r1 reviews"
     }
   },
   "checklist": [
@@ -1043,10 +1059,14 @@
     {
       "at": "2026-11-28T06:29:42Z",
       "text": "Judged 8.3 r1 (A0030): accepted A draft dictation, B unknown-start shells via ShellSightings, C timeline room via live.capsuleShown, D linked tip in More dialog, F doc, G lastVariant falls back to newest project row, H draft picks record variant, J no 4->3 shrink with focus, K deferred onListening, L keyboard tips w/o kIsWeb + preferences-only tips, N docs, O drop liveChildrenRunning. Rejected: E mic delay at mount (dissent to Sol-F), I '*' row eviction (bounded LRU, downgrade-safe), M stale tip until rotation. Metrics u9 r1 recorded. Also committed #549 da98f660, #550 ffb96bb8, #551 c0878a6a, #552 6f0a7e25."
+    },
+    {
+      "at": "2026-11-28T06:49:10Z",
+      "text": "8.3 r2 judged (A0031): all accepted except draft write race (sugg); fix a2e05556; Sol-F agreed with mic-at-mount. #553 committed (createdThisRun + GitHub default). Unit u10 (8.4-8.6 #549-#553: da98f660 ffb96bb8 c0878a6a 6f0a7e25 + #553 commit) metrics rvw_20261128T064823Z_9e20b158, key codewalk-g8-tasks-settings-theme-20261128T064818Z-4812; handshakes READY x6, Grok out of credits (excluded)."
     }
   ],
-  "generation": 153,
-  "next_action": "v2 suite running (bhlosxy38); then commit 8.3 fixes, dispatch u9 r2 re-review, then #553",
+  "generation": 157,
+  "next_action": "Full suite running (be72kmsho); then dispatch u9 r3 + u10 r1 + native stand-in for u10",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -1069,7 +1089,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T06:45:00Z",
+  "updated_at": "2026-11-28T07:07:54Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1202,6 +1222,13 @@
       "check": "8.3 r1 fixes: test/v2 suite + analyze + l10n check",
       "criterion": null,
       "evidence": "v2: all pass except expected goldens (appearance x4: #541/#551 settings; capsule x3: #543); analyze 4 (budget); l10n check OK. log /tmp/opencode/g8/v2.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T06:55:02Z",
+      "check": "Full flutter test at f9a8bf0c",
+      "criterion": null,
+      "evidence": "all pass except expected goldens (appearance x4, subagent capsule x3) regenerated on x86 after push; log /tmp/opencode/g8/full2.log",
       "outcome": "pass"
     }
   ]
