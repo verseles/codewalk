@@ -264,6 +264,9 @@ class _SessionComposerState extends State<SessionComposer> {
   /// since the send does not take its text.
   bool _continuing = false;
 
+  /// A dictation is under way: the composer opens for it (#546).
+  bool _dictating = false;
+
   Future<void> _continue() async {
     if (!_canContinue) return;
     // A new prompt ends the conversation's reading (#541).
@@ -643,8 +646,12 @@ class _SessionComposerState extends State<SessionComposer> {
                       key: _voice,
                       text: _text,
                       enabled: voiceEnabled,
+                      onListening: (listening) {
+                        if (mounted) setState(() => _dictating = listening);
+                      },
                     ),
                     voiceTakesAction: voiceTakesAction,
+                    listening: _dictating,
                     chip: SessionModelChip(live: c.live),
                     field: (context, open) => Focus(
                       onKeyEvent: _key,
@@ -661,7 +668,13 @@ class _SessionComposerState extends State<SessionComposer> {
                               c.live.endpointOffline,
                           minLines: 1,
                           // A closed phone composer stays one line.
-                          maxLines: open ? 4 : 1,
+                          // Dictated words show up to three lines, as
+                          // they come (#546).
+                          maxLines: !open
+                              ? 1
+                              : _dictating
+                              ? 3
+                              : 4,
                           keyboardType: TextInputType.multiline,
                           autocorrect: composerSuggests(context),
                           enableSuggestions: composerSuggests(context),

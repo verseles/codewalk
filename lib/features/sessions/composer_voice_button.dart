@@ -23,6 +23,7 @@ class ComposerVoiceButton extends StatefulWidget {
     super.key,
     required this.text,
     this.enabled = true,
+    this.onListening,
   });
 
   /// The field the words go into, at its cursor.
@@ -30,6 +31,9 @@ class ComposerVoiceButton extends StatefulWidget {
 
   /// False while the field takes no edits (a send in flight).
   final bool enabled;
+
+  /// Told when a dictation starts and ends, so the composer opens for it.
+  final ValueChanged<bool>? onListening;
 
   /// One slow breath while listening, in and out.
   static const breath = Duration(milliseconds: 1800);
@@ -133,6 +137,7 @@ class ComposerVoiceButtonState extends State<ComposerVoiceButton>
     _floor = null;
     _peak = null;
     setState(() => _listening = true);
+    widget.onListening?.call(true);
     widget.text.addListener(_edited);
     if (!MediaQuery.disableAnimationsOf(context)) {
       unawaited(_breath.repeat(reverse: true));
@@ -213,6 +218,7 @@ class ComposerVoiceButtonState extends State<ComposerVoiceButton>
       _stopping = false;
       if (end == SpeechDictationEnd.unavailable) _unavailable = true;
     });
+    widget.onListening?.call(false);
     final l10n = context.v2L10n;
     final message = switch (end) {
       SpeechDictationEnd.finished => null,

@@ -133,6 +133,7 @@ class ComposerFrame extends StatefulWidget {
     this.voice,
     this.chip,
     this.voiceTakesAction = false,
+    this.listening = false,
   });
 
   /// The field, given whether the composer is open.
@@ -149,6 +150,10 @@ class ComposerFrame extends StatefulWidget {
   /// while Send would only show the idle check (#501). The action is then
   /// neither shown, tapped nor focused.
   final bool voiceTakesAction;
+
+  /// A dictation is under way: the composer opens, with its second row and
+  /// a field that grows with the words, without the keyboard (#546).
+  final bool listening;
 
   /// How long the mic takes to slide between its place and the action's.
   static const voiceSlide = Duration(milliseconds: 220);
@@ -234,7 +239,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
 
   @override
   Widget build(BuildContext context) {
-    final open = composerAlwaysOpen || _frame.hasFocus;
+    final open = composerAlwaysOpen || _frame.hasFocus || widget.listening;
     final attach = KeyedSubtree(
       key: _attach,
       child:

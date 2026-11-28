@@ -10,6 +10,7 @@ Widget _frame({
   String chipLabel = 'Model',
   bool autofocus = false,
   bool voiceTakesAction = false,
+  bool listening = false,
   Widget? voice,
   TextDirection direction = TextDirection.ltr,
   bool reducedMotion = false,
@@ -24,6 +25,7 @@ Widget _frame({
           voiceTooltip: 'Voice',
           voice: voice,
           voiceTakesAction: voiceTakesAction,
+          listening: listening,
           chip: TextButton(
             key: const ValueKey('chip'),
             focusNode: chip,
@@ -106,6 +108,20 @@ void main() {
     expect(find.byKey(const ValueKey('chip')), findsOneWidget);
     final open = tester.getRect(find.byKey(const ValueKey('composer-bubble')));
     expect(open.height, greaterThan(closed.height));
+  });
+
+  testWidgets('a dictation opens a phone composer, keyboard closed (#546)', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_frame(field: field, chip: chip));
+    expect(maxLines(tester), 1);
+    await tester.pumpWidget(_frame(field: field, chip: chip, listening: true));
+    expect(maxLines(tester), 4);
+    expect(find.byKey(const ValueKey('chip')), findsOneWidget);
+    // No focus, so no keyboard.
+    expect(field.hasFocus, isFalse);
+    await tester.pumpWidget(_frame(field: field, chip: chip));
+    expect(maxLines(tester), 1);
   });
 
   testWidgets('a desktop composer is always open', (tester) async {
