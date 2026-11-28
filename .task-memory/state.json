@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 24,
+  "artifact_seq": 25,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -384,6 +384,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "Native stand-ins: #540 review + #542 plan; Sol-F dissent on #540 H3"
+    },
+    "A0025": {
+      "active": true,
+      "bytes": 192,
+      "created_at": "2026-11-28T04:51:35Z",
+      "evidence": "/tmp/opencode/g8/rev/u6/r2_*.out; /tmp/opencode/g8/rev/u7/r2_*.out",
+      "id": "A0025",
+      "impact": "Round 2 fixes for #540 and #541",
+      "origin": "8 helpers each (Claude x2 rc=1 quota)",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0025.md",
+      "purpose": "Re-review b3718ca3+2d0eee6b and d698564d",
+      "rerun_when": "#540/#541 files change",
+      "sha256": "eab325b0104377507d5c90ad05e6a272ea5e2d3a437c00ed9135d389b2949e9d",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u6 #540 r2 + u7 #541 r2 re-reviews"
     }
   },
   "checklist": [
@@ -895,10 +911,14 @@
     {
       "at": "2026-11-28T04:32:49Z",
       "text": "#542 Sol-F dissent reply: AGREE 1 (no previews), 5 (item text only); DISAGREE 2 (archived: projection drops time.archived), 3 (composer sendAgain on uncertain may duplicate), 4 (8 warm tabs block any 9th target). Resolution: 2 -> project time.archived into SessionSummary.archivedAt, filter archived rows in the picker and recheck the catalog row before submit; 3 -> resolved by evidence: composerSendAgain is an explicit user action labeled 'Send again (may duplicate)', same semantics as any uncertain prompt, never automatic; 4 -> raise the OpenCode slot watch capacity 8 -> 9 (tabs stay at 8), so one temporary lease always fits."
+    },
+    {
+      "at": "2026-11-28T04:51:28Z",
+      "text": "#542 implemented (uncommitted): message_forward.dart (forwardableText/origin/text, forwardTargetGroups search-then-20, MessageForwardRun sequential lease+queue+classify, late-lease close), message_forward_dialog.dart (forwardMessageAction gate: SessionLiveDirectory + same-profile catalog; picker + results dialog), live/history wiring, Ctrl/Cmd+Shift+F, SessionSummary.archivedAt + projection, slot watch 9, 28 l10n keys x14, BEHAVIOR 'V2 forward a message'. Tests: message_forward_test 11, dialog 4, reader archived. Gate bzth4x2xj running; u6/u7 r2 reviews buu4bltnw running (op_ae2fc308ab25)."
     }
   ],
-  "generation": 125,
-  "next_action": "Add #541 regression tests (completion, error, superseded no failure, other audio while preparing, history stop, settings commit/stop, speakable cases, https rule), BEHAVIOR updates, gate, commit; then u6 r2 + u7 r2 re-reviews; then #542 synthesis.",
+  "generation": 128,
+  "next_action": "On gate: commit #542; on r2: capture, judge, fix; then #542 review unit u8 (8 helpers + native stand-in).",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -921,7 +941,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T04:37:29Z",
+  "updated_at": "2026-11-28T04:51:35Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

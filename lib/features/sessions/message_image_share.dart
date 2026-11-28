@@ -35,7 +35,9 @@ double? messageImageRatio(Size content, {required double devicePixelRatio}) {
     min(devicePixelRatio, 3.0),
     messageImageMaxHeight / height,
     messageImageMaxWidth / width,
-    sqrt(messageImageMaxPixels / (width * height)),
+    // With room for the capture's rounding up, so the image stays within
+    // the bound in whole pixels.
+    sqrt(0.99 * messageImageMaxPixels / (width * height)),
   ].reduce(min);
   return ratio < 0.5 ? null : ratio;
 }
@@ -92,9 +94,10 @@ Future<void> shareMessageImage(BuildContext context) async {
       .findAncestorRenderObjectOfType<RenderRepaintBoundary>();
   final messenger = ScaffoldMessenger.maybeOf(context);
   final l10n = context.v2L10n;
-  final background = Theme.of(context).colorScheme.surface;
-  final devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
-  final screen = Offset.zero & MediaQuery.sizeOf(context);
+  var background = Theme.of(context).colorScheme.surface;
+  var devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+  var screen = Offset.zero & MediaQuery.sizeOf(context);
+  final list = Scrollable.maybeOf(context)?.context;
   if (sink == null || boundary == null) {
     showAppSnackBar(messenger, l10n.messageImageFailed);
     return;
@@ -104,6 +107,20 @@ Future<void> shareMessageImage(BuildContext context) async {
   if (!boundary.attached || !boundary.hasSize) {
     showAppSnackBar(messenger, l10n.messageImageFailed);
     return;
+  }
+  // The screen as it is now, after a rotation or a move to another display.
+  if (context.mounted) {
+    background = Theme.of(context).colorScheme.surface;
+    devicePixelRatio = MediaQuery.devicePixelRatioOf(context);
+    screen = Offset.zero & MediaQuery.sizeOf(context);
+  }
+  // The list's visible part, so the sheet never points at the header or
+  // the composer.
+  final listBox = list != null && list.mounted ? list.findRenderObject() : null;
+  if (listBox is RenderBox && listBox.attached && listBox.hasSize) {
+    screen = screen.intersect(
+      listBox.localToGlobal(Offset.zero) & listBox.size,
+    );
   }
   // The message as it is now drawn, after any change of size meanwhile.
   final ratio = messageImageRatio(

@@ -114,7 +114,17 @@ Future<File> writeNewImage(
       if (n < 100) continue;
       rethrow;
     }
-    await file.writeAsBytes(png, flush: true);
+    try {
+      await file.writeAsBytes(png, flush: true);
+    } on Object {
+      // No empty image is left behind to take the name.
+      try {
+        await file.delete();
+      } on FileSystemException {
+        // Pruned with the others.
+      }
+      rethrow;
+    }
     return file;
   }
 }

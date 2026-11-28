@@ -106,7 +106,7 @@ void main() {
           big *
           (2700 + 2 * messageImagePadding) *
           big,
-      closeTo(messageImageMaxPixels, 1),
+      closeTo(0.99 * messageImageMaxPixels, 1),
     );
     // Too tall even at half size.
     expect(
@@ -142,6 +142,10 @@ void main() {
     );
     final image = img.decodePng(png!)!;
     expect(image.height, lessThanOrEqualTo(messageImageMaxHeight));
+    expect(
+      image.width * image.height,
+      lessThanOrEqualTo(messageImageMaxPixels),
+    );
     expect(image.width, lessThanOrEqualTo(messageImageMaxWidth));
   });
 

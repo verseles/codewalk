@@ -520,16 +520,18 @@ class SessionTimelineTile extends StatelessWidget {
               // The whole message only: never a streaming answer, one whose
               // start history lost, one shown only in part for its length,
               // or one with nothing to show (#540).
+              // The cheap checks first: a streaming answer never measures
+              // its text.
               if (imageMode != MessageImageMode.none &&
-                  MessageRenderBudget.decide(text).kind !=
-                      RenderDecisionKind.plainTruncated &&
                   switch (item) {
                     AssistantText(:final complete, :final prefixMissing) =>
                       complete && !prefixMissing && text.trim().isNotEmpty,
                     UserInput(:final attachments) =>
                       text.trim().isNotEmpty || attachments.isNotEmpty,
                     _ => false,
-                  })
+                  } &&
+                  MessageRenderBudget.decide(text).kind !=
+                      RenderDecisionKind.plainTruncated)
                 MessageAction(
                   id: MessageActionId.shareImage,
                   label: imageMode == MessageImageMode.save
