@@ -355,12 +355,13 @@ class ReadAloudController extends ChangeNotifier {
   void _playerChanged(AudioPlaybackState state) {
     final id = _playing;
     if (_active == null || id == null || _activeNative) return;
-    // An attachment that was playing as the reading started and then paused
-    // or stopped loses its pass: starting it again claims the player.
+    // An attachment that was playing as the reading started and then paused,
+    // stopped or gave way loses its pass: starting it again claims the
+    // player.
     if (_foreign != null &&
-        state.activeId == _foreign &&
-        state.status != AudioPlaybackStatus.playing &&
-        state.status != AudioPlaybackStatus.loading) {
+        (state.activeId != _foreign ||
+            (state.status != AudioPlaybackStatus.playing &&
+                state.status != AudioPlaybackStatus.loading))) {
       _foreign = null;
     }
     if (state.activeId != id) {

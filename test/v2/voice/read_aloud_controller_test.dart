@@ -265,15 +265,16 @@ void main() {
 
   test('IPv6 servers each keep their own key', () {
     expect(
-      speechKeyScope(SpeechProvider.openAi, 'http://[fd00::1]:80'),
-      isNot(speechKeyScope(SpeechProvider.openAi, 'http://[fd00::1:80]')),
+      speechKeyScope(SpeechProvider.openAi, 'http://[fd00::1]:8080'),
+      isNot(speechKeyScope(SpeechProvider.openAi, 'http://[fd00::1:8080]')),
     );
   });
 
   test('a service that takes no key never waits on the key storage', () async {
+    final keys = _BrokenKeys();
     final broken = ReadAloudController(
       metadata: V2MetadataStore(backend: backend),
-      keys: _BrokenKeys(),
+      keys: keys,
       synthesizer: (_) => synth,
       locale: () => 'pt-BR',
       player: player,
@@ -282,6 +283,7 @@ void main() {
     expect(broken.settings.provider, SpeechProvider.edge);
     expect(await broken.read('s|a', 'Hello'), isNull);
     expect(await broken.voices(), hasLength(1));
+    expect(keys.reads, 0);
   });
 
   test('a player that cannot play says so', () async {
@@ -306,6 +308,35 @@ void main() {
     () async {
       final gate = synth.gate = Completer<void>();
       final first = controller.read('s|a', 'First');
+      await pumpEventQueue();
+      player.emit(
+        const AudioPlaybackState(
+          activeId: 'attachment',
+          status: AudioPlaybackStatus.playing,
+        ),
+      );
+      await pumpEventQueue();
+      expect(controller.phase, ReadAloudPhase.idle);
+      gate.complete();
+      expect(await first, isNull);
+      expect(player.played, isEmpty);
+    },
+  );
+
+  test(
+    'an attachment stopped and started again takes the player back',
+    () async {
+      player.emit(
+        const AudioPlaybackState(
+          activeId: 'attachment',
+          status: AudioPlaybackStatus.playing,
+        ),
+      );
+      final gate = synth.gate = Completer<void>();
+      final first = controller.read('s|a', 'First');
+      await pumpEventQueue();
+      // Stopped, the player tells only that nothing plays.
+      player.emit(const AudioPlaybackState());
       await pumpEventQueue();
       player.emit(
         const AudioPlaybackState(
@@ -379,8 +410,13 @@ void main() {
 }
 
 final class _BrokenKeys implements SpeechKeyStore {
+  int reads = 0;
+
   @override
-  Future<String?> read(String scope) => throw StateError('locked keyring');
+  Future<String?> read(String scope) {
+    reads++;
+    throw StateError('locked keyring');
+  }
 
   @override
   Future<void> write(String scope, String? key) =>

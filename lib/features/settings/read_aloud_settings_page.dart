@@ -158,8 +158,10 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
   }
 
   /// The scope the fields will apply to: the service shown, at the address
-  /// typed, as a commit would store them.
-  String _intendedScope(ReadAloudController controller) {
+  /// typed, as a commit would store them; null while another service is
+  /// being switched to, whose fields are not shown yet.
+  String? _intendedScope(ReadAloudController controller) {
+    if (_shown != controller.settings.provider) return null;
     final next = _pending(controller) ?? controller.settings;
     return speechKeyScope(next.provider, next.baseUrl);
   }
@@ -412,6 +414,7 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
                         // For the service and address shown when tapped;
                         // if they change meanwhile, the key is not saved.
                         final intended = _intendedScope(controller);
+                        if (intended == null) return;
                         await _commit(controller);
                         final now = controller.settings;
                         if (!mounted ||
@@ -428,6 +431,7 @@ class _ReadAloudSettingsPageState extends State<ReadAloudSettingsPage> {
                         key: const ValueKey('read_aloud_api_key_clear'),
                         onPressed: () async {
                           final intended = _intendedScope(controller);
+                          if (intended == null) return;
                           await _commit(controller);
                           final now = controller.settings;
                           if (!mounted ||

@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 26,
+  "artifact_seq": 27,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -416,6 +416,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "u7 #541 re-review round 3"
+    },
+    "A0027": {
+      "active": true,
+      "bytes": 1465,
+      "created_at": "2026-11-28T05:21:40Z",
+      "evidence": "/tmp/opencode/g8/rev/u7/r4_*.out, /tmp/opencode/g8/rev/u8/r1_*.out, r1_native-opus.out",
+      "id": "A0027",
+      "impact": "Fix round for #541 and #542 before push",
+      "origin": "helpers Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg + native stand-in (u8)",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0027.md",
+      "purpose": "Review #541 round 4 and #542 round 1",
+      "rerun_when": "after fixes commit",
+      "sha256": "d4d85102d3ba0fd033a600f4e56c9bc377a92d1939f37c16febf3f7b6cfb5bcd",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "#541 r4 + #542 r1 reviews"
     }
   },
   "checklist": [
@@ -945,16 +961,9 @@
       "text": "u7 #541 r3 judged (A0026): accepted IPv6 scope via Uri.origin; keyless Edge skips key storage (+ error tolerant); key save/clear bound to intended scope, abort if changed, write outdates reads; port stop({id}) spares a newer start, superseded stop leaves new file/state, failed play releases file; shared folder future, recreate if removed; foreign pass expires on pause; start not taken -> unavailable (3a5ee0aa). Native engine ownership: latent (system provider not offered), covered by id-scoped stop. Round 4 needed (port API change)."
     }
   ],
-  "generation": 134,
+  "generation": 136,
   "next_action": "On gate: commit #542; on r2: capture, judge, fix; then #542 review unit u8 (8 helpers + native stand-in).",
-  "pending_operation": {
-    "expected_bytes": 80000,
-    "expected_seconds": 1200,
-    "id": "op_1c2984b680f5",
-    "kind": "subagent",
-    "prepared_at": "2026-11-28T05:10:44Z",
-    "purpose": "Batch: u7 #541 round 4 (3a5ee0aa, 6 helpers) + u8 #542 review round 1 (6e0718a4, 6 helpers) + native stand-in for #542"
-  },
+  "pending_operation": null,
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -976,7 +985,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T05:10:44Z",
+  "updated_at": "2026-11-28T05:24:07Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1075,6 +1084,13 @@
       "criterion": null,
       "evidence": "analyze 4 pre-existing; l10n check ok; tests +2683 ~4 -2, only appearance golden desktop_light/dark (expected, x86 regen after push). /tmp/opencode/g8/t541b.log",
       "outcome": "info"
+    },
+    {
+      "at": "2026-11-28T05:24:07Z",
+      "check": "#541 r4 fixes: voice tests + analyze + mutation",
+      "criterion": null,
+      "evidence": "flutter test test/v2/voice 35 passed; analyze 4 (budget); foreign-pass test fails with fix reverted",
+      "outcome": "pass"
     }
   ]
 }
