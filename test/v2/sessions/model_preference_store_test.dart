@@ -214,6 +214,13 @@ void main() {
           'p/two',
           ['high', ''],
         ],
+        [
+          'variant',
+          'server-a',
+          '*',
+          'p/two',
+          ['high'],
+        ],
       ],
       'agentModels': [
         ['server-a', '/work/app', 'plan', 'p/two', null],
@@ -268,6 +275,30 @@ void main() {
     expect(store.variantRecents('server-a', '/work', 'p/a'), ['low']);
     expect(store.variantRecents('server-a', '/work', 'p/b'), isEmpty);
   });
+
+  test(
+    'the server keeps the variant last used with each model (#547)',
+    () async {
+      final store = await load();
+      expect(store.lastVariant('server-a', 'p/a'), isNull);
+      await store.recordVariant('server-a', '/work/one', 'p/a', 'high');
+      await store.recordVariant('server-a', '/work/two', 'p/a', 'low');
+      expect(store.lastVariant('server-a', 'p/a'), 'low');
+      expect(store.lastVariant('server-b', 'p/a'), isNull);
+      expect(store.lastVariant('server-a', 'p/b'), isNull);
+      // Auto remembered is no variant.
+      await store.recordVariant(
+        'server-a',
+        '/work/one',
+        'p/a',
+        ModelPreferenceStore.autoVariant,
+      );
+      expect(store.lastVariant('server-a', 'p/a'), isNull);
+      final reloaded = await load();
+      expect(reloaded.lastVariant('server-a', 'p/a'), isNull);
+      expect(reloaded.variantRecents('server-a', '/work/two', 'p/a'), ['low']);
+    },
+  );
 
   test('an agent keeps one model per project, the latest', () async {
     final store = await load();

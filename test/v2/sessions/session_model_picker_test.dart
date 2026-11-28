@@ -73,6 +73,7 @@ void main() {
     WidgetTester tester, {
     List<String> favorites = const [],
     List<String> recents = const [],
+    Map<String, String> variants = const {},
     Size size = const Size(800, 900),
     Locale locale = const Locale('en'),
     ThemeData? theme,
@@ -85,6 +86,10 @@ void main() {
     }
     for (final model in recents.reversed) {
       await seed.recordRecent(_server, _project, model);
+    }
+    // Used in another project of the server.
+    for (final MapEntry(key: model, value: variant) in variants.entries) {
+      await seed.recordVariant(_server, '/work/other', model, variant);
     }
     seed.dispose();
     preferences = ModelPreferenceStore(
@@ -772,6 +777,28 @@ void main() {
     await tester.tap(row('auto-prov/alpha'));
     await tester.pumpAndSettle();
     expect(switches(handle), ['model:prov/alpha']);
+  });
+
+  testWidgets('another model takes the variant last used with it (#547)', (
+    tester,
+  ) async {
+    final (_, handle) = await open(
+      tester,
+      variants: {'prov/alpha': 'low', 'prov/beta': 'max'},
+      state: SessionSelectionState(
+        selection: _selection(_gamma, null),
+        models: [_alpha, _beta, _zen, _gamma],
+      ),
+    );
+    await openPicker(tester);
+    await tester.tap(row('model-prov/alpha'));
+    await tester.pumpAndSettle();
+    expect(switches(handle), ['model:prov/alpha:low']);
+    // A variant the model does not list falls back to Auto.
+    await openPicker(tester);
+    await tester.tap(row('model-prov/beta'));
+    await tester.pumpAndSettle();
+    expect(switches(handle).last, 'model:prov/beta');
   });
 
   testWidgets('an unreadable record shows no stars to save and says so', (

@@ -965,9 +965,16 @@
       "text": "Judged #541 r4 (A0027): accepted stop of pending start, superseded-state recheck, folder retry, foreign pass on any state change, key save during switch, tests; rejected 1-day sweep (tradeoff, dissent sent to Sol-F in r5). Fix d1816c75. Judged #542 r1: accepted double-send guard, picked-row snapshot+dedupe, failure-first picker, error->unavailable/unconfirmed, Stop halts waits, watching:false lease (no auto-approve), isCurrent holds, history pop, SafeArea, health listener, warm composer reload; rejected separate archive check (dissent in r2). Metrics recorded u7 r4, u8 r1."
     }
   ],
-  "generation": 138,
+  "generation": 140,
   "next_action": "Session tests running (bzxv93agu); then commit #542 fixes, dispatch u7 r5 + u8 r2 re-reviews, continue #547 tests",
-  "pending_operation": null,
+  "pending_operation": {
+    "expected_bytes": 30000,
+    "expected_seconds": 900,
+    "id": "op_004a84496ed3",
+    "kind": "subagent",
+    "prepared_at": "2026-11-28T05:38:46Z",
+    "purpose": "Re-review #541 r5 (d1816c75) and #542 r2 (8c6e88f1) with 6 helpers each"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -989,7 +996,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T05:38:43Z",
+  "updated_at": "2026-11-28T05:42:39Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1101,6 +1108,13 @@
       "check": "#542 r1 fixes: test/v2/sessions + analyze",
       "criterion": null,
       "evidence": "sessions suite: forward/dialog/directory tests pass; only unrelated fails: 3 capsule goldens (#543 status change, regen on x86), #501 mic test (#545 delay), store readback (#547 WIP). analyze 4 (budget). Guard mutation fails directory test.",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T05:42:39Z",
+      "check": "#547 tests: store, picker, chip, cycle + analyze + mutation",
+      "criterion": null,
+      "evidence": "77+23 tests pass; analyze 4 (budget); picker #547 test fails with chip change reverted",
       "outcome": "pass"
     }
   ]

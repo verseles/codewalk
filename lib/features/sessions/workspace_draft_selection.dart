@@ -126,6 +126,12 @@ final class WorkspaceDraftSelection extends ChangeNotifier
   };
 
   @override
+  String? lastVariant(String modelKey) => switch (_profileId()) {
+    final profile? => modelPreferences?.lastVariant(profile, modelKey),
+    null => null,
+  };
+
+  @override
   List<String> get recentModels => switch ((_profileId(), _project())) {
     (final profile?, final project?) =>
       modelPreferences?.recents(profile, project) ?? const [],

@@ -24,6 +24,10 @@ abstract interface class SessionSelectionHost implements Listenable {
   ModelPreferenceStore? get modelPreferences;
   List<String> get favoriteModels;
   List<String> get recentModels;
+
+  /// The variant last used with the model of [modelKey] on this server,
+  /// favorite or not; null for Auto (#547).
+  String? lastVariant(String modelKey);
   bool get canFavoriteModels;
   Future<bool> setFavoriteModel(ModelEntry model, {required bool favorite});
 

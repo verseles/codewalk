@@ -481,8 +481,14 @@ class _SelectionPanelState extends State<_SelectionPanel> {
         final selected = identical(model, offeredModel);
         final favorite = favoriteKeys.contains(key);
         // A tap on the row keeps the session's variant for its own model and
-        // takes the server's default (Auto) for any other.
-        final variant = selected ? currentVariant : null;
+        // takes the one last used with any other model, else the server's
+        // default (Auto) (#547).
+        final remembered = live.lastVariant(key);
+        final variant = selected
+            ? currentVariant
+            : model.variants.contains(remembered)
+            ? remembered
+            : null;
         // The sheet (below 600 dp) has no room for the star: a long press
         // toggles the favorite and a bar on the start edge marks it (#516).
         final compact = widget.fill;

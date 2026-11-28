@@ -167,14 +167,34 @@ final class ModelPreferenceStore extends ChangeNotifier {
   }) => _record(_Kind.agent, server, project, '', agent, previous);
 
   /// Puts [variant] first among the variants used with [model], then
-  /// [previous]; [autoVariant] stands for Auto.
+  /// [previous]; [autoVariant] stands for Auto. The server also keeps the
+  /// last one used with the model in any project (#547).
   Future<bool> recordVariant(
     String server,
     String project,
     String model,
     String variant, {
     String? previous,
-  }) => _record(_Kind.variant, server, project, model, variant, previous);
+  }) => _record(
+    _Kind.variant,
+    server,
+    project,
+    model,
+    variant,
+    previous,
+    anywhere: true,
+  );
+
+  /// The variant last used with [model] on [server], in any project, or
+  /// null for Auto or none yet.
+  String? lastVariant(String server, String model) {
+    final last = _values(_Kind.variant, server, _anyProject, model).firstOrNull;
+    return last == null || last == autoVariant ? null : last;
+  }
+
+  // Server-wide variant rows use this project name, which no real project
+  // (an absolute path) can have.
+  static const _anyProject = '*';
 
   /// Remembers the model and variant [agent] used in the project.
   Future<bool> rememberAgentModel(
@@ -206,37 +226,38 @@ final class ModelPreferenceStore extends ChangeNotifier {
         (variant == null || _valid(variant)),
   );
 
+  /// Records [value] for [project], and with [anywhere] also for the
+  /// server as a whole, in one write.
   Future<bool> _record(
     _Kind kind,
     String server,
     String project,
     String scope,
     String value,
-    String? previous,
-  ) => _change(
+    String? previous, {
+    bool anywhere = false,
+  }) => _change(
     () {
-      final current = _values(kind, server, project, scope);
-      final next = <String>[
-        value,
-        if (previous != null && previous != value) previous,
-        ...current.where((v) => v != value && v != previous),
-      ].take(maxRecents).toList(growable: false);
-      if (listEquals(next, current)) return null;
-      final rows = [
-        ..._saved.history.where(
-          (r) =>
-              r.kind != kind ||
-              r.server != server ||
-              r.project != project ||
-              r.scope != scope,
-        ),
-        _History(kind, server, project, scope, next),
-      ];
-      // Each kind keeps its own bound, dropping its least recent row.
-      while (rows.where((r) => r.kind == kind).length > maxProjects) {
-        rows.remove(rows.firstWhere((r) => r.kind == kind));
+      var history = _saved.history;
+      var changed = false;
+      for (final (where, before) in [
+        (project, previous),
+        if (anywhere) (_anyProject, null),
+      ]) {
+        final next = _recorded(
+          history,
+          kind,
+          server,
+          where,
+          scope,
+          value,
+          before,
+        );
+        if (next == null) continue;
+        history = next;
+        changed = true;
       }
-      return _saved.copyWith(history: List.unmodifiable(rows));
+      return changed ? _saved.copyWith(history: history) : null;
     },
     valid:
         _valid(server) &&
@@ -245,6 +266,40 @@ final class ModelPreferenceStore extends ChangeNotifier {
         kind.allows(value) &&
         (previous == null || kind.allows(previous)),
   );
+
+  /// [history] with [value] first for [project], or null when it already
+  /// was.
+  static List<_History>? _recorded(
+    List<_History> history,
+    _Kind kind,
+    String server,
+    String project,
+    String scope,
+    String value,
+    String? previous,
+  ) {
+    bool same(_History r) =>
+        r.kind == kind &&
+        r.server == server &&
+        r.project == project &&
+        r.scope == scope;
+    final current = history.where(same).firstOrNull?.values ?? const [];
+    final next = <String>[
+      value,
+      if (previous != null && previous != value) previous,
+      ...current.where((v) => v != value && v != previous),
+    ].take(maxRecents).toList(growable: false);
+    if (listEquals(next, current)) return null;
+    final rows = [
+      ...history.where((r) => !same(r)),
+      _History(kind, server, project, scope, next),
+    ];
+    // Each kind keeps its own bound, dropping its least recent row.
+    while (rows.where((r) => r.kind == kind).length > maxProjects) {
+      rows.remove(rows.firstWhere((r) => r.kind == kind));
+    }
+    return List.unmodifiable(rows);
+  }
 
   Future<bool> _change(_Saved? Function() next, {required bool valid}) async {
     if (!valid || !writable) return false;

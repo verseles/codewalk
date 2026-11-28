@@ -887,7 +887,12 @@ class SessionLiveController extends ChangeNotifier
     );
     final model = offered[next];
     if (model == null || next == current) return;
-    await selectModel(model);
+    // With the variant last used with it, as a pick does (#547).
+    final remembered = lastVariant(next!);
+    await selectModel(
+      model,
+      variant: model.variants.contains(remembered) ? remembered : null,
+    );
   }
 
   /// The next variant of the current model, Auto among them (`mod+t`).
@@ -953,6 +958,10 @@ class SessionLiveController extends ChangeNotifier
   @override
   List<String> get favoriteModels =>
       modelPreferences?.favorites(profile.id) ?? const [];
+
+  @override
+  String? lastVariant(String modelKey) =>
+      modelPreferences?.lastVariant(profile.id, modelKey);
 
   /// This project's recent models, newest first.
   @override

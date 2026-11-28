@@ -286,6 +286,18 @@ void main() {
       expect(switches(handle).last, 'model:other/gamma');
     });
 
+    test('mod+m takes a model with the variant last used with it', () async {
+      final (live, handle) = await open();
+      await preferences.recordVariant(
+        _server,
+        '/work/other',
+        'prov/beta',
+        'high',
+      );
+      await live.cycleModel();
+      expect(switches(handle).single, 'model:prov/beta:high');
+    });
+
     test('mod+m skips a retired model the pick no longer offers', () async {
       final retired = ModelEntry(
         id: 'old',
