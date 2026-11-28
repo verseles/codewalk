@@ -1196,10 +1196,14 @@
     {
       "at": "2026-11-28T07:53:44Z",
       "text": "u9 (8.3) converged at r7/r8: 5/6 approve r7; Sol-F warning (hidden-tab untimed shell completion shows one Completed row) deferred to follow-up after dissent, Sol-F agreed (approve r8). DeepSeek page-level test suggestion rejected: ShellSightings settled-empty path unit-tested, page wiring 2 lines verified by all. Metrics r7 recorded."
+    },
+    {
+      "at": "2026-11-28T07:56:00Z",
+      "text": "Pushed e8ad29a7 (all group 8 reviewed commits). Goldens run 46123352062 on x86 started. Follow-ups created: #554 device voice, #555 forward pending, #556 settings transition bars, #557 hidden-tab shell sightings. Release notes drafted at release-notes/v2.14.0.md (uncommitted). Loop commits kept (interleaved across units, no squash)."
     }
   ],
-  "generation": 191,
-  "next_action": "Push reviewed commits, regenerate goldens on x86 (R0001), close issues, #527, follow-ups, minor release",
+  "generation": 193,
+  "next_action": "When goldens run ends: compare RGB, commit changed PNGs + notes, push, make watch-ci; then close #534 #536-#553 with comments, tick #527, make release V=stable",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -1222,7 +1226,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T07:54:29Z",
+  "updated_at": "2026-11-28T07:57:09Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1369,6 +1373,13 @@
       "check": "Full flutter test at 5bbc7812",
       "criterion": null,
       "evidence": "all pass except expected goldens (appearance x4, capsule x3); log /tmp/opencode/g8/full3.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T07:57:09Z",
+      "check": "x86 goldens run 46123352062",
+      "criterion": null,
+      "evidence": "10 PNGs differ in RGB (appearance x4 from #551, capsule/popin x6 from #543 status line removed); visually checked; local golden tests pass with them",
       "outcome": "pass"
     }
   ]
