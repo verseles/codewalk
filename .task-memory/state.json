@@ -1103,11 +1103,22 @@
     {
       "at": "2026-11-28T07:25:57Z",
       "text": "Judged 8.3 r4 + 8.4-8.6 r2 (A0033). 8.3: accepted unconfirmed-guess-as-history, end on disappearance (non-empty list), captured live in pop-in, sightings unit test; rejected controller->capsule import coupling (sugg). 8.4-8.6: accepted on-screen news visibility (resolves persisted Sol-F objection), leaveNews dismisses in memory, recenter on extent/metrics, first-run theme via _persist+flush, window test fix. Metrics u9 r4, u10 r2 recorded."
+    },
+    {
+      "at": "2026-11-28T07:40:57Z",
+      "text": "Judged final rounds (A0034): 8.3 accepted settled-only ending + name links + doc (0becb82b), rejected 512 eviction (sugg); 8.4-8.6 accepted first-load deadlock fix + covered-route news (695a9f81), residual interrupted first launch accepted. Metrics u9 r5, u10 r3 recorded."
     }
   ],
-  "generation": 164,
-  "next_action": "Full suite running (by52t2bp5); then final re-review u9 r5 + u10 r3",
-  "pending_operation": null,
+  "generation": 166,
+  "next_action": "Dispatch u9 r6 + u10 r4; then push, goldens regen, close issues, release",
+  "pending_operation": {
+    "expected_bytes": 25000,
+    "expected_seconds": 900,
+    "id": "op_83282bf8e68b",
+    "kind": "subagent",
+    "prepared_at": "2026-11-28T07:40:57Z",
+    "purpose": "u9 r6 (0becb82b) + u10 r4 (695a9f81) re-reviews"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -1129,7 +1140,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T07:36:31Z",
+  "updated_at": "2026-11-28T07:40:57Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

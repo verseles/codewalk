@@ -909,6 +909,28 @@ void main() {
       expect(sightings.shown([entry('solo', running: true)], at(10)), isEmpty);
       expect(sightings.shown(const [], at(11)), isEmpty);
       expect(sightings.shown([entry('solo')], at(20)), isEmpty);
+      // A shell known by its row, its row and id, then its id alone: its
+      // names hold together, so the row missing ends nothing.
+      final rig0 = CatalogSource(profile('a')).row('one').info.ref;
+      CapsuleShellEntry named(
+        String key, {
+        String? item,
+        bool running = true,
+      }) => CapsuleShellEntry(
+        key: key,
+        command: 'x',
+        isRunning: running,
+        timelineItem: item == null
+            ? null
+            : _shellTool(rig0, item, streaming: running),
+      );
+      expect(sightings.shown([named('r', item: 'r')], at(30)), isEmpty);
+      expect(sightings.shown([named('sh', item: 'r')], at(31)), isEmpty);
+      expect(sightings.shown([named('sh')], at(32)), isEmpty);
+      expect(
+        keys(sightings.shown([named('r', item: 'r', running: false)], at(40))),
+        ['r'],
+      );
       // Only guessed from an unconfirmed listing, then found ended: history.
       expect(
         sightings.shown([entry('old', unconfirmed: true)], at(8)),

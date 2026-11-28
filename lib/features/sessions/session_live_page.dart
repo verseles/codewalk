@@ -638,10 +638,26 @@ class _SessionLivePageState extends State<SessionLivePage>
               final canReadChild =
                   context.watch<SessionsController?>()?.sourceFor(c.session) !=
                   null;
-              final hasCapsule = hasSessionCapsuleActivity(
+              final observesShells = c.shells?.canObserve ?? false;
+              final shellEntries = sessionShellEntries(
                 state,
-                canObserveShells: c.shells?.canObserve ?? false,
+                canObserveShells: observesShells,
               );
+              // With no shell left the chip may go: the sightings still hear
+              // that the last one left, so it ended then (#544). While any
+              // is listed, the chip tells them.
+              if (shellEntries.isEmpty) {
+                c.shellSightings.shown(
+                  const [],
+                  c.clock().toUtc(),
+                  settled: ShellSightings.settledFor(
+                    state,
+                    observed: observesShells,
+                  ),
+                );
+              }
+              final hasCapsule =
+                  subagentWork(state).isNotEmpty || shellEntries.isNotEmpty;
               final compactViewport = MediaQuery.sizeOf(context).width < 600;
               final taskListPreferredCollapsed =
                   preferences?.taskListCollapsed ?? _localTaskListCollapsed;

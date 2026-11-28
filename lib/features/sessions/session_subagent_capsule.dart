@@ -364,9 +364,10 @@ const shellShownAfter = Duration(seconds: 5);
 /// own times are not known (#544): a shell that reports no start counts
 /// from when it was first seen running (or unconfirmed), and a quick one
 /// never shows, even once its live record gives way to a timeline row
-/// without times or its shell id arrives late. A shell that had ended
-/// before it was ever seen, as in history, shows. It tells its listeners
-/// when a running shell reaches [shellShownAfter].
+/// without times, its shell id arrives late or it leaves a settled list
+/// before its row ends. A shell that had ended before it was ever seen
+/// running, as in history or after only an unconfirmed listing, shows. It
+/// tells its listeners when a running shell reaches [shellShownAfter].
 final class ShellSightings extends ChangeNotifier {
   // Sightings outlive a shell's absence from one update to the next (a
   // retry, a live record gone before its row ends); past this many, those
@@ -377,8 +378,24 @@ final class ShellSightings extends ChangeNotifier {
   // an unconfirmed listing (never seen running).
   final _times = <String, (DateTime, DateTime?, bool)>{};
 
-  // The names each shell was listed under together.
+  // The names each shell was ever listed under, shared by all of them.
   final _links = <String, Set<String>>{};
+
+  /// Joins [names] and every name already joined with any of them.
+  void _link(List<String> names) {
+    final joined = <String>{...names};
+    for (final name in names) {
+      joined.addAll(_links[name] ?? const {});
+    }
+    for (final name in joined) {
+      _links[name] = joined;
+    }
+  }
+
+  /// Every name [entry] is known by.
+  Iterable<String> _names(CapsuleShellEntry entry) => {
+    for (final key in _keys(entry)) ...(_links[key] ?? {key}),
+  };
   Timer? _timer;
   DateTime? _timerAt;
   bool _disposed = false;
@@ -439,7 +456,7 @@ final class ShellSightings extends ChangeNotifier {
   /// with it, and whether that start is only a guess.
   (DateTime, DateTime?, bool)? _seen(CapsuleShellEntry entry) {
     (DateTime, DateTime?, bool)? seen;
-    for (final key in _keys(entry)) {
+    for (final key in _names(entry)) {
       final times = _times[key];
       if (times == null) continue;
       if (seen == null || times.$1.isBefore(seen.$1)) {
@@ -459,13 +476,12 @@ final class ShellSightings extends ChangeNotifier {
     final start = entry.startedAt ?? seen?.$1 ?? (_active(entry) ? now : null);
     if (start == null) return true;
     final end = _active(entry) ? null : entry.completedAt ?? seen?.$2 ?? now;
-    final names = _keys(entry);
-    for (final key in names) {
+    _link(_keys(entry));
+    for (final key in _names(entry)) {
       // Rewritten as the newest, so a listed shell is the last to go.
       _times
         ..remove(key)
         ..[key] = (start, end, guess && !entry.isRunning);
-      (_links[key] ??= <String>{}).addAll(names);
       listed.add(key);
     }
     if (end != null && guess && !entry.isRunning) return true;
@@ -509,15 +525,6 @@ final class ShellSightings extends ChangeNotifier {
     super.dispose();
   }
 }
-
-/// Whether the floating robot capsule may show for [state]: sub-agents, or
-/// shells it still has to look at.
-bool hasSessionCapsuleActivity(
-  SessionState? state, {
-  required bool canObserveShells,
-}) =>
-    subagentWork(state).isNotEmpty ||
-    sessionShellEntries(state, canObserveShells: canObserveShells).isNotEmpty;
 
 sealed class _PopinAction {
   const _PopinAction();
