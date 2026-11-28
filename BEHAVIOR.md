@@ -912,7 +912,7 @@ description of this code.
 - **Given** the explicit v2 app starts or the user changes appearance
 - **When** its preferences are loaded or saved
 - **Then** startup hydrates appearance before mounting the app, and accepted changes persist under the isolated `cw2.settings.*` namespace
-- **Then** defaults are system mode, normal density, dynamic colors enabled, no selected preset or custom seed, standard contrast and AMOLED disabled
+- **Then** defaults are system mode, normal density, dynamic colors enabled, no selected preset or custom seed, standard contrast and AMOLED disabled; a new install (storage with no schema marker and nothing saved yet) starts on the GitHub preset instead, saved at once so it holds, while an existing install keeps what it had and a later choice of the default stays (#553)
 - **Then** a stored `visualStyle` value is ignored on load, whatever it is (missing, classic, refined or invalid), and is never written or deleted; missing or invalid fields do not cause default values to be written over stored preferences
 - **Then** nullable preset and seed selections can be cleared without altering unrelated settings
 - **Then** a load/save failure keeps the app usable and shows an appearance-storage error with a retry action

@@ -465,7 +465,20 @@ class AppPreferencesController extends ChangeNotifier {
         );
       }
       final preset = value('themePreset');
-      if (preset is String) _themePreset = openCodeThemePresetFromKey(preset);
+      if (preset is String) {
+        _themePreset = openCodeThemePresetFromKey(preset);
+      } else if (store.createdThisRun &&
+          // Nothing saved yet either: storage that only lost its marker is
+          // no new install.
+          values.values.every((value) => value == null) &&
+          revisions['themePreset'] == null &&
+          _revisions['themePreset'] == null) {
+        // A new install starts on the GitHub theme, saved so a later run
+        // keeps it; an existing one keeps what it had (#553).
+        _themePreset = OpenCodeThemePreset.github;
+        _revisions['themePreset'] = 0;
+        _persist('themePreset', _values['themePreset'], 0);
+      }
       final language = value('locale');
       if (language is String) _locale = localeForLanguageCode(language);
       final density = value('appDensity');

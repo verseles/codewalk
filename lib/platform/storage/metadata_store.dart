@@ -94,6 +94,13 @@ final class V2MetadataStore {
   final KeySerialExecutor _queue = KeySerialExecutor();
   Future<void>? _initialization;
 
+  /// Whether this run found the storage with no schema marker: a new
+  /// install, whose first-run defaults apply (#553). Read after
+  /// [ensureSchema].
+  bool get createdThisRun => _createdThisRun;
+  bool _createdThisRun = false;
+  bool _schemaSeen = false;
+
   Future<void> ensureSchema() {
     final existing = _initialization;
     if (existing != null) return existing;
@@ -114,6 +121,10 @@ final class V2MetadataStore {
 
   Future<void> _upgradeSchema() async {
     final saved = await _backend.read(schemaKey);
+    if (!_schemaSeen) {
+      _schemaSeen = true;
+      _createdThisRun = saved == null;
+    }
     if (saved != null && (saved is! int || saved < 0)) {
       throw const StorageSchemaException(
         'Invalid schema marker; data preserved',
