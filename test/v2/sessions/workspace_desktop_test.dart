@@ -244,6 +244,10 @@ void main() {
     tester,
   ) async {
     final app = await launchWorkspace(tester);
+    // With tabs the bar names the project (#535); tests run as a phone,
+    // whose new install starts without them.
+    app.dependencies.preferences.setShowSessionTabs(true);
+    await settleWorkspace(tester);
     final toggle = find.byKey(const ValueKey('workspace-pane-toggle'));
     expect(find.byKey(const ValueKey('workspace-sidebar')), findsOneWidget);
     expect(find.byKey(const ValueKey('workspace-settings')), findsNothing);

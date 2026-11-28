@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
 
@@ -431,6 +432,13 @@ class AppPreferencesController extends ChangeNotifier {
 
   Future<void> initialize() => _initialization ??= _load();
 
+  /// Phones and tablets, where a new install starts without session tabs.
+  static bool get _touchFirst => const {
+    TargetPlatform.android,
+    TargetPlatform.iOS,
+    TargetPlatform.fuchsia,
+  }.contains(defaultTargetPlatform);
+
   Future<void> _load() async {
     final store = _store;
     if (store == null || _disposed) return;
@@ -464,26 +472,39 @@ class AppPreferencesController extends ChangeNotifier {
           orElse: () => ThemeMode.system,
         );
       }
-      final preset = value('themePreset');
-      if (preset is String) {
-        _themePreset = openCodeThemePresetFromKey(preset);
-      } else if (store.createdThisRun &&
-          // Nothing saved yet either: storage that only lost its marker is
-          // no new install.
-          values.values.every((value) => value == null) &&
-          revisions['themePreset'] == null &&
-          _revisions['themePreset'] == null) {
-        // A new install starts on the GitHub theme, saved so a later run
-        // keeps it; an existing one keeps what it had (#553).
-        _themePreset = OpenCodeThemePreset.github;
-        _revisions['themePreset'] = 0;
+      // Nothing saved yet either: storage that only lost its marker is no
+      // new install.
+      final newInstall =
+          store.createdThisRun && values.values.every((value) => value == null);
+      // A new install starts on the GitHub theme (#553) and, on a phone or
+      // tablet, without session tabs, each saved so a later run keeps it;
+      // an existing one keeps what it had.
+      final firstRun = <Future<void>>[];
+      void start(String key, void Function() apply) {
+        if (!newInstall || revisions[key] != null || _revisions[key] != null) {
+          return;
+        }
+        apply();
+        _revisions[key] = 0;
         // Written before the load ends, to narrow the moment a stop could
         // leave a marked storage without it; a write that fails is told
         // and retried like any other save.
-        _persist('themePreset', _values['themePreset'], 0);
-        // Only that write: all of them could hold a shortcut save, which
-        // waits for this load.
-        if (_pending.isNotEmpty) await _pending.last;
+        firstRun.add(_save(key, _values[key], 0));
+      }
+
+      final preset = value('themePreset');
+      if (preset is String) {
+        _themePreset = openCodeThemePresetFromKey(preset);
+      } else {
+        start('themePreset', () => _themePreset = OpenCodeThemePreset.github);
+      }
+      if (_touchFirst) {
+        start('showSessionTabs', () => _showSessionTabs = false);
+      }
+      // Only these writes: any other could be a shortcut save, which waits
+      // for this load.
+      if (firstRun.isNotEmpty) {
+        await Future.wait(firstRun);
         if (_disposed) return;
       }
       final language = value('locale');
@@ -701,9 +722,13 @@ class AppPreferencesController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void _persist(String key, Object? value, int revision) {
+  void _persist(String key, Object? value, int revision) =>
+      _save(key, value, revision);
+
+  /// Starts one save and returns it, so a caller can await that save alone.
+  Future<void> _save(String key, Object? value, int revision) {
     final store = _store;
-    if (store == null) return;
+    if (store == null) return Future<void>.value();
     final operation = key == 'shortcuts'
         ? _persistShortcuts()
         : value == null
@@ -732,6 +757,7 @@ class AppPreferencesController extends ChangeNotifier {
         )
         .whenComplete(() => _pending.remove(pending));
     _pending.add(pending);
+    return pending;
   }
 
   Future<void> flush() async {

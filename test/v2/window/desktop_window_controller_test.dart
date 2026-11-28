@@ -153,8 +153,13 @@ void main() {
     await first.initialize();
     expect(first.integratedWindowChrome, isTrue);
     expect(first.windowCloseAction, WindowCloseAction.close);
-    // A new install writes its first-run theme (#553).
-    expect(backend.writes, ['cw2.schema', 'cw2.settings.themePreset']);
+    // A new install writes its first-run theme (#553), and as a phone,
+    // which tests run as, its tabs off.
+    expect(backend.writes, [
+      'cw2.schema',
+      'cw2.settings.themePreset',
+      'cw2.settings.showSessionTabs',
+    ]);
     first.setIntegratedWindowChrome(false);
     first.setWindowCloseAction(WindowCloseAction.minimize);
     await first.flush();

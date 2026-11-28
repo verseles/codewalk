@@ -1,1445 +1,155 @@
 {
-  "artifact_seq": 37,
+  "artifact_seq": 2,
   "artifacts": {
     "A0001": {
-      "active": false,
-      "bytes": 740,
-      "created_at": "2026-11-27T22:11:17Z",
-      "evidence": "/tmp/opencode/g8/rev/u1/r1_*.out",
+      "active": true,
+      "bytes": 407,
+      "created_at": "2026-11-28T14:35:19Z",
+      "evidence": "/tmp/opencode/g8/rev/u11/r1_*.out",
       "id": "A0001",
-      "impact": "F1 may need a wording/reason fix; F2 docs step; F3 test strengthening",
+      "impact": "Judge: likely accept _persist return, test fix; examine Ernie claim and Sol-F W",
       "origin": "8 helpers",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0001.md",
-      "purpose": "Review 170e8de5..f5a05c40",
-      "rerun_when": "sessions_page.dart, session_actions_menu.dart or workspace_draft_page.dart change",
-      "retired": true,
-      "sha256": "fae4e064501ebfe88a83d3b159c097220aa7502f04d2065985b089f669f31cf8",
-      "stage": "S2",
+      "path": "artifacts/tm_20261128T140706Z_cfe10974/A0001.md",
+      "purpose": "Review b9fd36ad tabs platform default",
+      "rerun_when": "n/a",
+      "sha256": "2116a15f6fd37f31929a98b6b858318e90b7f91f37f64332260fa8f8d628e9e4",
+      "stage": "S1",
       "supersedes": null,
-      "title": "u1 review r1 (#532+#533)"
+      "title": "u11 r1 review"
     },
     "A0002": {
-      "active": false,
-      "bytes": 1217,
-      "created_at": "2026-11-27T22:24:46Z",
-      "evidence": "/tmp/opencode/g8/plan/p534/r1_*.out",
+      "active": true,
+      "bytes": 97,
+      "created_at": "2026-11-28T14:39:01Z",
+      "evidence": "/tmp/opencode/g8/rev/u11/r2_helperCodex-6.2-sol-xhigh-F.out",
       "id": "A0002",
-      "impact": "Drives #534 implementation",
-      "origin": "7 delivered (haiku, opus-F, sol-F, deepseek, ernie, gemini, hungerg); luna invalid-delivery (only ## Behavior), re-emit requested",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0002.md",
-      "purpose": "Plan #534",
-      "rerun_when": "sessions_page.dart, project_workspace_store.dart or project_contexts_controller.dart change materially",
-      "retired": true,
-      "sha256": "2360fdd1bdb35a3b2a4f1fcbf72e0d4a25021e2d8cdada54a678fe1f9014d670",
-      "stage": "S4",
-      "supersedes": null,
-      "title": "p534 planning r1 (sidebar revamp)"
-    },
-    "A0003": {
-      "active": false,
-      "bytes": 1065,
-      "created_at": "2026-11-27T22:36:01Z",
-      "evidence": "/tmp/opencode/g8/plan/p534/d1*.out, /tmp/opencode/g8/rev/u2/r1_*.out",
-      "id": "A0003",
-      "impact": "#534 plan adjusted to sol-F objections; #535 fixes",
-      "origin": "p534: luna, opus-F, sol-F; u2: 8 helpers",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0003.md",
-      "purpose": "Close #534 planning judgment and review #535",
-      "rerun_when": "app_shell.dart or sessions_page.dart change",
-      "retired": true,
-      "sha256": "7bd171cf0363c70c6e58aa642096ae36cd03b16557b394cc981fbc6cac33179a",
-      "stage": "S4",
-      "supersedes": null,
-      "title": "p534 dissent + luna re-emit; u2 review r1 (#535)"
-    },
-    "A0004": {
-      "active": false,
-      "bytes": 417,
-      "created_at": "2026-11-27T22:37:07Z",
-      "evidence": "/tmp/opencode/g8/rev/u2/d1_helperCodex-6.2-sol-xhigh-F.out",
-      "id": "A0004",
-      "impact": "Guard fix stands with explicit tradeoff",
-      "origin": "helperCodex-6.2-sol-xhigh-F",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0004.md",
-      "purpose": "Dissent exchange",
-      "rerun_when": "toolbar actions layout changes",
-      "retired": true,
-      "sha256": "39d6a5f05136c2460fa0e168c35ab81f93c17800e2074ce7cf151e06aa0d6374",
-      "stage": "S4",
-      "supersedes": null,
-      "title": "u2 sol-F dissent on #535 overflow fix"
-    },
-    "A0005": {
-      "active": false,
-      "bytes": 1012,
-      "created_at": "2026-11-27T23:08:03Z",
-      "evidence": "/tmp/opencode/g8/rev/u3/r1_*.out",
-      "id": "A0005",
-      "impact": "Fix round for #534",
-      "origin": "8 helpers",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0005.md",
-      "purpose": "Review 4a0e9904",
-      "rerun_when": "sessions_page.dart, project_workspace_store.dart or project_contexts_controller.dart change",
-      "retired": true,
-      "sha256": "0609a3a1d327d349e1d51a9a26b91af60e661234743bd67206d9d24412dcd5f7",
-      "stage": "S4",
-      "supersedes": null,
-      "title": "u3 review r1 (#534 sidebar revamp)"
-    },
-    "A0006": {
-      "active": false,
-      "bytes": 656,
-      "created_at": "2026-11-27T23:18:25Z",
-      "evidence": "/tmp/opencode/g8/rev/u3/r2_*.out",
-      "id": "A0006",
-      "impact": "Small fix round 2",
-      "origin": "8 helpers",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0006.md",
-      "purpose": "Re-review",
-      "rerun_when": "project_workspace_store.dart or sessions_page.dart change",
-      "retired": true,
-      "sha256": "ae371da599c63f360c5278031e926fcf166a971f1de919789b8132d71a0139ce",
-      "stage": "S4",
-      "supersedes": null,
-      "title": "u3 re-review r2 (#534 fix 0e911541)"
-    },
-    "A0007": {
-      "active": false,
-      "bytes": 192,
-      "created_at": "2026-11-27T23:25:18Z",
-      "evidence": "/tmp/opencode/g8/rev/u3/r3_*.out",
-      "id": "A0007",
-      "impact": "#534 review converged pending haiku resume",
-      "origin": "7 delivered + haiku failed",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0007.md",
-      "purpose": "Re-review",
-      "rerun_when": "#534 files change",
-      "retired": true,
-      "sha256": "554166a51cde6f9c2675475487632fff7fdab5ae8ae985c89d5e4676c2018785",
-      "stage": "S4",
-      "supersedes": null,
-      "title": "u3 re-review r3 (#534 fix 7122ddc7)"
-    },
-    "A0008": {
-      "active": false,
-      "bytes": 182,
-      "created_at": "2026-11-27T23:25:59Z",
-      "evidence": "/tmp/opencode/g8/rev/u3/r3b_helperClaude-haiku-5-max.err",
-      "id": "A0008",
-      "impact": "#534 review done",
-      "origin": "helperClaude-haiku-5-max",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0008.md",
-      "purpose": "Recovery",
-      "rerun_when": "never",
-      "retired": true,
-      "sha256": "ab36a0451fea23c332da8156fc94f1db5c68be6e5b15d61d65ebb5e0d19b64d6",
-      "stage": "S4",
-      "supersedes": null,
-      "title": "u3 r3 haiku resume"
-    },
-    "A0009": {
-      "active": false,
-      "bytes": 768,
-      "created_at": "2026-11-27T23:47:27Z",
-      "evidence": "/tmp/opencode/g8/rev/u4/r1_*.out, r1_native-*.note",
-      "id": "A0009",
-      "impact": "#538 trailing mechanism reworked",
-      "origin": "6 helpers + native Plan haiku/opus stand-ins",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0009.md",
-      "purpose": "Review 5d2bc856, 538c0b0a, 6843825b",
-      "rerun_when": "markdown_content.dart or timeline tiles change",
-      "retired": true,
-      "sha256": "c5feccbe8b4ab81315750a7f1e56caeafe3337640c1b6ee559f925085160fa03",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u4 review r1 (#536-#538)"
-    },
-    "A0010": {
-      "active": false,
-      "bytes": 799,
-      "created_at": "2026-11-28T00:05:12Z",
-      "evidence": "/tmp/opencode/g8/rev/u4/r2_*",
-      "id": "A0010",
-      "impact": "Fix round 2 for #538",
-      "origin": "6 helpers + native haiku/opus",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0010.md",
-      "purpose": "Re-review",
-      "rerun_when": "markdown_content.dart changes",
-      "retired": true,
-      "sha256": "083045c5f13aa0d8179e92bb2d4857441582a94162a239c35742f5661ffc191c",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u4 re-review r2 (#536-#538 fix a612095d)"
-    },
-    "A0011": {
-      "active": false,
-      "bytes": 415,
-      "created_at": "2026-11-28T00:26:11Z",
-      "evidence": "/tmp/opencode/g8/rev/u4/r3_*",
-      "id": "A0011",
-      "impact": "Fix round 3",
-      "origin": "6 helpers + native haiku/opus",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0011.md",
-      "purpose": "Re-review",
-      "rerun_when": "markdown_content.dart or tile change",
-      "retired": true,
-      "sha256": "4b6c4ff4d3a8f6dc38797a4afc2276ffb9dbae5997c979fb40c258d2b2c1527a",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u4 re-review r3 (#538 fix 3fe38ba2)"
-    },
-    "A0012": {
-      "active": false,
-      "bytes": 603,
-      "created_at": "2026-11-28T00:36:02Z",
-      "evidence": "/tmp/opencode/g8/rev/u4/r4_*.out, r4_native-*.note; /tmp/opencode/g8/plan/p539/r1_*",
-      "id": "A0012",
-      "impact": "u4 converges after two small suggestion fixes; push unblocked",
-      "origin": "helpers sol-F, luna, DeepSeek, Ernie, Gemini, Hungerg + native opus/haiku",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0012.md",
-      "purpose": "Re-review round 4 of u4 and first planning round for #539-#542",
-      "rerun_when": "u4 code changes beyond the two suggestions",
-      "retired": true,
-      "sha256": "01f3cba0ed787aca284e22c4f9f9ee199d13404b2cf87547e01cfccbd33ea27a",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u4 r4 review (#536-#538, f7e3da16) + p539 planning r1 partial"
-    },
-    "A0013": {
-      "active": false,
-      "bytes": 177,
-      "created_at": "2026-11-28T00:43:12Z",
-      "evidence": "/tmp/opencode/g8/plan/p539/r1_*",
-      "id": "A0013",
-      "impact": "7 of 8 plans available for synthesis",
-      "origin": "helperCodex-6-luna-max, helperHungerg-free",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0013.md",
-      "purpose": "Remaining helper plans for #539-#542",
-      "rerun_when": "payload p1.txt changes",
-      "retired": true,
-      "sha256": "58aef2e5a7a3d9a90424a1d547e8573a563bbf366de21325cb9858f018adeace",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "p539 planning r1: luna + Hungerg plans"
-    },
-    "A0014": {
-      "active": false,
-      "bytes": 912,
-      "created_at": "2026-11-28T00:46:20Z",
-      "evidence": "/tmp/opencode/g8/plan/p539/r1_native-opus.md",
-      "id": "A0014",
-      "impact": "8/8 plans in; synthesis can complete",
-      "origin": "native Plan agent (opus) for helperClaude-opus-5-xhigh-F",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0014.md",
-      "purpose": "Last plan for #539-#542",
-      "rerun_when": "payload p1.txt changes",
-      "retired": true,
-      "sha256": "9fce74a6af9145b2593793b20022a5f5dbcffbbb28f2823bf333a09fbf048782",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "p539 planning r1: native opus stand-in plan"
-    },
-    "A0015": {
-      "active": false,
-      "bytes": 1533,
-      "created_at": "2026-11-28T00:50:31Z",
-      "evidence": "/tmp/opencode/g8/plan/p539/r1_*",
-      "id": "A0015",
-      "impact": "Implementation source of truth for 8.2 remainder",
-      "origin": "orchestrator synthesis of 8 plans (A0012-A0014)",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0015.md",
-      "purpose": "Execution plan for the message action units",
-      "rerun_when": "owner changes Q1/Q2 or a unit's design fails a prototype",
-      "retired": true,
-      "sha256": "adf1c6fbe5b2a6ed0e76d6b77eb0dee78a6ce483dfca1a4c1ab9afc546450ba9",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "ART-EXECUTION-HANDOFF #539-#542"
-    },
-    "A0016": {
-      "active": false,
-      "bytes": 1205,
-      "created_at": "2026-11-28T01:55:42Z",
-      "evidence": "/tmp/opencode/g8/rev/u5/r1_*.out",
-      "id": "A0016",
-      "impact": "Fix round needed before push",
-      "origin": "8 helpers: Claude haiku/opus, luna, sol-F, DeepSeek, Ernie, Gemini, Hungerg",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0016.md",
-      "purpose": "Review round 1 of the action bar",
-      "rerun_when": "message_action_bar/live page fork code changes",
-      "retired": true,
-      "sha256": "82948301c55cdf4c400129b9da2286ded15687cb49c9dcd902fef81d9491eaf3",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u5 r1 review #539 (4ea5b87a)"
-    },
-    "A0017": {
-      "active": false,
-      "bytes": 895,
-      "created_at": "2026-11-28T02:17:35Z",
-      "evidence": "/tmp/opencode/g8/rev/u5/r2_*.out",
-      "id": "A0017",
-      "impact": "Second fix round",
-      "origin": "8 helpers",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0017.md",
-      "purpose": "Re-review round 2",
-      "rerun_when": "message_action_bar or fork code changes",
-      "retired": true,
-      "sha256": "115db5492453b1260bbfcb6243eb18701d2b09306b2bca2b73b40505d0d808c7",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u5 r2 re-review #539 (386397ce)"
-    },
-    "A0018": {
-      "active": false,
-      "bytes": 643,
-      "created_at": "2026-11-28T02:41:10Z",
-      "evidence": "/tmp/opencode/g8/rev/u5/r3_*.out",
-      "id": "A0018",
-      "impact": "Third fix round",
-      "origin": "8 helpers",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0018.md",
-      "purpose": "Re-review round 3",
-      "rerun_when": "message_action_bar/fork code changes",
-      "retired": true,
-      "sha256": "c675c67c7ea77fec831f4c3225412292e9e44b83f9dcc45db3bcd0fd722ec500",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u5 r3 re-review #539 (00abe9cb)"
-    },
-    "A0019": {
-      "active": false,
-      "bytes": 849,
-      "created_at": "2026-11-28T03:00:05Z",
-      "evidence": "/tmp/opencode/g8/rev/u5/r4_*.out",
-      "id": "A0019",
-      "impact": "Round 4 judgment and fixes",
-      "origin": "8 helpers (rev.sh u5 r4)",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0019.md",
-      "purpose": "Re-review 13044164",
-      "rerun_when": "message_action_bar.dart or _forkFrom change",
-      "retired": true,
-      "sha256": "bf84e3866324e783efed2843b138a0c8a052e8d9de317c482fbd6cb2290b3f5d",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u5 #539 review round 4 reports"
-    },
-    "A0020": {
-      "active": false,
-      "bytes": 1187,
-      "created_at": "2026-11-28T03:12:33Z",
-      "evidence": "session_live_source.dart:179,92; prompt_outbox.dart:104; prompt_client.dart:155-162; workspace_first_prompt.dart:55; sessions_controller.dart:21-239; v1 forward_message_dialog.dart",
-      "id": "A0020",
-      "impact": "Shapes #542 plan: same-server targets, open handle per target, per-target outcome, no model override",
-      "origin": "Explore subagent",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0020.md",
-      "purpose": "Plan #542 Forward",
-      "rerun_when": "send/outbox/live directory APIs change",
-      "retired": true,
-      "sha256": "2a3da488afa668270cd3eb0c622e13a1af376c5b1f436c1495f8ae0a41cd8a00",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "#542 v1 forward UX and v2 seams"
-    },
-    "A0021": {
-      "active": false,
-      "bytes": 668,
-      "created_at": "2026-11-28T03:26:29Z",
-      "evidence": "/tmp/opencode/g8/rev/u5/r5_*.out",
-      "id": "A0021",
-      "impact": "Round 5 fixes",
-      "origin": "8 helpers (rev.sh u5 r5)",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0021.md",
-      "purpose": "Re-review bdc25d4b",
-      "rerun_when": "message_action_bar.dart changes",
-      "retired": true,
-      "sha256": "d419dd58843a3efa8ae10469e6c35b2b0fcea97c2065ae65039c26176f393b8d",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u5 #539 review round 5 reports"
-    },
-    "A0022": {
-      "active": false,
-      "bytes": 403,
-      "created_at": "2026-11-28T04:02:31Z",
-      "evidence": "/tmp/opencode/g8/plan/p542/r1_*.out; /tmp/opencode/g8/rev/u6/r1_*.out; /tmp/opencode/g8/rev/u7/r1_*.out",
-      "id": "A0022",
-      "impact": "Inputs for #542 synthesis and #540/#541 fixes",
-      "origin": "8 helpers x3 jobs",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0022.md",
-      "purpose": "Plan #542; review e98a01f4 and a00460f9",
-      "rerun_when": "boundaries change",
-      "retired": true,
-      "sha256": "6c5725262ae1abb633f25311e17b343f559ada69351d02e835af4e223472bbce",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "Batch: p542 planning r1 + u6 #540 review r1 + u7 #541 review r1"
-    },
-    "A0023": {
-      "active": false,
-      "bytes": 335,
-      "created_at": "2026-11-28T04:08:46Z",
-      "evidence": "/tmp/opencode/g8/rev/u5/r6_*.out; /tmp/opencode/g8/rev/u7/r1_native-opus.out",
-      "id": "A0023",
-      "impact": "#539 review loop done; #541 judgment input",
-      "origin": "6 helpers r6 + native general-purpose stand-in",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0023.md",
-      "purpose": "Re-review cbea5f2e; stand-in for failed Claude helpers on a00460f9",
-      "rerun_when": "message_action_bar.dart or read-aloud files change",
-      "retired": true,
-      "sha256": "d6e6bf93980184df31374c9b45f35756e2d8f6c663fbe269287e439ddc2022ba",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u5 #539 round 6 + native stand-in review of #541 (partial batch)"
-    },
-    "A0024": {
-      "active": false,
-      "bytes": 1217,
-      "created_at": "2026-11-28T04:13:42Z",
-      "evidence": "/tmp/opencode/g8/rev/u6/r1_native-opus.out; /tmp/opencode/g8/rev/u6/dissent_h3.out; Plan stand-in reply in session transcript",
-      "id": "A0024",
-      "impact": "#540 one more fix; #542 synthesis input",
-      "origin": "native general-purpose (u6), native Plan (p542), helperCodex-6.2-sol-xhigh-F continuation",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0024.md",
-      "purpose": "Replace failed Claude helpers; resolve dissent",
-      "rerun_when": "#542 seams change",
-      "retired": true,
-      "sha256": "10a4d26ce8c7c018bfa61b93c6f8995bf3ab1180a3755f63b8281cb9cc1e4bf8",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "Native stand-ins: #540 review + #542 plan; Sol-F dissent on #540 H3"
-    },
-    "A0025": {
-      "active": false,
-      "bytes": 192,
-      "created_at": "2026-11-28T04:51:35Z",
-      "evidence": "/tmp/opencode/g8/rev/u6/r2_*.out; /tmp/opencode/g8/rev/u7/r2_*.out",
-      "id": "A0025",
-      "impact": "Round 2 fixes for #540 and #541",
-      "origin": "8 helpers each (Claude x2 rc=1 quota)",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0025.md",
-      "purpose": "Re-review b3718ca3+2d0eee6b and d698564d",
-      "rerun_when": "#540/#541 files change",
-      "retired": true,
-      "sha256": "eab325b0104377507d5c90ad05e6a272ea5e2d3a437c00ed9135d389b2949e9d",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u6 #540 r2 + u7 #541 r2 re-reviews"
-    },
-    "A0026": {
-      "active": false,
-      "bytes": 112,
-      "created_at": "2026-11-28T05:07:04Z",
-      "evidence": "/tmp/opencode/g8/rev/u7/r3_*.out",
-      "id": "A0026",
-      "impact": "Round 3 fixes for #541",
-      "origin": "6 helpers (Claude x2 rc=1)",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0026.md",
-      "purpose": "Re-review 8674ac7d",
-      "rerun_when": "#541 files change",
-      "retired": true,
-      "sha256": "8d5fa1f8ebb10e757181f767d8bc7412d8e3469eca14b9ff518af921f817057b",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "u7 #541 re-review round 3"
-    },
-    "A0027": {
-      "active": false,
-      "bytes": 1465,
-      "created_at": "2026-11-28T05:21:40Z",
-      "evidence": "/tmp/opencode/g8/rev/u7/r4_*.out, /tmp/opencode/g8/rev/u8/r1_*.out, r1_native-opus.out",
-      "id": "A0027",
-      "impact": "Fix round for #541 and #542 before push",
-      "origin": "helpers Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg + native stand-in (u8)",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0027.md",
-      "purpose": "Review #541 round 4 and #542 round 1",
-      "rerun_when": "after fixes commit",
-      "retired": true,
-      "sha256": "d4d85102d3ba0fd033a600f4e56c9bc377a92d1939f37c16febf3f7b6cfb5bcd",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "#541 r4 + #542 r1 reviews"
-    },
-    "A0028": {
-      "active": false,
-      "bytes": 918,
-      "created_at": "2026-11-28T05:50:03Z",
-      "evidence": "/tmp/opencode/g8/rev/u7/r5_*.out, /tmp/opencode/g8/rev/u8/r2_*.out",
-      "id": "A0028",
-      "impact": "Small fix round for both",
-      "origin": "6 helpers each",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0028.md",
-      "purpose": "Re-review d1816c75 and 8c6e88f1",
-      "rerun_when": "after fixes",
-      "retired": true,
-      "sha256": "733c80336ced786e87b91b8f64471e8d9d75ce9b5c6a96bb4e30c1dd22a53260",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "#541 r5 + #542 r2 re-reviews"
-    },
-    "A0029": {
-      "active": false,
-      "bytes": 564,
-      "created_at": "2026-11-28T06:06:16Z",
-      "evidence": "/tmp/opencode/g8/rev/u7/r6_*.out, /tmp/opencode/g8/rev/u8/r3_*.out",
-      "id": "A0029",
-      "impact": "#541 converged (Sol-F approve; small fix, no re-review); #542 small fix",
-      "origin": "Sol-F (u7); 6 helpers (u8)",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0029.md",
-      "purpose": "Dissent on #541 rejections; re-review 67771f4e",
-      "rerun_when": "n/a",
-      "retired": true,
-      "sha256": "12fea759697a6440a16254683616cddbe40026e3b77020807af12a8f5cbb5ffd",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "#541 r6 Sol-F dissent + #542 r3"
-    },
-    "A0030": {
-      "active": false,
-      "bytes": 1129,
-      "created_at": "2026-11-28T06:18:58Z",
-      "evidence": "/tmp/opencode/g8/rev/u9/r1_*.out",
-      "id": "A0030",
-      "impact": "Fix round for 8.3",
-      "origin": "Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg + native stand-in",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0030.md",
-      "purpose": "Initial review of 80026a94..d35cf9de (8.3)",
-      "rerun_when": "after fix commit",
-      "retired": true,
-      "sha256": "1660194bb67f89680008f4cdba3eed24730b965fee6f2b3125475728d9f4186a",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "8.3 review r1 (#543-#548)"
-    },
-    "A0031": {
-      "active": false,
-      "bytes": 796,
-      "created_at": "2026-11-28T06:45:00Z",
-      "evidence": "/tmp/opencode/g8/rev/u9/r2_*.out",
-      "id": "A0031",
-      "impact": "Fix round 2 for 8.3",
-      "origin": "6 helpers",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0031.md",
-      "purpose": "Re-review e4ab0949",
-      "rerun_when": "after fix",
-      "retired": true,
-      "sha256": "ac9172b1a3082a8283248f484e92e8f1fe35de97d166cfbb5b750ca33dc29312",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "8.3 review r2"
-    },
-    "A0032": {
-      "active": false,
-      "bytes": 964,
-      "created_at": "2026-11-28T07:07:54Z",
-      "evidence": "/tmp/opencode/g8/rev/u9/r3_*.out, /tmp/opencode/g8/rev/u10/r1_*.out",
-      "id": "A0032",
-      "impact": "Fix rounds for both units",
-      "origin": "6 helpers each + native stand-in (u10)",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0032.md",
-      "purpose": "Re-review a2e05556; initial review da98f660..f9a8bf0c",
-      "rerun_when": "after fixes",
-      "retired": true,
-      "sha256": "6fd58e4358892d26442284d1b8b1cdef8ba26fbe4249d98181579a8ece4862d1",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "8.3 r3 + 8.4-8.6 r1 reviews"
-    },
-    "A0033": {
-      "active": false,
-      "bytes": 689,
-      "created_at": "2026-11-28T07:19:37Z",
-      "evidence": "/tmp/opencode/g8/rev/u9/r4_*.out, /tmp/opencode/g8/rev/u10/r2_*.out",
-      "id": "A0033",
-      "impact": "Small fixes; news visibility must be resolved (persisted -F objection)",
-      "origin": "6 helpers each",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0033.md",
-      "purpose": "Re-review 5ed8a987 and 64f6b0af",
-      "rerun_when": "after fixes",
-      "retired": true,
-      "sha256": "658186ed21cc0ec71043a40adf93f66083302923a2dc7d7229fe83c9154b27d8",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "8.3 r4 + 8.4-8.6 r2"
-    },
-    "A0034": {
-      "active": false,
-      "bytes": 624,
-      "created_at": "2026-11-28T07:36:31Z",
-      "evidence": "/tmp/opencode/g8/rev/u9/r5_*.out, /tmp/opencode/g8/rev/u10/r3_*.out",
-      "id": "A0034",
-      "impact": "Two real fixes (flush deadlock, covered route), doc; capsule residuals judged",
-      "origin": "6 helpers each",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0034.md",
-      "purpose": "Re-review fddeb392 and 5bbc7812",
-      "rerun_when": "n/a",
-      "retired": true,
-      "sha256": "d04669cd53bd5356e531122676a61e4a6cbce92046834619c5fbcb5d96f2e472",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "8.3 r5 + 8.4-8.6 r3 (final)"
-    },
-    "A0035": {
-      "active": false,
-      "bytes": 373,
-      "created_at": "2026-11-28T07:46:55Z",
-      "evidence": "/tmp/opencode/g8/rev/u9/r6_*.out, /tmp/opencode/g8/rev/u10/r4_*.out",
-      "id": "A0035",
-      "impact": "u10 converged; u9 one more round",
-      "origin": "6 helpers each",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0035.md",
-      "purpose": "Re-review 0becb82b and 695a9f81",
-      "rerun_when": "n/a",
-      "retired": true,
-      "sha256": "c5e6b094c92c676b634295af72223bd2cd69c7884251a99d2ac0e9d79f0c4ed0",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "8.3 r6 + 8.4-8.6 r4"
-    },
-    "A0036": {
-      "active": false,
-      "bytes": 294,
-      "created_at": "2026-11-28T07:51:19Z",
-      "evidence": "/tmp/opencode/g8/rev/u9/r7_*.out",
-      "id": "A0036",
-      "impact": "Intended rejection of background-tab edge -> dissent to Sol-F",
-      "origin": "6 helpers",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0036.md",
-      "purpose": "Re-review bfcf9271",
-      "rerun_when": "n/a",
-      "retired": true,
-      "sha256": "d0101cb5f7bae2ae836e80afe670d502d0741ed067613c9ccb2d47baab10f087",
-      "stage": "S6",
-      "supersedes": null,
-      "title": "8.3 r7"
-    },
-    "A0037": {
-      "active": false,
-      "bytes": 146,
-      "created_at": "2026-11-28T07:53:33Z",
-      "evidence": "/tmp/opencode/g8/rev/u9/r8_helperCodex-6.2-sol-xhigh-F.out",
-      "id": "A0037",
-      "impact": "u9 converged; follow-up issue for background-tab sightings",
+      "impact": "u11 converged",
       "origin": "Codex-6.2-sol-xhigh-F",
-      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0037.md",
-      "purpose": "Dissent on background-tab Completed row",
+      "path": "artifacts/tm_20261128T140706Z_cfe10974/A0002.md",
+      "purpose": "Dissent + verify 344f3f7c",
       "rerun_when": "n/a",
-      "retired": true,
-      "sha256": "a630ccbe2c7993f1b8deda38a5b7a6aae0bece3ab96685f5be2cfc49b8fb3fc2",
-      "stage": "S6",
+      "sha256": "c576ab05a52db5a65aacd4ffd19ce71e34a3da4c257abfffa0213713c3c469c6",
+      "stage": "S1",
       "supersedes": null,
-      "title": "8.3 r8 dissent Sol-F"
+      "title": "u11 r2 dissent Sol-F"
     }
   },
   "checklist": [
     {
       "depends": [],
       "id": "S1",
-      "label": "Plan group 8, create its GitHub issues and #527 section, ask owner questions",
-      "outcome": "Planning settled: no blocking owner question; defaults item3=chat timeline on phones, item14=card hides on the next visit after first view, item17=2 before/2 after; planner only for #534,#537,#539-#542; questions asked just in time per unit",
-      "status": "done",
-      "validation": "issues #532-#553 exist; #527 section 8 present"
+      "label": "Inspect tabs default and first-run path",
+      "outcome": "",
+      "status": "current",
+      "validation": ""
     },
     {
       "depends": [
         "S1"
       ],
       "id": "S2",
-      "label": "[19] Sidebar: remove or fix the stale and 'not the endpoint response' texts (#19)",
-      "outcome": "#532 done: 92d646ee + review fix 3cf9f7b7 (failure text instead of sync promise)",
-      "status": "done",
-      "validation": "gate make check pass on f5a05c40; review r1 8/8 delivered; focused suites 105 pass"
+      "label": "Implement platform default on new installs with tests",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
     },
     {
       "depends": [
         "S2"
       ],
       "id": "S3",
-      "label": "[10] Sidebar: header row closer to the top, transient messages below it",
-      "outcome": "#533 done: f5a05c40 (server row first, notices below, top padding 8); BEHAVIOR.md updated for #532/#533",
-      "status": "done",
-      "validation": "gate pass; review r1 approve except #532 F1 fixed"
-    },
-    {
-      "depends": [
-        "S3"
-      ],
-      "id": "S4",
-      "label": "[11] Sidebar revamp: no Recent sessions; active project first with 5 sessions; others 3 compact by recency",
-      "outcome": "#534 done: 4a0e9904 + fixes 0e911541, 7122ddc7, docs 5d0e3e74 (not pushed yet: waits for #536-#538 review)",
-      "status": "done",
-      "validation": "gate pass 4a0e9904; review 3 rounds, final 7/7 approve"
-    },
-    {
-      "depends": [
-        "S4"
-      ],
-      "id": "S5",
-      "label": "[7] Top bar without tabs: session title with project icon that switches project",
-      "outcome": "#535 done earlier: 022ca26c + 13242f18, docs 7b6b6992, pushed, issue closed",
-      "status": "done",
-      "validation": "gate pass 022ca26c; review r1 judged"
-    },
-    {
-      "depends": [
-        "S5"
-      ],
-      "id": "S6",
-      "label": "[3] Timeline: slightly wider side padding on phones",
-      "outcome": "#536 phone padding done in 8.2 block (commits local, reviewed u7/u8)",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S6"
-      ],
-      "id": "S7",
-      "label": "[5] Timeline: collapsed tool/thinking summary by default, Display toggle for expanded tools",
-      "outcome": "#537 collapsed summary + Display toggle (option a)",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S7"
-      ],
-      "id": "S8",
-      "label": "[4] TPS and duration on by default, inline after the last word without icons",
-      "outcome": "#538 TPS/duration inline by default",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S8"
-      ],
-      "id": "S9",
-      "label": "[12] Message action bar: always-selectable text, floating bar (copy, undo turn, overflow rewind/fork), desktop hover",
-      "outcome": "#539 floating action bar converged",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S9"
-      ],
-      "id": "S10",
-      "label": "[12c] Message action: share as image",
-      "outcome": "#540 share as image converged",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S10"
-      ],
-      "id": "S11",
-      "label": "[12b] Message action: read aloud with multi-provider TTS, Edge by default",
-      "outcome": "#541 read aloud Edge default; converged u7 r6",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S11"
-      ],
-      "id": "S12",
-      "label": "[12a] Message action: forward to another session",
-      "outcome": "#542 forward multi-select; converged u8 r3",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S12"
-      ],
-      "id": "S13",
-      "label": "[1] Composer: never show 'Subagents running: N'",
-      "outcome": "#543 no 'Subagents running' in composer",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S13"
-      ],
-      "id": "S14",
-      "label": "[2] Activity chip: count shells only after 5 s",
-      "outcome": "#544 shells after 5 s; u9 converged r7/r8 (Sol-F agreed follow-up)",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S14"
-      ],
-      "id": "S15",
-      "label": "[8] Mic: debounce the return to the right after send",
-      "outcome": "#545 mic debounce",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S15"
-      ],
-      "id": "S16",
-      "label": "[9] Mic: expanded composer without keyboard, input grows to 3 lines",
-      "outcome": "#546 dictation composer 3 lines",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S16"
-      ],
-      "id": "S17",
-      "label": "[16] Model selector: remember the last effort variant per model",
-      "outcome": "#547 last variant per model",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S17"
-      ],
-      "id": "S18",
-      "label": "[6] Composer tips: real tips with a tappable menu link",
-      "outcome": "#548 tips with links",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S18"
-      ],
-      "id": "S19",
-      "label": "[15] Tasks widget: title 'Tasks' plus done/total chip",
-      "outcome": "#549 Tasks title",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S19"
-      ],
-      "id": "S20",
-      "label": "[17] Task list: open by default, 5 visible rows centered on the in-progress item",
-      "outcome": "#550 5 rows centered; u10 converged r4",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S20"
-      ],
-      "id": "S21",
-      "label": "[13] Settings: back and title only in the top bar, consistent across pages",
-      "outcome": "#551 settings single bar; u10 converged",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S21"
-      ],
-      "id": "S22",
-      "label": "[14] Settings news card: X close, hide after first view, 'Novidades' label",
-      "outcome": "#552 news card X, seen once; u10 converged",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S22"
-      ],
-      "id": "S23",
-      "label": "[18] Default GitHub theme on new installs",
-      "outcome": "#553 GitHub theme on new installs; u10 converged r4",
-      "status": "done",
-      "validation": "flutter analyze ok; full suite green except 7 expected goldens; core 357 + harness 725 pass; l10n check ok"
-    },
-    {
-      "depends": [
-        "S23"
-      ],
-      "id": "S24",
-      "label": "Group 8 docs, #527 check-off, push and minor release",
-      "outcome": "Pushed group 8; goldens 4347e56b; notes 9b515862; release v2.14.0 cut (7701bc96, tag pushed), watch-release + watch-ci running; #534 #536-#553 closed with comments; #527 all 51 ticked; follow-ups #554-#557",
-      "status": "done",
-      "validation": "local gate green; goldens equal x86 renders; release dry run ok"
-    },
-    {
-      "depends": [],
-      "id": "CONT1",
-      "label": "Close #527",
-      "outcome": "#527 closed with comment",
-      "status": "done",
-      "validation": "gh: closed"
-    },
-    {
-      "depends": [],
-      "id": "CONT2",
-      "label": "Add rules 2-5 to project AGENTS.md and rule 1 to global AGENTS.md, commit and push",
-      "outcome": "Project AGENTS.md: dart format only changed files, --no-ext-diff (GIT_EXTERNAL_DIFF=difft), registrant alphabetical, goldens compared by decoded RGB. Global AGENTS.md: same-model native stand-in rule",
-      "status": "done",
-      "validation": "docs-only; v2.14.0 CI and release green on 7701bc96"
+      "label": "Gate, review, docs and push",
+      "outcome": "",
+      "status": "pending",
+      "validation": ""
     }
   ],
-  "completion": {
-    "at": "2026-11-28T14:06:57Z",
-    "by": "agent",
-    "delivered": "#527 closed; approved rules 2-5 in project AGENTS.md; rule 1 (same-model native stand-in) in global AGENTS.md",
-    "residual_risk": "Commit pushed with the queued follow-up",
-    "validation": "docs-only; CI and Release for v2.14.0 green"
-  },
+  "completion": null,
   "contract": {
     "complete_when": [
       {
-        "evidence": "gh: #532 #533 #535 closed earlier; #534 #536-#553 closed with commit comments",
+        "evidence": "flutter analyze 4 issues (budget 4, pre-existing); flutter test 2755 pass ~4 skip; focused 79 pass",
         "id": "C1",
-        "text": "all 22 items delivered and their issues closed",
+        "text": "tests cover both platforms and existing installs",
         "waived": false
       },
       {
-        "evidence": "#527 body: 51 checked, 0 unchecked",
+        "evidence": null,
         "id": "C2",
-        "text": "#527 group 8 fully checked",
+        "text": "reviewers converged",
         "waived": false
       },
       {
-        "evidence": "make release V=stable -> 7701bc96, tag v2.14.0 pushed; make watch-release started",
+        "evidence": null,
         "id": "C3",
-        "text": "final release cut with watch-release started",
+        "text": "pushed",
         "waived": false
       }
     ],
     "constraints": [
-      "project AGENTS.md flow and Known pitfalls",
-      "v1 is a UX reference, never a source of code",
-      "Brazilian Portuguese to the owner with hey for questions and conclusions",
-      "the owner compacts context after the issues exist; planning resumes from this Task Memory"
+      "project AGENTS.md rules",
+      "reviewed before push",
+      "no release unless ordered"
     ],
-    "delivery_boundary": "issues created now; implementation and releases in later turns after planning",
+    "delivery_boundary": "pushed reviewed commit on main",
     "expected_results": [
-      "22 issues created and listed under #527 group 8",
-      "each item delivered with tests, review, docs",
-      "releases cut per the flow"
+      "desktop new install: tabs on",
+      "mobile new install: tabs off",
+      "existing install unchanged"
     ],
-    "objective": "Plan and deliver #527 group 8: the 19 owner UX items (item 12 split into bar, share image, read aloud, forward) in the agent-decided order, through the project flow.",
+    "objective": "A new install starts with session tabs on desktop and without them on mobile; existing installs keep their choice",
     "scope_in": [
-      "create one GitHub issue per item with its verbatim and add group 8 to #527 in execution order",
-      "plan, implement, review and release each item per the project flow",
-      "Linux smoke updates when touched screens change"
+      "first-run default for cw2.settings.showSessionTabs",
+      "tests",
+      "BEHAVIOR.md",
+      "review",
+      "push"
     ],
     "scope_out": [
-      "work outside the 22 listed items",
-      "importing v1 code (adapt only, v1 is a UX reference)"
+      "changing existing installs",
+      "other defaults"
     ]
   },
   "decisions": [
     {
-      "at": "2026-11-27T21:39:59Z",
-      "text": "Group 8 order (agent decided by similarity then priority): 8.1 Sidebar e topo 19,10,11,7; 8.2 Timeline e ações da mensagem 3,5,4,12,12c,12b,12a; 8.3 Composer, microfone e chip 1,2,8,9,16,6 (tips last so they can point to final Display options); 8.4 Widget de tarefas 15,17; 8.5 Configurações 13,14; 8.6 Padrões 18. Code pointers per item from an Explore pass are saved in /tmp/opencode/g8/pointers.txt and go into each issue body (durable copy on GitHub)."
+      "at": "2026-11-28T14:18:15Z",
+      "text": "Impl: AppPreferencesController._load newInstall start() helper; touch-first (android/iOS/fuchsia via defaultTargetPlatform) new install writes showSessionTabs=false; desktop keeps default on. Tests: theme_default (+7), 4 test files adjusted (tests run as android). Review ledger: unit /tmp/opencode/g8/rev/u11, key codewalk-tabs-platform-default-20261128T141810Z-ba01, metrics rvw_20261128T141810Z_561e0c54, 9 helpers (Claude helpers: if quota fails, stand in with native same model only)."
     },
     {
-      "at": "2026-11-27T21:41:22Z",
-      "text": "Group 8 GitHub issues created (label ux), in execution order: 8.1 #532(19 textos sidebar) #533(10 cabeçalho) #534(11 revamp) #535(7 topo sem abas); 8.2 #536(3 padding) #537(5 resumo ferramentas) #538(4 TPS inline) #539(12 barra de ações) #540(12c imagem) #541(12b TTS) #542(12a encaminhar); 8.3 #543(1 subagentes) #544(2 shell 5s) #545(8 debounce mic) #546(9 mic expandido) #547(16 variante) #548(6 dicas); 8.4 #549(15 título tarefas) #550(17 lista 5 itens); 8.5 #551(13 títulos settings) #552(14 cartão novidades); 8.6 #553(18 tema GitHub). #527 body gained section 8 with these checkboxes; #539 comment links #540-#542. Each issue body has context, code pointers and the owner verbatim."
+      "at": "2026-11-28T14:19:07Z",
+      "text": "u11 handshakes: 8 READY (Claude haiku/opus back from quota, Codex luna/sol-F, DeepSeek, Ernie, Gemini, Hungerg); Grok-47-high-F rc=1 (technical failure, credits) excluded"
     },
     {
-      "at": "2026-11-27T22:02:06Z",
-      "text": "#532 committed 92d646ee (sidebar drops liveStale and listNotCurrent notices; sessionsActionUnavailableList reworded in 14 locales). #533 implemented: server row first, WorkspaceDrawerNotice and loading bar below it, list top padding 8. Review boundary covers #532+#533 together (170e8de5..HEAD): both small, same file and header, saves one helper round."
+      "at": "2026-11-28T14:38:10Z",
+      "text": "u11 r1 judgment: ACCEPT Haiku+DeepSeek S (_save returns the started save; first run awaits exactly it). REJECT Ernie W (session_tab_strip_test passes 31/31; full suite green), DeepSeek S display_preferences (#534 test stores showRecentSessions so not a new install; write is caused by the setter), Sol-F S no-op enable during load (same accepted residual as #553 theme). Sol-F W (write failure after schema commit -> relaunch tabs on): intended REJECT as #553-accepted residual -> dissent to Sol-F."
     },
     {
-      "at": "2026-11-27T22:02:15Z",
-      "text": "Review u1 (#532+#533, 170e8de5..f5a05c40): WORK ITEM codewalk-532-533-sidebar-header-notices, job key codewalk-532-533-sidebar-header-notices-20261127T220210Z-1edf, dir /home/ubuntu/MEGA/WORK/codewalk, metrics rvw_20261127T220211Z_16a7fc94, helpers (9): helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperDeepSeek-41-flash-high, helperErnie-55-flash-high, helperGemini-4-hydrogen-xhigh, helperGrok-47-high-F, helperHungerg-free. Files /tmp/opencode/g8/rev/u1."
-    },
-    {
-      "at": "2026-11-27T22:03:38Z",
-      "text": "u1 handshakes: READY from helperClaude-haiku-5-max, helperClaude-opus-5-xhigh-F, helperCodex-6-luna-max, helperCodex-6.2-sol-xhigh-F, helperDeepSeek-41-flash-high, helperErnie-55-flash-high, helperGemini-4-hydrogen-xhigh, helperHungerg-free (key codewalk-532-533-sidebar-header-notices-20261127T220210Z-1edf, dir /home/ubuntu/MEGA/WORK/codewalk). helperGrok-47-high-F failed twice: out of Grok credits (failed for the job)."
-    },
-    {
-      "at": "2026-11-27T22:11:43Z",
-      "text": "u1 gate make check on f5a05c40: pass. Planning #534 (sidebar revamp; planner trigger: cross-module + tradeoffs): WORK ITEM codewalk-534-sidebar-revamp-plan, key codewalk-534-sidebar-revamp-plan-20261127T220455Z-37f2, dir /home/ubuntu/MEGA/WORK/codewalk, metrics rvw_20261127T221143Z_c75d2156, helpers (9) same pool as u1 incl. helperGrok-47-high-F. Files /tmp/opencode/g8/plan/p534."
-    },
-    {
-      "at": "2026-11-27T22:12:40Z",
-      "text": "p534 handshakes: READY from haiku, opus-F, luna, sol-F, deepseek, ernie, gemini, hungerg (key codewalk-534-sidebar-revamp-plan-20261127T220455Z-37f2). helperGrok-47-high-F failed handshake + retry: out of credits (failed for the job)."
-    },
-    {
-      "at": "2026-11-27T22:14:49Z",
-      "text": "u1 r1 judgment: F1 (haiku warning) accepted: with catalog.failure set, row actions and draft show sessionCatalogFailureText instead of the sync promise; F3 (sol-F) accepted: test asserts createReason=listNotCurrent and no sidebar text after the 400 ms pump; F2 (haiku, opus-F) accepted for the docs step: BEHAVIOR.md 307/312 rewrite. All frontier positions accepted, no dissent needed. Fix commit 2 in fix round; re-review skipped: local text selection + tests, no concurrency/interface/persistence change; focused suites 105 pass, analyze clean, mutation fails as expected."
-    },
-    {
-      "at": "2026-11-27T22:19:40Z",
-      "text": "#535 implemented ahead of #534 while its planners run (no file overlap): base 986bd8b1f55aa559179b10a929833e78d929df31; _ToolbarProjectTitle shows, when showSessionTabs is false and a session is shown, a project IconButton (ProjectIconView, opens pickWorkspaceProject) + the session title (open view summary > loaded row > tab title; unknown title keeps the project title). Test in session_route_test at 390 and 1280. Suites route/desktop/tab_strip 80 pass."
-    },
-    {
-      "at": "2026-11-27T22:19:45Z",
-      "text": "Review u2 (#535, 986bd8b1..022ca26c): WORK ITEM codewalk-535-toolbar-session-title, key codewalk-535-toolbar-session-title-20261127T221944Z-1a1a, dir /home/ubuntu/MEGA/WORK/codewalk, metrics rvw_20261127T221944Z_375bd668, helpers (9) incl. Grok. Files /tmp/opencode/g8/rev/u2."
-    },
-    {
-      "at": "2026-11-27T22:20:46Z",
-      "text": "u2 handshakes READY: haiku, opus-F, luna, sol-F, deepseek, ernie, gemini, hungerg (key in /tmp/opencode/g8/rev/u2/key). Grok failed twice (credits)."
-    },
-    {
-      "at": "2026-11-27T22:39:13Z",
-      "text": "u2 r1 judgment (#535): accepted F1 sol-F warning with a smaller fix (48 dp LayoutBuilder guard; dissent: sol-F residual objection conditional on explicit acceptance of hiding title+icon in an extremely crowded toolbar: accepted explicitly as tradeoff, documented in BEHAVIOR.md); F2 deepseek fallthrough on empty titles; F3 haiku+opus-F tests for rename and untitled; F4 gemini findSession, host guard, live state title. Fix commit 13242f18, docs 7b6b6992. Re-review skipped: local UI lookup + tests, no concurrency/interface/persistence. route+desktop suites 50 pass. Squash skipped: tree holds uncommitted #534 WIP (kept 022ca26c, 13242f18, 7b6b6992)."
-    },
-    {
-      "at": "2026-11-27T22:39:38Z",
-      "text": "p534 judgment (final after dissent): remove Recent (state, Display/Appearance toggles, RecentSessionRow, l10n keys; stored key inert); ProjectWorkspace.shown stamps (left project s, new s+1, monotonic, tolerant decode, removed on close, nowMs from catalog clock); ProjectContextsController.ordered = active first, then max(latestSessionUpdate incl. children, stamp), ties by open order, open untouched; close handover unchanged (opus agreed); active project window = first 5 of pins-first list, current outside takes the 5th slot (sol-F objection adopted on the owner's literal 'até cinco'; overrides opus's all-pins/append positions, opus exchange already used), Show more/less TextButton (sessions-reveal, page state reset on project change), search uncapped, Load more only when whole list shows and it expands; rows padding 8/4, maxLines 2, centered, menu 40/32 shrinkWrap; findChildIndexCallback with keyed children (sol-F objection adopted)."
-    },
-    {
-      "at": "2026-11-27T22:49:12Z",
-      "text": "#534 committed 4a0e9904 (base 7b6b6992). Review u3: WORK ITEM codewalk-534-sidebar-revamp, key codewalk-534-sidebar-revamp-20261127T224912Z-b881, dir /home/ubuntu/MEGA/WORK/codewalk, metrics rvw_20261127T224912Z_4ffaf956, helpers (9) incl. Grok. Focused: sessions+settings suites 1798 pass, appearance goldens pass, analyze clean, l10n --check ok."
-    },
-    {
-      "at": "2026-11-27T22:50:39Z",
-      "text": "u3 handshakes READY: haiku, opus-F, luna, sol-F, deepseek, ernie, gemini, hungerg (key in /tmp/opencode/g8/rev/u3/key). Grok failed twice (credits)."
-    },
-    {
-      "at": "2026-11-27T22:51:29Z",
-      "text": "Asked the owner via hey (non-blocking) about #537: with 'Ferramentas expandidas' on, A) today's behavior (open while running, summary when text arrives) [recommended] or B) always expanded incl. history. Default off = summary line even while running. #536 plan: timelineSideInset phones 8 -> 12 dp."
-    },
-    {
-      "at": "2026-11-27T22:53:38Z",
-      "text": "Owner answered #537: A. 'Ferramentas expandidas' on = today's behavior (stretch open while running, summary once text arrives); off (default) = summary line even while running, tap expands."
-    },
-    {
-      "at": "2026-11-27T23:00:32Z",
-      "text": "#536 committed (12 dp phone margin; test in session_work_group_test). Mobile timeline goldens now stale (6% diff), accepted until the x86 Goldens workflow regenerates them together with the stale appearance goldens. #536 joins the next review boundary with #537/#538 (same timeline rendering)."
-    },
-    {
-      "at": "2026-11-27T23:11:40Z",
-      "text": "u3 r1 judgment (#534): accepted F1 (stamp decode bound maxShownMs + increment guard), F3 (fold/expansion scoped by server+project), F4 (Load more expands during search), F5 opus-F (stamps >1 day ahead of now dropped when stamping), F6 tests; F2 docs accepted for the docs step; rejected F7 hungerg (deep-linked session outside loaded rows has no row: pre-existing, the list only shows loaded rows; not a #534 regression). No frontier position overridden. Fix commit 0e911541. Re-review required: persistence touched (store decode/stamping)."
-    },
-    {
-      "at": "2026-11-27T23:21:38Z",
-      "text": "u3 r2 judgment: accepted R1 (sol-F warning + haiku/deepseek/opus-F: stamps untouched unless written; ahead-filter only when stamping; doc fixed; backward jump >1 day drop documented as tradeoff), R2 haiku (scope reset at build start incl. server list), R3 tests (search+Load more, exact bound). Rejected haiku's two-server reset test: needs a second profile rig; the reset is a record comparison covered by the project-switch test. Fix 7122ddc7. Re-review r3 for the persistence change."
-    },
-    {
-      "at": "2026-11-27T23:26:01Z",
-      "text": "#534 review converged after 3 rounds (r3: 7 approve, haiku failed twice SESSION_CLAUDE_ERROR). Docs committed. Squash skipped: #536 5d2bc856 and #537 538c0b0a sit between the #534 commits. Push held until #536-#538 are reviewed (no unreviewed code on main); #534 issue closes after that push."
-    },
-    {
-      "at": "2026-11-27T23:35:12Z",
-      "text": "#537 committed 538c0b0a, #538 committed 6843825b. Review u4 (#536+#537+#538: 5d2bc856, 538c0b0a, 6843825b): WORK ITEM codewalk-536-538-timeline-display, key codewalk-536-538-timeline-display-20261127T233512Z-ab74, metrics rvw_20261127T233512Z_c7ca9aa8, helpers (9) incl. Grok."
-    },
-    {
-      "at": "2026-11-27T23:36:40Z",
-      "text": "u4 handshakes READY: luna, sol-F, deepseek, ernie, gemini, hungerg. Failed twice: helperClaude-haiku-5-max and helperClaude-opus-5-xhigh-F (SESSION_CLAUDE_ERROR process exited unsuccessfully), helperGrok-47-high-F (credits) -> failed for the job."
-    },
-    {
-      "at": "2026-11-27T23:38:27Z",
-      "text": "Owner (verbatim: 'é cota mesmo, tenta substituir subagentes nativos aqui mesmo'): Claude helpers are out of quota; replace helperClaude-haiku-5-max and helperClaude-opus-5-xhigh-F with native Claude Code subagents (Agent tool, subagent_type Plan = read-only, model haiku / opus) given the same canonical payload file, from u4 onward, until the helpers work again. Native results join the same prepared batch."
-    },
-    {
-      "at": "2026-11-27T23:56:14Z",
-      "text": "u4 r1 judgment: all findings accepted (no frontier override): trailing placement via AST check trailingFitsInline (paragraph/ATX heading/list or quote end; separate line otherwise; source untouched; literal U+E000 -> separate), focusable InkWell button in a WidgetSpan + accessibility node (markdown paragraph semantics exclude WidgetSpans), MarkdownBody keyed by trailing, budget-gated showsInlineTurnStats, elapsed chip suppressed on the message's other rows (stretch header, tool, reasoning) in live and history, Block-mode early calls summarized when !expandTools. Fix commit a612095d. Re-review r2 needed (rendering mechanism rework)."
-    },
-    {
-      "at": "2026-11-28T00:11:57Z",
-      "text": "u4 r2 judgment: accepted all remaining items (Block-mode split by isCompactable, SessionSubagentCalls inlineStats, over-budget chip gets the turn rate, parse cached per source, closing hashes, parse-comparison inline test covering multi-line link refs and nested HTML, inline button without semantics + container node, key with label/style/tap). Over-budget answers still show no visible speed (dialog has it): accepted tradeoff, >64k-rune answers only. Fix 3fe38ba2; re-review r3."
-    },
-    {
-      "at": "2026-11-28T00:26:25Z",
-      "text": "u4 r3 judgment: accepted over-budget turn rate (ownsTurnStats), CRLF/CR, empty list item, semantics container at the stats; rejected luna small-target suggestion (owner asked for inline text). Fix f7e3da16 (+BEHAVIOR docs). Next: u4 r4 + planning p539 (#539-#542) in one batch: WORK ITEM codewalk-539-542-message-actions-plan, key codewalk-539-542-message-actions-plan-20261128T002625Z-5788, metrics rvw_20261128T002625Z_16b75226; Claude helpers replaced by native Plan subagents (haiku, opus)."
-    },
-    {
-      "at": "2026-11-28T00:27:04Z",
-      "text": "p539 handshakes READY: luna, sol-F, deepseek, ernie, gemini, hungerg. Claude helpers (quota) and Grok (credits) failed; Claude replaced by native Plan subagents per owner."
-    },
-    {
-      "at": "2026-11-28T00:36:43Z",
-      "text": "u4 r4 judged: converged. 8/8 approve (6 helpers + native opus/haiku stand-ins). Accepted 2 suggestions: sol-F distinct turn/step rate in over-budget test; Ernie BEHAVIOR L637/L639 qualify opening chip unless final answer owns stats. Fixed in 75e225f8 (test+doc only, tps test 5/5 pass); no re-review: test-only assertion and doc wording, no runtime change. Squash impossible (interleaved #534/#536/#537 commits): keep loop commits."
-    },
-    {
-      "at": "2026-11-28T00:38:07Z",
-      "text": "p539 synthesis so far (5/8 plans): order 539->540->541->542; #539 drops long-press menu and select mode, text always selectable, bar on UserInput+AssistantText, overflow = Rewind/edit + Fork from here; unshipped actions absent until their unit (release only after all 4). Open owner question Q1: #492 double tap copy-all conflicts with native word selection (a drop / b keep / c clean-area only). Pending Q2 later at #542: forward sends immediately vs stages draft."
-    },
-    {
-      "at": "2026-11-28T00:39:04Z",
-      "text": "Owner Q1 = a: drop #492 double-tap copy-all; double tap follows native selection (word); Copy all lives in the action bar."
-    },
-    {
-      "at": "2026-11-28T00:43:28Z",
-      "text": "p539 plans 7/8 read. Forward divergence: immediate single-target + New session (sol-F, haiku, Ernie, Hungerg), v1-style multi-select immediate (Gemini, luna), staged draft (DeepSeek). Asking owner Q2 (a single immediate / b multi immediate / c draft). Other synthesis decisions: 5 TTS providers (sol-F, DeepSeek, Gemini, luna, Hungerg vs 3 Ernie/haiku), Edge default, privacy notice in settings only (no blocking consent), double tap dropped (Q1=a)."
-    },
-    {
-      "at": "2026-11-28T00:50:31Z",
-      "text": "p539 planning round 1 judged and recorded (rvw_20261128T002625Z_16b75226: sol-F high-value, others useful-common; native stand-ins unscored); sessions closed. Handoff in last artifact."
-    },
-    {
-      "at": "2026-11-28T00:53:39Z",
-      "text": "Owner Q2 = b: #542 Forward like v1: multi-select sessions and send immediately to all (per-target outcome, no blind replay of uncertain sends)."
-    },
-    {
-      "at": "2026-11-28T01:18:09Z",
-      "text": "u5 review #539: boundary 4ea5b87a (base f6c7a46e), WORK ITEM codewalk-539-message-action-bar, key in /tmp/opencode/g8/rev/u5/key, metrics rvw_20261128T011730Z_82aebb86. Pool: 9 helpers (Claude x2 replaced by native Plan stand-ins haiku/opus per owner; Grok no credits). Payload /tmp/opencode/g8/rev/u5/p1.txt."
-    },
-    {
-      "at": "2026-11-28T01:19:03Z",
-      "text": "u5 handshake: 8 READY (Claude haiku/opus, luna, sol-F, DeepSeek, Ernie, Gemini, Hungerg); Grok rc=1 (no credits, failed). Dispatching r1 to the 8; natives replace Claude only if they fail again."
-    },
-    {
-      "at": "2026-11-28T01:21:07Z",
-      "text": "CI goldens root cause: my earlier PIL check compared RGBA getbbox (alpha only), so 8 changed goldens were wrongly kept. Re-applied from run 46089433935 in a separate commit after 4ea5b87a: desktop appearance (stale since #519 removed Release history) + 6 capsule/popin (#536 margin). Local golden tests 18/18 pass. Push pending #539 review convergence."
-    },
-    {
-      "at": "2026-11-28T01:57:01Z",
-      "text": "u5 r1 judged. Accept: Escape closes from anywhere (HardwareKeyboard handler while shown); Fork only when catalog.lists(session) and no staged revert; canRedoAll/canCompact need a port; overflow cancel restores pin + hide timer; bar on the edge away from the trigger + ignore bar presses for kDoubleTapTimeout after a tap open; hover only over the content; menu re-resolves the action by id at run; drag beyond slop or scroll cancels the tap; edges need both viewport bounds; semantics actions go through _run; refocus message after a keyboard action; fork navigates via router.go(sessionTabLocation(ref)) after saving the draft (tabs.open alone does not show it; verified sessions_page _openLive); MessageTurn doc split; highlighted code RichText registers with SelectionArea; post-fork test. Reject: accepted-without-ref notice (OpenCode always returns the session)."
-    },
-    {
-      "at": "2026-11-28T02:17:42Z",
-      "text": "u5 r2 judged. Accept: Escape scoped to the host (enabled Action only while shown; focus in message or bar), drop the global HardwareKeyboard handler; outside-dismissed menu keeps the bar unpinned when hidden; no hide timer while the pointer is on the bar; bar ignores pointers while settling so a double tap's second tap selects the word; fork navigates only if the route is unchanged; hide when a scroll (incl. jumpTo) moves the anchor edge out of the viewport; BEHAVIOR placement/Escape wording; tests for fork guards. Reject: hover bar covering characters (owner's half-in/out; selection can start elsewhere and hides the bar)."
-    },
-    {
-      "at": "2026-11-28T02:34:57Z",
-      "text": "#541 research: Edge read-aloud requires Sec-MS-GEC v2 since Oct 2026 (v1 token -> 403); only public reimplementation is edge-tts drm.py (LGPLv3, labelled DRM; compatible with CodeWalk AGPL-3.0 with notices). flutter_tts 4.2.5: Windows crash before main on some machines (#640), Windows CMake needs nuget + network, AGP9 builtInKotlin incompatibility -> decision: no System provider this release (follow-up). Asking owner Q3 on Edge (a port v2 token / c no Edge, cloud only)."
-    },
-    {
-      "at": "2026-11-28T02:41:10Z",
-      "text": "u5 r3 judged, all accepted: clip the bar to the list viewport (Positioned.fromRect + ClipRect around the follower) so it never covers header/composer whatever moves it; IgnorePointer wraps the whole overlay child while settling; an overflow choice runs even if the bar was hidden meanwhile; fork navigates only if the page route is current and the location unchanged; _overBar resets on hide; guard test simplified."
-    },
-    {
-      "at": "2026-11-28T02:45:37Z",
-      "text": "Owner Q3 = a: port the edge-tts Sec-MS-GEC v2 token (LGPLv3, keep attribution; compatible with AGPL-3.0) and keep Microsoft Edge as the default read-aloud provider. System voice (flutter_tts) deferred to a follow-up."
-    },
-    {
-      "at": "2026-11-28T03:01:23Z",
-      "text": "u5 r4 judgment (A0019): accept F1 hint below pill when no room above in list; F2 keep row alive while overflow menu open (AutomaticKeepAliveClientMixin); F3+F9 post-frame recheck on scroll and ScrollMetricsNotification (Scaffold ScrollNotificationObserver) re-reads clip rect, hides if anchor left; F4 fork skips navigation when root navigator can pop (same rule as composer_voice_button _covered, shared helper); F5 absorb taps on bar half outside bubble while settling (inside TapRegion group); F6 observable pass-through test via hit test; F7 positive control fork test; F8 menu choice after list jump test. Rejected: none. Significant change -> round 5 re-review."
-    },
-    {
-      "at": "2026-11-28T03:09:17Z",
-      "text": "u5 r4 fixes committed bdc25d4b (staged only #539 hunks of session_live_page via hash-object/update-index). Mutation check: 4 new bar tests fail with fixes reverted. #541 WIP: widget tests read_aloud_ui_test (3 pass), BEHAVIOR 'V2 read aloud' section, ADR-063 (Edge keyless default; replaces ADR-048 for v2; AGENTS has no ADR table), AGENTS L108 deps note, cache key uses text not hashCode; analyze 4 pre-existing; l10n check ok."
-    },
-    {
-      "at": "2026-11-28T03:15:56Z",
-      "text": "p542 planning (#542 Forward, owner Q2=b multi-select immediate, per-target outcome, no blind resend): 9 helpers discovered (incl. Grok, retried), key codewalk-542-forward-plan-20261128T031515Z-53a6, payload /tmp/opencode/g8/plan/p542/p1.txt, metrics rvw_20261128T031555Z_6bedaf7c. Runs concurrently with u5 r5 review (op_dfce3612db26)."
-    },
-    {
-      "at": "2026-11-28T03:16:58Z",
-      "text": "p542 handshakes: 8 READY (Claude-haiku, Claude-opus-F, Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg); Grok rc=1 out of credits (technical failure, excluded: helpers_r1 = 8)."
-    },
-    {
-      "at": "2026-11-28T03:24:27Z",
-      "text": "Review units: u6 #540 boundary e98a01f4 (key codewalk-540-message-image-20261128T032420Z-5148, metrics rvw_20261128T032426Z_5ad26b64); u7 #541 boundary a00460f9 (key codewalk-541-read-aloud-20261128T032420Z-72c3, metrics rvw_20261128T032426Z_5411f92b); 8 helpers each (Grok out of credits). #541 committed a00460f9 after fixing app_snack_bar guard (showAppSnackBar)."
-    },
-    {
-      "at": "2026-11-28T03:25:44Z",
-      "text": "u6 (#540) and u7 (#541) handshakes: 8/8 READY each."
-    },
-    {
-      "at": "2026-11-28T03:26:52Z",
-      "text": "u5 r5 judgment (A0021): accept all. G1 hint room from text scaler (scale(16)+14); G2 hint test asserts inside ClipRect, plus large text; G3 replace position listener + ScrollNotificationObserver with a post-frame recheck rearmed every frame while the bar shows (no ensureVisualUpdate, idle-free) so width-only resizes re-clip; G4 non-finite anchor -> hide; test skipOffstage:false; G5 absorber and hint sized by the pill's real height (FractionallySizedBox heightFactor 0.5; hint via FractionalTranslation), desktop compact density test. Round 6 re-review after fixes."
-    },
-    {
-      "at": "2026-11-28T03:30:52Z",
-      "text": "u5 r5 fixes committed cbea5f2e (per-frame post-frame recheck replaces scroll listeners; non-finite anchor hides; text-scaled hint room; absorber/hint by real pill height). Gesture suite 38 pass; 4 mutation checks fail as expected. Round 6 payload /tmp/opencode/g8/rev/u5/p6.txt (validation placeholder)."
-    },
-    {
-      "at": "2026-11-28T04:08:59Z",
-      "text": "#539 review converged at round 6 (cbea5f2e): 6/6 working helpers approve, 0 findings; Claude helpers failed (quota). u5 sessions closed; metrics recorded r6. Squash skipped: #539 commits interleave with #540 (e98a01f4, b3718ca3) and #541 (a00460f9), so base..HEAD is not one stage; keep and report. Push waits for #540 and #541 convergence (e98a01f4 lies below the #539 fixes)."
-    },
-    {
-      "at": "2026-11-28T04:09:10Z",
-      "text": "u7 #541 r1 judgment (A0022/A0023): accept all ~29 deduped: completion->idle; player error->failure; cancelled/superseded->no failure; generation checks after each await; other audio during preparing cancels; /settings?section allowlist; fields commit on blur/before test/voice/key; https except local hosts (+1 l10n key); cloud total deadline + close on cancel; audioplayers temp files on iOS/macOS/Linux (own file, delete previous); history page stops its reading; deferred stop in dispose (tree lock); composer _continue stops; settings test stop + stop on leave; ordered settings writes; voice picker stale guard; speakable_text real HTML tags only, code kept, math skipped; locale in cache key; speed label as multiplier; active backend recorded; Edge 403->rejected, client close, IOException->offline, fallback voice reused; malformed URL->notConfigured; load() tolerant; Web section hidden without providers; key save provider race."
-    },
-    {
-      "at": "2026-11-28T04:10:06Z",
-      "text": "u6 #540 judgment: accepted H1 unique file, H2 Windows title, H4 truncated/empty gating, H5 clamp + ratio after frame, H6 12M pixel bound, H7 registrant order, H8 prune per file, H9 picture dispose, H10 detached notice (commit b3718ca3). H3 (share_plus Android clears its cache on next share) REJECTED: library behavior, rare lazy-reading target, fix needs custom FileProvider; Sol-F dissent continuation answered AGREE (retention text refers to codewalk_shares PNGs, as BEHAVIOR says)."
-    },
-    {
-      "at": "2026-11-28T04:28:34Z",
-      "text": "Owner went to sleep (no pending decision). #540 extra fix 2d0eee6b. #541 fixes in working tree (controller generation/completion/error/other-audio, ordered writes by revision, deferred stops, history stop, composer continue stop, settings commit-on-blur + test stop + voice/key races + speed label + insecure address text, settings link allowlist, https rule, cloud deadline + cancel close, Edge 403 rejected + fallback reuse + IOException offline + client close, speakable code/math/HTML, audioplayers own temp file, Web section hidden). Voice tests 19 pass, bootstrap 21 pass."
-    },
-    {
-      "at": "2026-11-28T04:31:38Z",
-      "text": "p542 synthesis (A0022, A0024): Forward between Copy and Read aloud, live+history, confirmed prompt/complete answer with text; picker grouped by open projects (contextRows), 20 newest roots, source/other hosts excluded, search, Set selection, states; text 'Forwarded from: project / title' + blank line + item text; sequential temp lease per target (SessionLiveDirectory.open, no composer), ready wait 20s (live, !stale, outbox, no holds, no staged revert), outbox.submit Delivery.queue, isCurrent rechecks stop/staged; admitted/delivered/settled=ok, rejected/cancelled=failed+dismiss, refusal=failed, uncertain=unconfirmed (no reconcile, never resent); close lease finally; Stop; Retry failed only; all ok -> close+snackbar; no Undo; Ctrl/Cmd+Shift+F. Deferred: previews, archived filter, ledger key, capacity 9, block joining. Sol-F dissent sent. Metrics p542 r1 recorded."
-    },
-    {
-      "at": "2026-11-28T04:32:49Z",
-      "text": "#542 Sol-F dissent reply: AGREE 1 (no previews), 5 (item text only); DISAGREE 2 (archived: projection drops time.archived), 3 (composer sendAgain on uncertain may duplicate), 4 (8 warm tabs block any 9th target). Resolution: 2 -> project time.archived into SessionSummary.archivedAt, filter archived rows in the picker and recheck the catalog row before submit; 3 -> resolved by evidence: composerSendAgain is an explicit user action labeled 'Send again (may duplicate)', same semantics as any uncertain prompt, never automatic; 4 -> raise the OpenCode slot watch capacity 8 -> 9 (tabs stay at 8), so one temporary lease always fits."
-    },
-    {
-      "at": "2026-11-28T04:51:28Z",
-      "text": "#542 implemented (uncommitted): message_forward.dart (forwardableText/origin/text, forwardTargetGroups search-then-20, MessageForwardRun sequential lease+queue+classify, late-lease close), message_forward_dialog.dart (forwardMessageAction gate: SessionLiveDirectory + same-profile catalog; picker + results dialog), live/history wiring, Ctrl/Cmd+Shift+F, SessionSummary.archivedAt + projection, slot watch 9, 28 l10n keys x14, BEHAVIOR 'V2 forward a message'. Tests: message_forward_test 11, dialog 4, reader archived. Gate bzth4x2xj running; u6/u7 r2 reviews buu4bltnw running (op_ae2fc308ab25)."
-    },
-    {
-      "at": "2026-11-28T04:59:22Z",
-      "text": "u6 #540 r2 judged (A0025): accepted pixel slack (0.99), anchor clipped to list + screen re-read after frame, delete empty file on write error, streaming skips budget scan (45894d4e). Rejected Windows registrant reorder (DeepSeek, Gemini): evidence = Flutter tool regenerates generated_plugin_registrant with share_plus after url_launcher_windows (my reorder was overwritten by the next flutter command), so current order is the tool's output. Re-review skipped: small local fixes. u7 #541 r2 judged: all accepted (8674ac7d): per-reading player ids, cache only current/evict on error, completed flag, foreign audio kept, port op generation + private per-run folder, key scope service@origin, Edge cancel/turn.end/no drain/voice deadline, settings stale list + storage errors, link FormatException, Web link guard, disposed guards. Round 3 for #541 needed."
-    },
-    {
-      "at": "2026-11-28T05:03:42Z",
-      "text": "u8 #542 review unit: boundary 6e0718a4, key codewalk-542-forward-20261128T050250Z-5700, metrics rvw_20261128T050250Z_36cbf3c0, payload /tmp/opencode/g8/rev/u8/p1.txt; handshakes done (see run log); dispatch after u7 r3 capture, plus native stand-in for Claude helpers."
-    },
-    {
-      "at": "2026-11-28T05:10:43Z",
-      "text": "u7 #541 r3 judged (A0026): accepted IPv6 scope via Uri.origin; keyless Edge skips key storage (+ error tolerant); key save/clear bound to intended scope, abort if changed, write outdates reads; port stop({id}) spares a newer start, superseded stop leaves new file/state, failed play releases file; shared folder future, recreate if removed; foreign pass expires on pause; start not taken -> unavailable (3a5ee0aa). Native engine ownership: latent (system provider not offered), covered by id-scoped stop. Round 4 needed (port API change)."
-    },
-    {
-      "at": "2026-11-28T05:32:51Z",
-      "text": "Judged #541 r4 (A0027): accepted stop of pending start, superseded-state recheck, folder retry, foreign pass on any state change, key save during switch, tests; rejected 1-day sweep (tradeoff, dissent sent to Sol-F in r5). Fix d1816c75. Judged #542 r1: accepted double-send guard, picked-row snapshot+dedupe, failure-first picker, error->unavailable/unconfirmed, Stop halts waits, watching:false lease (no auto-approve), isCurrent holds, history pop, SafeArea, health listener, warm composer reload; rejected separate archive check (dissent in r2). Metrics recorded u7 r4, u8 r1."
-    },
-    {
-      "at": "2026-11-28T05:56:10Z",
-      "text": "Judged #541 r5 (A0028): accepted superseded-start file release + partial file delete (fix 6370c5d0); intended rejections AVPlayer pending + resume message -> dissent to Sol-F only (u7 r6). Judged #542 r2: accepted all (submit-error unconfirmed, live/stale recheck, confirm read for archive per Sol-F evidence, context failing + group Retry, short window, doc) fix 67771f4e. Metrics u7 r5, u8 r2 recorded. #547 commit de7fd928; #545 test fix 9f2f9099."
-    },
-    {
-      "at": "2026-11-28T05:58:46Z",
-      "text": "8.3 review unit u9 (#543-#548, commits 80026a94 b93142cd e0753859 9f2f9099 de7fd928 d35cf9de): metrics rvw_20261128T055800Z_7275622f, key codewalk-g8-composer-chip-20261128T055757Z-d3e5. Handshakes READY: Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg. Grok-47-high-F failed (out of credits, technical, excluded). Claude helpers excluded (quota; owner: use native stand-in)."
-    },
-    {
-      "at": "2026-11-28T06:06:28Z",
-      "text": "#541 converged: Sol-F r6 approve; its remaining suggestion (resume failure message) implemented 1226a32d; re-review skipped (small change reusing SpeechFailure.unavailable, new test). #542 converged: r3 single consensus item (notFound->gone, no task->unavailable) + small layout/autofocus/search fixes add5ef96; re-review skipped (narrow, tested: dialog notFound test, run tests). u7 and u8 helper sessions closed. Metrics u7 r6, u8 r3 recorded."
-    },
-    {
-      "at": "2026-11-28T06:29:42Z",
-      "text": "Judged 8.3 r1 (A0030): accepted A draft dictation, B unknown-start shells via ShellSightings, C timeline room via live.capsuleShown, D linked tip in More dialog, F doc, G lastVariant falls back to newest project row, H draft picks record variant, J no 4->3 shrink with focus, K deferred onListening, L keyboard tips w/o kIsWeb + preferences-only tips, N docs, O drop liveChildrenRunning. Rejected: E mic delay at mount (dissent to Sol-F), I '*' row eviction (bounded LRU, downgrade-safe), M stale tip until rotation. Metrics u9 r1 recorded. Also committed #549 da98f660, #550 ffb96bb8, #551 c0878a6a, #552 6f0a7e25."
-    },
-    {
-      "at": "2026-11-28T06:49:10Z",
-      "text": "8.3 r2 judged (A0031): all accepted except draft write race (sugg); fix a2e05556; Sol-F agreed with mic-at-mount. #553 committed (createdThisRun + GitHub default). Unit u10 (8.4-8.6 #549-#553: da98f660 ffb96bb8 c0878a6a 6f0a7e25 + #553 commit) metrics rvw_20261128T064823Z_9e20b158, key codewalk-g8-tasks-settings-theme-20261128T064818Z-4812; handshakes READY x6, Grok out of credits (excluded)."
-    },
-    {
-      "at": "2026-11-28T07:14:29Z",
-      "text": "Judged 8.3 r3 + 8.4-8.6 r1 (A0032). 8.3: accepted retention (512, oldest-first), earliest-start reconciliation, pop-in guard + timer cancel, per-link recognizers -> 5ed8a987. 8.4-8.6: accepted viewport centering, news dismissed despite leave, no workspace notice for seen news, awaited first-run theme write -> 64f6b0af; rejected seen-while-scrolled (dissent to Sol-F), double bar during transition (sugg), card widget test (sugg). Metrics u9 r3, u10 r1 recorded."
-    },
-    {
-      "at": "2026-11-28T07:25:57Z",
-      "text": "Judged 8.3 r4 + 8.4-8.6 r2 (A0033). 8.3: accepted unconfirmed-guess-as-history, end on disappearance (non-empty list), captured live in pop-in, sightings unit test; rejected controller->capsule import coupling (sugg). 8.4-8.6: accepted on-screen news visibility (resolves persisted Sol-F objection), leaveNews dismisses in memory, recenter on extent/metrics, first-run theme via _persist+flush, window test fix. Metrics u9 r4, u10 r2 recorded."
-    },
-    {
-      "at": "2026-11-28T07:40:57Z",
-      "text": "Judged final rounds (A0034): 8.3 accepted settled-only ending + name links + doc (0becb82b), rejected 512 eviction (sugg); 8.4-8.6 accepted first-load deadlock fix + covered-route news (695a9f81), residual interrupted first launch accepted. Metrics u9 r5, u10 r3 recorded."
-    },
-    {
-      "at": "2026-11-28T07:53:44Z",
-      "text": "u9 (8.3) converged at r7/r8: 5/6 approve r7; Sol-F warning (hidden-tab untimed shell completion shows one Completed row) deferred to follow-up after dissent, Sol-F agreed (approve r8). DeepSeek page-level test suggestion rejected: ShellSightings settled-empty path unit-tested, page wiring 2 lines verified by all. Metrics r7 recorded."
-    },
-    {
-      "at": "2026-11-28T07:56:00Z",
-      "text": "Pushed e8ad29a7 (all group 8 reviewed commits). Goldens run 46123352062 on x86 started. Follow-ups created: #554 device voice, #555 forward pending, #556 settings transition bars, #557 hidden-tab shell sightings. Release notes drafted at release-notes/v2.14.0.md (uncommitted). Loop commits kept (interleaved across units, no squash)."
-    },
-    {
-      "at": "2026-11-28T07:58:04Z",
-      "text": "R0001 resolved: x86 Goldens run 46123352062 at e8ad29a7 rendered all 36 goldens; the 10 differing PNGs committed in 4347e56b, so every committed golden equals its x86 render in RGB. Release proceeds per project rule (local gate decides, CI safety net via make watch-ci; release.yml has its own Linux smoke and verify before publish)."
-    },
-    {
-      "at": "2026-11-28T14:03:55Z",
-      "text": "Completed milestone preserved at 2026-11-28T07:59:36Z by agent: delivered=Group 8 (#532-#553) implemented, reviewed to convergence, pushed; goldens regenerated on x86; v2.14.0 cut and tagged; issues closed, #527 ticked; follow-ups #554-#557 created | validation=flutter analyze within budget, full suite green, core 357 + harness 725 pass, l10n check ok, golden tests pass with x86 renders, release dry run ok | residual_risk=Release workflow and CI results pending (watchers notify via hey); Linux preview smoke has not run on group 8 since goldens blocked CI; #527 closure awaits owner"
-    },
-    {
-      "at": "2026-11-28T14:03:55Z",
-      "text": "Continuation request: fecha. Aceito os itens 2 a 5. O 1 tem que ser no AGENTS global e tem que estar disponivel, um helper Claude Opus só pode ser substituido por igual modelo nativamente local para o subagente. | reason: Direct follow-up of the group 8 flow: close #527 and add the approved evergreen rules"
+      "at": "2026-11-28T14:39:13Z",
+      "text": "u11 converged: r1 6 approve + fix 344f3f7c (mechanical: _save returns its future), verified by Sol-F r2 approve (agreed both residuals) and focused tests 177 pass; no wider re-review (simple fix). Metrics r1 recorded (Haiku/DeepSeek high-value, Ernie invalid: cited test passes). Sessions closed."
     }
   ],
-  "generation": 204,
-  "next_action": "Classify the next managed request: explicitly related continuation uses tm continue; an unrelated request or an explicit fresh start uses tm start (which archives this task)",
+  "generation": 10,
+  "next_action": "Squash b9fd36ad+344f3f7c onto bdbca96d, push, make watch-ci, hey",
   "pending_operation": null,
-  "queued_followups": [
-    {
-      "at": "2026-11-28T14:06:24Z",
-      "request": "em desktop novas instalacoes devem comecar com abas, mobile o contrario. faz"
-    }
-  ],
+  "queued_followups": [],
   "request": {
-    "bytes": 13157,
-    "path": "requests/tm_20261127T213730Z_22ec9025.txt",
-    "sha256": "3312d9f5549abb4c885855d481df60fe972e395873a88d7d74b32332491a897b"
+    "bytes": 76,
+    "path": "requests/tm_20261128T140706Z_cfe10974.txt",
+    "sha256": "2cca91369c1d7cc48c6564efb2e29aadfc60e4da200e637a993b9d56dd47aeaf"
   },
-  "risks": [
-    {
-      "at": "2026-11-27T22:56:37Z",
-      "id": "R0001",
-      "mitigation": "After #534 is pushed (it also removes the Appearance Recent card), run gh workflow run goldens.yml --ref main, download, inspect and commit only differing PNGs, push, gate on that SHA before the group release",
-      "stage": "S4",
-      "status": "resolved",
-      "text": "CI red on main since 2aeae5e2 (runs 46067006885, 46075515623, 46077955108): appearance golden desktop_light/dark differ 0.22% (2242 px) on x86; same diff before group 8, so stale since #519 (Settings changed); local ARM tolerance 0.3% hides it"
-    }
-  ],
+  "risks": [],
   "schema": 1,
-  "started_at": "2026-11-27T21:37:30Z",
-  "status": "completed",
-  "task_id": "tm_20261127T213730Z_22ec9025",
-  "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T14:06:57Z",
+  "started_at": "2026-11-28T14:07:06Z",
+  "status": "in_progress",
+  "task_id": "tm_20261128T140706Z_cfe10974",
+  "title": "Session tabs default by platform on new installs",
+  "updated_at": "2026-11-28T14:39:13Z",
   "validations": [
     {
-      "at": "2026-11-27T22:28:42Z",
-      "check": "make check TEST_JOBS=4 on 022ca26c (#535)",
-      "criterion": null,
-      "evidence": "/tmp/opencode/g8/gate-u2.log exit 0",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-27T22:58:59Z",
-      "check": "make check TEST_JOBS=4 on 4a0e9904 (#534)",
-      "criterion": null,
-      "evidence": "/tmp/opencode/g8/gate-u3.log exit 0",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-27T23:44:09Z",
-      "check": "flutter test --no-pub -j 4 (full) on 6843825b",
-      "criterion": null,
-      "evidence": "only stale goldens fail: 8 live timeline mobile + 3 subagent capsule (#536 margin); /tmp/opencode/g8/gate-u4-tests.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T00:39:12Z",
-      "check": "flutter analyze on 75e225f8",
-      "criterion": null,
-      "evidence": "4 issues = gate budget 4 (tool/ci/check_analyze_budget.sh), all pre-existing: removed_lint in analysis_options + 3 infos in test/contract fixture main.dart",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T00:43:39Z",
-      "check": "Full gate on 75e225f8 (analyze, flutter test -j N, l10n --check)",
-      "criterion": null,
-      "evidence": "analyze 4/4 budget; tests +2608 ~4 -11, all 11 failures = known stale goldens (8 session_live_timeline_golden mobile, 3 subagent_capsule_golden) from #536 margin, regenerated via x86 goldens.yml after push (tm risk); l10n rc=0. Log /tmp/opencode/g8/gate_test.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T01:17:18Z",
-      "check": "#539 gate (analyze + full suite + l10n check)",
-      "criterion": null,
-      "evidence": "analyze 4/4 budget; tests +2621 ~4 -3, the 3 = pre-existing subagent_capsule goldens (also red in CI f6c7a46e, env-dependent); l10n --check ok. Log /tmp/opencode/g8/gate539.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T02:07:45Z",
-      "check": "#539 fix round 1 gate",
-      "criterion": null,
-      "evidence": "analyze 4/4 budget; full suite +2631 ~4 -0 (goldens fixed by 835a6995). Log /tmp/opencode/g8/gate539b.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T02:19:59Z",
-      "check": "#540 gate (analyze + full suite + l10n check)",
-      "criterion": null,
-      "evidence": "analyze 4/4 budget; full suite +2637 ~4 -0; l10n --check ok; pubspec.lock adds only share_plus 13.2.1 + interface 7.2.0. Log /tmp/opencode/g8/gate540.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T02:30:32Z",
-      "check": "#539 fix round 2 gate",
-      "criterion": null,
-      "evidence": "analyze 4/4 budget; full suite +2641 ~4 -0. Log /tmp/opencode/g8/gate539c.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T02:49:34Z",
-      "check": "#539 fix round 3 gate",
-      "criterion": null,
-      "evidence": "analyze 4/4; suite +2641 ~4 -1, the 1 = app_indeterminate_progress_test flagging the uncommitted #541 WIP settings page (not part of the #539 commit). Log /tmp/opencode/g8/gate539d.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T03:14:23Z",
-      "check": "Full gate on bdc25d4b (clean worktree)",
-      "criterion": null,
-      "evidence": "analyze 4 pre-existing; flutter test +2646 ~4 all passed (/tmp/opencode/g8/wt_test.log)",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T03:23:44Z",
-      "check": "#541 full suite (working tree)",
-      "criterion": null,
-      "evidence": "+2483 ~4 -3: app_snack_bar guard (fixed: read-aloud failure via showAppSnackBar; guard+voice 25 pass) and appearance golden desktop_light/dark (expected: new Read aloud settings destination; regenerate on x86 via goldens.yml after push). Log /tmp/opencode/g8/t541.log",
-      "outcome": "info"
-    },
-    {
-      "at": "2026-11-28T03:38:28Z",
-      "check": "Full gate on cbea5f2e",
-      "criterion": null,
-      "evidence": "analyze 4 pre-existing; tests all pass except appearance golden desktop_light/dark (expected, #541 settings destination). /tmp/opencode/g8/t_r5.log",
-      "outcome": "info"
-    },
-    {
-      "at": "2026-11-28T04:37:29Z",
-      "check": "Full gate with #541 fixes (working tree)",
-      "criterion": null,
-      "evidence": "analyze 4 pre-existing; l10n check ok; tests +2683 ~4 -2, only appearance golden desktop_light/dark (expected, x86 regen after push). /tmp/opencode/g8/t541b.log",
-      "outcome": "info"
-    },
-    {
-      "at": "2026-11-28T05:24:07Z",
-      "check": "#541 r4 fixes: voice tests + analyze + mutation",
-      "criterion": null,
-      "evidence": "flutter test test/v2/voice 35 passed; analyze 4 (budget); foreign-pass test fails with fix reverted",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T05:38:43Z",
-      "check": "#542 r1 fixes: test/v2/sessions + analyze",
-      "criterion": null,
-      "evidence": "sessions suite: forward/dialog/directory tests pass; only unrelated fails: 3 capsule goldens (#543 status change, regen on x86), #501 mic test (#545 delay), store readback (#547 WIP). analyze 4 (budget). Guard mutation fails directory test.",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T05:42:39Z",
-      "check": "#547 tests: store, picker, chip, cycle + analyze + mutation",
-      "criterion": null,
-      "evidence": "77+23 tests pass; analyze 4 (budget); picker #547 test fails with chip change reverted",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T06:05:22Z",
-      "check": "Full flutter test at d35cf9de",
-      "criterion": null,
-      "evidence": "all pass except expected goldens: appearance desktop_light/dark (#541 settings entry), subagent capsule x3 (#543 status line); regen on x86 via goldens.yml after push. log /tmp/opencode/g8/full.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T06:36:20Z",
-      "check": "8.3 r1 fixes: test/v2 suite + analyze + l10n check",
-      "criterion": null,
-      "evidence": "v2: all pass except expected goldens (appearance x4: #541/#551 settings; capsule x3: #543); analyze 4 (budget); l10n check OK. log /tmp/opencode/g8/v2.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T06:55:02Z",
-      "check": "Full flutter test at f9a8bf0c",
-      "criterion": null,
-      "evidence": "all pass except expected goldens (appearance x4, subagent capsule x3) regenerated on x86 after push; log /tmp/opencode/g8/full2.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T07:32:27Z",
-      "check": "Full flutter test at 5bbc7812",
-      "criterion": null,
-      "evidence": "all pass except expected goldens (appearance x4, capsule x3); log /tmp/opencode/g8/full3.log",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T07:57:09Z",
-      "check": "x86 goldens run 46123352062",
-      "criterion": null,
-      "evidence": "10 PNGs differ in RGB (appearance x4 from #551, capsule/popin x6 from #543 status line removed); visually checked; local golden tests pass with them",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T07:59:36Z",
-      "check": "Group 8 issues closed",
+      "at": "2026-11-28T14:25:17Z",
+      "check": "Gate after tabs default",
       "criterion": "C1",
-      "evidence": "gh: #532 #533 #535 closed earlier; #534 #536-#553 closed with commit comments",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T07:59:36Z",
-      "check": "#527 group 8 ticked",
-      "criterion": "C2",
-      "evidence": "#527 body: 51 checked, 0 unchecked",
-      "outcome": "pass"
-    },
-    {
-      "at": "2026-11-28T07:59:36Z",
-      "check": "Release cut",
-      "criterion": "C3",
-      "evidence": "make release V=stable -> 7701bc96, tag v2.14.0 pushed; make watch-release started",
+      "evidence": "flutter analyze 4 issues (budget 4, pre-existing); flutter test 2755 pass ~4 skip; focused 79 pass",
       "outcome": "pass"
     }
   ]

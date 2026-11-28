@@ -70,6 +70,9 @@ Future<_App> _launch(
       index: metadata,
     ),
   );
+  // Tests run as a phone, whose new install starts without tabs.
+  await dependencies.preferences.initialize();
+  dependencies.preferences.setShowSessionTabs(true);
   // The same root as the relaunches with another text scale, so those keep
   // the app's controllers.
   await tester.pumpWidget(

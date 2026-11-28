@@ -13,16 +13,21 @@ void main() {
   AppPreferencesController controller(FakeMetadataBackend backend) =>
       AppPreferencesController(store: V2MetadataStore(backend: backend));
 
-  test('display defaults show tabs, hint unseen', () async {
+  test('display defaults on a phone hide tabs, hint unseen', () async {
     final backend = FakeMetadataBackend();
     final preferences = controller(backend);
     addTearDown(preferences.dispose);
     await preferences.initialize();
-    expect(preferences.showSessionTabs, isTrue);
+    // Tests run as a phone, whose new install starts without tabs.
+    expect(preferences.showSessionTabs, isFalse);
     expect(preferences.expandedTools, isFalse);
     expect(preferences.tabsGestureHintDismissed, isFalse);
-    // A new install writes only its theme, GitHub (#553).
-    expect(backend.writes, ['cw2.schema', 'cw2.settings.themePreset']);
+    // A new install writes only its theme, GitHub (#553), and its tabs.
+    expect(backend.writes, [
+      'cw2.schema',
+      'cw2.settings.themePreset',
+      'cw2.settings.showSessionTabs',
+    ]);
   });
 
   test('the display choices survive a reload', () async {
@@ -101,9 +106,15 @@ void main() {
     );
     await tester.ensureVisible(toggle);
     await tester.pumpAndSettle();
+    // Tests run as a phone, whose new install starts without tabs.
+    expect(graph.preferences.showSessionTabs, isFalse);
     await tester.tap(toggle);
     await tester.pumpAndSettle();
-    expect(graph.preferences.showSessionTabs, isFalse);
+    expect(graph.preferences.showSessionTabs, isTrue);
+    await graph.preferences.flush();
+    expect(backend.values.containsKey('cw2.settings.showSessionTabs'), isFalse);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
     await graph.preferences.flush();
     expect(backend.values['cw2.settings.showSessionTabs'], isFalse);
   });

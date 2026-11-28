@@ -1,0 +1,1 @@
+em desktop novas instalacoes devem comecar com abas, mobile o contrario. faz
