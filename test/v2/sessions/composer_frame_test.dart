@@ -197,6 +197,10 @@ void main() {
           voiceTakesAction: true,
         ),
       );
+      // It waits a moment first, in case work starts (#545).
+      await tester.pump(ComposerFrame.voiceTakeDelay ~/ 2);
+      expect(rect(tester, 'mic'), beside);
+      await tester.pump(ComposerFrame.voiceTakeDelay ~/ 2);
       // Halfway through, the mic is between its place and Send's.
       await tester.pump(ComposerFrame.voiceSlide ~/ 2);
       final moving = rect(tester, 'mic');
@@ -262,8 +266,38 @@ void main() {
           reducedMotion: true,
         ),
       );
+      await tester.pump(ComposerFrame.voiceTakeDelay);
       await tester.pump();
       expect(rect(tester, 'mic'), send);
+    });
+
+    testWidgets('a send whose work starts at once never moves it (#545)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          voice: const _Mic(key: micKey),
+        ),
+      );
+      final beside = rect(tester, 'mic');
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          voice: const _Mic(key: micKey),
+          voiceTakesAction: true,
+        ),
+      );
+      await tester.pump(ComposerFrame.voiceTakeDelay ~/ 2);
+      // Stop appears: the mic stays where it was.
+      await tester.pumpWidget(
+        _frame(
+          field: field,
+          voice: const _Mic(key: micKey),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(rect(tester, 'mic'), beside);
     });
 
     testWidgets('it keeps to the end edge right to left', (tester) async {

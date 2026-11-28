@@ -4,6 +4,8 @@
 /// that sends (#174).
 library;
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
@@ -151,6 +153,11 @@ class ComposerFrame extends StatefulWidget {
   /// How long the mic takes to slide between its place and the action's.
   static const voiceSlide = Duration(milliseconds: 220);
 
+  /// How long the mic waits before taking the action's place, so a send
+  /// whose work starts at once never moves it there and back (#545). It
+  /// leaves that place at once.
+  static const voiceTakeDelay = Duration(milliseconds: 1500);
+
   @override
   State<ComposerFrame> createState() => _ComposerFrameState();
 }
@@ -170,6 +177,26 @@ class _ComposerFrameState extends State<ComposerFrame> {
     skipTraversal: true,
   );
 
+  // Whether the mic stands in the action's place now: it follows
+  // [ComposerFrame.voiceTakesAction] after [ComposerFrame.voiceTakeDelay].
+  late bool _takes = widget.voiceTakesAction;
+  Timer? _takeAfter;
+
+  @override
+  void didUpdateWidget(ComposerFrame oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.voiceTakesAction) {
+      _takeAfter?.cancel();
+      _takeAfter = null;
+      _takes = false;
+    } else if (!_takes && _takeAfter == null) {
+      _takeAfter = Timer(ComposerFrame.voiceTakeDelay, () {
+        _takeAfter = null;
+        if (mounted && widget.voiceTakesAction) setState(() => _takes = true);
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -183,6 +210,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
 
   @override
   void dispose() {
+    _takeAfter?.cancel();
     _frame
       ..removeListener(_changed)
       ..dispose();
@@ -230,7 +258,7 @@ class _ComposerFrameState extends State<ComposerFrame> {
     );
     final chip = widget.chip;
     const gap = SizedBox(width: _gap);
-    final takes = widget.voiceTakesAction;
+    final takes = _takes;
     Widget actionSlot(double t) => PositionedDirectional(
       key: const ValueKey('composer-action-slot'),
       end: 0,
