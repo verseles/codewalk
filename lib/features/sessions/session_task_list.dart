@@ -255,7 +255,7 @@ class _SessionTaskListPanelState extends State<SessionTaskListPanel>
     );
     final headerTitle = collapsed
         ? summaryText
-        : l10n.sessionTodoTasksCount(entries.length);
+        : l10n.sessionTodoTasks;
     final progressSemantic = l10n.sessionTodoProgressSemantic(
       progress.completed,
       displayTotal,

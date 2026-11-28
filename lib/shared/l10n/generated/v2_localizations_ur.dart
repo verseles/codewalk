@@ -3136,9 +3136,7 @@ class V2LocalizationsUr extends V2Localizations {
   String get settingsAppearanceTaskList => 'کاموں کی فہرست';
 
   @override
-  String sessionTodoTasksCount(int count) {
-    return 'کام ($count)';
-  }
+  String get sessionTodoTasks => 'کام';
 
   @override
   String sessionTodoTaskProgress(int index, int total, String content) {

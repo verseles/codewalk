@@ -3110,9 +3110,7 @@ class V2LocalizationsAr extends V2Localizations {
   String get settingsAppearanceTaskList => 'قائمة المهام';
 
   @override
-  String sessionTodoTasksCount(int count) {
-    return 'المهام ($count)';
-  }
+  String get sessionTodoTasks => 'المهام';
 
   @override
   String sessionTodoTaskProgress(int index, int total, String content) {

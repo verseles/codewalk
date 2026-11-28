@@ -221,7 +221,9 @@ void main() {
         await tester.tap(find.byKey(const ValueKey('session-todo-header')));
         await tester.pumpAndSettle();
 
-        expect(find.text('Tasks (5)'), findsOneWidget);
+        // The chip carries the counts; the title does not repeat them (#549).
+        expect(find.text('Tasks'), findsOneWidget);
+        expect(find.textContaining('('), findsNothing);
         expect(find.text('1/5'), findsOneWidget);
         expect(find.text('1 cancelled'), findsOneWidget);
         expect(find.text('+1'), findsOneWidget);

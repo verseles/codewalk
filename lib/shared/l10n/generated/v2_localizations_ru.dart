@@ -3162,9 +3162,7 @@ class V2LocalizationsRu extends V2Localizations {
   String get settingsAppearanceTaskList => 'Список задач';
 
   @override
-  String sessionTodoTasksCount(int count) {
-    return 'Задачи ($count)';
-  }
+  String get sessionTodoTasks => 'Задачи';
 
   @override
   String sessionTodoTaskProgress(int index, int total, String content) {

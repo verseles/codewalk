@@ -2343,7 +2343,7 @@
   "updatesNotificationTitle": "تم تحديث CodeWalk",
   "updatesNotificationBody": "انقر لإعادة فتح CodeWalk.",
   "settingsAppearanceTaskList": "قائمة المهام",
-  "sessionTodoTasksCount": "المهام ({count})",
+  "sessionTodoTasks": "المهام",
   "sessionTodoTaskProgress": "المهمة {index}/{total} · {content}",
   "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoDoneCompact": "أُنجز {count}/{total}",

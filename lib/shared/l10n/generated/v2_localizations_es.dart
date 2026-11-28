@@ -3179,9 +3179,7 @@ class V2LocalizationsEs extends V2Localizations {
   String get settingsAppearanceTaskList => 'Lista de tareas';
 
   @override
-  String sessionTodoTasksCount(int count) {
-    return 'Tareas ($count)';
-  }
+  String get sessionTodoTasks => 'Tareas';
 
   @override
   String sessionTodoTaskProgress(int index, int total, String content) {

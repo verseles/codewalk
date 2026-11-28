@@ -5530,11 +5530,11 @@ abstract class V2Localizations {
   /// **'Task list'**
   String get settingsAppearanceTaskList;
 
-  /// Expanded task list header showing total task count
+  /// Expanded task list header; the progress chip beside it carries the counts (#549)
   ///
   /// In en, this message translates to:
-  /// **'Tasks ({count})'**
-  String sessionTodoTasksCount(int count);
+  /// **'Tasks'**
+  String get sessionTodoTasks;
 
   /// Wide collapsed task list summary showing the active task index, total, and content
   ///

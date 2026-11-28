@@ -2344,7 +2344,7 @@
   "updatesNotificationTitle": "CodeWalk अपडेट हो गया",
   "updatesNotificationBody": "CodeWalk को फिर से खोलने के लिए टैप करें।",
   "settingsAppearanceTaskList": "कार्य सूची",
-  "sessionTodoTasksCount": "कार्य ({count})",
+  "sessionTodoTasks": "कार्य",
   "sessionTodoTaskProgress": "कार्य {index}/{total} · {content}",
   "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} पूर्ण",

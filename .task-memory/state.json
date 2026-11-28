@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 28,
+  "artifact_seq": 29,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -448,6 +448,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "#541 r5 + #542 r2 re-reviews"
+    },
+    "A0029": {
+      "active": true,
+      "bytes": 564,
+      "created_at": "2026-11-28T06:06:16Z",
+      "evidence": "/tmp/opencode/g8/rev/u7/r6_*.out, /tmp/opencode/g8/rev/u8/r3_*.out",
+      "id": "A0029",
+      "impact": "#541 converged (Sol-F approve; small fix, no re-review); #542 small fix",
+      "origin": "Sol-F (u7); 6 helpers (u8)",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0029.md",
+      "purpose": "Dissent on #541 rejections; re-review 67771f4e",
+      "rerun_when": "n/a",
+      "sha256": "12fea759697a6440a16254683616cddbe40026e3b77020807af12a8f5cbb5ffd",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "#541 r6 Sol-F dissent + #542 r3"
     }
   },
   "checklist": [
@@ -987,17 +1003,21 @@
     {
       "at": "2026-11-28T05:58:46Z",
       "text": "8.3 review unit u9 (#543-#548, commits 80026a94 b93142cd e0753859 9f2f9099 de7fd928 d35cf9de): metrics rvw_20261128T055800Z_7275622f, key codewalk-g8-composer-chip-20261128T055757Z-d3e5. Handshakes READY: Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg. Grok-47-high-F failed (out of credits, technical, excluded). Claude helpers excluded (quota; owner: use native stand-in)."
+    },
+    {
+      "at": "2026-11-28T06:06:28Z",
+      "text": "#541 converged: Sol-F r6 approve; its remaining suggestion (resume failure message) implemented 1226a32d; re-review skipped (small change reusing SpeechFailure.unavailable, new test). #542 converged: r3 single consensus item (notFound->gone, no task->unavailable) + small layout/autofocus/search fixes add5ef96; re-review skipped (narrow, tested: dialog notFound test, run tests). u7 and u8 helper sessions closed. Metrics u7 r6, u8 r3 recorded."
     }
   ],
-  "generation": 145,
-  "next_action": "Wait full gate (bwrf2woul) and u7 r6/u8 r3 (bzlrawjcu); then dispatch u9 r1 + native stand-in review",
+  "generation": 148,
+  "next_action": "Dispatch u9 r1 (8.3 #543-#548) to 6 helpers + native stand-in reviewer",
   "pending_operation": {
-    "expected_bytes": 20000,
-    "expected_seconds": 900,
-    "id": "op_89be7451b314",
+    "expected_bytes": 40000,
+    "expected_seconds": 1200,
+    "id": "op_15b5d39722ad",
     "kind": "subagent",
-    "prepared_at": "2026-11-28T05:56:10Z",
-    "purpose": "#541 r6 Sol-F dissent + #542 r3 re-review"
+    "prepared_at": "2026-11-28T06:06:49Z",
+    "purpose": "u9 r1: initial review of 8.3 (#543-#548) by 6 helpers + native stand-in"
   },
   "queued_followups": [],
   "request": {
@@ -1020,7 +1040,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T06:05:22Z",
+  "updated_at": "2026-11-28T06:06:49Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

@@ -2344,7 +2344,7 @@
   "updatesNotificationTitle": "CodeWalk mis à jour",
   "updatesNotificationBody": "Appuyez pour rouvrir CodeWalk.",
   "settingsAppearanceTaskList": "Liste des tâches",
-  "sessionTodoTasksCount": "Tâches ({count})",
+  "sessionTodoTasks": "Tâches",
   "sessionTodoTaskProgress": "Tâche {index}/{total} · {content}",
   "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} terminées",

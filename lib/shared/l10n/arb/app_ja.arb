@@ -2344,7 +2344,7 @@
   "updatesNotificationTitle": "CodeWalk を更新しました",
   "updatesNotificationBody": "タップして CodeWalk を再度開きます。",
   "settingsAppearanceTaskList": "タスクリスト",
-  "sessionTodoTasksCount": "タスク ({count})",
+  "sessionTodoTasks": "タスク",
   "sessionTodoTaskProgress": "タスク {index}/{total} · {content}",
   "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} 完了",

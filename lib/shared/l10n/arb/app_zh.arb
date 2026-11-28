@@ -2344,7 +2344,7 @@
   "updatesNotificationTitle": "CodeWalk 已更新",
   "updatesNotificationBody": "点按即可重新打开 CodeWalk。",
   "settingsAppearanceTaskList": "任务列表",
-  "sessionTodoTasksCount": "任务 ({count})",
+  "sessionTodoTasks": "任务",
   "sessionTodoTaskProgress": "任务 {index}/{total} · {content}",
   "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoDoneCompact": "已完成 {count}/{total}",

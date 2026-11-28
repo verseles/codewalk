@@ -3133,9 +3133,7 @@ class V2LocalizationsBn extends V2Localizations {
   String get settingsAppearanceTaskList => 'কাজের তালিকা';
 
   @override
-  String sessionTodoTasksCount(int count) {
-    return 'কাজ ($count)';
-  }
+  String get sessionTodoTasks => 'কাজ';
 
   @override
   String sessionTodoTaskProgress(int index, int total, String content) {

@@ -2,7 +2,7 @@
 
 NEW_KEYS = (
     "settingsAppearanceTaskList",
-    "sessionTodoTasksCount",
+    "sessionTodoTasks",
     "sessionTodoTaskProgress",
     "sessionTodoInProgressCompact",
     "sessionTodoDoneCompact",
@@ -18,11 +18,8 @@ METADATA = {
     "settingsAppearanceTaskList": {
         "description": "Display menu toggle label for showing or hiding the session task list panel",
     },
-    "sessionTodoTasksCount": {
-        "description": "Expanded task list header showing total task count",
-        "placeholders": {
-            "count": {"type": "int"},
-        },
+    "sessionTodoTasks": {
+        "description": "Expanded task list header; the progress chip beside it carries the counts (#549)",
     },
     "sessionTodoTaskProgress": {
         "description": "Wide collapsed task list summary showing the active task index, total, and content",

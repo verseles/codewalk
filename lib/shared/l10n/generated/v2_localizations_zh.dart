@@ -2956,9 +2956,7 @@ class V2LocalizationsZh extends V2Localizations {
   String get settingsAppearanceTaskList => '任务列表';
 
   @override
-  String sessionTodoTasksCount(int count) {
-    return '任务 ($count)';
-  }
+  String get sessionTodoTasks => '任务';
 
   @override
   String sessionTodoTaskProgress(int index, int total, String content) {

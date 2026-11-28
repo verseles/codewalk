@@ -2382,7 +2382,7 @@
   "updatesNotificationTitle": "CodeWalk 업데이트됨",
   "updatesNotificationBody": "탭하여 CodeWalk를 다시 여세요.",
   "settingsAppearanceTaskList": "작업 목록",
-  "sessionTodoTasksCount": "작업 ({count})",
+  "sessionTodoTasks": "작업",
   "sessionTodoTaskProgress": "작업 {index}/{total} · {content}",
   "sessionTodoInProgressCompact": "{current}/{total} {content}",
   "sessionTodoDoneCompact": "{count}/{total} 완료",
