@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 11,
+  "artifact_seq": 12,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -176,6 +176,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "u4 re-review r3 (#538 fix 3fe38ba2)"
+    },
+    "A0012": {
+      "active": true,
+      "bytes": 603,
+      "created_at": "2026-11-28T00:36:02Z",
+      "evidence": "/tmp/opencode/g8/rev/u4/r4_*.out, r4_native-*.note; /tmp/opencode/g8/plan/p539/r1_*",
+      "id": "A0012",
+      "impact": "u4 converges after two small suggestion fixes; push unblocked",
+      "origin": "helpers sol-F, luna, DeepSeek, Ernie, Gemini, Hungerg + native opus/haiku",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0012.md",
+      "purpose": "Re-review round 4 of u4 and first planning round for #539-#542",
+      "rerun_when": "u4 code changes beyond the two suggestions",
+      "sha256": "01f3cba0ed787aca284e22c4f9f9ee199d13404b2cf87547e01cfccbd33ea27a",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u4 r4 review (#536-#538, f7e3da16) + p539 planning r1 partial"
     }
   },
   "checklist": [
@@ -567,11 +583,26 @@
     {
       "at": "2026-11-28T00:11:57Z",
       "text": "u4 r2 judgment: accepted all remaining items (Block-mode split by isCompactable, SessionSubagentCalls inlineStats, over-budget chip gets the turn rate, parse cached per source, closing hashes, parse-comparison inline test covering multi-line link refs and nested HTML, inline button without semantics + container node, key with label/style/tap). Over-budget answers still show no visible speed (dialog has it): accepted tradeoff, >64k-rune answers only. Fix 3fe38ba2; re-review r3."
+    },
+    {
+      "at": "2026-11-28T00:26:25Z",
+      "text": "u4 r3 judgment: accepted over-budget turn rate (ownsTurnStats), CRLF/CR, empty list item, semantics container at the stats; rejected luna small-target suggestion (owner asked for inline text). Fix f7e3da16 (+BEHAVIOR docs). Next: u4 r4 + planning p539 (#539-#542) in one batch: WORK ITEM codewalk-539-542-message-actions-plan, key codewalk-539-542-message-actions-plan-20261128T002625Z-5788, metrics rvw_20261128T002625Z_16b75226; Claude helpers replaced by native Plan subagents (haiku, opus)."
+    },
+    {
+      "at": "2026-11-28T00:27:04Z",
+      "text": "p539 handshakes READY: luna, sol-F, deepseek, ernie, gemini, hungerg. Claude helpers (quota) and Grok (credits) failed; Claude replaced by native Plan subagents per owner."
     }
   ],
-  "generation": 58,
+  "generation": 63,
   "next_action": "#536 committed 5d2bc856; #537 538c0b0a; finish #538 then review #536-#538 together",
-  "pending_operation": null,
+  "pending_operation": {
+    "expected_bytes": 60000,
+    "expected_seconds": 900,
+    "id": "op_632b16f0f1fb",
+    "kind": "subagent",
+    "prepared_at": "2026-11-28T00:36:02Z",
+    "purpose": "p539 planning r1 remainder: luna, Hungerg, native opus planner"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -593,7 +624,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T00:26:11Z",
+  "updated_at": "2026-11-28T00:36:02Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

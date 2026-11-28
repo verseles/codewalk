@@ -430,7 +430,8 @@ void main() {
               ),
               // Reasoning opened the message: the answer still shows it.
               messageHeader: false,
-              turnTokensPerSecond: 42.5,
+              // Differs from the final step's 42.5 so a fallback shows.
+              turnTokensPerSecond: 31.5,
               showElapsed: false,
             ),
           ),
@@ -444,7 +445,8 @@ void main() {
     expect(chip, findsOneWidget);
     await tester.tap(chip);
     await tester.pumpAndSettle();
-    expect(find.text('Speed: 42.5 tok/s'), findsOneWidget);
+    expect(find.text('Speed: 31.5 tok/s'), findsOneWidget);
+    expect(find.text('Speed: 42.5 tok/s'), findsNothing);
   });
 
   testWidgets(
