@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 10,
+  "artifact_seq": 11,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -160,6 +160,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "u4 re-review r2 (#536-#538 fix a612095d)"
+    },
+    "A0011": {
+      "active": true,
+      "bytes": 415,
+      "created_at": "2026-11-28T00:26:11Z",
+      "evidence": "/tmp/opencode/g8/rev/u4/r3_*",
+      "id": "A0011",
+      "impact": "Fix round 3",
+      "origin": "6 helpers + native haiku/opus",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0011.md",
+      "purpose": "Re-review",
+      "rerun_when": "markdown_content.dart or tile change",
+      "sha256": "4b6c4ff4d3a8f6dc38797a4afc2276ffb9dbae5997c979fb40c258d2b2c1527a",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "u4 re-review r3 (#538 fix 3fe38ba2)"
     }
   },
   "checklist": [
@@ -547,9 +563,13 @@
     {
       "at": "2026-11-27T23:56:14Z",
       "text": "u4 r1 judgment: all findings accepted (no frontier override): trailing placement via AST check trailingFitsInline (paragraph/ATX heading/list or quote end; separate line otherwise; source untouched; literal U+E000 -> separate), focusable InkWell button in a WidgetSpan + accessibility node (markdown paragraph semantics exclude WidgetSpans), MarkdownBody keyed by trailing, budget-gated showsInlineTurnStats, elapsed chip suppressed on the message's other rows (stretch header, tool, reasoning) in live and history, Block-mode early calls summarized when !expandTools. Fix commit a612095d. Re-review r2 needed (rendering mechanism rework)."
+    },
+    {
+      "at": "2026-11-28T00:11:57Z",
+      "text": "u4 r2 judgment: accepted all remaining items (Block-mode split by isCompactable, SessionSubagentCalls inlineStats, over-budget chip gets the turn rate, parse cached per source, closing hashes, parse-comparison inline test covering multi-line link refs and nested HTML, inline button without semantics + container node, key with label/style/tap). Over-budget answers still show no visible speed (dialog has it): accepted tradeoff, >64k-rune answers only. Fix 3fe38ba2; re-review r3."
     }
   ],
-  "generation": 55,
+  "generation": 58,
   "next_action": "#536 committed 5d2bc856; #537 538c0b0a; finish #538 then review #536-#538 together",
   "pending_operation": null,
   "queued_followups": [],
@@ -573,7 +593,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T00:05:12Z",
+  "updated_at": "2026-11-28T00:26:11Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

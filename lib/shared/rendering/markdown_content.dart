@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
@@ -307,27 +309,7 @@ class _MarkdownContentState extends State<MarkdownContent> {
       imageBuilder: (uri, title, alt) =>
           Text('![${alt ?? ''}]($uri${title == null ? '' : ' "$title"'})'),
     );
-    if (trailing == null) return markdown;
-    if (inline) {
-      // A paragraph reads as its own text, leaving out what flows in it, so
-      // a screen reader gets the trailing button as a node of its own.
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          markdown,
-          Semantics(
-            container: true,
-            button: widget.onTapTrailing != null,
-            label: widget.trailingSemanticsLabel ?? trailing,
-            onTap: widget.onTapTrailing == null
-                ? null
-                : () => _onTrailing?.call(),
-            child: const SizedBox(height: 1),
-          ),
-        ],
-      );
-    }
+    if (trailing == null || inline) return markdown;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -374,7 +356,7 @@ bool trailingFitsInline(String source, md.ExtensionSet extensionSet) {
   List<md.Node> parse(String text, md.ExtensionSet set) => md.Document(
     extensionSet: set,
     encodeHtml: false,
-  ).parseLines(text.split('\n'));
+  ).parseLines(const LineSplitter().convert(text));
   final plain = parse(trimmed, extensionSet);
   final marked = parse(
     '$trimmed $_trailingMark',
@@ -396,19 +378,20 @@ bool trailingFitsInline(String source, md.ExtensionSet extensionSet) {
       plain.last.textContent.trimRight() != last.textContent.trimRight()) {
     return false;
   }
-  // The marker element, reached through block and inline elements only.
-  bool reaches(md.Element element) {
-    if (_closedTags.contains(element.tag)) return false;
+  // The element holding the marker, reached through block and inline
+  // elements only; it must hold words too, or the stats would sit alone in
+  // an empty list item.
+  md.Element? holder(md.Element element) {
+    if (_closedTags.contains(element.tag)) return null;
     for (final child in element.children ?? const <md.Node>[]) {
-      if (child is md.Element &&
-          (child.tag == _TrailingSyntax.tag || reaches(child))) {
-        return true;
-      }
+      if (child is! md.Element) continue;
+      if (child.tag == _TrailingSyntax.tag) return element;
+      if (holder(child) case final found?) return found;
     }
-    return false;
+    return null;
   }
 
-  return reaches(last);
+  return holder(last)?.textContent.trim().isNotEmpty ?? false;
 }
 
 class _TrailingSyntax extends md.InlineSyntax {
@@ -465,8 +448,8 @@ class _TrailingButton extends StatelessWidget {
   final String? semanticsLabel;
   final VoidCallback? onTap;
 
-  /// Off inside a paragraph, whose semantics would merge it into the whole
-  /// answer: a node of its own below the body speaks for it there.
+  /// Off inside a paragraph, where it becomes a container node of its own,
+  /// so the answer is not read as a button and touch exploration finds it.
   final bool semantics;
 
   @override
@@ -475,7 +458,13 @@ class _TrailingButton extends StatelessWidget {
     if (onTap == null) return SelectionContainer.disabled(child: label);
     if (!semantics) {
       return SelectionContainer.disabled(
-        child: ExcludeSemantics(
+        child: Semantics(
+          container: true,
+          explicitChildNodes: true,
+          button: true,
+          label: semanticsLabel ?? text,
+          excludeSemantics: true,
+          onTap: onTap,
           child: InkWell(
             key: const ValueKey('message-trailing-stats'),
             onTap: onTap,

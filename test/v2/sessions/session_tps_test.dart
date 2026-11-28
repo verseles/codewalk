@@ -407,6 +407,46 @@ void main() {
     expect(_stats('60tps 3s'), findsOneWidget);
   });
 
+  testWidgets('an answer over the rich budget keeps its speed in a chip', (
+    tester,
+  ) async {
+    final ctx = _step(
+      'msg_big',
+      createdMs: 1000,
+      firstTokenMs: 1500,
+      streamedMs: 3500,
+      completedMs: 5000,
+      output: 85,
+    );
+    await tester.pumpWidget(
+      _wrap(
+        Scaffold(
+          body: SingleChildScrollView(
+            child: SessionTimelineTile(
+              item: AssistantText(
+                meta: _meta('a_big', message: ctx),
+                text: 'x' * 64001,
+                complete: true,
+              ),
+              // Reasoning opened the message: the answer still shows it.
+              messageHeader: false,
+              turnTokensPerSecond: 42.5,
+              showElapsed: false,
+            ),
+          ),
+        ),
+        showTokensPerSecond: true,
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(_statsCount(), 0);
+    final chip = find.byKey(const ValueKey('message-elapsed-msg_big'));
+    expect(chip, findsOneWidget);
+    await tester.tap(chip);
+    await tester.pumpAndSettle();
+    expect(find.text('Speed: 42.5 tok/s'), findsOneWidget);
+  });
+
   testWidgets(
     'ends the answer the same in pt and RTL ar, with no overflow on 320px at 200% text scale',
     (tester) async {

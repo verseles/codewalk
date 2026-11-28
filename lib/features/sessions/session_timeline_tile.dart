@@ -22,25 +22,31 @@ import 'session_switch_note.dart';
 import 'session_timeline_projection.dart';
 import 'session_tool_result.dart';
 
-/// Whether [item] ends with its turn's speed and time (#538): a final
-/// answer with a valid rate, in a message, rendered rich. An answer over the
-/// rich budget keeps its elapsed chip in the header instead.
-bool showsInlineTurnStats(TimelineItem item, double? tokensPerSecond) =>
+/// Whether [item] is a final answer that shows its turn's speed and time
+/// itself (#538): an answer with a valid rate, in a message.
+bool ownsTurnStats(TimelineItem item, double? tokensPerSecond) =>
     item is AssistantText &&
     tokensPerSecond != null &&
     tokensPerSecond.isFinite &&
     tokensPerSecond > 0 &&
-    item.meta.message != null &&
-    MessageRenderBudget.decide(item.text).kind == RenderDecisionKind.rich;
+    item.meta.message != null;
 
-/// The messages whose final answer ends with its speed and time, so no
-/// other row of them repeats the elapsed time (#538).
+/// Whether [item] ends with its turn's speed and time (#538): a final
+/// answer that shows them, rendered rich. An answer over the rich budget
+/// shows them in an elapsed chip above it instead.
+bool showsInlineTurnStats(TimelineItem item, double? tokensPerSecond) =>
+    ownsTurnStats(item, tokensPerSecond) &&
+    MessageRenderBudget.decide((item as AssistantText).text).kind ==
+        RenderDecisionKind.rich;
+
+/// The messages whose final answer shows its speed and time, so no other
+/// row of them repeats the elapsed time (#538).
 Set<MessageRef> inlineTurnStatsMessages(
   Iterable<TimelineItem> items,
   Map<ItemId, double> tokensPerSecond,
 ) => {
   for (final item in items)
-    if (showsInlineTurnStats(item, tokensPerSecond[item.id]))
+    if (ownsTurnStats(item, tokensPerSecond[item.id]))
       item.meta.message!.message,
 };
 
@@ -292,9 +298,14 @@ class SessionTimelineTile extends StatelessWidget {
             TimeOfDay.fromDateTime(created.toLocal()),
             alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
           );
-    final showTps =
-        showsInlineTurnStats(item, turnTokensPerSecond) &&
-        ChatAppearance.showTokensPerSecondOf(context);
+    final speed = ChatAppearance.showTokensPerSecondOf(context);
+    final showTps = speed && showsInlineTurnStats(item, turnTokensPerSecond);
+    // An answer over the rich budget shows its speed and time in a chip
+    // above it, even when another row opened its message.
+    final statsChip =
+        speed && !showTps && ownsTurnStats(item, turnTokensPerSecond)
+        ? item.meta.message
+        : null;
     // A message whose final answer ends with its speed and time shows no
     // elapsed chip on its other rows either (#538).
     final elapsed = message != null && showElapsed;
@@ -304,7 +315,8 @@ class SessionTimelineTile extends StatelessWidget {
     // With the speed on, the final answer's speed and time follow its last
     // word instead of heading it (#538).
     final headerShown = switch (item) {
-      AssistantText() => clock != null || (elapsed && !showTps),
+      AssistantText() =>
+        clock != null || (elapsed && !showTps) || statsChip != null,
       UserInput() => clock != null,
       _ => true,
     };
@@ -371,13 +383,13 @@ class SessionTimelineTile extends StatelessWidget {
                               ],
                             ),
                           ),
-                          if (elapsed)
+                          if (statsChip != null)
                             MessageElapsedChip(
-                              message: message,
-                              // An answer over the rich budget keeps the
-                              // speed in its details.
+                              message: statsChip,
                               tokensPerSecond: turnTokensPerSecond,
-                            ),
+                            )
+                          else if (elapsed)
+                            MessageElapsedChip(message: message),
                         ],
                       ),
               )

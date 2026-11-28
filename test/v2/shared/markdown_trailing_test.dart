@@ -35,6 +35,10 @@ void main() {
         'See [the doc][1].\n\n[1]: https://example.com\n  "The title"',
         '> <div>quoted html</div>',
         '- <!-- a comment -->',
+        'Words first\n\n- ',
+        'Words first\n\n-',
+        // Line ends as the renderer reads them.
+        'See [the doc][1].\r\n\r\n[1]: https://example.com',
         'See [the doc][1].\n\n[1]: https://example.com',
         '<details>open</details>',
         'An answer that uses  itself',
