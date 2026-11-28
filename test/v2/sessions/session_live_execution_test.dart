@@ -316,11 +316,10 @@ void main() {
     expect(chip(tester), l10n.liveRetryingIn('0:24'));
   });
 
-  testWidgets('an idle parent shows how many of its sub-agents run', (
+  testWidgets('an idle parent never counts its sub-agents in the composer', (
     tester,
   ) async {
     final handle = await mount(tester);
-    final l10n = await V2Localizations.delegate.load(const Locale('en'));
     WorkItem child(String id, WorkStatus status) {
       final session = SessionRef(ref.host, ref.harness, id);
       return WorkItem(
@@ -352,8 +351,9 @@ void main() {
     );
     await tester.pump();
     await tester.pump();
-    // Running sub-agents outrank the parent's idle state in the one bar.
-    expect(chip(tester), l10n.liveChildrenRunning(2));
+    // Their chip counts them (#543): the composer says nothing, not even
+    // that the parent is idle.
+    expect(chip(tester), isNull);
     await show(
       tester,
       handle,

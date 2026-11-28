@@ -27,7 +27,6 @@ enum ComposerStatusKind {
   retrying,
   progress,
   reasoning,
-  subagents,
   working,
   failed,
   idle,
@@ -167,18 +166,12 @@ ComposerActivity? liveStatus(SessionLiveController live, V2Localizations l10n) {
   if (activity != null && activity.kind != ComposerStatusKind.working) {
     return activity;
   }
-  // A session stays idle while its sub-agents run; they are counted here.
-  final children =
-      state?.work
-          .where((w) => w.child != null && w.status.known == WorkStatus.running)
-          .length ??
-      0;
-  if (children > 0) {
-    return status(
-      ComposerStatusKind.subagents,
-      l10n.liveChildrenRunning(children),
-    );
-  }
+  // A session stays idle while its sub-agents run: their chip counts them,
+  // and the composer says nothing of them, not even that it is idle (#543).
+  final children = state?.work.any(
+    (w) => w.child != null && w.status.known == WorkStatus.running,
+  );
+  if (children ?? false) return activity;
   if (activity != null) return activity;
   if (kind != ExecutionKind.idle) return null;
   // The last turn's result, unless the timeline already shows its
@@ -452,7 +445,6 @@ class _SessionComposerStatusState extends State<SessionComposerStatus> {
       ComposerStatusKind.notice => Symbols.info,
       ComposerStatusKind.progress => Symbols.build,
       ComposerStatusKind.retrying => Symbols.sync_rounded,
-      ComposerStatusKind.subagents => Symbols.account_tree,
       ComposerStatusKind.failed => Symbols.error,
       ComposerStatusKind.idle => Symbols.edit_note,
       ComposerStatusKind.reasoning ||

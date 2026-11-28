@@ -846,4 +846,50 @@ void main() {
       expect(find.text(l10n.liveSubagentsUnknown), findsWidgets);
     },
   );
+  testWidgets('a shell shows in the chip only after five seconds (#544)', (
+    tester,
+  ) async {
+    var now = DateTime.utc(2026, 11, 19, 1, 0, 10);
+    final port = _FakeShellPort();
+    final rig = await _mount(tester, shellPort: port, clock: () => now);
+    void emit(List<ShellWork> shells) => rig.handle.emit(
+      SessionLiveView(
+        session: rig.parent,
+        phase: SessionLivePhase.live,
+        state: liveState(rig.parent, shells: shells),
+      ),
+    );
+    // Started two seconds ago: not counted, no chip.
+    emit([
+      _shellWork(
+        rig.parent,
+        'sh_quick',
+        startedAt: DateTime.utc(2026, 11, 19, 1, 0, 8),
+      ),
+    ]);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('subagent-capsule')), findsNothing);
+    // Still running at five seconds: it shows, with no new event.
+    now = DateTime.utc(2026, 11, 19, 1, 0, 13);
+    await tester.pump(const Duration(seconds: 3));
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('subagent-capsule')), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('subagent-count'))).data,
+      '1',
+    );
+    // A command done within the five seconds never shows.
+    emit([
+      _shellWork(
+        rig.parent,
+        'sh_done',
+        status: ShellStatus.exited,
+        exitCode: 0,
+        startedAt: DateTime.utc(2026, 11, 19, 1, 0, 11),
+        completedAt: DateTime.utc(2026, 11, 19, 1, 0, 12),
+      ),
+    ]);
+    await _settle(tester);
+    expect(find.byKey(const ValueKey('subagent-capsule')), findsNothing);
+  });
 }

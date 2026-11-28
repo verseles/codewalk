@@ -939,11 +939,22 @@
     {
       "at": "2026-11-28T05:03:42Z",
       "text": "u8 #542 review unit: boundary 6e0718a4, key codewalk-542-forward-20261128T050250Z-5700, metrics rvw_20261128T050250Z_36cbf3c0, payload /tmp/opencode/g8/rev/u8/p1.txt; handshakes done (see run log); dispatch after u7 r3 capture, plus native stand-in for Claude helpers."
+    },
+    {
+      "at": "2026-11-28T05:10:43Z",
+      "text": "u7 #541 r3 judged (A0026): accepted IPv6 scope via Uri.origin; keyless Edge skips key storage (+ error tolerant); key save/clear bound to intended scope, abort if changed, write outdates reads; port stop({id}) spares a newer start, superseded stop leaves new file/state, failed play releases file; shared folder future, recreate if removed; foreign pass expires on pause; start not taken -> unavailable (3a5ee0aa). Native engine ownership: latent (system provider not offered), covered by id-scoped stop. Round 4 needed (port API change)."
     }
   ],
-  "generation": 132,
+  "generation": 134,
   "next_action": "On gate: commit #542; on r2: capture, judge, fix; then #542 review unit u8 (8 helpers + native stand-in).",
-  "pending_operation": null,
+  "pending_operation": {
+    "expected_bytes": 80000,
+    "expected_seconds": 1200,
+    "id": "op_1c2984b680f5",
+    "kind": "subagent",
+    "prepared_at": "2026-11-28T05:10:44Z",
+    "purpose": "Batch: u7 #541 round 4 (3a5ee0aa, 6 helpers) + u8 #542 review round 1 (6e0718a4, 6 helpers) + native stand-in for #542"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -965,7 +976,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T05:07:04Z",
+  "updated_at": "2026-11-28T05:10:44Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",

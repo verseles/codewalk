@@ -161,6 +161,33 @@ ShellStatus? _shellReportStatus(ShellReport report) {
 /// - Any shell ID in [confirmedRemovedShellIds] (previously observed live and
 ///   subsequently stopped/deleted) is immediately suppressed from Active even
 ///   if its timeline `ToolCall` is momentarily still streaming.
+/// How long a shell runs before the chip counts and shows it (#544), so
+/// quick commands never make the count jump.
+const shellShownAfter = Duration(seconds: 5);
+
+/// Whether [entry] ran long enough by [now] for the chip: a shell of
+/// unknown start always does.
+bool shellShown(CapsuleShellEntry entry, DateTime now) {
+  final started = entry.startedAt;
+  if (started == null) return true;
+  final end = entry.isRunning ? now : entry.completedAt;
+  if (end == null) return true;
+  return end.difference(started) >= shellShownAfter;
+}
+
+/// When the next running shell of [entries] reaches [shellShownAfter].
+DateTime? nextShellShown(List<CapsuleShellEntry> entries, DateTime now) {
+  DateTime? next;
+  for (final entry in entries) {
+    final started = entry.startedAt;
+    if (!entry.isRunning || started == null) continue;
+    final at = started.add(shellShownAfter);
+    if (!at.isAfter(now)) continue;
+    if (next == null || at.isBefore(next)) next = at;
+  }
+  return next;
+}
+
 List<CapsuleShellEntry> sessionShellEntries(
   SessionState? state, {
   required bool canObserveShells,
@@ -424,8 +451,24 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
     return _observedShellIds.difference(liveIds);
   }
 
+  // Rebuilds the chip when a running shell becomes old enough to show.
+  Timer? _shown;
+  DateTime? _shownAt;
+
+  void _armShown(DateTime? at, DateTime now) {
+    if (at == null || (_shownAt != null && !at.isBefore(_shownAt!))) return;
+    _shown?.cancel();
+    _shownAt = at;
+    _shown = Timer(at.difference(now), () {
+      _shown = null;
+      _shownAt = null;
+      if (mounted) setState(() {});
+    });
+  }
+
   @override
   void dispose() {
+    _shown?.cancel();
     _focus.dispose();
     super.dispose();
   }
@@ -568,11 +611,19 @@ class _SessionSubagentCapsuleState extends State<SessionSubagentCapsule> {
     builder: (context, _) {
       final state = widget.live.state;
       final children = subagentWork(state);
-      final shells = sessionShellEntries(
+      final now = widget.live.clock().toUtc();
+      final every = sessionShellEntries(
         state,
         canObserveShells: _canObserveShells,
         confirmedRemovedShellIds: _confirmedRemovedFor(state),
       );
+      // A quick command never shows; one that runs on shows once it is
+      // five seconds old.
+      final shells = [
+        for (final shell in every)
+          if (shellShown(shell, now)) shell,
+      ];
+      _armShown(nextShellShown(every, now), now);
       if (state == null || (children.isEmpty && shells.isEmpty)) {
         return const SizedBox.shrink();
       }
@@ -965,11 +1016,15 @@ class _SubagentPopinState extends State<_SubagentPopin> {
   Widget build(BuildContext context) {
     final state = widget.live.state;
     final initialSubagents = subagentWork(state);
-    final initialShells = sessionShellEntries(
-      state,
-      canObserveShells: _canObserveShells,
-      confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
-    );
+    final now = widget.live.clock().toUtc();
+    final initialShells = [
+      for (final shell in sessionShellEntries(
+        state,
+        canObserveShells: _canObserveShells,
+        confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
+      ))
+        if (shellShown(shell, now)) shell,
+    ];
     final isLive =
         widget.live.phase == SessionLivePhase.live &&
         widget.live.view?.stale != true &&
@@ -1006,11 +1061,15 @@ class _SubagentPopinState extends State<_SubagentPopin> {
                 widget.live.session == widget.parent;
             final state = widget.live.state;
             final rows = subagentWork(state);
-            final shells = sessionShellEntries(
-              state,
-              canObserveShells: _canObserveShells,
-              confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
-            );
+            final now = widget.live.clock().toUtc();
+            final shells = [
+              for (final shell in sessionShellEntries(
+                state,
+                canObserveShells: _canObserveShells,
+                confirmedRemovedShellIds: widget.confirmedRemovedFor(state),
+              ))
+                if (shellShown(shell, now)) shell,
+            ];
             final hasShells = shells.isNotEmpty;
             final activeSubagents = <(WorkItem, WorkStatus)>[];
             final completedSubagents = <(WorkItem, WorkStatus)>[];
