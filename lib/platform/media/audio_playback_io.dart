@@ -123,6 +123,8 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
         }
       }
       await player.stop();
+      // A later start or stop owns the player, and maybe a file, by now.
+      if (op != _op) return;
       await _release();
       if (op != _op) return;
       _emit(
@@ -194,7 +196,13 @@ final class _NativeAudioPlayback implements AudioPlaybackPort {
     final file = File(
       '${folder.path}${Platform.pathSeparator}play-${_files++}.$extension',
     );
-    await file.writeAsBytes(bytes, flush: true);
+    try {
+      await file.writeAsBytes(bytes, flush: true);
+    } on Object {
+      // A file written in part goes too.
+      await _delete(file);
+      rethrow;
+    }
     return (DeviceFileSource(file.path, mimeType: mimeType), file);
   }
 
