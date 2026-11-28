@@ -276,28 +276,125 @@ void main() {
     final card = tester.getRect(find.byType(Card));
     await tester.tapAt(Offset(card.right - 6, card.bottom - 3));
     await tester.pump(const Duration(milliseconds: 60));
-    await tester.tap(_action(MessageActionId.copy));
+    await tester.tap(_action(MessageActionId.copy), warnIfMissed: false);
     await tester.pump();
     expect(copied, isEmpty);
-    expect(_bar, findsOneWidget);
   });
 
-  testWidgets('Escape closes a bar a tap opened, wherever the focus is', (
-    tester,
-  ) async {
+  testWidgets('Escape on the message closes its bar; elsewhere it keeps '
+      'its own use', (tester) async {
     final focus = FocusNode();
     addTearDown(focus.dispose);
+    var elsewhere = 0;
     await _pump(tester, [
       SessionTimelineTile(item: _agent('the answer')),
-      Focus(focusNode: focus, child: const SizedBox(height: 10)),
+      CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.escape): () => elsewhere++,
+        },
+        child: Focus(focusNode: focus, child: const SizedBox(height: 10)),
+      ),
     ]);
+    await tester.tap(find.text('the answer'));
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(_bar, findsNothing);
     await tester.tap(find.text('the answer'));
     await tester.pumpAndSettle();
     focus.requestFocus();
     await tester.pump();
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
     await tester.pumpAndSettle();
+    expect(elsewhere, 1);
+  });
+
+  testWidgets('a fresh bar lets a double tap through, then takes presses', (
+    tester,
+  ) async {
+    await _pump(tester, [SessionTimelineTile(item: _agent('the answer'))]);
+    await tester.tap(find.text('the answer'));
+    await tester.pump();
+    bool ignoring() => tester
+        .widget<IgnorePointer>(
+          find.ancestor(of: _bar, matching: find.byType(IgnorePointer)).first,
+        )
+        .ignoring;
+    expect(ignoring(), isTrue);
+    await tester.pump(kDoubleTapTimeout);
+    expect(ignoring(), isFalse);
+  });
+
+  testWidgets('the bar goes when the list moves its edge out of view', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: V2Localizations.localizationsDelegates,
+        supportedLocales: V2Localizations.supportedLocales,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            controller: controller,
+            child: Column(
+              children: [
+                const SizedBox(height: 200),
+                SessionTimelineTile(item: _agent('the answer')),
+                const SizedBox(height: 1200),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('the answer'));
+    await tester.pumpAndSettle();
+    expect(_bar, findsOneWidget);
+    // As the list follows a growing answer: no scroll gesture.
+    controller.jumpTo(150);
+    await tester.pump();
+    expect(_bar, findsOneWidget);
+    controller.jumpTo(400);
+    await tester.pump();
     expect(_bar, findsNothing);
+  });
+
+  testWidgets('a menu closed by a tap outside leaves the bar ready for the '
+      'mouse', (tester) async {
+    await _pump(tester, [
+      SessionTimelineTile(
+        item: _agent('the answer'),
+        actions: [
+          MessageAction(
+            id: MessageActionId.fork,
+            label: 'Fork from here',
+            icon: Icons.call_split,
+            overflow: true,
+            onSelected: (_) {},
+          ),
+        ],
+      ),
+    ]);
+    await tester.tap(find.text('the answer'));
+    await tester.pumpAndSettle();
+    await tester.pump(kDoubleTapTimeout);
+    await tester.tap(find.byKey(const ValueKey('message-action-more')));
+    await tester.pumpAndSettle();
+    // A tap outside closes the menu, a second one the bar.
+    await tester.tapAt(const Offset(700, 500));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(700, 500));
+    await tester.pumpAndSettle();
+    expect(_bar, findsNothing);
+    final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    addTearDown(mouse.removePointer);
+    await mouse.addPointer(location: const Offset(700, 500));
+    await mouse.moveTo(tester.getCenter(find.text('the answer')));
+    await tester.pump(messageBarHoverDelay * 2);
+    await tester.pumpAndSettle();
+    expect(_bar, findsOneWidget);
   });
 
   testWidgets('a drag that comes back opens nothing', (tester) async {
@@ -422,6 +519,7 @@ void main() {
     await _pump(tester, [SessionTimelineTile(item: _agent('the answer'))]);
     await tester.tap(find.text('the answer'));
     await tester.pumpAndSettle();
+    await tester.pump(kDoubleTapTimeout);
     await tester.longPress(_action(MessageActionId.copy));
     await tester.pump();
     expect(

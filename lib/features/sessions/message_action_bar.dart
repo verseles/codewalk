@@ -110,6 +110,25 @@ class _CloseBarIntent extends Intent {
   const _CloseBarIntent();
 }
 
+/// Escape on the message or its bar closes the bar, the focus going back
+/// to the message from the bar; with no bar, or its menu open, Escape is
+/// someone else's.
+class _CloseBarAction extends Action<_CloseBarIntent> {
+  _CloseBarAction(this._host);
+
+  final _MessageActionHostState _host;
+
+  @override
+  bool isEnabled(_CloseBarIntent intent) =>
+      _host._portal.isShowing && !_host._menuOpen;
+
+  @override
+  Object? invoke(_CloseBarIntent intent) {
+    _host._hide(refocus: _host._barHasFocus);
+    return null;
+  }
+}
+
 /// A user's or the agent's message, with always selectable text and its
 /// floating action bar (#539).
 ///
@@ -169,7 +188,10 @@ class _MessageActionHostState extends State<MessageActionHost> {
   // Bar presses wait out a double tap's second tap after a tap opened it,
   // so that tap cannot land on a button by accident.
   Timer? _settling;
-  bool _keysHandled = false;
+
+  // The mouse is over the bar, which then never hides under it.
+  bool _overBar = false;
+  ScrollPosition? _position;
 
   // The three-dots menu is open: Escape is its own.
   bool _menuOpen = false;
@@ -182,19 +204,24 @@ class _MessageActionHostState extends State<MessageActionHost> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final scrolling = Scrollable.maybeOf(context)?.position.isScrollingNotifier;
+    final position = Scrollable.maybeOf(context)?.position;
+    final scrolling = position?.isScrollingNotifier;
     if (!identical(scrolling, _scrolling)) {
       _scrolling?.removeListener(_scrollChanged);
       _scrolling = scrolling?..addListener(_scrollChanged);
+    }
+    if (!identical(position, _position)) {
+      _position?.removeListener(_moved);
+      _position = position?..addListener(_moved);
     }
   }
 
   @override
   void dispose() {
     _scrolling?.removeListener(_scrollChanged);
+    _position?.removeListener(_moved);
     _hoverTimer?.cancel();
     _settling?.cancel();
-    _keys(false);
     if (identical(_shown, this)) _shown = null;
     _firstButton.dispose();
     _barFocus.dispose();
@@ -209,28 +236,27 @@ class _MessageActionHostState extends State<MessageActionHost> {
     _hide();
   }
 
-  /// Escape closes the bar wherever the focus is, before any other use of
-  /// the key, such as the workspace's own.
-  bool _onKey(KeyEvent event) {
-    if (event is! KeyDownEvent ||
-        event.logicalKey != LogicalKeyboardKey.escape ||
-        !_portal.isShowing ||
-        _menuOpen) {
-      return false;
-    }
-    final inBar = _barHasFocus;
-    _hide(refocus: inBar);
-    return true;
+  /// The list moved without a scroll gesture, as when it follows a
+  /// growing answer: a bar whose edge left the visible list goes.
+  void _moved() {
+    if (!_portal.isShowing) return;
+    final box = _contentBox;
+    final viewport = _viewport;
+    if (box == null || viewport == null) return;
+    final top = box.localToGlobal(Offset.zero).dy;
+    final y = switch (_edge) {
+      _Edge.top => top,
+      _Edge.bottom => top + box.size.height,
+      _Edge.pinned => top + _pinnedDy,
+    };
+    if (y < viewport.top || y > viewport.bottom) _hide();
   }
 
-  void _keys(bool on) {
-    if (on == _keysHandled) return;
-    _keysHandled = on;
-    if (on) {
-      HardwareKeyboard.instance.addHandler(_onKey);
-    } else {
-      HardwareKeyboard.instance.removeHandler(_onKey);
-    }
+  Rect? get _viewport {
+    final box = Scrollable.maybeOf(context)?.context.findRenderObject();
+    return box is RenderBox && box.hasSize && box.attached
+        ? box.localToGlobal(Offset.zero) & box.size
+        : null;
   }
 
   bool get _barHasFocus => _barFocus.hasFocus;
@@ -270,10 +296,11 @@ class _MessageActionHostState extends State<MessageActionHost> {
     _place(at);
     setState(() => _pinned = _pinned || pin);
     _portal.show();
-    _keys(true);
     _settling?.cancel();
     _settling = tapped
-        ? Timer(kDoubleTapTimeout, () => _settling = null)
+        ? Timer(kDoubleTapTimeout, () {
+            if (mounted) setState(() => _settling = null);
+          })
         : null;
     if (focus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -284,7 +311,6 @@ class _MessageActionHostState extends State<MessageActionHost> {
 
   void _hide({bool refocus = false}) {
     _hoverTimer?.cancel();
-    _keys(false);
     if (identical(_shown, this)) _shown = null;
     if (!_portal.isShowing) return;
     _portal.hide();
@@ -299,10 +325,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
     final box = _contentBox;
     if (box == null) return;
     final rect = box.localToGlobal(Offset.zero) & box.size;
-    final viewportBox = Scrollable.maybeOf(context)?.context.findRenderObject();
-    final viewport = viewportBox is RenderBox && viewportBox.hasSize
-        ? viewportBox.localToGlobal(Offset.zero) & viewportBox.size
-        : Offset.zero & MediaQuery.sizeOf(context);
+    final viewport = _viewport ?? Offset.zero & MediaQuery.sizeOf(context);
     const half = _barHeight / 2 + _barMargin;
     bool fits(double y) =>
         y - half >= viewport.top && y + half <= viewport.bottom;
@@ -438,6 +461,12 @@ class _MessageActionHostState extends State<MessageActionHost> {
     );
     _menuOpen = false;
     if (!mounted) return;
+    // A tap outside the menu also closed the bar: it stays closed, ready
+    // for the mouse again.
+    if (!_portal.isShowing) {
+      setState(() => _pinned = false);
+      return;
+    }
     // The action as it is now: the message may have changed meanwhile, as
     // when a newer turn moved a fork's cut.
     final action = _all.where((a) => a.id == chosen).firstOrNull;
@@ -448,7 +477,7 @@ class _MessageActionHostState extends State<MessageActionHost> {
     // A dismissed menu leaves the bar as it was: a bar the mouse showed
     // still hides once the mouse is gone.
     setState(() => _pinned = wasPinned);
-    if (!wasPinned && _portal.isShowing) {
+    if (!wasPinned && !_overBar) {
       _hoverTimer = Timer(messageBarHideDelay, () {
         if (mounted && !_pinned) _hide();
       });
@@ -493,18 +522,20 @@ class _MessageActionHostState extends State<MessageActionHost> {
         child: TapRegion(
           groupId: this,
           child: MouseRegion(
-            onEnter: (_) => _hoverTimer?.cancel(),
-            onExit: _hoverExit,
+            onEnter: (_) {
+              _overBar = true;
+              _hoverTimer?.cancel();
+            },
+            onExit: (event) {
+              _overBar = false;
+              _hoverExit(event);
+            },
             child: Shortcuts(
               shortcuts: const {
                 SingleActivator(LogicalKeyboardKey.escape): _CloseBarIntent(),
               },
               child: Actions(
-                actions: {
-                  _CloseBarIntent: CallbackAction<_CloseBarIntent>(
-                    onInvoke: (_) => _hide(refocus: true),
-                  ),
-                },
+                actions: {_CloseBarIntent: _CloseBarAction(this)},
                 child: FocusTraversalGroup(
                   child: Focus(
                     focusNode: _barFocus,
@@ -512,31 +543,38 @@ class _MessageActionHostState extends State<MessageActionHost> {
                       container: true,
                       explicitChildNodes: true,
                       label: l10n.messageActions,
-                      child: _ActionPill(
-                        end: widget.end,
-                        maxWidth: (viewportWidth - 16).clamp(
-                          _barHeight,
-                          double.infinity,
+                      // While a double tap may still land, its second tap
+                      // goes through to the words, which it selects.
+                      child: IgnorePointer(
+                        ignoring: _settling != null,
+                        child: _ActionPill(
+                          end: widget.end,
+                          maxWidth: (viewportWidth - 16).clamp(
+                            _barHeight,
+                            double.infinity,
+                          ),
+                          buttons: [
+                            for (final action in primary)
+                              _PillButton(
+                                key: ValueKey(
+                                  'message-action-${action.id.name}',
+                                ),
+                                focusNode: focusFor(),
+                                label: action.label,
+                                icon: action.icon,
+                                onPressed: (_) => _run(action),
+                              ),
+                            if (overflow.isNotEmpty)
+                              _PillButton(
+                                key: const ValueKey('message-action-more'),
+                                focusNode: focusFor(),
+                                label: l10n.messageMoreActions,
+                                icon: Symbols.more_vert,
+                                onPressed: (button) =>
+                                    unawaited(_more(button, overflow)),
+                              ),
+                          ],
                         ),
-                        buttons: [
-                          for (final action in primary)
-                            _PillButton(
-                              key: ValueKey('message-action-${action.id.name}'),
-                              focusNode: focusFor(),
-                              label: action.label,
-                              icon: action.icon,
-                              onPressed: (_) => _run(action),
-                            ),
-                          if (overflow.isNotEmpty)
-                            _PillButton(
-                              key: const ValueKey('message-action-more'),
-                              focusNode: focusFor(),
-                              label: l10n.messageMoreActions,
-                              icon: Symbols.more_vert,
-                              onPressed: (button) =>
-                                  unawaited(_more(button, overflow)),
-                            ),
-                        ],
                       ),
                     ),
                   ),
@@ -603,11 +641,14 @@ class _MessageActionHostState extends State<MessageActionHost> {
           SingleActivator(LogicalKeyboardKey.contextMenu): _OpenBarIntent(),
           SingleActivator(LogicalKeyboardKey.f10, shift: true):
               _OpenBarIntent(),
+          // Only while the bar shows; otherwise Escape goes on as before.
+          SingleActivator(LogicalKeyboardKey.escape): _CloseBarIntent(),
         },
         actions: {
           _OpenBarIntent: CallbackAction<_OpenBarIntent>(
             onInvoke: (_) => _show(pin: true, focus: true),
           ),
+          _CloseBarIntent: _CloseBarAction(this),
         },
         child: TapRegion(
           groupId: this,

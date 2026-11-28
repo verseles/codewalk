@@ -431,6 +431,8 @@ class _SessionLivePageState extends State<SessionLivePage>
     final messenger = ScaffoldMessenger.maybeOf(context);
     final l10n = context.v2L10n;
     final router = GoRouter.maybeOf(context);
+    // Where the user was when asking; elsewhere by the end, they stay.
+    final from = router?.routerDelegate.currentConfiguration.uri;
     final drafts = context.read<SessionDraftStore?>();
     final result = await catalog.forkFrom(row, before: before);
     final ref = result.session;
@@ -452,7 +454,11 @@ class _SessionLivePageState extends State<SessionLivePage>
     }
     // The workspace shows a session through its route, as a list row does;
     // the route opens its tab.
-    router?.go(sessionTabLocation(ref));
+    if (mounted &&
+        router != null &&
+        router.routerDelegate.currentConfiguration.uri == from) {
+      router.go(sessionTabLocation(ref));
+    }
   }
 
   @override

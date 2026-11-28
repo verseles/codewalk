@@ -717,7 +717,7 @@
       "text": "u5 r2 judged. Accept: Escape scoped to the host (enabled Action only while shown; focus in message or bar), drop the global HardwareKeyboard handler; outside-dismissed menu keeps the bar unpinned when hidden; no hide timer while the pointer is on the bar; bar ignores pointers while settling so a double tap's second tap selects the word; fork navigates only if the route is unchanged; hide when a scroll (incl. jumpTo) moves the anchor edge out of the viewport; BEHAVIOR placement/Escape wording; tests for fork guards. Reject: hover bar covering characters (owner's half-in/out; selection can start elsewhere and hides the bar)."
     }
   ],
-  "generation": 88,
+  "generation": 89,
   "next_action": "Handshake u5 helpers, then dispatch round 1 + native stand-ins",
   "pending_operation": null,
   "queued_followups": [],
@@ -741,7 +741,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T02:19:59Z",
+  "updated_at": "2026-11-28T02:30:32Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -797,6 +797,13 @@
       "check": "#540 gate (analyze + full suite + l10n check)",
       "criterion": null,
       "evidence": "analyze 4/4 budget; full suite +2637 ~4 -0; l10n --check ok; pubspec.lock adds only share_plus 13.2.1 + interface 7.2.0. Log /tmp/opencode/g8/gate540.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T02:30:32Z",
+      "check": "#539 fix round 2 gate",
+      "criterion": null,
+      "evidence": "analyze 4/4 budget; full suite +2641 ~4 -0. Log /tmp/opencode/g8/gate539c.log",
       "outcome": "pass"
     }
   ]
