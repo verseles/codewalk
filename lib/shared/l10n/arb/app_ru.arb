@@ -566,9 +566,17 @@
   "@messageCopyAll": {
     "description": "V2 message bubble options (#492)"
   },
-  "messageSelectText": "Выделить текст",
-  "@messageSelectText": {
-    "description": "V2 message bubble options (#492)"
+  "messageActions": "Действия с сообщением",
+  "@messageActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageMoreActions": "Другие действия",
+  "@messageMoreActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageForkUncertain": "Ответвление могло быть создано. Проверьте список бесед.",
+  "@messageForkUncertain": {
+    "description": "V2 message action bar (#539)"
   },
   "composerSendNow": "Отправить сейчас",
   "@composerSendNow": {

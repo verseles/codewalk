@@ -197,12 +197,32 @@ final class _NativeSource implements SessionActionSource {
   }
 
   @override
-  Future<SessionActionOutcome> fork(SessionSummary row) async {
+  Future<SessionCreateResult> fork(SessionSummary row, {ItemId? before}) async {
     final client = _client();
-    if (client == null) return SessionActionOutcome.unavailable;
-    // The row has no timeline position, so the whole history is copied.
-    final attempt = await client.fork(session: row.info.ref, id: mintCommandId());
-    return _outcome(attempt.receipt);
+    if (client == null) {
+      return const SessionCreateResult(SessionActionOutcome.unavailable);
+    }
+    String? boundary;
+    if (before != null) {
+      // A position the endpoint cannot name is refused before any send.
+      boundary = openCodeMessageIdOf(before, row.info.ref);
+      if (boundary == null) {
+        return const SessionCreateResult(SessionActionOutcome.unavailable);
+      }
+    }
+    try {
+      final attempt = await client.fork(
+        session: row.info.ref,
+        id: mintCommandId(),
+        before: boundary,
+      );
+      return SessionCreateResult(
+        _outcome(attempt.receipt),
+        attempt.session?.info.ref,
+      );
+    } on ArgumentError {
+      return const SessionCreateResult(SessionActionOutcome.unavailable);
+    }
   }
 
   @override

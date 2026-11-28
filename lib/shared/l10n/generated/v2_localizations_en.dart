@@ -901,7 +901,14 @@ class V2LocalizationsEn extends V2Localizations {
   String get messageCopyAll => 'Copy all text';
 
   @override
-  String get messageSelectText => 'Select text';
+  String get messageActions => 'Message actions';
+
+  @override
+  String get messageMoreActions => 'More actions';
+
+  @override
+  String get messageForkUncertain =>
+      'The fork may have been created. Check your conversations.';
 
   @override
   String get composerSendNow => 'Send now';

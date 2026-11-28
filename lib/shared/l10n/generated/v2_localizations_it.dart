@@ -913,7 +913,14 @@ class V2LocalizationsIt extends V2Localizations {
   String get messageCopyAll => 'Copia tutto il testo';
 
   @override
-  String get messageSelectText => 'Seleziona testo';
+  String get messageActions => 'Azioni del messaggio';
+
+  @override
+  String get messageMoreActions => 'Altre azioni';
+
+  @override
+  String get messageForkUncertain =>
+      'La diramazione potrebbe essere stata creata. Controlla le conversazioni.';
 
   @override
   String get composerSendNow => 'Invia ora';

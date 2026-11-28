@@ -12,6 +12,7 @@ import '../../shared/l10n/l10n_context.dart';
 import '../../shared/rendering/markdown_link_opener.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
+import 'message_action_bar.dart';
 import 'session_error_card.dart';
 import 'session_live_scroll.dart';
 import 'session_report_group.dart';
@@ -26,6 +27,42 @@ import 'session_work_group.dart';
 /// header is the first row and the items follow it, so a live update appends
 /// below the reader and the newest content is at the end.
 ///
+/// The confirmed user turn a message belongs to (#539).
+final class MessageTurn {
+  const MessageTurn({this.owner, this.latest = false, this.next});
+
+  /// The confirmed user turn the message belongs to: the message itself for
+  /// a user turn, the last one before it for an answer. Null for none.
+  final UserInput? owner;
+
+  /// Whether [owner] is the latest confirmed turn shown.
+  final bool latest;
+
+  /// The confirmed user turn after [owner], where a fork that keeps the
+  /// message's turn cuts. Null when [owner] is the latest.
+  final UserInput? next;
+}
+
+/// The turn of each item of [items], in order.
+Map<ItemId, MessageTurn> messageTurns(List<TimelineItem> items) {
+  final turns = [
+    for (final item in items)
+      if (item is UserInput && item.confirmed) item,
+  ];
+  final result = <ItemId, MessageTurn>{};
+  var index = -1;
+  for (final item in items) {
+    if (item is UserInput && item.confirmed) index++;
+    if (index < 0) continue;
+    result[item.id] = MessageTurn(
+      owner: turns[index],
+      latest: index == turns.length - 1,
+      next: index + 1 < turns.length ? turns[index + 1] : null,
+    );
+  }
+  return result;
+}
+
 /// Older history pages in above the rows the timeline first showed. Those
 /// rows open a center sliver: what comes before it grows upwards and what
 /// comes after it grows downwards, so a page added on top never moves the row
@@ -52,7 +89,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.onTapLink,
     this.bottomEndOverlay,
     this.emptyBuilder,
-    this.userTurnRevert,
+    this.messageActions,
     this.highlight,
     this.reveals = 0,
   });
@@ -108,11 +145,11 @@ class SessionLiveTimeline extends StatefulWidget {
   /// Null for none.
   final WidgetBuilder? emptyBuilder;
 
-  /// A confirmed user turn's revert, offered in its message menu (#492);
-  /// [isLatest] tells the latest turn (undo) from an older one (rewind and
-  /// edit). Null, or a null result, offers none.
-  final SessionBubbleAction? Function(UserInput item, bool isLatest)?
-  userTurnRevert;
+  /// A message's actions beyond Copy all, offered in its action bar (#539):
+  /// its turn's undo or rewind, a fork and the like. [turn] is the confirmed
+  /// user turn the message belongs to. Null offers none.
+  final List<MessageAction> Function(TimelineItem item, MessageTurn turn)?
+  messageActions;
 
   /// The item a search found (#462): its row is outlined.
   final ItemId? highlight;
@@ -961,12 +998,9 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
                 turnTokensPerSecond: turnTpsByItem[item.id],
                 showElapsed: !inlineStats.contains(item.meta.message?.message),
                 highlighted: found,
-                revert: item is UserInput && item.confirmed
-                    ? widget.userTurnRevert?.call(
-                        item,
-                        item.id == _latestConfirmedUserTurnId(rows),
-                      )
-                    : null,
+                actions:
+                    widget.messageActions?.call(item, _turnOf(rows, item)) ??
+                    const [],
               ),
             SessionSubagentCallsRow() => SessionSubagentCalls(
               row: row,
@@ -1116,15 +1150,19 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
     );
   }
 
-  static ItemId? _latestConfirmedUserTurnId(List<SessionTimelineRow> rows) {
-    for (var i = rows.length - 1; i >= 0; i--) {
-      if (rows[i] case SessionItemRow(
-        item: final UserInput item,
-      ) when item.confirmed) {
-        return item.id;
-      }
+  List<SessionTimelineRow>? _turnsOf;
+  Map<ItemId, MessageTurn> _turns = const {};
+
+  /// The confirmed user turn [item] belongs to, read once per set of rows.
+  MessageTurn _turnOf(List<SessionTimelineRow> rows, TimelineItem item) {
+    if (!identical(_turnsOf, rows)) {
+      _turnsOf = rows;
+      _turns = messageTurns([
+        for (final row in rows)
+          if (row case SessionItemRow(:final item)) item,
+      ]);
     }
-    return null;
+    return _turns[item.id] ?? const MessageTurn();
   }
 }
 

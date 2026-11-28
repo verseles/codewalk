@@ -916,7 +916,14 @@ class V2LocalizationsFr extends V2Localizations {
   String get messageCopyAll => 'Copier tout le texte';
 
   @override
-  String get messageSelectText => 'Sélectionner le texte';
+  String get messageActions => 'Actions du message';
+
+  @override
+  String get messageMoreActions => 'Plus d’actions';
+
+  @override
+  String get messageForkUncertain =>
+      'Le fork a peut-être été créé. Vérifiez vos conversations.';
 
   @override
   String get composerSendNow => 'Envoyer maintenant';

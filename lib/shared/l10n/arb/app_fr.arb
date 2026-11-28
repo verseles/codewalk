@@ -566,9 +566,17 @@
   "@messageCopyAll": {
     "description": "V2 message bubble options (#492)"
   },
-  "messageSelectText": "Sélectionner le texte",
-  "@messageSelectText": {
-    "description": "V2 message bubble options (#492)"
+  "messageActions": "Actions du message",
+  "@messageActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageMoreActions": "Plus d’actions",
+  "@messageMoreActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageForkUncertain": "Le fork a peut-être été créé. Vérifiez vos conversations.",
+  "@messageForkUncertain": {
+    "description": "V2 message action bar (#539)"
   },
   "composerSendNow": "Envoyer maintenant",
   "@composerSendNow": {

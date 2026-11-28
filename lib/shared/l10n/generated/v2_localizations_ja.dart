@@ -860,7 +860,13 @@ class V2LocalizationsJa extends V2Localizations {
   String get messageCopyAll => 'テキストをすべてコピー';
 
   @override
-  String get messageSelectText => 'テキストを選択';
+  String get messageActions => 'メッセージの操作';
+
+  @override
+  String get messageMoreActions => 'その他の操作';
+
+  @override
+  String get messageForkUncertain => '分岐が作成された可能性があります。会話一覧を確認してください。';
 
   @override
   String get composerSendNow => '今すぐ送信';

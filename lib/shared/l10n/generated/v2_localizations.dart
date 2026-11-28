@@ -1739,11 +1739,23 @@ abstract class V2Localizations {
   /// **'Copy all text'**
   String get messageCopyAll;
 
-  /// V2 message bubble options (#492)
+  /// V2 message action bar (#539)
   ///
   /// In en, this message translates to:
-  /// **'Select text'**
-  String get messageSelectText;
+  /// **'Message actions'**
+  String get messageActions;
+
+  /// V2 message action bar (#539)
+  ///
+  /// In en, this message translates to:
+  /// **'More actions'**
+  String get messageMoreActions;
+
+  /// V2 message action bar (#539)
+  ///
+  /// In en, this message translates to:
+  /// **'The fork may have been created. Check your conversations.'**
+  String get messageForkUncertain;
 
   /// V2 waiting messages (#486)
   ///

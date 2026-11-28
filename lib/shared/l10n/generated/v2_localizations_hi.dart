@@ -903,7 +903,14 @@ class V2LocalizationsHi extends V2Localizations {
   String get messageCopyAll => 'पूरा टेक्स्ट कॉपी करें';
 
   @override
-  String get messageSelectText => 'टेक्स्ट चुनें';
+  String get messageActions => 'संदेश की कार्रवाइयाँ';
+
+  @override
+  String get messageMoreActions => 'और कार्रवाइयाँ';
+
+  @override
+  String get messageForkUncertain =>
+      'फ़ोर्क शायद बन गया है। अपनी बातचीत देखें।';
 
   @override
   String get composerSendNow => 'अभी भेजें';

@@ -566,9 +566,17 @@
   "@messageCopyAll": {
     "description": "V2 message bubble options (#492)"
   },
-  "messageSelectText": "متن منتخب کریں",
-  "@messageSelectText": {
-    "description": "V2 message bubble options (#492)"
+  "messageActions": "پیغام کے اقدامات",
+  "@messageActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageMoreActions": "مزید اقدامات",
+  "@messageMoreActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageForkUncertain": "ہو سکتا ہے فورک بن گیا ہو۔ اپنی گفتگو دیکھیں۔",
+  "@messageForkUncertain": {
+    "description": "V2 message action bar (#539)"
   },
   "composerSendNow": "ابھی بھیجیں",
   "@composerSendNow": {

@@ -919,7 +919,14 @@ class V2LocalizationsDe extends V2Localizations {
   String get messageCopyAll => 'Gesamten Text kopieren';
 
   @override
-  String get messageSelectText => 'Text auswählen';
+  String get messageActions => 'Nachrichtenaktionen';
+
+  @override
+  String get messageMoreActions => 'Weitere Aktionen';
+
+  @override
+  String get messageForkUncertain =>
+      'Die Abzweigung wurde möglicherweise erstellt. Prüfe deine Unterhaltungen.';
 
   @override
   String get composerSendNow => 'Jetzt senden';

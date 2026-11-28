@@ -566,9 +566,17 @@
   "@messageCopyAll": {
     "description": "V2 message bubble options (#492)"
   },
-  "messageSelectText": "Seleziona testo",
-  "@messageSelectText": {
-    "description": "V2 message bubble options (#492)"
+  "messageActions": "Azioni del messaggio",
+  "@messageActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageMoreActions": "Altre azioni",
+  "@messageMoreActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageForkUncertain": "La diramazione potrebbe essere stata creata. Controlla le conversazioni.",
+  "@messageForkUncertain": {
+    "description": "V2 message action bar (#539)"
   },
   "composerSendNow": "Invia ora",
   "@composerSendNow": {

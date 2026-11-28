@@ -128,8 +128,10 @@ abstract interface class SessionActionSource {
   /// Deletes the session and its children.
   Future<SessionActionOutcome> delete(SessionSummary row);
 
-  /// Copies the session's history into a new root session.
-  Future<SessionActionOutcome> fork(SessionSummary row);
+  /// Copies the session's history into a new root session: all of it, or
+  /// what comes before [before] (#539). The result carries the new session
+  /// when the endpoint answered with it.
+  Future<SessionCreateResult> fork(SessionSummary row, {ItemId? before});
 
   /// Marks the row's idle transition as viewed.
   Future<SessionActionOutcome> markViewed(SessionSummary row);

@@ -566,9 +566,17 @@
   "@messageCopyAll": {
     "description": "V2 message bubble options (#492)"
   },
-  "messageSelectText": "Seleccionar texto",
-  "@messageSelectText": {
-    "description": "V2 message bubble options (#492)"
+  "messageActions": "Acciones del mensaje",
+  "@messageActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageMoreActions": "Más acciones",
+  "@messageMoreActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageForkUncertain": "Es posible que la bifurcación se haya creado. Revisa tus conversaciones.",
+  "@messageForkUncertain": {
+    "description": "V2 message action bar (#539)"
   },
   "composerSendNow": "Enviar ahora",
   "@composerSendNow": {

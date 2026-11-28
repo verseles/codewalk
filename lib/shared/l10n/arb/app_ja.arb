@@ -566,9 +566,17 @@
   "@messageCopyAll": {
     "description": "V2 message bubble options (#492)"
   },
-  "messageSelectText": "テキストを選択",
-  "@messageSelectText": {
-    "description": "V2 message bubble options (#492)"
+  "messageActions": "メッセージの操作",
+  "@messageActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageMoreActions": "その他の操作",
+  "@messageMoreActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageForkUncertain": "分岐が作成された可能性があります。会話一覧を確認してください。",
+  "@messageForkUncertain": {
+    "description": "V2 message action bar (#539)"
   },
   "composerSendNow": "今すぐ送信",
   "@composerSendNow": {

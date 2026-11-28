@@ -118,7 +118,7 @@ AssistantText _answer(
 
 void main() {
   testWidgets(
-    'a user message menu offers undo on the latest turn and rewind on older ones (#492)',
+    'a message bar offers undo on the latest turn and rewind on older ones (#539)',
     (tester) async {
       final rig = CatalogRig();
       await rig.save('a');
@@ -166,42 +166,117 @@ void main() {
         find.byKey(ValueKey('user-turn-action-${user1.id.value}')),
         findsNothing,
       );
-      final revert = find.byKey(const ValueKey('message-menu-revert'));
+      final undo = find.byKey(const ValueKey('message-action-undo'));
+      final rewind = find.byKey(const ValueKey('message-action-rewind'));
+      final more = find.byKey(const ValueKey('message-action-more'));
 
-      // An older confirmed turn offers "Rewind and edit from here".
-      await tester.longPress(find.text('First user prompt'));
-      await tester.pumpAndSettle();
-      expect(
-        find.descendant(
-          of: revert,
-          matching: find.text('Rewind and edit from here'),
-        ),
-        findsOneWidget,
-      );
-      await tester.tapAt(Offset.zero);
-      await tester.pumpAndSettle();
-
-      // The agent's message offers no revert.
-      await tester.longPress(find.text('First response'));
-      await tester.pumpAndSettle();
-      expect(revert, findsNothing);
-      expect(find.byKey(const ValueKey('message-menu-copy')), findsOneWidget);
-      await tester.tapAt(Offset.zero);
-      await tester.pumpAndSettle();
+      // An older confirmed turn offers "Rewind and edit from here" in its
+      // bar's menu (#539), on its prompt and on its answer.
+      for (final text in ['First user prompt', 'First response']) {
+        await tester.tap(find.text(text));
+        await tester.pumpAndSettle();
+        expect(undo, findsNothing);
+        await tester.tap(more);
+        await tester.pumpAndSettle();
+        expect(
+          find.descendant(
+            of: rewind,
+            matching: find.text('Rewind and edit from here'),
+          ),
+          findsOneWidget,
+        );
+        await tester.tapAt(Offset.zero);
+        await tester.pumpAndSettle();
+        await tester.tapAt(Offset.zero);
+        await tester.pumpAndSettle();
+      }
 
       // The latest confirmed turn offers "Undo this turn", which stages it.
-      await tester.longPress(find.text('Second user prompt'));
+      await tester.tap(find.text('Second response'));
       await tester.pumpAndSettle();
-      expect(
-        find.descendant(of: revert, matching: find.text('Undo this turn')),
-        findsOneWidget,
-      );
+      expect(undo, findsOneWidget);
+      await tester.tapAt(Offset.zero);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Second user prompt'));
+      await tester.pumpAndSettle();
       port.nextAnchor = user2.meta.anchor;
-      await tester.tap(revert);
+      await tester.tap(undo);
       await tester.pumpAndSettle();
 
       expect(port.staged, [user2.id]);
       expect(live.draft.text, 'Second user prompt');
+    },
+  );
+
+  testWidgets(
+    'Fork from here cuts before a prompt, after an answer\'s turn (#539)',
+    (tester) async {
+      final actions = FakeActionSource();
+      final rig = CatalogRig(actions: actions);
+      await rig.save('a');
+      await rig.sessions.initialize();
+      final loading = rig.sessions.selectProfile('profile_a');
+      final source = rig.sources.single;
+      final summary = source.row('one');
+      source.respond([summary]);
+      await loading;
+      final directory = LiveDirectory();
+      final ref = summary.info.ref;
+      final live = SessionLiveController(
+        hosts: rig.hosts,
+        profile: profile('a'),
+        summary: summary,
+        directory: directory,
+      );
+      addTearDown(live.dispose);
+      final start = live.start();
+      final handle = directory.grant(ref, turnActions: _FakePort());
+      await start;
+      final user1 = _turn('msg_1', ref: ref, text: 'First user prompt');
+      final ans1 = _answer('ans_1', ref: ref, text: 'First response');
+      final user2 = _turn('msg_2', ref: ref, text: 'Second user prompt');
+      final ans2 = _answer('ans_2', ref: ref, text: 'Second response');
+      handle.emit(
+        SessionLiveView(
+          session: ref,
+          phase: SessionLivePhase.live,
+          state: liveState(ref, items: [user1, ans1, user2, ans2]),
+        ),
+      );
+      await tester.pumpWidget(
+        ChangeNotifierProvider<SessionsController?>.value(
+          value: rig.sessions,
+          child: MaterialApp(
+            localizationsDelegates: V2Localizations.localizationsDelegates,
+            supportedLocales: V2Localizations.supportedLocales,
+            home: Scaffold(body: SessionLivePage(controller: live)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      Future<void> fork(String text) async {
+        await tester.tap(find.text(text));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('message-action-more')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('message-action-fork')));
+        await tester.pumpAndSettle();
+        // The list reads again after a fork; it answers before the next one.
+        if (!source.tasks.last.completion.isCompleted) {
+          source.respond([summary]);
+          await tester.pumpAndSettle();
+        }
+      }
+
+      await fork('First user prompt');
+      await fork('First response');
+      await fork('Second response');
+      expect(actions.calls, [
+        'fork:${user1.id.value}',
+        'fork:${user2.id.value}',
+        'fork',
+      ]);
     },
   );
 

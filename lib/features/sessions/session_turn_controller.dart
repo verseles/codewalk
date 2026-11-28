@@ -70,14 +70,17 @@ class SessionTurnController extends ChangeNotifier
       live.draft.text == _restoredText &&
       _revision == _restoredRevision;
 
+  // A session without the turn port cannot revert: no port is no undo.
   bool get canUndo =>
       !_disposed &&
-      port?.unavailable(shared.SessionTurnAction.undo) == null &&
+      port != null &&
+      port!.unavailable(shared.SessionTurnAction.undo) == null &&
       visibleConfirmedTurns().isNotEmpty;
 
   bool get canRedoNext =>
       !_disposed &&
-      port?.unavailable(shared.SessionTurnAction.redoNext) == null;
+      port != null &&
+      port!.unavailable(shared.SessionTurnAction.redoNext) == null;
 
   bool get canRedoAll =>
       !_disposed && port?.unavailable(shared.SessionTurnAction.redoAll) == null;

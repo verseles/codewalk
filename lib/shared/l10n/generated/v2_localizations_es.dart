@@ -913,7 +913,14 @@ class V2LocalizationsEs extends V2Localizations {
   String get messageCopyAll => 'Copiar todo el texto';
 
   @override
-  String get messageSelectText => 'Seleccionar texto';
+  String get messageActions => 'Acciones del mensaje';
+
+  @override
+  String get messageMoreActions => 'Más acciones';
+
+  @override
+  String get messageForkUncertain =>
+      'Es posible que la bifurcación se haya creado. Revisa tus conversaciones.';
 
   @override
   String get composerSendNow => 'Enviar ahora';

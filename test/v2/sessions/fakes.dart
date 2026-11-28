@@ -66,6 +66,7 @@ class CatalogSource implements SessionCatalogSource {
   final queries = <SessionQuery>[];
   final reads = <(SessionRef, ReadTask)>[];
   int closes = 0;
+
   /// Answers a read of one project context at once with the rows of the
   /// whole-server answers in that directory, as a consistent server would.
   /// Tests that drive the context reads by hand turn it off.
@@ -118,11 +119,7 @@ class CatalogSource implements SessionCatalogSource {
           ownership ?? const OwnershipInfo.unknown(reason: 'not observed'),
       project: directory == null
           ? null
-          : ProjectRef(
-              harness.host,
-              directory,
-              upstreamProjectId: upstream,
-            ),
+          : ProjectRef(harness.host, directory, upstreamProjectId: upstream),
     ),
     updatedAt: DateTime.utc(2026, 10, 12),
     view: view,
@@ -171,20 +168,14 @@ class CatalogSource implements SessionCatalogSource {
   }
 
   @override
-  CatalogRead<List<FileEntry>> listDirectory(
-    String directory, {
-    String? path,
-  }) {
+  CatalogRead<List<FileEntry>> listDirectory(String directory, {String? path}) {
     final read = CatalogRead<List<FileEntry>>();
     listReads.add((directory, path, read));
     return read;
   }
 
   @override
-  CatalogRead<List<FileEntry>> findDirectories(
-    String directory,
-    String query,
-  ) {
+  CatalogRead<List<FileEntry>> findDirectories(String directory, String query) {
     final read = CatalogRead<List<FileEntry>>();
     findReads.add((directory, query, read));
     return read;
@@ -197,8 +188,10 @@ class CatalogSource implements SessionCatalogSource {
     }
     tasks.last.completion.complete(Page(items: rows, nextCursor: next));
   }
+
   void fail(SessionCatalogFailure failure) =>
       tasks.last.completion.completeError(SessionCatalogException(failure));
+
   /// The defaults a draft reads; tests set them before the draft opens.
   DraftDefaults defaults = const DraftDefaults();
 
@@ -242,6 +235,7 @@ class CatalogRig {
   final repository = GatedProfiles();
   late final HostsController hosts;
   late final SessionsController sessions;
+
   /// The defaults every source of this rig answers a draft with.
   DraftDefaults draftDefaults = const DraftDefaults();
 
@@ -306,16 +300,13 @@ class LiveCatalogChanges implements SessionCatalogChanges {
   }
 }
 
-
 /// A scripted session action source for the widget tests.
 ///
 /// It answers the platform's contract without a transport: the support, the
 /// unread marker, the child count and the commands.
 final class FakeActionSource implements SessionActionSource {
   FakeActionSource({
-    this.endpointSupport = const SessionActionSupport(
-      SessionActionReason.none,
-    ),
+    this.endpointSupport = const SessionActionSupport(SessionActionReason.none),
     this.children = 0,
     Map<String, SessionViewState> viewStates = const {},
   }) : viewStates = {...viewStates};
@@ -337,6 +328,9 @@ final class FakeActionSource implements SessionActionSource {
 
   /// The commands the tests received, in order.
   final calls = <String>[];
+
+  /// The session a fork answers with.
+  SessionRef? forked;
 
   /// The titles the renames carried.
   final titles = <String>[];
@@ -402,9 +396,12 @@ final class FakeActionSource implements SessionActionSource {
   }
 
   @override
-  Future<SessionActionOutcome> fork(SessionSummary row) async {
-    calls.add('fork');
-    return outcomes['fork'] ?? SessionActionOutcome.accepted;
+  Future<SessionCreateResult> fork(SessionSummary row, {ItemId? before}) async {
+    calls.add(before == null ? 'fork' : 'fork:${before.value}');
+    return SessionCreateResult(
+      outcomes['fork'] ?? SessionActionOutcome.accepted,
+      forked,
+    );
   }
 
   @override

@@ -42,8 +42,10 @@ final class _UnsupportedSource implements SessionActionSource {
       SessionActionOutcome.unavailable;
 
   @override
-  Future<SessionActionOutcome> fork(SessionSummary row) async =>
-      SessionActionOutcome.unavailable;
+  Future<SessionCreateResult> fork(
+    SessionSummary row, {
+    ItemId? before,
+  }) async => const SessionCreateResult(SessionActionOutcome.unavailable);
 
   @override
   Future<SessionActionOutcome> markViewed(SessionSummary row) async =>

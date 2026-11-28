@@ -749,9 +749,7 @@ class SessionsController extends ChangeNotifier {
     _readFailures = failed == SessionCatalogFailure.rateLimited
         ? _liveMaxBackoff
         : math.min(_readFailures + 1, _liveMaxBackoff);
-    _armReadRetry(
-      now ? Duration.zero : liveMinInterval * (1 << _readFailures),
-    );
+    _armReadRetry(now ? Duration.zero : liveMinInterval * (1 << _readFailures));
   }
 
   /// Closes the feed's current live period: one that lasted a whole longest
@@ -1152,8 +1150,26 @@ class SessionsController extends ChangeNotifier {
       _run(row, (source) => source.delete(row));
 
   /// Copies the row's history into a new root session.
-  Future<SessionActionOutcome> fork(SessionSummary row) =>
-      _run(row, (source) => source.fork(row));
+  Future<SessionActionOutcome> fork(SessionSummary row) async =>
+      (await forkFrom(row)).outcome;
+
+  /// Copies the row's history before [before], or all of it, into a new
+  /// root session (#539); the result names it when the endpoint did.
+  Future<SessionCreateResult> forkFrom(
+    SessionSummary row, {
+    ItemId? before,
+  }) async {
+    SessionRef? created;
+    final outcome = await _run(row, (source) async {
+      final result = await source.fork(row, before: before);
+      created = result.session;
+      return result.outcome;
+    });
+    return SessionCreateResult(
+      outcome,
+      outcome == SessionActionOutcome.accepted ? created : null,
+    );
+  }
 
   /// Marks the row's idle transition as viewed.
   Future<SessionActionOutcome> markViewed(SessionSummary row) =>

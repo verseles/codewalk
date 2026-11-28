@@ -75,20 +75,20 @@ VOICE = {
     "ur": ("آواز سے اندراج", "آواز سے اندراج روکیں", "اس ڈیوائس پر آواز سے اندراج دستیاب نہیں", "آواز سے اندراج کے لیے مائیکروفون تک رسائی کی اجازت دیں", "آواز سے اندراج اچانک رک گیا"),
 }
 
-BUBBLE_KEYS = ('messageCopyAll', 'messageSelectText')
+BUBBLE_KEYS = ('messageCopyAll', 'messageActions', 'messageMoreActions', 'messageForkUncertain')
 BUBBLE = {
-    "en": ("Copy all text", "Select text"),
-    "pt": ("Copiar todo o texto", "Selecionar texto"),
-    "es": ("Copiar todo el texto", "Seleccionar texto"),
-    "fr": ("Copier tout le texte", "Sélectionner le texte"),
-    "de": ("Gesamten Text kopieren", "Text auswählen"),
-    "it": ("Copia tutto il testo", "Seleziona testo"),
-    "ru": ("Скопировать весь текст", "Выделить текст"),
-    "ja": ("テキストをすべてコピー", "テキストを選択"),
-    "ko": ("전체 텍스트 복사", "텍스트 선택"),
-    "zh": ("复制全部文本", "选择文本"),
-    "hi": ("पूरा टेक्स्ट कॉपी करें", "टेक्स्ट चुनें"),
-    "bn": ("সব লেখা কপি করুন", "লেখা নির্বাচন করুন"),
-    "ar": ("نسخ النص بالكامل", "تحديد النص"),
-    "ur": ("پورا متن کاپی کریں", "متن منتخب کریں"),
+    "en": ("Copy all text", "Message actions", "More actions", "The fork may have been created. Check your conversations."),
+    "pt": ("Copiar todo o texto", "Ações da mensagem", "Mais ações", "A bifurcação pode ter sido criada. Confira suas conversas."),
+    "es": ("Copiar todo el texto", "Acciones del mensaje", "Más acciones", "Es posible que la bifurcación se haya creado. Revisa tus conversaciones."),
+    "fr": ("Copier tout le texte", "Actions du message", "Plus d’actions", "Le fork a peut-être été créé. Vérifiez vos conversations."),
+    "de": ("Gesamten Text kopieren", "Nachrichtenaktionen", "Weitere Aktionen", "Die Abzweigung wurde möglicherweise erstellt. Prüfe deine Unterhaltungen."),
+    "it": ("Copia tutto il testo", "Azioni del messaggio", "Altre azioni", "La diramazione potrebbe essere stata creata. Controlla le conversazioni."),
+    "ru": ("Скопировать весь текст", "Действия с сообщением", "Другие действия", "Ответвление могло быть создано. Проверьте список бесед."),
+    "ja": ("テキストをすべてコピー", "メッセージの操作", "その他の操作", "分岐が作成された可能性があります。会話一覧を確認してください。"),
+    "ko": ("전체 텍스트 복사", "메시지 작업", "추가 작업", "분기가 생성되었을 수 있습니다. 대화 목록을 확인하세요."),
+    "zh": ("复制全部文本", "消息操作", "更多操作", "分支可能已创建。请检查你的对话。"),
+    "hi": ("पूरा टेक्स्ट कॉपी करें", "संदेश की कार्रवाइयाँ", "और कार्रवाइयाँ", "फ़ोर्क शायद बन गया है। अपनी बातचीत देखें।"),
+    "bn": ("সব লেখা কপি করুন", "বার্তার কাজ", "আরও কাজ", "ফর্কটি হয়তো তৈরি হয়েছে। আপনার কথোপকথনগুলো দেখুন।"),
+    "ar": ("نسخ النص بالكامل", "إجراءات الرسالة", "إجراءات أخرى", "ربما تم إنشاء التفرع. تحقق من محادثاتك."),
+    "ur": ("پورا متن کاپی کریں", "پیغام کے اقدامات", "مزید اقدامات", "ہو سکتا ہے فورک بن گیا ہو۔ اپنی گفتگو دیکھیں۔"),
 }

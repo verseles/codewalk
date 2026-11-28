@@ -863,7 +863,13 @@ class V2LocalizationsKo extends V2Localizations {
   String get messageCopyAll => '전체 텍스트 복사';
 
   @override
-  String get messageSelectText => '텍스트 선택';
+  String get messageActions => '메시지 작업';
+
+  @override
+  String get messageMoreActions => '추가 작업';
+
+  @override
+  String get messageForkUncertain => '분기가 생성되었을 수 있습니다. 대화 목록을 확인하세요.';
 
   @override
   String get composerSendNow => '지금 보내기';

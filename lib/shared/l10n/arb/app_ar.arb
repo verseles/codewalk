@@ -565,9 +565,17 @@
   "@messageCopyAll": {
     "description": "V2 message bubble options (#492)"
   },
-  "messageSelectText": "تحديد النص",
-  "@messageSelectText": {
-    "description": "V2 message bubble options (#492)"
+  "messageActions": "إجراءات الرسالة",
+  "@messageActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageMoreActions": "إجراءات أخرى",
+  "@messageMoreActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageForkUncertain": "ربما تم إنشاء التفرع. تحقق من محادثاتك.",
+  "@messageForkUncertain": {
+    "description": "V2 message action bar (#539)"
   },
   "composerSendNow": "أرسل الآن",
   "@composerSendNow": {

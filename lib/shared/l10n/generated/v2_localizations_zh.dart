@@ -845,7 +845,13 @@ class V2LocalizationsZh extends V2Localizations {
   String get messageCopyAll => '复制全部文本';
 
   @override
-  String get messageSelectText => '选择文本';
+  String get messageActions => '消息操作';
+
+  @override
+  String get messageMoreActions => '更多操作';
+
+  @override
+  String get messageForkUncertain => '分支可能已创建。请检查你的对话。';
 
   @override
   String get composerSendNow => '立即发送';

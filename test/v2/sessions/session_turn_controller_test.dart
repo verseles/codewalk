@@ -24,7 +24,10 @@ final class _FakePort implements SessionTurnActionPort {
   SessionTurnUnavailable? unavailable(SessionTurnAction action) => refusal;
 
   @override
-  Future<SessionTurnResult> stage(ItemId boundary, {required CommandId id}) async {
+  Future<SessionTurnResult> stage(
+    ItemId boundary, {
+    required CommandId id,
+  }) async {
     staged.add(boundary);
     state = SessionTurnState(
       phase: SessionTurnPhase.idle,
@@ -76,141 +79,149 @@ UserInput _turn(
   required SessionRef ref,
   String? text,
   bool confirmed = true,
-}) =>
-    UserInput(
-      meta: ItemMeta(
-        id: ItemId(jsonEncode([ref.storageKey, message, 'user', 0])),
-        generation: 'history',
-        status: const OpenValue.known(ItemStatus.completed),
-        source: SourceProvenance(
-          harness: ref.harnessRef,
-          version: '2.0.22',
-          nativeType: 'user',
-        ),
-        anchor: MessageAnchor(message: MessageRef(message), orderKey: message),
-      ),
-      text: text ?? 'text of $message',
-      delivery: const OpenValue.known(DeliveryState.delivered),
-      confirmed: confirmed,
-    );
+}) => UserInput(
+  meta: ItemMeta(
+    id: ItemId(jsonEncode([ref.storageKey, message, 'user', 0])),
+    generation: 'history',
+    status: const OpenValue.known(ItemStatus.completed),
+    source: SourceProvenance(
+      harness: ref.harnessRef,
+      version: '2.0.22',
+      nativeType: 'user',
+    ),
+    anchor: MessageAnchor(message: MessageRef(message), orderKey: message),
+  ),
+  text: text ?? 'text of $message',
+  delivery: const OpenValue.known(DeliveryState.delivered),
+  confirmed: confirmed,
+);
 
 void main() {
-  test('stageUndo restores target text and tracks revision/provenance', () async {
-    final rig = CatalogRig();
-    await rig.save('a');
-    await rig.sessions.initialize();
-    final directory = LiveDirectory();
-    final summary = CatalogSource(profile('a')).row('one');
-    final ref = summary.info.ref;
-    final live = SessionLiveController(
-      hosts: rig.hosts,
-      profile: profile('a'),
-      summary: summary,
-      directory: directory,
-    );
-    addTearDown(live.dispose);
+  test(
+    'stageUndo restores target text and tracks revision/provenance',
+    () async {
+      final rig = CatalogRig();
+      await rig.save('a');
+      await rig.sessions.initialize();
+      final directory = LiveDirectory();
+      final summary = CatalogSource(profile('a')).row('one');
+      final ref = summary.info.ref;
+      final live = SessionLiveController(
+        hosts: rig.hosts,
+        profile: profile('a'),
+        summary: summary,
+        directory: directory,
+      );
+      addTearDown(live.dispose);
 
-    final port = _FakePort();
-    final start = live.start();
-    directory.grant(ref, turnActions: port);
-    await start;
+      final port = _FakePort();
+      final start = live.start();
+      directory.grant(ref, turnActions: port);
+      await start;
 
-    final turn = live.turn;
-    final target = _turn('msg_1', ref: ref, text: 'Original prompt text');
+      final turn = live.turn;
+      final target = _turn('msg_1', ref: ref, text: 'Original prompt text');
 
-    expect(live.draft.text, isEmpty);
-    final result = await turn.stageUndo(target: target);
+      expect(live.draft.text, isEmpty);
+      final result = await turn.stageUndo(target: target);
 
-    expect(result.applied, isTrue);
-    expect(port.staged, [target.id]);
-    expect(live.draft.text, 'Original prompt text');
-    expect(turn.restoredText, 'Original prompt text');
-    expect(turn.hasUntouchedRestoredText, isTrue);
-  });
+      expect(result.applied, isTrue);
+      expect(port.staged, [target.id]);
+      expect(live.draft.text, 'Original prompt text');
+      expect(turn.restoredText, 'Original prompt text');
+      expect(turn.hasUntouchedRestoredText, isTrue);
+    },
+  );
 
-  test('stageUndo confirms before overwriting a non-empty user draft', () async {
-    final rig = CatalogRig();
-    await rig.save('a');
-    await rig.sessions.initialize();
-    final directory = LiveDirectory();
-    final summary = CatalogSource(profile('a')).row('one');
-    final ref = summary.info.ref;
-    final live = SessionLiveController(
-      hosts: rig.hosts,
-      profile: profile('a'),
-      summary: summary,
-      directory: directory,
-    );
-    addTearDown(live.dispose);
+  test(
+    'stageUndo confirms before overwriting a non-empty user draft',
+    () async {
+      final rig = CatalogRig();
+      await rig.save('a');
+      await rig.sessions.initialize();
+      final directory = LiveDirectory();
+      final summary = CatalogSource(profile('a')).row('one');
+      final ref = summary.info.ref;
+      final live = SessionLiveController(
+        hosts: rig.hosts,
+        profile: profile('a'),
+        summary: summary,
+        directory: directory,
+      );
+      addTearDown(live.dispose);
 
-    final port = _FakePort();
-    final start = live.start();
-    directory.grant(ref, turnActions: port);
-    await start;
+      final port = _FakePort();
+      final start = live.start();
+      directory.grant(ref, turnActions: port);
+      await start;
 
-    final turn = live.turn;
-    final target = _turn('msg_1', ref: ref, text: 'Restored prompt');
+      final turn = live.turn;
+      final target = _turn('msg_1', ref: ref, text: 'Restored prompt');
 
-    live.draft.text = 'Unsent user draft';
-    var confirmCalls = 0;
-    turn.confirmReplaceDraft = () async {
-      confirmCalls++;
-      return false; // User cancels
-    };
+      live.draft.text = 'Unsent user draft';
+      var confirmCalls = 0;
+      turn.confirmReplaceDraft = () async {
+        confirmCalls++;
+        return false; // User cancels
+      };
 
-    final cancelled = await turn.stageUndo(target: target);
-    expect(cancelled.applied, isFalse);
-    expect(confirmCalls, 1);
-    expect(live.draft.text, 'Unsent user draft');
-    expect(port.staged, isEmpty);
+      final cancelled = await turn.stageUndo(target: target);
+      expect(cancelled.applied, isFalse);
+      expect(confirmCalls, 1);
+      expect(live.draft.text, 'Unsent user draft');
+      expect(port.staged, isEmpty);
 
-    // Now user confirms
-    turn.confirmReplaceDraft = () async {
-      confirmCalls++;
-      return true;
-    };
-    final accepted = await turn.stageUndo(target: target);
-    expect(accepted.applied, isTrue);
-    expect(confirmCalls, 2);
-    expect(live.draft.text, 'Restored prompt');
-    expect(turn.hasUntouchedRestoredText, isTrue);
-  });
+      // Now user confirms
+      turn.confirmReplaceDraft = () async {
+        confirmCalls++;
+        return true;
+      };
+      final accepted = await turn.stageUndo(target: target);
+      expect(accepted.applied, isTrue);
+      expect(confirmCalls, 2);
+      expect(live.draft.text, 'Restored prompt');
+      expect(turn.hasUntouchedRestoredText, isTrue);
+    },
+  );
 
-  test('CAS protection: concurrent edit during RPC wait is not overwritten', () async {
-    final rig = CatalogRig();
-    await rig.save('a');
-    await rig.sessions.initialize();
-    final directory = LiveDirectory();
-    final summary = CatalogSource(profile('a')).row('one');
-    final ref = summary.info.ref;
-    final live = SessionLiveController(
-      hosts: rig.hosts,
-      profile: profile('a'),
-      summary: summary,
-      directory: directory,
-    );
-    addTearDown(live.dispose);
+  test(
+    'CAS protection: concurrent edit during RPC wait is not overwritten',
+    () async {
+      final rig = CatalogRig();
+      await rig.save('a');
+      await rig.sessions.initialize();
+      final directory = LiveDirectory();
+      final summary = CatalogSource(profile('a')).row('one');
+      final ref = summary.info.ref;
+      final live = SessionLiveController(
+        hosts: rig.hosts,
+        profile: profile('a'),
+        summary: summary,
+        directory: directory,
+      );
+      addTearDown(live.dispose);
 
-    final port = _FakePort();
-    final start = live.start();
-    directory.grant(ref, turnActions: port);
-    await start;
+      final port = _FakePort();
+      final start = live.start();
+      directory.grant(ref, turnActions: port);
+      await start;
 
-    final turn = live.turn;
-    final target = _turn('msg_1', ref: ref, text: 'Restored prompt');
+      final turn = live.turn;
+      final target = _turn('msg_1', ref: ref, text: 'Restored prompt');
 
-    live.draft.text = 'Initial draft';
-    turn.confirmReplaceDraft = () async {
-      // User types while confirmation was pending
-      live.draft.text = 'New concurrent edit';
-      return true;
-    };
+      live.draft.text = 'Initial draft';
+      turn.confirmReplaceDraft = () async {
+        // User types while confirmation was pending
+        live.draft.text = 'New concurrent edit';
+        return true;
+      };
 
-    final result = await turn.stageUndo(target: target);
-    expect(result.applied, isTrue);
-    // Draft was NOT overwritten because revision changed during wait
-    expect(live.draft.text, 'New concurrent edit');
-  });
+      final result = await turn.stageUndo(target: target);
+      expect(result.applied, isTrue);
+      // Draft was NOT overwritten because revision changed during wait
+      expect(live.draft.text, 'New concurrent edit');
+    },
+  );
 
   test('redoAll clears draft only when restored text is untouched', () async {
     final rig = CatalogRig();
@@ -284,7 +295,52 @@ void main() {
     expect(live.draft.text, isEmpty);
   });
 
-  test('redoNext updates restored draft when advancing without full clear', () async {
+  test(
+    'redoNext updates restored draft when advancing without full clear',
+    () async {
+      final rig = CatalogRig();
+      await rig.save('a');
+      await rig.sessions.initialize();
+      final directory = LiveDirectory();
+      final summary = CatalogSource(profile('a')).row('one');
+      final ref = summary.info.ref;
+      final live = SessionLiveController(
+        hosts: rig.hosts,
+        profile: profile('a'),
+        summary: summary,
+        directory: directory,
+      );
+      addTearDown(live.dispose);
+
+      final port = _FakePort();
+      final start = live.start();
+      directory.grant(ref, turnActions: port);
+      await start;
+
+      final turn = live.turn;
+      final target = _turn('msg_1', ref: ref, text: 'First restored prompt');
+      final nextTarget = _turn(
+        'msg_2',
+        ref: ref,
+        text: 'Second restored prompt',
+      );
+
+      await turn.stageUndo(target: target);
+      expect(turn.hasUntouchedRestoredText, isTrue);
+
+      // Partial redo: advances cut to next turn, does not clear staged revert
+      port.nextRedoCleared = false;
+      port.nextRedoRestored = nextTarget;
+
+      await turn.redoNext();
+      expect(port.redoNextCalls, 1);
+      expect(live.draft.text, 'Second restored prompt');
+      expect(turn.hasUntouchedRestoredText, isTrue);
+      expect(turn.restoredText, 'Second restored prompt');
+    },
+  );
+
+  test('a session without the turn port cannot undo (#539)', () async {
     final rig = CatalogRig();
     await rig.save('a');
     await rig.sessions.initialize();
@@ -298,98 +354,108 @@ void main() {
       directory: directory,
     );
     addTearDown(live.dispose);
-
-    final port = _FakePort();
     final start = live.start();
-    directory.grant(ref, turnActions: port);
+    final handle = directory.grant(ref);
     await start;
-
-    final turn = live.turn;
-    final target = _turn('msg_1', ref: ref, text: 'First restored prompt');
-    final nextTarget = _turn('msg_2', ref: ref, text: 'Second restored prompt');
-
-    await turn.stageUndo(target: target);
-    expect(turn.hasUntouchedRestoredText, isTrue);
-
-    // Partial redo: advances cut to next turn, does not clear staged revert
-    port.nextRedoCleared = false;
-    port.nextRedoRestored = nextTarget;
-
-    await turn.redoNext();
-    expect(port.redoNextCalls, 1);
-    expect(live.draft.text, 'Second restored prompt');
-    expect(turn.hasUntouchedRestoredText, isTrue);
-    expect(turn.restoredText, 'Second restored prompt');
-  });
-
-  test('builtin slash commands map unavailable reasons and execute when available', () async {
-    final rig = CatalogRig();
-    await rig.save('a');
-    await rig.sessions.initialize();
-    final directory = LiveDirectory();
-    final summary = CatalogSource(profile('a')).row('one');
-    final ref = summary.info.ref;
-    final live = SessionLiveController(
-      hosts: rig.hosts,
-      profile: profile('a'),
-      summary: summary,
-      directory: directory,
-    );
-    addTearDown(live.dispose);
-
-    final port = _FakePort();
-    final start = live.start();
-    final handle = directory.grant(ref, turnActions: port);
-    await start;
-
-    final turn = live.turn;
-
-    // When no confirmed turns are in view, canUndo is false and nothingToUndo is returned
-    expect(turn.canUndo, isFalse);
-    expect(turn.unavailable(builtin.SessionTurnAction.undo),
-        builtin.SessionTurnActionUnavailable.nothingToUndo);
-
-    // Emit confirmed user turn into live view
-    final user1 = _turn('msg_1', ref: ref, text: 'User prompt');
     handle.emit(
       SessionLiveView(
         session: ref,
         phase: SessionLivePhase.live,
-        state: liveState(ref, items: [user1]),
+        state: liveState(
+          ref,
+          items: [_turn('msg_1', ref: ref, text: 'User prompt')],
+        ),
       ),
     );
     await pumpEventQueue();
-
-    // Now port is available and turn is visible
-    expect(turn.canUndo, isTrue);
-    expect(turn.unavailable(builtin.SessionTurnAction.undo), isNull);
-
-    // When port is busy
-    port.refusal = SessionTurnUnavailable.busy;
-    expect(turn.unavailable(builtin.SessionTurnAction.undo),
-        builtin.SessionTurnActionUnavailable.busy);
-
-    // When compacting
-    port.state = const SessionTurnState(compacting: true);
-    expect(turn.unavailable(builtin.SessionTurnAction.compact),
-        builtin.SessionTurnActionUnavailable.compacting);
-
-    // When revert staged
-    port.state = const SessionTurnState();
-    port.refusal = SessionTurnUnavailable.revertStaged;
-    expect(turn.unavailable(builtin.SessionTurnAction.compact),
-        builtin.SessionTurnActionUnavailable.revertStaged);
-
-    // When no turn to undo / target unknown
-    port.refusal = SessionTurnUnavailable.targetUnknown;
-    expect(turn.unavailable(builtin.SessionTurnAction.undo),
-        builtin.SessionTurnActionUnavailable.nothingToUndo);
-    expect(turn.unavailable(builtin.SessionTurnAction.redo),
-        builtin.SessionTurnActionUnavailable.nothingToRedo);
-
-    // Run slash actions
-    port.refusal = null;
-    await turn.run(builtin.SessionTurnAction.compact);
-    expect(port.compactCalls, 1);
+    expect(live.turn.port, isNull);
+    expect(live.turn.canUndo, isFalse);
+    expect(live.turn.canRedoNext, isFalse);
   });
+
+  test(
+    'builtin slash commands map unavailable reasons and execute when available',
+    () async {
+      final rig = CatalogRig();
+      await rig.save('a');
+      await rig.sessions.initialize();
+      final directory = LiveDirectory();
+      final summary = CatalogSource(profile('a')).row('one');
+      final ref = summary.info.ref;
+      final live = SessionLiveController(
+        hosts: rig.hosts,
+        profile: profile('a'),
+        summary: summary,
+        directory: directory,
+      );
+      addTearDown(live.dispose);
+
+      final port = _FakePort();
+      final start = live.start();
+      final handle = directory.grant(ref, turnActions: port);
+      await start;
+
+      final turn = live.turn;
+
+      // When no confirmed turns are in view, canUndo is false and nothingToUndo is returned
+      expect(turn.canUndo, isFalse);
+      expect(
+        turn.unavailable(builtin.SessionTurnAction.undo),
+        builtin.SessionTurnActionUnavailable.nothingToUndo,
+      );
+
+      // Emit confirmed user turn into live view
+      final user1 = _turn('msg_1', ref: ref, text: 'User prompt');
+      handle.emit(
+        SessionLiveView(
+          session: ref,
+          phase: SessionLivePhase.live,
+          state: liveState(ref, items: [user1]),
+        ),
+      );
+      await pumpEventQueue();
+
+      // Now port is available and turn is visible
+      expect(turn.canUndo, isTrue);
+      expect(turn.unavailable(builtin.SessionTurnAction.undo), isNull);
+
+      // When port is busy
+      port.refusal = SessionTurnUnavailable.busy;
+      expect(
+        turn.unavailable(builtin.SessionTurnAction.undo),
+        builtin.SessionTurnActionUnavailable.busy,
+      );
+
+      // When compacting
+      port.state = const SessionTurnState(compacting: true);
+      expect(
+        turn.unavailable(builtin.SessionTurnAction.compact),
+        builtin.SessionTurnActionUnavailable.compacting,
+      );
+
+      // When revert staged
+      port.state = const SessionTurnState();
+      port.refusal = SessionTurnUnavailable.revertStaged;
+      expect(
+        turn.unavailable(builtin.SessionTurnAction.compact),
+        builtin.SessionTurnActionUnavailable.revertStaged,
+      );
+
+      // When no turn to undo / target unknown
+      port.refusal = SessionTurnUnavailable.targetUnknown;
+      expect(
+        turn.unavailable(builtin.SessionTurnAction.undo),
+        builtin.SessionTurnActionUnavailable.nothingToUndo,
+      );
+      expect(
+        turn.unavailable(builtin.SessionTurnAction.redo),
+        builtin.SessionTurnActionUnavailable.nothingToRedo,
+      );
+
+      // Run slash actions
+      port.refusal = null;
+      await turn.run(builtin.SessionTurnAction.compact);
+      expect(port.compactCalls, 1);
+    },
+  );
 }

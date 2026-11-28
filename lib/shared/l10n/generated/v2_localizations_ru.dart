@@ -908,7 +908,14 @@ class V2LocalizationsRu extends V2Localizations {
   String get messageCopyAll => 'Скопировать весь текст';
 
   @override
-  String get messageSelectText => 'Выделить текст';
+  String get messageActions => 'Действия с сообщением';
+
+  @override
+  String get messageMoreActions => 'Другие действия';
+
+  @override
+  String get messageForkUncertain =>
+      'Ответвление могло быть создано. Проверьте список бесед.';
 
   @override
   String get composerSendNow => 'Отправить сейчас';

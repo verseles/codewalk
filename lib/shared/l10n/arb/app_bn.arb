@@ -566,9 +566,17 @@
   "@messageCopyAll": {
     "description": "V2 message bubble options (#492)"
   },
-  "messageSelectText": "লেখা নির্বাচন করুন",
-  "@messageSelectText": {
-    "description": "V2 message bubble options (#492)"
+  "messageActions": "বার্তার কাজ",
+  "@messageActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageMoreActions": "আরও কাজ",
+  "@messageMoreActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageForkUncertain": "ফর্কটি হয়তো তৈরি হয়েছে। আপনার কথোপকথনগুলো দেখুন।",
+  "@messageForkUncertain": {
+    "description": "V2 message action bar (#539)"
   },
   "composerSendNow": "এখনই পাঠান",
   "@composerSendNow": {

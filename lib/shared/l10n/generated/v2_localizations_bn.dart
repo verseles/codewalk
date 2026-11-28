@@ -896,7 +896,14 @@ class V2LocalizationsBn extends V2Localizations {
   String get messageCopyAll => 'সব লেখা কপি করুন';
 
   @override
-  String get messageSelectText => 'লেখা নির্বাচন করুন';
+  String get messageActions => 'বার্তার কাজ';
+
+  @override
+  String get messageMoreActions => 'আরও কাজ';
+
+  @override
+  String get messageForkUncertain =>
+      'ফর্কটি হয়তো তৈরি হয়েছে। আপনার কথোপকথনগুলো দেখুন।';
 
   @override
   String get composerSendNow => 'এখনই পাঠান';

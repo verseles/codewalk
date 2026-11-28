@@ -566,9 +566,17 @@
   "@messageCopyAll": {
     "description": "V2 message bubble options (#492)"
   },
-  "messageSelectText": "텍스트 선택",
-  "@messageSelectText": {
-    "description": "V2 message bubble options (#492)"
+  "messageActions": "메시지 작업",
+  "@messageActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageMoreActions": "추가 작업",
+  "@messageMoreActions": {
+    "description": "V2 message action bar (#539)"
+  },
+  "messageForkUncertain": "분기가 생성되었을 수 있습니다. 대화 목록을 확인하세요.",
+  "@messageForkUncertain": {
+    "description": "V2 message action bar (#539)"
   },
   "composerSendNow": "지금 보내기",
   "@composerSendNow": {

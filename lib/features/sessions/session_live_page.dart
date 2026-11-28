@@ -12,13 +12,17 @@ import 'package:provider/provider.dart';
 import '../../app/app_keyboard_shortcuts.dart';
 import '../../app/app_preferences_controller.dart';
 import '../../app/workspace_actions.dart';
+import '../../platform/sessions/session_draft_store.dart';
 import '../../shared/l10n/generated/v2_localizations.dart';
 import '../../shared/l10n/l10n_context.dart';
+import '../../shared/sessions/session_actions.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/sessions/session_stop.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
+import '../../shared/widgets/app_snack_bar.dart';
+import 'message_action_bar.dart';
 import 'session_attachment_scope.dart';
 import 'session_composer.dart';
 import 'session_composer_status.dart';
@@ -34,9 +38,9 @@ import 'session_selection_chip.dart';
 import 'session_stop_button.dart';
 import 'session_subagent_capsule.dart';
 import 'session_switch_note.dart';
+import 'session_tabs_controller.dart';
 import 'session_task_list.dart';
 import 'session_timeline_projection.dart';
-import 'session_timeline_tile.dart';
 import 'sessions_controller.dart';
 import 'subconversation_navigation.dart';
 import 'subconversation_resolver.dart';
@@ -354,6 +358,104 @@ class _SessionLivePageState extends State<SessionLivePage>
   Widget _frameBody(BuildContext context, Widget body) =>
       widget.bodyFrame?.call(context, body) ?? body;
 
+  /// The actions [item] offers beyond Copy all (#539): its turn's undo (the
+  /// latest turn) or rewind and edit (an older one), where the session can
+  /// revert, and a fork from it where the server can fork.
+  List<MessageAction> _messageActions(
+    SessionLiveController c,
+    V2Localizations l10n,
+    TimelineItem item,
+    MessageTurn turn,
+  ) {
+    final settled = switch (item) {
+      UserInput(:final confirmed) => confirmed,
+      AssistantText(:final complete) => complete,
+      _ => false,
+    };
+    final owner = turn.owner;
+    if (!settled || owner == null) return const [];
+    final catalog = context.read<SessionsController?>();
+    final row = catalog?.findSession(c.session);
+    final canFork = row != null && catalog!.actionSupport.available;
+    return [
+      if (c.turn.canUndo)
+        turn.latest
+            ? MessageAction(
+                id: MessageActionId.undo,
+                label: l10n.msgInfoUndoThisTurn,
+                icon: Symbols.undo_rounded,
+                onSelected: (context) => unawaited(
+                  c.turn.stageUndo(target: owner, context: context),
+                ),
+              )
+            : MessageAction(
+                id: MessageActionId.rewind,
+                label: l10n.chatMessageRewindEdit,
+                icon: Symbols.settings_backup_restore,
+                overflow: true,
+                onSelected: (context) => unawaited(
+                  c.turn.stageUndo(target: owner, context: context),
+                ),
+              ),
+      if (canFork)
+        MessageAction(
+          id: MessageActionId.fork,
+          label: l10n.sessionsActionFork,
+          icon: Symbols.call_split,
+          overflow: true,
+          // A prompt forks before itself and lands in the new session's
+          // message box; an answer keeps its whole turn.
+          onSelected: (_) => unawaited(
+            item is UserInput
+                ? _forkFrom(catalog, row, item.id, draft: item.text)
+                : _forkFrom(catalog, row, turn.next?.id),
+          ),
+        ),
+    ];
+  }
+
+  /// Forks the session before [before], or all of it, then opens the new
+  /// session with [draft] in its message box.
+  Future<void> _forkFrom(
+    SessionsController catalog,
+    SessionSummary row,
+    ItemId? before, {
+    String? draft,
+  }) async {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final l10n = context.v2L10n;
+    final tabs = context.read<SessionTabsController?>();
+    final drafts = context.read<SessionDraftStore?>();
+    final result = await catalog.forkFrom(row, before: before);
+    final ref = result.session;
+    switch (result.outcome) {
+      case SessionActionOutcome.uncertain:
+        showAppSnackBar(messenger, l10n.messageForkUncertain);
+        return;
+      case SessionActionOutcome.rejected || SessionActionOutcome.unavailable:
+        showAppSnackBar(messenger, l10n.sessionsActionFailed);
+        return;
+      case SessionActionOutcome.accepted:
+        break;
+    }
+    // Without the new session's name, the list shows it once it reads it.
+    if (ref == null) return;
+    if (drafts != null && draft != null && draft.isNotEmpty) {
+      drafts.save(ref, draft);
+      await drafts.flush();
+    }
+    SessionSummary? summary;
+    try {
+      summary = await catalog.read(ref)?.result;
+    } on Object {
+      summary = null;
+    }
+    if (summary == null || tabs == null) return;
+    if (await tabs.open(summary) == SessionTabOpen.full) {
+      showAppSnackBar(messenger, l10n.sessionTabsFull);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: widget.controller,
@@ -628,25 +730,10 @@ class _SessionLivePageState extends State<SessionLivePage>
                                   : null,
                               items: items,
                               waiting: pinned,
-                              // A turn reverts from its message menu, where
-                              // the session can (#492).
-                              userTurnRevert: (turnItem, isLatest) =>
-                                  c.turn.canUndo
-                                  ? SessionBubbleAction(
-                                      label: isLatest
-                                          ? l10n.msgInfoUndoThisTurn
-                                          : l10n.chatMessageRewindEdit,
-                                      icon: isLatest
-                                          ? Symbols.undo_rounded
-                                          : Symbols.settings_backup_restore,
-                                      onSelected: (context) => unawaited(
-                                        c.turn.stageUndo(
-                                          target: turnItem,
-                                          context: context,
-                                        ),
-                                      ),
-                                    )
-                                  : null,
+                              // A message's turn actions and fork live in
+                              // its action bar (#539).
+                              messageActions: (item, turn) =>
+                                  _messageActions(c, l10n, item, turn),
                               emptyBuilder: _empty(c, l10n),
                               scroll: widget.controller.scroll,
                               settled: settled,

@@ -910,7 +910,14 @@ class V2LocalizationsPt extends V2Localizations {
   String get messageCopyAll => 'Copiar todo o texto';
 
   @override
-  String get messageSelectText => 'Selecionar texto';
+  String get messageActions => 'Ações da mensagem';
+
+  @override
+  String get messageMoreActions => 'Mais ações';
+
+  @override
+  String get messageForkUncertain =>
+      'A bifurcação pode ter sido criada. Confira suas conversas.';
 
   @override
   String get composerSendNow => 'Enviar agora';

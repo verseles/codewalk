@@ -894,7 +894,13 @@ class V2LocalizationsAr extends V2Localizations {
   String get messageCopyAll => 'نسخ النص بالكامل';
 
   @override
-  String get messageSelectText => 'تحديد النص';
+  String get messageActions => 'إجراءات الرسالة';
+
+  @override
+  String get messageMoreActions => 'إجراءات أخرى';
+
+  @override
+  String get messageForkUncertain => 'ربما تم إنشاء التفرع. تحقق من محادثاتك.';
 
   @override
   String get composerSendNow => 'أرسل الآن';

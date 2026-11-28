@@ -900,7 +900,14 @@ class V2LocalizationsUr extends V2Localizations {
   String get messageCopyAll => 'پورا متن کاپی کریں';
 
   @override
-  String get messageSelectText => 'متن منتخب کریں';
+  String get messageActions => 'پیغام کے اقدامات';
+
+  @override
+  String get messageMoreActions => 'مزید اقدامات';
+
+  @override
+  String get messageForkUncertain =>
+      'ہو سکتا ہے فورک بن گیا ہو۔ اپنی گفتگو دیکھیں۔';
 
   @override
   String get composerSendNow => 'ابھی بھیجیں';

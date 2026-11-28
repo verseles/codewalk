@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:codewalk_core/codewalk_core.dart';
-import 'package:flutter/gestures.dart';
 // ignore: deprecated_member_use
 import 'package:flutter/material.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../shared/l10n/l10n_context.dart';
@@ -13,6 +11,7 @@ import '../../shared/rendering/canonical_message_body.dart';
 import '../../shared/rendering/message_render_budget.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_snack_bar.dart';
+import 'message_action_bar.dart';
 import 'session_attachment_strip.dart';
 import 'session_compaction_note.dart';
 import 'session_error_card.dart';
@@ -70,21 +69,6 @@ void copyConversationText(BuildContext context, String text) {
   );
 }
 
-/// An option a message offers in its menu beside Copy and Select (#492).
-final class SessionBubbleAction {
-  const SessionBubbleAction({
-    required this.label,
-    required this.icon,
-    required this.onSelected,
-  });
-
-  final String label;
-  final IconData icon;
-
-  /// Runs the option; [context] is the message's, for any confirmation.
-  final void Function(BuildContext context) onSelected;
-}
-
 /// One read-only timeline item, shared by the history and live views.
 ///
 /// V2-071A: text-bearing canonical items render rich Markdown/math/HTML/
@@ -107,15 +91,15 @@ class SessionTimelineTile extends StatelessWidget {
     this.messageHeader = false,
     this.turnTokensPerSecond,
     this.showElapsed = true,
-    this.revert,
+    this.actions = const [],
     this.minimizeUnknownShell = false,
     this.highlighted = false,
   });
   final TimelineItem item;
 
-  /// The user turn's revert (undo this turn, or rewind and edit from here),
-  /// offered in the message's menu. Null for none.
-  final SessionBubbleAction? revert;
+  /// The message's actions beyond Copy all (undo, rewind, fork and the
+  /// like), offered in its action bar (#539).
+  final List<MessageAction> actions;
   final bool minimizeUnknownShell;
   final bool highlighted;
   final void Function(String text, String href, String? title)? onTapLink;
@@ -489,7 +473,7 @@ class SessionTimelineTile extends StatelessWidget {
           UserInput(:final text) || AssistantText(:final text) => text,
           _ => null,
         };
-        Widget bubble = ConversationTextScale(
+        final bubble = ConversationTextScale(
           // The sender is no longer written on the bubble; screen readers
           // still hear it.
           child: isUser
@@ -511,22 +495,38 @@ class SessionTimelineTile extends StatelessWidget {
                 )
               : tile,
         );
-        if (text != null) {
-          bubble = _MessageBubble(
-            key: ValueKey('message-bubble-${item.id.value}'),
-            text: text,
-            revert: isUser ? revert : null,
-            child: bubble,
+        final bounds = BoxConstraints(
+          minHeight: isUser ? 48.0 : 0.0,
+          maxWidth: candidateW,
+        );
+        // A prompt still on its way has no actions of its own (#502); its
+        // text stays selectable.
+        if (text != null && !waiting) {
+          return MessageActionHost(
+            key: ValueKey('message-row-${item.id.value}'),
+            end: isUser,
+            constraints: bounds,
+            actions: [
+              if (text.isNotEmpty)
+                MessageAction(
+                  id: MessageActionId.copy,
+                  label: l10n.messageCopyAll,
+                  icon: Symbols.content_copy,
+                  onSelected: (context) => copyConversationText(context, text),
+                ),
+              ...actions,
+            ],
+            child: KeyedSubtree(
+              key: ValueKey('message-bubble-${item.id.value}'),
+              child: bubble,
+            ),
           );
         }
         return Align(
           alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
           child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: isUser ? 48.0 : 0.0,
-              maxWidth: candidateW,
-            ),
-            child: bubble,
+            constraints: bounds,
+            child: text != null ? SelectionArea(child: bubble) : bubble,
           ),
         );
       },
@@ -536,8 +536,8 @@ class SessionTimelineTile extends StatelessWidget {
   Widget _buildBody(BuildContext context, dynamic l10n, {String? trailing}) {
     final item = this.item;
     switch (item) {
-      // A message selects its text only on request (#492): an always-on
-      // selection would take the long press its menu needs.
+      // A message's text is always selectable (#539): its host wraps it in
+      // a selection area.
       case UserInput(:final text, :final attachments):
         final messageBody = text.isEmpty
             ? null
@@ -652,291 +652,6 @@ class SessionTimelineTile extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
         );
     }
-  }
-}
-
-enum _BubbleChoice { revert, copy, select }
-
-class _OpenMenuIntent extends Intent {
-  const _OpenMenuIntent();
-}
-
-/// Escape while selecting: its own intent, since the selection's region
-/// takes the shared dismiss intent to hide its toolbar first.
-class _StopSelectingIntent extends Intent {
-  const _StopSelectingIntent();
-}
-
-/// A message's own gestures (#492): a double tap copies its whole text, and
-/// a long press, a secondary click or the Menu key offers Revert (on the
-/// user's own turns, where the session can), Copy all text and Select text.
-/// Selecting is a mode of this message alone, until Escape, a tap outside
-/// it or a copy from its toolbar.
-class _MessageBubble extends StatefulWidget {
-  const _MessageBubble({
-    super.key,
-    required this.text,
-    required this.revert,
-    required this.child,
-  });
-
-  /// The message's canonical text, as the harness sent it.
-  final String text;
-  final SessionBubbleAction? revert;
-  final Widget child;
-
-  @override
-  State<_MessageBubble> createState() => _MessageBubbleState();
-}
-
-class _MessageBubbleState extends State<_MessageBubble> {
-  // The message keeps its state while the selection wraps it and lets go.
-  final _content = GlobalKey();
-  final _selection = GlobalKey<SelectionAreaState>();
-  final _selectionFocus = FocusNode(debugLabel: 'message selection');
-  bool _selecting = false;
-  bool _highlight = false;
-
-  // Whether the selection took the focus: it ends when the focus moves on,
-  // as when another selectable item (reasoning, a notice) is tapped, which
-  // shares the selection's tap group.
-  bool _selectionFocused = false;
-
-  // A double tap is read from raw pointers rather than a double-tap
-  // recognizer, which would hold every single tap on the message's own
-  // controls (links, the elapsed chip, copy buttons) for its timeout.
-  Offset? _downAt;
-  Offset? _lastTapAt;
-  Timer? _lastTapTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectionFocus.addListener(_selectionFocusChanged);
-  }
-
-  void _selectionFocusChanged() {
-    if (_selectionFocus.hasFocus) {
-      _selectionFocused = true;
-    } else if (_selectionFocused) {
-      _stopSelecting();
-    }
-  }
-
-  @override
-  void dispose() {
-    _lastTapTimer?.cancel();
-    _selectionFocus.dispose();
-    super.dispose();
-  }
-
-  void _copyAll() => copyConversationText(context, widget.text);
-
-  void _pointerDown(PointerDownEvent event) {
-    _downAt = event.buttons == kPrimaryButton ? event.position : null;
-  }
-
-  void _pointerUp(PointerUpEvent event) {
-    final downAt = _downAt;
-    _downAt = null;
-    if (_selecting || downAt == null) return;
-    // Only a tap counts: a press that did not travel or turn into the long
-    // press, which clears [_downAt].
-    if ((event.position - downAt).distance > kTouchSlop) {
-      _lastTapAt = null;
-      return;
-    }
-    final lastAt = _lastTapAt;
-    if (lastAt != null &&
-        (_lastTapTimer?.isActive ?? false) &&
-        (downAt - lastAt).distance <= kDoubleTapSlop) {
-      _lastTapTimer?.cancel();
-      _lastTapAt = null;
-      // After this pointer's own taps, so a copy a control inside the
-      // message makes (inline code, a code block) cannot replace it.
-      scheduleMicrotask(() {
-        if (mounted) _copyAll();
-      });
-      return;
-    }
-    _lastTapAt = event.position;
-    _lastTapTimer?.cancel();
-    _lastTapTimer = Timer(kDoubleTapTimeout, () => _lastTapAt = null);
-  }
-
-  void _select() {
-    setState(() => _selecting = true);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_selecting) return;
-      _selectionFocus.requestFocus();
-      _selection.currentState?.selectableRegion.selectAll();
-      // The handles and the toolbar need the selection's geometry, which the
-      // next frame lays out.
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted || !_selecting) return;
-        _selection.currentState?.selectableRegion.selectAll(
-          SelectionChangedCause.toolbar,
-        );
-      });
-      WidgetsBinding.instance.scheduleFrame();
-    });
-  }
-
-  void _stopSelecting() {
-    _selectionFocused = false;
-    if (!_selecting) return;
-    setState(() => _selecting = false);
-  }
-
-  Future<void> _openMenu([Offset? at]) async {
-    final box = context.findRenderObject() as RenderBox?;
-    final overlay = Overlay.maybeOf(context)?.context.findRenderObject();
-    if (box == null || overlay is! RenderBox) return;
-    final point = overlay.globalToLocal(
-      at ?? box.localToGlobal(box.size.center(Offset.zero)),
-    );
-    final l10n = context.v2L10n;
-    final revert = widget.revert;
-    unawaited(HapticFeedback.selectionClick());
-    final choice = await showMenu<_BubbleChoice>(
-      context: context,
-      position: RelativeRect.fromRect(
-        point & Size.zero,
-        Offset.zero & overlay.size,
-      ),
-      items: [
-        if (revert != null)
-          _item(_BubbleChoice.revert, revert.icon, revert.label),
-        _item(_BubbleChoice.copy, Symbols.content_copy, l10n.messageCopyAll),
-        _item(_BubbleChoice.select, Symbols.select_all, l10n.messageSelectText),
-      ],
-    );
-    if (!mounted) return;
-    switch (choice) {
-      case _BubbleChoice.revert:
-        revert?.onSelected(context);
-      case _BubbleChoice.copy:
-        _copyAll();
-      case _BubbleChoice.select:
-        _select();
-      case null:
-        break;
-    }
-  }
-
-  PopupMenuItem<_BubbleChoice> _item(
-    _BubbleChoice choice,
-    IconData icon,
-    String label,
-  ) => PopupMenuItem(
-    key: ValueKey('message-menu-${choice.name}'),
-    value: choice,
-    child: Row(
-      children: [
-        Icon(icon, size: 20),
-        const SizedBox(width: 12),
-        Flexible(child: Text(label)),
-      ],
-    ),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.v2L10n;
-    final revert = widget.revert;
-    Widget content = KeyedSubtree(key: _content, child: widget.child);
-    if (_selecting) {
-      content = TapRegion(
-        // The selection's handles and toolbar live in the overlay, in this
-        // group, so touching them does not end the selection.
-        groupId: SelectableRegion,
-        onTapOutside: (_) => _stopSelecting(),
-        child: SelectionArea(
-          key: _selection,
-          focusNode: _selectionFocus,
-          // A copy from the toolbar ends the selection, as it does on a
-          // native text view.
-          contextMenuBuilder: (context, state) =>
-              AdaptiveTextSelectionToolbar.buttonItems(
-                anchors: state.contextMenuAnchors,
-                buttonItems: [
-                  for (final button in state.contextMenuButtonItems)
-                    button.type == ContextMenuButtonType.copy
-                        ? button.copyWith(
-                            onPressed: () {
-                              button.onPressed?.call();
-                              _stopSelecting();
-                            },
-                          )
-                        : button,
-                ],
-              ),
-          child: content,
-        ),
-      );
-    }
-    return Semantics(
-      container: true,
-      customSemanticsActions: {
-        if (revert != null)
-          CustomSemanticsAction(label: revert.label): () =>
-              revert.onSelected(context),
-        CustomSemanticsAction(label: l10n.messageCopyAll): _copyAll,
-        CustomSemanticsAction(label: l10n.messageSelectText): _select,
-      },
-      child: FocusableActionDetector(
-        onShowFocusHighlight: (value) => setState(() => _highlight = value),
-        shortcuts: {
-          const SingleActivator(LogicalKeyboardKey.contextMenu):
-              const _OpenMenuIntent(),
-          const SingleActivator(LogicalKeyboardKey.f10, shift: true):
-              const _OpenMenuIntent(),
-          if (_selecting)
-            const SingleActivator(LogicalKeyboardKey.escape):
-                const _StopSelectingIntent(),
-        },
-        actions: {
-          _OpenMenuIntent: CallbackAction<_OpenMenuIntent>(
-            onInvoke: (_) => unawaited(_openMenu()),
-          ),
-          _StopSelectingIntent: CallbackAction<_StopSelectingIntent>(
-            onInvoke: (_) => _stopSelecting(),
-          ),
-        },
-        child: GestureDetector(
-          // The whole message answers, its padding and line ends included.
-          behavior: HitTestBehavior.translucent,
-          onLongPressStart: _selecting
-              ? null
-              : (details) {
-                  _downAt = null;
-                  unawaited(_openMenu(details.globalPosition));
-                },
-          onSecondaryTapUp: _selecting
-              ? null
-              : (details) => unawaited(_openMenu(details.globalPosition)),
-          child: Listener(
-            behavior: HitTestBehavior.translucent,
-            onPointerDown: _pointerDown,
-            onPointerUp: _pointerUp,
-            child: DecoratedBox(
-              position: DecorationPosition.foreground,
-              decoration: _highlight
-                  ? BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(context).colorScheme.primary,
-                        width: 2,
-                        strokeAlign: BorderSide.strokeAlignOutside,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    )
-                  : const BoxDecoration(),
-              child: content,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
 
