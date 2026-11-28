@@ -29,6 +29,9 @@ class _ReleaseNewsCardState extends State<ReleaseNewsCard> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Told when its page is covered or shown again, as by Servers.
+    ModalRoute.of(context);
+    _look();
     final position = Scrollable.maybeOf(context)?.position;
     if (!identical(position, _position)) {
       _position?.removeListener(_look);
@@ -64,6 +67,8 @@ class _ReleaseNewsCardState extends State<ReleaseNewsCard> {
     final card = context.findRenderObject();
     final view = Scrollable.maybeOf(context)?.context.findRenderObject();
     if (card is! RenderBox || !card.attached || !card.hasSize) return;
+    // A page covered by another, as Servers over Settings, shows nothing.
+    if (!(ModalRoute.isCurrentOf(context) ?? true)) return;
     if (view is RenderBox && view.attached && view.hasSize) {
       final top = card.localToGlobal(Offset.zero, ancestor: view).dy;
       if (top >= view.size.height || top + card.size.height <= 0) return;

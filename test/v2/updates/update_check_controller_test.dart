@@ -415,6 +415,54 @@ void main() {
     updates.dispose();
   });
 
+  testWidgets('news under a page that covers Settings is not seen', (
+    tester,
+  ) async {
+    installed = '2.0.0-beta.2';
+    final updates = controller();
+    addTearDown(updates.dispose);
+    await tester.runAsync(() => updates.setChannel(UpdateChannel.beta));
+    final navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      ChangeNotifierProvider<UpdateCheckController?>.value(
+        value: updates,
+        child: MaterialApp(
+          navigatorKey: navigator,
+          localizationsDelegates: V2Localizations.localizationsDelegates,
+          supportedLocales: V2Localizations.supportedLocales,
+          home: Scaffold(
+            body: ListView(children: [ReleaseNewsCard(onHistory: () {})]),
+          ),
+        ),
+      ),
+    );
+    // Servers covers Settings, then the news arrives.
+    unawaited(
+      navigator.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => const Scaffold()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.runAsync(() async {
+      final entries = jsonDecode(listing(['v2.0.0-beta.2'])) as List;
+      for (final entry in entries) {
+        (entry as Map)['published_at'] = '2026-11-04T12:00:00Z';
+        entry['body'] = '> 📣 News for ${entry['tag_name']}';
+      }
+      final check = updates.check();
+      await answer(jsonEncode(entries));
+      await check;
+    });
+    await tester.pumpAndSettle();
+    updates.leaveNews();
+    expect(updates.visibleNews, isNotNull);
+    // Back on Settings, it is seen.
+    navigator.currentState!.pop();
+    await tester.pumpAndSettle();
+    updates.leaveNews();
+    expect(updates.visibleNews, isNull);
+  });
+
   testWidgets('news is seen only once it is on screen', (tester) async {
     installed = '2.0.0-beta.2';
     final updates = controller();

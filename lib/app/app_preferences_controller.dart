@@ -481,7 +481,9 @@ class AppPreferencesController extends ChangeNotifier {
         // leave a marked storage without it; a write that fails is told
         // and retried like any other save.
         _persist('themePreset', _values['themePreset'], 0);
-        await flush();
+        // Only that write: all of them could hold a shortcut save, which
+        // waits for this load.
+        if (_pending.isNotEmpty) await _pending.last;
         if (_disposed) return;
       }
       final language = value('locale');

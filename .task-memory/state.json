@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 33,
+  "artifact_seq": 34,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -528,6 +528,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "8.3 r4 + 8.4-8.6 r2"
+    },
+    "A0034": {
+      "active": true,
+      "bytes": 624,
+      "created_at": "2026-11-28T07:36:31Z",
+      "evidence": "/tmp/opencode/g8/rev/u9/r5_*.out, /tmp/opencode/g8/rev/u10/r3_*.out",
+      "id": "A0034",
+      "impact": "Two real fixes (flush deadlock, covered route), doc; capsule residuals judged",
+      "origin": "6 helpers each",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0034.md",
+      "purpose": "Re-review fddeb392 and 5bbc7812",
+      "rerun_when": "n/a",
+      "sha256": "d04669cd53bd5356e531122676a61e4a6cbce92046834619c5fbcb5d96f2e472",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "8.3 r5 + 8.4-8.6 r3 (final)"
     }
   },
   "checklist": [
@@ -1083,10 +1099,14 @@
     {
       "at": "2026-11-28T07:14:29Z",
       "text": "Judged 8.3 r3 + 8.4-8.6 r1 (A0032). 8.3: accepted retention (512, oldest-first), earliest-start reconciliation, pop-in guard + timer cancel, per-link recognizers -> 5ed8a987. 8.4-8.6: accepted viewport centering, news dismissed despite leave, no workspace notice for seen news, awaited first-run theme write -> 64f6b0af; rejected seen-while-scrolled (dissent to Sol-F), double bar during transition (sugg), card widget test (sugg). Metrics u9 r3, u10 r1 recorded."
+    },
+    {
+      "at": "2026-11-28T07:25:57Z",
+      "text": "Judged 8.3 r4 + 8.4-8.6 r2 (A0033). 8.3: accepted unconfirmed-guess-as-history, end on disappearance (non-empty list), captured live in pop-in, sightings unit test; rejected controller->capsule import coupling (sugg). 8.4-8.6: accepted on-screen news visibility (resolves persisted Sol-F objection), leaveNews dismisses in memory, recenter on extent/metrics, first-run theme via _persist+flush, window test fix. Metrics u9 r4, u10 r2 recorded."
     }
   ],
-  "generation": 160,
-  "next_action": "Dispatch u9 r4 + u10 r2",
+  "generation": 164,
+  "next_action": "Full suite running (by52t2bp5); then final re-review u9 r5 + u10 r3",
   "pending_operation": null,
   "queued_followups": [],
   "request": {
@@ -1109,7 +1129,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T07:19:37Z",
+  "updated_at": "2026-11-28T07:36:31Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -1249,6 +1269,13 @@
       "check": "Full flutter test at f9a8bf0c",
       "criterion": null,
       "evidence": "all pass except expected goldens (appearance x4, subagent capsule x3) regenerated on x86 after push; log /tmp/opencode/g8/full2.log",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T07:32:27Z",
+      "check": "Full flutter test at 5bbc7812",
+      "criterion": null,
+      "evidence": "all pass except expected goldens (appearance x4, capsule x3); log /tmp/opencode/g8/full3.log",
       "outcome": "pass"
     }
   ]

@@ -1,5 +1,6 @@
 import 'package:codewalk/app/app_preferences_controller.dart';
 import 'package:codewalk/platform/storage/metadata_store.dart';
+import 'package:codewalk/shared/shortcuts/shortcut_action.dart';
 import 'package:codewalk/shared/theme/opencode_theme_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -32,6 +33,18 @@ void main() {
     first.setThemePreset(null);
     await pumpEventQueue();
     expect((await load(backend)).themePreset, isNull);
+  });
+
+  test('a shortcut saved during the first load does not hold it', () async {
+    final preferences = AppPreferencesController(
+      store: V2MetadataStore(backend: FakeMetadataBackend()),
+    );
+    addTearDown(preferences.dispose);
+    final loading = preferences.initialize();
+    // Its save waits for the load, which must not wait for it.
+    preferences.setShortcutBinding(ShortcutAction.openSettings, 'a');
+    await loading.timeout(const Duration(seconds: 2));
+    expect(preferences.themePreset, OpenCodeThemePreset.github);
   });
 
   test('an existing install keeps what it had', () async {
