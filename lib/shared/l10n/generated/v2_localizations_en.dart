@@ -926,6 +926,129 @@ class V2LocalizationsEn extends V2Localizations {
   String get messageImageSaved => 'Image saved';
 
   @override
+  String get readAloudTitle => 'Read aloud';
+
+  @override
+  String get readAloudEnable => 'Read aloud';
+
+  @override
+  String get readAloudEnableDescription =>
+      'Offer Read aloud in the message bar';
+
+  @override
+  String get readAloudProvider => 'Voice service';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge (experimental)';
+
+  @override
+  String get readAloudProviderSystem => 'Device voice';
+
+  @override
+  String get readAloudProviderOpenAi => 'OpenAI-compatible';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      'Experimental: uses Microsoft Edge\'s unofficial read-aloud service. The message text goes to Microsoft.';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return 'The message text goes to $service.';
+  }
+
+  @override
+  String get readAloudVoice => 'Voice';
+
+  @override
+  String get readAloudVoiceDefault => 'Default for your language';
+
+  @override
+  String get readAloudVoicesFailed => 'Could not load the voices';
+
+  @override
+  String get readAloudModel => 'Model';
+
+  @override
+  String get readAloudBaseUrl => 'Server address';
+
+  @override
+  String get readAloudBaseUrlRequired => 'Required for NVIDIA NIM';
+
+  @override
+  String get readAloudApiKey => 'API key';
+
+  @override
+  String get readAloudApiKeySaved => 'A key is saved on this device';
+
+  @override
+  String get readAloudSave => 'Save';
+
+  @override
+  String get readAloudClear => 'Clear';
+
+  @override
+  String get readAloudSpeed => 'Speed';
+
+  @override
+  String get readAloudTestPhrase => 'Test phrase';
+
+  @override
+  String get readAloudTestPhraseDefault =>
+      'Hello! This is how messages will sound.';
+
+  @override
+  String get readAloudTest => 'Test voice';
+
+  @override
+  String get readAloudAction => 'Read aloud';
+
+  @override
+  String get readAloudStop => 'Stop reading';
+
+  @override
+  String get readAloudPause => 'Pause';
+
+  @override
+  String get readAloudResume => 'Resume';
+
+  @override
+  String get readAloudPreparing => 'Preparing audio…';
+
+  @override
+  String get readAloudSettings => 'Settings';
+
+  @override
+  String get readAloudFailOffline => 'Could not reach the voice service';
+
+  @override
+  String get readAloudFailUnauthorized => 'The voice service refused the key';
+
+  @override
+  String get readAloudFailRateLimited =>
+      'The voice service is busy; try again later';
+
+  @override
+  String get readAloudFailTooLong => 'Too long to read aloud';
+
+  @override
+  String get readAloudFailNoAudio => 'Nothing to read aloud';
+
+  @override
+  String get readAloudFailRejected => 'The voice service refused the request';
+
+  @override
+  String get readAloudFailNotConfigured => 'Set up read aloud first';
+
+  @override
+  String get readAloudFailUnavailable => 'Read aloud is unavailable here';
+
+  @override
   String get composerSendNow => 'Send now';
 
   @override

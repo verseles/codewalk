@@ -918,6 +918,127 @@ class V2LocalizationsAr extends V2Localizations {
   String get messageImageSaved => 'تم حفظ الصورة';
 
   @override
+  String get readAloudTitle => 'القراءة بصوت عالٍ';
+
+  @override
+  String get readAloudEnable => 'القراءة بصوت عالٍ';
+
+  @override
+  String get readAloudEnableDescription =>
+      'إظهار القراءة بصوت عالٍ في شريط الرسالة';
+
+  @override
+  String get readAloudProvider => 'خدمة الصوت';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge (تجريبي)';
+
+  @override
+  String get readAloudProviderSystem => 'صوت الجهاز';
+
+  @override
+  String get readAloudProviderOpenAi => 'متوافق مع OpenAI';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      'تجريبي: يستخدم خدمة القراءة غير الرسمية في Microsoft Edge. يُرسل نص الرسالة إلى Microsoft.';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return 'يُرسل نص الرسالة إلى $service.';
+  }
+
+  @override
+  String get readAloudVoice => 'الصوت';
+
+  @override
+  String get readAloudVoiceDefault => 'الافتراضي للغتك';
+
+  @override
+  String get readAloudVoicesFailed => 'تعذر تحميل الأصوات';
+
+  @override
+  String get readAloudModel => 'النموذج';
+
+  @override
+  String get readAloudBaseUrl => 'عنوان الخادم';
+
+  @override
+  String get readAloudBaseUrlRequired => 'مطلوب لـ NVIDIA NIM';
+
+  @override
+  String get readAloudApiKey => 'مفتاح API';
+
+  @override
+  String get readAloudApiKeySaved => 'يوجد مفتاح محفوظ على هذا الجهاز';
+
+  @override
+  String get readAloudSave => 'حفظ';
+
+  @override
+  String get readAloudClear => 'مسح';
+
+  @override
+  String get readAloudSpeed => 'السرعة';
+
+  @override
+  String get readAloudTestPhrase => 'عبارة الاختبار';
+
+  @override
+  String get readAloudTestPhraseDefault => 'مرحبًا! هكذا ستبدو الرسائل.';
+
+  @override
+  String get readAloudTest => 'اختبار الصوت';
+
+  @override
+  String get readAloudAction => 'القراءة بصوت عالٍ';
+
+  @override
+  String get readAloudStop => 'إيقاف القراءة';
+
+  @override
+  String get readAloudPause => 'إيقاف مؤقت';
+
+  @override
+  String get readAloudResume => 'استئناف';
+
+  @override
+  String get readAloudPreparing => 'جارٍ تجهيز الصوت…';
+
+  @override
+  String get readAloudSettings => 'الإعدادات';
+
+  @override
+  String get readAloudFailOffline => 'تعذر الوصول إلى خدمة الصوت';
+
+  @override
+  String get readAloudFailUnauthorized => 'رفضت خدمة الصوت المفتاح';
+
+  @override
+  String get readAloudFailRateLimited => 'خدمة الصوت مشغولة؛ حاول لاحقًا';
+
+  @override
+  String get readAloudFailTooLong => 'أطول من أن تُقرأ بصوت عالٍ';
+
+  @override
+  String get readAloudFailNoAudio => 'لا يوجد ما يُقرأ بصوت عالٍ';
+
+  @override
+  String get readAloudFailRejected => 'رفضت خدمة الصوت الطلب';
+
+  @override
+  String get readAloudFailNotConfigured => 'اضبط القراءة بصوت عالٍ أولًا';
+
+  @override
+  String get readAloudFailUnavailable => 'القراءة بصوت عالٍ غير متاحة هنا';
+
+  @override
   String get composerSendNow => 'أرسل الآن';
 
   @override

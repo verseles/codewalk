@@ -9,6 +9,7 @@ import '../../shared/rendering/markdown_link_opener.dart';
 import '../../shared/sessions/session_history_source.dart';
 import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
+import '../voice/read_aloud_actions.dart';
 import 'session_attachment_scope.dart';
 import 'session_history_controller.dart';
 import 'session_report_group.dart';
@@ -208,6 +209,9 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                             showElapsed: !inlineStats.contains(
                               item.meta.message?.message,
                             ),
+                            actions: [
+                              ?readAloudAction(context, c.session, item),
+                            ],
                           );
                         },
                       ),
@@ -218,9 +222,17 @@ class _SessionHistoryPageState extends State<SessionHistoryPage> {
                   top: false,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text(
-                      l10n.historySendUnavailable,
-                      key: const ValueKey('history-composer'),
+                    child: Row(
+                      children: [
+                        ReadAloudPill(session: c.session),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            l10n.historySendUnavailable,
+                            key: const ValueKey('history-composer'),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),

@@ -598,6 +598,167 @@
   "@messageImageSaved": {
     "description": "V2 message image sharing (#540)"
   },
+  "readAloudTitle": "Leer en voz alta",
+  "@readAloudTitle": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEnable": "Leer en voz alta",
+  "@readAloudEnable": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEnableDescription": "Mostrar Leer en voz alta en la barra del mensaje",
+  "@readAloudEnableDescription": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProvider": "Servicio de voz",
+  "@readAloudProvider": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderEdge": "Microsoft Edge (experimental)",
+  "@readAloudProviderEdge": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderSystem": "Voz del dispositivo",
+  "@readAloudProviderSystem": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderOpenAi": "Compatible con OpenAI",
+  "@readAloudProviderOpenAi": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderElevenLabs": "ElevenLabs",
+  "@readAloudProviderElevenLabs": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderNim": "NVIDIA NIM",
+  "@readAloudProviderNim": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEdgeNotice": "Experimental: usa el servicio no oficial de lectura de Microsoft Edge. El texto del mensaje va a Microsoft.",
+  "@readAloudEdgeNotice": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudCloudNotice": "El texto del mensaje va a {service}.",
+  "@readAloudCloudNotice": {
+    "description": "V2 read aloud (#541)",
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "readAloudVoice": "Voz",
+  "@readAloudVoice": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudVoiceDefault": "Predeterminada de tu idioma",
+  "@readAloudVoiceDefault": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudVoicesFailed": "No se pudieron cargar las voces",
+  "@readAloudVoicesFailed": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudModel": "Modelo",
+  "@readAloudModel": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudBaseUrl": "Dirección del servidor",
+  "@readAloudBaseUrl": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudBaseUrlRequired": "Obligatoria para NVIDIA NIM",
+  "@readAloudBaseUrlRequired": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudApiKey": "Clave de API",
+  "@readAloudApiKey": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudApiKeySaved": "Hay una clave guardada en este dispositivo",
+  "@readAloudApiKeySaved": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSave": "Guardar",
+  "@readAloudSave": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudClear": "Borrar",
+  "@readAloudClear": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSpeed": "Velocidad",
+  "@readAloudSpeed": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTestPhrase": "Frase de prueba",
+  "@readAloudTestPhrase": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTestPhraseDefault": "¡Hola! Así sonarán los mensajes.",
+  "@readAloudTestPhraseDefault": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTest": "Probar voz",
+  "@readAloudTest": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudAction": "Leer en voz alta",
+  "@readAloudAction": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudStop": "Detener lectura",
+  "@readAloudStop": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudPause": "Pausar",
+  "@readAloudPause": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudResume": "Reanudar",
+  "@readAloudResume": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudPreparing": "Preparando el audio…",
+  "@readAloudPreparing": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSettings": "Ajustes",
+  "@readAloudSettings": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailOffline": "No se pudo contactar con el servicio de voz",
+  "@readAloudFailOffline": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailUnauthorized": "El servicio de voz rechazó la clave",
+  "@readAloudFailUnauthorized": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailRateLimited": "El servicio de voz está ocupado; inténtalo más tarde",
+  "@readAloudFailRateLimited": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailTooLong": "Demasiado largo para leerlo en voz alta",
+  "@readAloudFailTooLong": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailNoAudio": "Nada que leer en voz alta",
+  "@readAloudFailNoAudio": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailRejected": "El servicio de voz rechazó la solicitud",
+  "@readAloudFailRejected": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailNotConfigured": "Configura primero la lectura en voz alta",
+  "@readAloudFailNotConfigured": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailUnavailable": "Leer en voz alta no está disponible aquí",
+  "@readAloudFailUnavailable": {
+    "description": "V2 read aloud (#541)"
+  },
   "composerSendNow": "Enviar ahora",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

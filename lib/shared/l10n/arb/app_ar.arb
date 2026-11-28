@@ -597,6 +597,167 @@
   "@messageImageSaved": {
     "description": "V2 message image sharing (#540)"
   },
+  "readAloudTitle": "القراءة بصوت عالٍ",
+  "@readAloudTitle": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEnable": "القراءة بصوت عالٍ",
+  "@readAloudEnable": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEnableDescription": "إظهار القراءة بصوت عالٍ في شريط الرسالة",
+  "@readAloudEnableDescription": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProvider": "خدمة الصوت",
+  "@readAloudProvider": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderEdge": "Microsoft Edge (تجريبي)",
+  "@readAloudProviderEdge": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderSystem": "صوت الجهاز",
+  "@readAloudProviderSystem": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderOpenAi": "متوافق مع OpenAI",
+  "@readAloudProviderOpenAi": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderElevenLabs": "ElevenLabs",
+  "@readAloudProviderElevenLabs": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderNim": "NVIDIA NIM",
+  "@readAloudProviderNim": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEdgeNotice": "تجريبي: يستخدم خدمة القراءة غير الرسمية في Microsoft Edge. يُرسل نص الرسالة إلى Microsoft.",
+  "@readAloudEdgeNotice": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudCloudNotice": "يُرسل نص الرسالة إلى {service}.",
+  "@readAloudCloudNotice": {
+    "description": "V2 read aloud (#541)",
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "readAloudVoice": "الصوت",
+  "@readAloudVoice": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudVoiceDefault": "الافتراضي للغتك",
+  "@readAloudVoiceDefault": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudVoicesFailed": "تعذر تحميل الأصوات",
+  "@readAloudVoicesFailed": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudModel": "النموذج",
+  "@readAloudModel": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudBaseUrl": "عنوان الخادم",
+  "@readAloudBaseUrl": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudBaseUrlRequired": "مطلوب لـ NVIDIA NIM",
+  "@readAloudBaseUrlRequired": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudApiKey": "مفتاح API",
+  "@readAloudApiKey": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudApiKeySaved": "يوجد مفتاح محفوظ على هذا الجهاز",
+  "@readAloudApiKeySaved": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSave": "حفظ",
+  "@readAloudSave": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudClear": "مسح",
+  "@readAloudClear": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSpeed": "السرعة",
+  "@readAloudSpeed": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTestPhrase": "عبارة الاختبار",
+  "@readAloudTestPhrase": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTestPhraseDefault": "مرحبًا! هكذا ستبدو الرسائل.",
+  "@readAloudTestPhraseDefault": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTest": "اختبار الصوت",
+  "@readAloudTest": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudAction": "القراءة بصوت عالٍ",
+  "@readAloudAction": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudStop": "إيقاف القراءة",
+  "@readAloudStop": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudPause": "إيقاف مؤقت",
+  "@readAloudPause": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudResume": "استئناف",
+  "@readAloudResume": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudPreparing": "جارٍ تجهيز الصوت…",
+  "@readAloudPreparing": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSettings": "الإعدادات",
+  "@readAloudSettings": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailOffline": "تعذر الوصول إلى خدمة الصوت",
+  "@readAloudFailOffline": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailUnauthorized": "رفضت خدمة الصوت المفتاح",
+  "@readAloudFailUnauthorized": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailRateLimited": "خدمة الصوت مشغولة؛ حاول لاحقًا",
+  "@readAloudFailRateLimited": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailTooLong": "أطول من أن تُقرأ بصوت عالٍ",
+  "@readAloudFailTooLong": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailNoAudio": "لا يوجد ما يُقرأ بصوت عالٍ",
+  "@readAloudFailNoAudio": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailRejected": "رفضت خدمة الصوت الطلب",
+  "@readAloudFailRejected": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailNotConfigured": "اضبط القراءة بصوت عالٍ أولًا",
+  "@readAloudFailNotConfigured": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailUnavailable": "القراءة بصوت عالٍ غير متاحة هنا",
+  "@readAloudFailUnavailable": {
+    "description": "V2 read aloud (#541)"
+  },
   "composerSendNow": "أرسل الآن",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

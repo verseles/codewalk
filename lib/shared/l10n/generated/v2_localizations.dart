@@ -1787,6 +1787,240 @@ abstract class V2Localizations {
   /// **'Image saved'**
   String get messageImageSaved;
 
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Read aloud'**
+  String get readAloudTitle;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Read aloud'**
+  String get readAloudEnable;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Offer Read aloud in the message bar'**
+  String get readAloudEnableDescription;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Voice service'**
+  String get readAloudProvider;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Microsoft Edge (experimental)'**
+  String get readAloudProviderEdge;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Device voice'**
+  String get readAloudProviderSystem;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'OpenAI-compatible'**
+  String get readAloudProviderOpenAi;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'ElevenLabs'**
+  String get readAloudProviderElevenLabs;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'NVIDIA NIM'**
+  String get readAloudProviderNim;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Experimental: uses Microsoft Edge\'\'s unofficial read-aloud service. The message text goes to Microsoft.'**
+  String get readAloudEdgeNotice;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'The message text goes to {service}.'**
+  String readAloudCloudNotice(String service);
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Voice'**
+  String get readAloudVoice;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Default for your language'**
+  String get readAloudVoiceDefault;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the voices'**
+  String get readAloudVoicesFailed;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get readAloudModel;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Server address'**
+  String get readAloudBaseUrl;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Required for NVIDIA NIM'**
+  String get readAloudBaseUrlRequired;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'API key'**
+  String get readAloudApiKey;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'A key is saved on this device'**
+  String get readAloudApiKeySaved;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get readAloudSave;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get readAloudClear;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get readAloudSpeed;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Test phrase'**
+  String get readAloudTestPhrase;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Hello! This is how messages will sound.'**
+  String get readAloudTestPhraseDefault;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Test voice'**
+  String get readAloudTest;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Read aloud'**
+  String get readAloudAction;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Stop reading'**
+  String get readAloudStop;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get readAloudPause;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get readAloudResume;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing audio…'**
+  String get readAloudPreparing;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get readAloudSettings;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the voice service'**
+  String get readAloudFailOffline;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'The voice service refused the key'**
+  String get readAloudFailUnauthorized;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'The voice service is busy; try again later'**
+  String get readAloudFailRateLimited;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Too long to read aloud'**
+  String get readAloudFailTooLong;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to read aloud'**
+  String get readAloudFailNoAudio;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'The voice service refused the request'**
+  String get readAloudFailRejected;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Set up read aloud first'**
+  String get readAloudFailNotConfigured;
+
+  /// V2 read aloud (#541)
+  ///
+  /// In en, this message translates to:
+  /// **'Read aloud is unavailable here'**
+  String get readAloudFailUnavailable;
+
   /// V2 waiting messages (#486)
   ///
   /// In en, this message translates to:

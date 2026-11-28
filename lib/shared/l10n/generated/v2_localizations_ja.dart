@@ -884,6 +884,126 @@ class V2LocalizationsJa extends V2Localizations {
   String get messageImageSaved => '画像を保存しました';
 
   @override
+  String get readAloudTitle => '読み上げ';
+
+  @override
+  String get readAloudEnable => '読み上げ';
+
+  @override
+  String get readAloudEnableDescription => 'メッセージバーに読み上げを表示する';
+
+  @override
+  String get readAloudProvider => '音声サービス';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge（試験的）';
+
+  @override
+  String get readAloudProviderSystem => '端末の音声';
+
+  @override
+  String get readAloudProviderOpenAi => 'OpenAI 互換';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      '試験的：Microsoft Edge の非公式な読み上げサービスを使います。メッセージの本文は Microsoft に送られます。';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return 'メッセージの本文は $service に送られます。';
+  }
+
+  @override
+  String get readAloudVoice => '音声';
+
+  @override
+  String get readAloudVoiceDefault => '言語の既定';
+
+  @override
+  String get readAloudVoicesFailed => '音声を読み込めませんでした';
+
+  @override
+  String get readAloudModel => 'モデル';
+
+  @override
+  String get readAloudBaseUrl => 'サーバーのアドレス';
+
+  @override
+  String get readAloudBaseUrlRequired => 'NVIDIA NIM では必須';
+
+  @override
+  String get readAloudApiKey => 'API キー';
+
+  @override
+  String get readAloudApiKeySaved => 'この端末にキーが保存されています';
+
+  @override
+  String get readAloudSave => '保存';
+
+  @override
+  String get readAloudClear => '消去';
+
+  @override
+  String get readAloudSpeed => '速度';
+
+  @override
+  String get readAloudTestPhrase => 'テスト用の文';
+
+  @override
+  String get readAloudTestPhraseDefault => 'こんにちは！メッセージはこのように聞こえます。';
+
+  @override
+  String get readAloudTest => '音声をテスト';
+
+  @override
+  String get readAloudAction => '読み上げ';
+
+  @override
+  String get readAloudStop => '読み上げを停止';
+
+  @override
+  String get readAloudPause => '一時停止';
+
+  @override
+  String get readAloudResume => '再開';
+
+  @override
+  String get readAloudPreparing => '音声を準備中…';
+
+  @override
+  String get readAloudSettings => '設定';
+
+  @override
+  String get readAloudFailOffline => '音声サービスに接続できません';
+
+  @override
+  String get readAloudFailUnauthorized => '音声サービスがキーを拒否しました';
+
+  @override
+  String get readAloudFailRateLimited => '音声サービスが混み合っています。後でお試しください';
+
+  @override
+  String get readAloudFailTooLong => '長すぎて読み上げられません';
+
+  @override
+  String get readAloudFailNoAudio => '読み上げる内容がありません';
+
+  @override
+  String get readAloudFailRejected => '音声サービスが要求を拒否しました';
+
+  @override
+  String get readAloudFailNotConfigured => '先に読み上げを設定してください';
+
+  @override
+  String get readAloudFailUnavailable => 'ここでは読み上げを使えません';
+
+  @override
   String get composerSendNow => '今すぐ送信';
 
   @override

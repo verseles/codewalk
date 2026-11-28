@@ -921,6 +921,127 @@ class V2LocalizationsBn extends V2Localizations {
   String get messageImageSaved => 'ছবি সংরক্ষিত হয়েছে';
 
   @override
+  String get readAloudTitle => 'জোরে পড়ুন';
+
+  @override
+  String get readAloudEnable => 'জোরে পড়ুন';
+
+  @override
+  String get readAloudEnableDescription => 'বার্তার বারে জোরে পড়ুন দেখান';
+
+  @override
+  String get readAloudProvider => 'ভয়েস পরিষেবা';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge (পরীক্ষামূলক)';
+
+  @override
+  String get readAloudProviderSystem => 'ডিভাইসের কণ্ঠ';
+
+  @override
+  String get readAloudProviderOpenAi => 'OpenAI-সামঞ্জস্যপূর্ণ';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      'পরীক্ষামূলক: Microsoft Edge-এর অনানুষ্ঠানিক পড়ার পরিষেবা ব্যবহার করে। বার্তার লেখা Microsoft-এ যায়।';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return 'বার্তার লেখা $service-এ যায়।';
+  }
+
+  @override
+  String get readAloudVoice => 'কণ্ঠ';
+
+  @override
+  String get readAloudVoiceDefault => 'আপনার ভাষার ডিফল্ট';
+
+  @override
+  String get readAloudVoicesFailed => 'কণ্ঠগুলো লোড করা যায়নি';
+
+  @override
+  String get readAloudModel => 'মডেল';
+
+  @override
+  String get readAloudBaseUrl => 'সার্ভারের ঠিকানা';
+
+  @override
+  String get readAloudBaseUrlRequired => 'NVIDIA NIM-এর জন্য আবশ্যক';
+
+  @override
+  String get readAloudApiKey => 'API কী';
+
+  @override
+  String get readAloudApiKeySaved => 'এই ডিভাইসে একটি কী সংরক্ষিত আছে';
+
+  @override
+  String get readAloudSave => 'সংরক্ষণ';
+
+  @override
+  String get readAloudClear => 'মুছুন';
+
+  @override
+  String get readAloudSpeed => 'গতি';
+
+  @override
+  String get readAloudTestPhrase => 'পরীক্ষার বাক্য';
+
+  @override
+  String get readAloudTestPhraseDefault => 'নমস্কার! বার্তাগুলো এমন শোনাবে।';
+
+  @override
+  String get readAloudTest => 'কণ্ঠ পরীক্ষা';
+
+  @override
+  String get readAloudAction => 'জোরে পড়ুন';
+
+  @override
+  String get readAloudStop => 'পড়া থামান';
+
+  @override
+  String get readAloudPause => 'বিরতি';
+
+  @override
+  String get readAloudResume => 'চালিয়ে যান';
+
+  @override
+  String get readAloudPreparing => 'অডিও প্রস্তুত হচ্ছে…';
+
+  @override
+  String get readAloudSettings => 'সেটিংস';
+
+  @override
+  String get readAloudFailOffline => 'ভয়েস পরিষেবায় পৌঁছানো যায়নি';
+
+  @override
+  String get readAloudFailUnauthorized => 'ভয়েস পরিষেবা কী প্রত্যাখ্যান করেছে';
+
+  @override
+  String get readAloudFailRateLimited =>
+      'ভয়েস পরিষেবা ব্যস্ত; পরে চেষ্টা করুন';
+
+  @override
+  String get readAloudFailTooLong => 'জোরে পড়ার জন্য খুব লম্বা';
+
+  @override
+  String get readAloudFailNoAudio => 'জোরে পড়ার কিছু নেই';
+
+  @override
+  String get readAloudFailRejected => 'ভয়েস পরিষেবা অনুরোধ প্রত্যাখ্যান করেছে';
+
+  @override
+  String get readAloudFailNotConfigured => 'আগে জোরে পড়া সেট আপ করুন';
+
+  @override
+  String get readAloudFailUnavailable => 'এখানে জোরে পড়া উপলব্ধ নয়';
+
+  @override
   String get composerSendNow => 'এখনই পাঠান';
 
   @override

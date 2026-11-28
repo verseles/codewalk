@@ -944,6 +944,133 @@ class V2LocalizationsDe extends V2Localizations {
   String get messageImageSaved => 'Bild gespeichert';
 
   @override
+  String get readAloudTitle => 'Vorlesen';
+
+  @override
+  String get readAloudEnable => 'Vorlesen';
+
+  @override
+  String get readAloudEnableDescription =>
+      'Vorlesen in der Nachrichtenleiste anbieten';
+
+  @override
+  String get readAloudProvider => 'Sprachdienst';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge (experimentell)';
+
+  @override
+  String get readAloudProviderSystem => 'Gerätestimme';
+
+  @override
+  String get readAloudProviderOpenAi => 'OpenAI-kompatibel';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      'Experimentell: nutzt den inoffiziellen Vorlesedienst von Microsoft Edge. Der Nachrichtentext geht an Microsoft.';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return 'Der Nachrichtentext geht an $service.';
+  }
+
+  @override
+  String get readAloudVoice => 'Stimme';
+
+  @override
+  String get readAloudVoiceDefault => 'Standard für deine Sprache';
+
+  @override
+  String get readAloudVoicesFailed =>
+      'Die Stimmen konnten nicht geladen werden';
+
+  @override
+  String get readAloudModel => 'Modell';
+
+  @override
+  String get readAloudBaseUrl => 'Serveradresse';
+
+  @override
+  String get readAloudBaseUrlRequired => 'Für NVIDIA NIM erforderlich';
+
+  @override
+  String get readAloudApiKey => 'API-Schlüssel';
+
+  @override
+  String get readAloudApiKeySaved =>
+      'Auf diesem Gerät ist ein Schlüssel gespeichert';
+
+  @override
+  String get readAloudSave => 'Speichern';
+
+  @override
+  String get readAloudClear => 'Löschen';
+
+  @override
+  String get readAloudSpeed => 'Geschwindigkeit';
+
+  @override
+  String get readAloudTestPhrase => 'Testsatz';
+
+  @override
+  String get readAloudTestPhraseDefault =>
+      'Hallo! So werden Nachrichten klingen.';
+
+  @override
+  String get readAloudTest => 'Stimme testen';
+
+  @override
+  String get readAloudAction => 'Vorlesen';
+
+  @override
+  String get readAloudStop => 'Vorlesen beenden';
+
+  @override
+  String get readAloudPause => 'Pausieren';
+
+  @override
+  String get readAloudResume => 'Fortsetzen';
+
+  @override
+  String get readAloudPreparing => 'Audio wird vorbereitet…';
+
+  @override
+  String get readAloudSettings => 'Einstellungen';
+
+  @override
+  String get readAloudFailOffline => 'Der Sprachdienst ist nicht erreichbar';
+
+  @override
+  String get readAloudFailUnauthorized =>
+      'Der Sprachdienst hat den Schlüssel abgelehnt';
+
+  @override
+  String get readAloudFailRateLimited =>
+      'Der Sprachdienst ist ausgelastet; versuche es später';
+
+  @override
+  String get readAloudFailTooLong => 'Zu lang zum Vorlesen';
+
+  @override
+  String get readAloudFailNoAudio => 'Nichts zum Vorlesen';
+
+  @override
+  String get readAloudFailRejected =>
+      'Der Sprachdienst hat die Anfrage abgelehnt';
+
+  @override
+  String get readAloudFailNotConfigured => 'Richte das Vorlesen zuerst ein';
+
+  @override
+  String get readAloudFailUnavailable => 'Vorlesen ist hier nicht verfügbar';
+
+  @override
   String get composerSendNow => 'Jetzt senden';
 
   @override

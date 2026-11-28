@@ -941,6 +941,131 @@ class V2LocalizationsFr extends V2Localizations {
   String get messageImageSaved => 'Image enregistrée';
 
   @override
+  String get readAloudTitle => 'Lire à voix haute';
+
+  @override
+  String get readAloudEnable => 'Lire à voix haute';
+
+  @override
+  String get readAloudEnableDescription =>
+      'Proposer Lire à voix haute dans la barre du message';
+
+  @override
+  String get readAloudProvider => 'Service vocal';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge (expérimental)';
+
+  @override
+  String get readAloudProviderSystem => 'Voix de l’appareil';
+
+  @override
+  String get readAloudProviderOpenAi => 'Compatible OpenAI';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      'Expérimental : utilise le service de lecture non officiel de Microsoft Edge. Le texte du message est envoyé à Microsoft.';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return 'Le texte du message est envoyé à $service.';
+  }
+
+  @override
+  String get readAloudVoice => 'Voix';
+
+  @override
+  String get readAloudVoiceDefault => 'Par défaut pour votre langue';
+
+  @override
+  String get readAloudVoicesFailed => 'Impossible de charger les voix';
+
+  @override
+  String get readAloudModel => 'Modèle';
+
+  @override
+  String get readAloudBaseUrl => 'Adresse du serveur';
+
+  @override
+  String get readAloudBaseUrlRequired => 'Obligatoire pour NVIDIA NIM';
+
+  @override
+  String get readAloudApiKey => 'Clé d’API';
+
+  @override
+  String get readAloudApiKeySaved => 'Une clé est enregistrée sur cet appareil';
+
+  @override
+  String get readAloudSave => 'Enregistrer';
+
+  @override
+  String get readAloudClear => 'Effacer';
+
+  @override
+  String get readAloudSpeed => 'Vitesse';
+
+  @override
+  String get readAloudTestPhrase => 'Phrase de test';
+
+  @override
+  String get readAloudTestPhraseDefault =>
+      'Bonjour ! Voici comment les messages sonneront.';
+
+  @override
+  String get readAloudTest => 'Tester la voix';
+
+  @override
+  String get readAloudAction => 'Lire à voix haute';
+
+  @override
+  String get readAloudStop => 'Arrêter la lecture';
+
+  @override
+  String get readAloudPause => 'Pause';
+
+  @override
+  String get readAloudResume => 'Reprendre';
+
+  @override
+  String get readAloudPreparing => 'Préparation de l’audio…';
+
+  @override
+  String get readAloudSettings => 'Paramètres';
+
+  @override
+  String get readAloudFailOffline => 'Impossible de joindre le service vocal';
+
+  @override
+  String get readAloudFailUnauthorized => 'Le service vocal a refusé la clé';
+
+  @override
+  String get readAloudFailRateLimited =>
+      'Le service vocal est occupé ; réessayez plus tard';
+
+  @override
+  String get readAloudFailTooLong => 'Trop long pour être lu à voix haute';
+
+  @override
+  String get readAloudFailNoAudio => 'Rien à lire à voix haute';
+
+  @override
+  String get readAloudFailRejected => 'Le service vocal a refusé la demande';
+
+  @override
+  String get readAloudFailNotConfigured =>
+      'Configurez d’abord la lecture à voix haute';
+
+  @override
+  String get readAloudFailUnavailable =>
+      'La lecture à voix haute n’est pas disponible ici';
+
+  @override
   String get composerSendNow => 'Envoyer maintenant';
 
   @override

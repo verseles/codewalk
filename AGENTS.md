@@ -105,7 +105,7 @@ rm -rf "$dir"
 - `main` is CodeWalk 2 and holds only v2. The entry point is `lib/main_v2.dart` until the cutover (#319).
 - `v1` is 100% frozen. Check the branch before editing, and never merge whole trees between lines.
 - v2 releases ship Android arm64, Linux x64/arm64, Windows x64 and macOS arm64. Web and iOS come later in the queue. v2 does not import v1 data.
-- #476 removed the v1-only dependencies; `window_manager` (#474) and `speech_to_text` (native dictation slice of #307) have since returned. Remaining ones return only with the v2 feature that uses them: TTS/remaining voice #307, notifications and tray #309 (`tray_manager`), terminal #291 (`xterm`), and Tailscale #317.
+- #476 removed the v1-only dependencies; `window_manager` (#474), `speech_to_text` (native dictation slice of #307) and `share_plus` (message image, #540) have since returned; read aloud (#541) needs no new package. Remaining ones return only with the v2 feature that uses them: the device voice (`flutter_tts`, #307, deferred by ADR-063), notifications and tray #309 (`tray_manager`), terminal #291 (`xterm`), and Tailscale #317.
 
 ## Web origins
 

@@ -15,6 +15,7 @@ import '../features/settings/release_announcements_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../features/settings/update_scheduler.dart';
+import '../features/voice/read_aloud_controller.dart';
 import '../platform/pairing/native_pairing_links.dart';
 import '../platform/sessions/attachment_staging_store.dart';
 import '../platform/sessions/model_preference_store.dart';
@@ -77,6 +78,7 @@ class AppDependencies {
     this.audioPlayback,
     this.locationFixSource,
     this.messageImages,
+    this.readAloud,
     this.workspaceDrafts,
     this.projectContexts,
     this.desktopWindow,
@@ -155,6 +157,9 @@ class AppDependencies {
 
   /// Shares or saves a message's image (#540).
   final MessageImageSink? messageImages;
+
+  /// Reads messages aloud (#541).
+  final ReadAloudController? readAloud;
   final PairingController? pairing;
   final DiagnosticsController? diagnostics;
   final ReleaseHistoryController? releaseHistory;
@@ -194,6 +199,7 @@ class AppDependencies {
     sessionTabs?.dispose();
     // What was typed and not yet written is written now.
     unawaited(sessionDrafts?.flush());
+    readAloud?.dispose();
     unawaited(audioPlayback?.dispose());
     sessions?.dispose();
     unawaited(liveDirectory?.close());

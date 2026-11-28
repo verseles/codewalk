@@ -598,6 +598,167 @@
   "@messageImageSaved": {
     "description": "V2 message image sharing (#540)"
   },
+  "readAloudTitle": "بلند آواز سے پڑھیں",
+  "@readAloudTitle": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEnable": "بلند آواز سے پڑھیں",
+  "@readAloudEnable": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEnableDescription": "پیغام کی بار میں بلند آواز سے پڑھیں دکھائیں",
+  "@readAloudEnableDescription": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProvider": "آواز کی سروس",
+  "@readAloudProvider": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderEdge": "Microsoft Edge (تجرباتی)",
+  "@readAloudProviderEdge": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderSystem": "آلے کی آواز",
+  "@readAloudProviderSystem": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderOpenAi": "OpenAI کے موافق",
+  "@readAloudProviderOpenAi": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderElevenLabs": "ElevenLabs",
+  "@readAloudProviderElevenLabs": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderNim": "NVIDIA NIM",
+  "@readAloudProviderNim": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEdgeNotice": "تجرباتی: Microsoft Edge کی غیر سرکاری پڑھنے کی سروس استعمال کرتا ہے۔ پیغام کا متن Microsoft کو جاتا ہے۔",
+  "@readAloudEdgeNotice": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudCloudNotice": "پیغام کا متن {service} کو جاتا ہے۔",
+  "@readAloudCloudNotice": {
+    "description": "V2 read aloud (#541)",
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "readAloudVoice": "آواز",
+  "@readAloudVoice": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudVoiceDefault": "آپ کی زبان کی ڈیفالٹ",
+  "@readAloudVoiceDefault": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudVoicesFailed": "آوازیں لوڈ نہیں ہو سکیں",
+  "@readAloudVoicesFailed": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudModel": "ماڈل",
+  "@readAloudModel": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudBaseUrl": "سرور کا پتہ",
+  "@readAloudBaseUrl": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudBaseUrlRequired": "NVIDIA NIM کے لیے لازمی",
+  "@readAloudBaseUrlRequired": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudApiKey": "API کلید",
+  "@readAloudApiKey": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudApiKeySaved": "اس آلے پر ایک کلید محفوظ ہے",
+  "@readAloudApiKeySaved": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSave": "محفوظ کریں",
+  "@readAloudSave": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudClear": "صاف کریں",
+  "@readAloudClear": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSpeed": "رفتار",
+  "@readAloudSpeed": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTestPhrase": "آزمائشی جملہ",
+  "@readAloudTestPhrase": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTestPhraseDefault": "ہیلو! پیغامات ایسے سنائی دیں گے۔",
+  "@readAloudTestPhraseDefault": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTest": "آواز آزمائیں",
+  "@readAloudTest": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudAction": "بلند آواز سے پڑھیں",
+  "@readAloudAction": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudStop": "پڑھنا روکیں",
+  "@readAloudStop": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudPause": "روکیں",
+  "@readAloudPause": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudResume": "جاری رکھیں",
+  "@readAloudResume": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudPreparing": "آڈیو تیار ہو رہا ہے…",
+  "@readAloudPreparing": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSettings": "ترتیبات",
+  "@readAloudSettings": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailOffline": "آواز کی سروس تک رسائی نہیں ہو سکی",
+  "@readAloudFailOffline": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailUnauthorized": "آواز کی سروس نے کلید مسترد کر دی",
+  "@readAloudFailUnauthorized": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailRateLimited": "آواز کی سروس مصروف ہے؛ بعد میں کوشش کریں",
+  "@readAloudFailRateLimited": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailTooLong": "بلند آواز سے پڑھنے کے لیے بہت لمبا",
+  "@readAloudFailTooLong": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailNoAudio": "بلند آواز سے پڑھنے کو کچھ نہیں",
+  "@readAloudFailNoAudio": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailRejected": "آواز کی سروس نے درخواست مسترد کر دی",
+  "@readAloudFailRejected": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailNotConfigured": "پہلے بلند آواز سے پڑھنا ترتیب دیں",
+  "@readAloudFailNotConfigured": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailUnavailable": "یہاں بلند آواز سے پڑھنا دستیاب نہیں",
+  "@readAloudFailUnavailable": {
+    "description": "V2 read aloud (#541)"
+  },
   "composerSendNow": "ابھی بھیجیں",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

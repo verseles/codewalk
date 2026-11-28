@@ -933,6 +933,130 @@ class V2LocalizationsRu extends V2Localizations {
   String get messageImageSaved => 'Изображение сохранено';
 
   @override
+  String get readAloudTitle => 'Прочитать вслух';
+
+  @override
+  String get readAloudEnable => 'Прочитать вслух';
+
+  @override
+  String get readAloudEnableDescription =>
+      'Показывать «Прочитать вслух» на панели сообщения';
+
+  @override
+  String get readAloudProvider => 'Голосовой сервис';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge (экспериментально)';
+
+  @override
+  String get readAloudProviderSystem => 'Голос устройства';
+
+  @override
+  String get readAloudProviderOpenAi => 'Совместимый с OpenAI';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      'Экспериментально: использует неофициальный сервис чтения Microsoft Edge. Текст сообщения отправляется в Microsoft.';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return 'Текст сообщения отправляется в $service.';
+  }
+
+  @override
+  String get readAloudVoice => 'Голос';
+
+  @override
+  String get readAloudVoiceDefault => 'По умолчанию для вашего языка';
+
+  @override
+  String get readAloudVoicesFailed => 'Не удалось загрузить голоса';
+
+  @override
+  String get readAloudModel => 'Модель';
+
+  @override
+  String get readAloudBaseUrl => 'Адрес сервера';
+
+  @override
+  String get readAloudBaseUrlRequired => 'Обязателен для NVIDIA NIM';
+
+  @override
+  String get readAloudApiKey => 'API-ключ';
+
+  @override
+  String get readAloudApiKeySaved => 'На этом устройстве сохранён ключ';
+
+  @override
+  String get readAloudSave => 'Сохранить';
+
+  @override
+  String get readAloudClear => 'Очистить';
+
+  @override
+  String get readAloudSpeed => 'Скорость';
+
+  @override
+  String get readAloudTestPhrase => 'Тестовая фраза';
+
+  @override
+  String get readAloudTestPhraseDefault =>
+      'Привет! Так будут звучать сообщения.';
+
+  @override
+  String get readAloudTest => 'Проверить голос';
+
+  @override
+  String get readAloudAction => 'Прочитать вслух';
+
+  @override
+  String get readAloudStop => 'Остановить чтение';
+
+  @override
+  String get readAloudPause => 'Пауза';
+
+  @override
+  String get readAloudResume => 'Продолжить';
+
+  @override
+  String get readAloudPreparing => 'Подготовка аудио…';
+
+  @override
+  String get readAloudSettings => 'Настройки';
+
+  @override
+  String get readAloudFailOffline =>
+      'Не удалось связаться с голосовым сервисом';
+
+  @override
+  String get readAloudFailUnauthorized => 'Голосовой сервис отклонил ключ';
+
+  @override
+  String get readAloudFailRateLimited =>
+      'Голосовой сервис занят; попробуйте позже';
+
+  @override
+  String get readAloudFailTooLong => 'Слишком длинное для чтения вслух';
+
+  @override
+  String get readAloudFailNoAudio => 'Нечего читать вслух';
+
+  @override
+  String get readAloudFailRejected => 'Голосовой сервис отклонил запрос';
+
+  @override
+  String get readAloudFailNotConfigured => 'Сначала настройте чтение вслух';
+
+  @override
+  String get readAloudFailUnavailable => 'Чтение вслух здесь недоступно';
+
+  @override
   String get composerSendNow => 'Отправить сейчас';
 
   @override

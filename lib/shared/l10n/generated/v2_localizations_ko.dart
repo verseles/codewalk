@@ -887,6 +887,126 @@ class V2LocalizationsKo extends V2Localizations {
   String get messageImageSaved => '이미지를 저장했습니다';
 
   @override
+  String get readAloudTitle => '소리 내어 읽기';
+
+  @override
+  String get readAloudEnable => '소리 내어 읽기';
+
+  @override
+  String get readAloudEnableDescription => '메시지 막대에 소리 내어 읽기 표시';
+
+  @override
+  String get readAloudProvider => '음성 서비스';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge(실험적)';
+
+  @override
+  String get readAloudProviderSystem => '기기 음성';
+
+  @override
+  String get readAloudProviderOpenAi => 'OpenAI 호환';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      '실험적: Microsoft Edge의 비공식 읽기 서비스를 사용합니다. 메시지 텍스트가 Microsoft로 전송됩니다.';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return '메시지 텍스트가 $service(으)로 전송됩니다.';
+  }
+
+  @override
+  String get readAloudVoice => '음성';
+
+  @override
+  String get readAloudVoiceDefault => '언어 기본값';
+
+  @override
+  String get readAloudVoicesFailed => '음성을 불러올 수 없습니다';
+
+  @override
+  String get readAloudModel => '모델';
+
+  @override
+  String get readAloudBaseUrl => '서버 주소';
+
+  @override
+  String get readAloudBaseUrlRequired => 'NVIDIA NIM에 필수';
+
+  @override
+  String get readAloudApiKey => 'API 키';
+
+  @override
+  String get readAloudApiKeySaved => '이 기기에 키가 저장되어 있습니다';
+
+  @override
+  String get readAloudSave => '저장';
+
+  @override
+  String get readAloudClear => '지우기';
+
+  @override
+  String get readAloudSpeed => '속도';
+
+  @override
+  String get readAloudTestPhrase => '테스트 문장';
+
+  @override
+  String get readAloudTestPhraseDefault => '안녕하세요! 메시지는 이렇게 들립니다.';
+
+  @override
+  String get readAloudTest => '음성 테스트';
+
+  @override
+  String get readAloudAction => '소리 내어 읽기';
+
+  @override
+  String get readAloudStop => '읽기 중지';
+
+  @override
+  String get readAloudPause => '일시 중지';
+
+  @override
+  String get readAloudResume => '계속';
+
+  @override
+  String get readAloudPreparing => '오디오 준비 중…';
+
+  @override
+  String get readAloudSettings => '설정';
+
+  @override
+  String get readAloudFailOffline => '음성 서비스에 연결할 수 없습니다';
+
+  @override
+  String get readAloudFailUnauthorized => '음성 서비스가 키를 거부했습니다';
+
+  @override
+  String get readAloudFailRateLimited => '음성 서비스가 혼잡합니다. 나중에 다시 시도하세요';
+
+  @override
+  String get readAloudFailTooLong => '너무 길어서 읽을 수 없습니다';
+
+  @override
+  String get readAloudFailNoAudio => '읽을 내용이 없습니다';
+
+  @override
+  String get readAloudFailRejected => '음성 서비스가 요청을 거부했습니다';
+
+  @override
+  String get readAloudFailNotConfigured => '먼저 소리 내어 읽기를 설정하세요';
+
+  @override
+  String get readAloudFailUnavailable => '여기서는 소리 내어 읽기를 사용할 수 없습니다';
+
+  @override
   String get composerSendNow => '지금 보내기';
 
   @override

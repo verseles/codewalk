@@ -598,6 +598,167 @@
   "@messageImageSaved": {
     "description": "V2 message image sharing (#540)"
   },
+  "readAloudTitle": "소리 내어 읽기",
+  "@readAloudTitle": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEnable": "소리 내어 읽기",
+  "@readAloudEnable": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEnableDescription": "메시지 막대에 소리 내어 읽기 표시",
+  "@readAloudEnableDescription": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProvider": "음성 서비스",
+  "@readAloudProvider": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderEdge": "Microsoft Edge(실험적)",
+  "@readAloudProviderEdge": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderSystem": "기기 음성",
+  "@readAloudProviderSystem": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderOpenAi": "OpenAI 호환",
+  "@readAloudProviderOpenAi": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderElevenLabs": "ElevenLabs",
+  "@readAloudProviderElevenLabs": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudProviderNim": "NVIDIA NIM",
+  "@readAloudProviderNim": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudEdgeNotice": "실험적: Microsoft Edge의 비공식 읽기 서비스를 사용합니다. 메시지 텍스트가 Microsoft로 전송됩니다.",
+  "@readAloudEdgeNotice": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudCloudNotice": "메시지 텍스트가 {service}(으)로 전송됩니다.",
+  "@readAloudCloudNotice": {
+    "description": "V2 read aloud (#541)",
+    "placeholders": {
+      "service": {
+        "type": "String"
+      }
+    }
+  },
+  "readAloudVoice": "음성",
+  "@readAloudVoice": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudVoiceDefault": "언어 기본값",
+  "@readAloudVoiceDefault": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudVoicesFailed": "음성을 불러올 수 없습니다",
+  "@readAloudVoicesFailed": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudModel": "모델",
+  "@readAloudModel": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudBaseUrl": "서버 주소",
+  "@readAloudBaseUrl": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudBaseUrlRequired": "NVIDIA NIM에 필수",
+  "@readAloudBaseUrlRequired": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudApiKey": "API 키",
+  "@readAloudApiKey": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudApiKeySaved": "이 기기에 키가 저장되어 있습니다",
+  "@readAloudApiKeySaved": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSave": "저장",
+  "@readAloudSave": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudClear": "지우기",
+  "@readAloudClear": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSpeed": "속도",
+  "@readAloudSpeed": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTestPhrase": "테스트 문장",
+  "@readAloudTestPhrase": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTestPhraseDefault": "안녕하세요! 메시지는 이렇게 들립니다.",
+  "@readAloudTestPhraseDefault": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudTest": "음성 테스트",
+  "@readAloudTest": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudAction": "소리 내어 읽기",
+  "@readAloudAction": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudStop": "읽기 중지",
+  "@readAloudStop": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudPause": "일시 중지",
+  "@readAloudPause": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudResume": "계속",
+  "@readAloudResume": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudPreparing": "오디오 준비 중…",
+  "@readAloudPreparing": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudSettings": "설정",
+  "@readAloudSettings": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailOffline": "음성 서비스에 연결할 수 없습니다",
+  "@readAloudFailOffline": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailUnauthorized": "음성 서비스가 키를 거부했습니다",
+  "@readAloudFailUnauthorized": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailRateLimited": "음성 서비스가 혼잡합니다. 나중에 다시 시도하세요",
+  "@readAloudFailRateLimited": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailTooLong": "너무 길어서 읽을 수 없습니다",
+  "@readAloudFailTooLong": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailNoAudio": "읽을 내용이 없습니다",
+  "@readAloudFailNoAudio": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailRejected": "음성 서비스가 요청을 거부했습니다",
+  "@readAloudFailRejected": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailNotConfigured": "먼저 소리 내어 읽기를 설정하세요",
+  "@readAloudFailNotConfigured": {
+    "description": "V2 read aloud (#541)"
+  },
+  "readAloudFailUnavailable": "여기서는 소리 내어 읽기를 사용할 수 없습니다",
+  "@readAloudFailUnavailable": {
+    "description": "V2 read aloud (#541)"
+  },
   "composerSendNow": "지금 보내기",
   "@composerSendNow": {
     "description": "V2 waiting messages (#486)"

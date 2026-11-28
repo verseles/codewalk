@@ -64,6 +64,7 @@ This document contains active architectural decisions for the current implementa
 - ADR-060: CodeWalk v1 to v2 Transition
 - ADR-061: (Reserved for CodeWalk Host and CHP — V21-012 / #335)
 - ADR-062: Native Continuous Indeterminate Motion on All Platforms
+- ADR-063: CodeWalk v2 Read Aloud with Microsoft Edge as the Keyless Default
 
 ---
 
@@ -3138,6 +3139,8 @@ Edge/Bing Read Aloud is a client-owned read-aloud feature. CodeWalk extracts san
 
 **Related**: ADR-007 (Modular Settings Architecture for `ExperienceSettings`), ADR-023 (Official OpenCode Contract-First Compatibility Policy), ADR-047 (Experimental Direct Microsoft Edge/Bing Read Aloud TTS via Client WebSocket).
 
+**v2 note**: CodeWalk v2 does not use this first-run resolver; ADR-063 sets its read-aloud defaults. v1 keeps this ADR.
+
 ### Context
 
 CodeWalk now supports multiple read-aloud providers, including native platform TTS and the experimental direct Microsoft Edge/Bing Read Aloud backend. The previous ADR-047 wording treated native TTS as the universal default and stated that Edge is never enabled automatically, but the current implementation needs first-run defaults that avoid a broken read-aloud experience on platforms where native TTS is unavailable.
@@ -4038,3 +4041,67 @@ Fully compliant, not an exception. Presentation-only change with no endpoint, sc
 - `test/v2/shared/app_indeterminate_progress_test.dart` — cross-platform native animation, reduced-motion, `TickerMode`, semantics, and source guard tests.
 
 Related: #510, #511, #509, #525; supersedes ADR-056.
+
+---
+
+## ADR-063: CodeWalk v2 Read Aloud with Microsoft Edge as the Keyless Default (2026-11-28)
+
+**Status**: Accepted (replaces ADR-048 for CodeWalk v2 only; v1 keeps ADR-047 and ADR-048)
+
+**Related**: ADR-023 (Official OpenCode Contract-First Compatibility Policy), ADR-047 (Experimental Direct Microsoft Edge/Bing Read Aloud TTS via Client WebSocket), ADR-048 (Adaptive First-Run Read-Aloud TTS Defaults), ADR-058 (CodeWalk v2 Harness-Neutral Architecture), ADR-060 (CodeWalk v1 to v2 Transition). Issue #541; follow-up for the device voice.
+
+### Context
+
+CodeWalk v2 adds Read aloud to the message action bar (#539, #541). v1 code is a UX reference only, so v2 needs its own read-aloud stack and default. Constraints:
+
+1. Read aloud must work out of the box on every native platform without a paid key or account.
+2. The only keyless service with good multilingual voices is Microsoft Edge's read-aloud websocket (`speech.platform.bing.com`). It is unofficial and requires a `Sec-MS-GEC` token whose v2 algorithm is published by the `edge-tts` project (LGPLv3).
+3. The device voice (`flutter_tts`) cannot ship now: on Windows it crashed before `main` (#640), it requires NuGet during the build, and it breaks the Android build under AGP 9's built-in Kotlin.
+4. Message text is user data. Sending it to a third party must be visible, and API keys must never reach settings JSON or logs.
+5. Read aloud is client-owned. It must not change the OpenCode server contract (ADR-023) and must stay harness-neutral (ADR-058).
+
+### Decision
+
+1. **Edge by default.** v2 read aloud defaults to Microsoft Edge, marked experimental. It needs no key and is on by default (`cw2.settings.readAloud`).
+2. **Edge protocol.**
+   - Synthesis runs over a client websocket.
+   - The Sec-MS-GEC v2 token is ported to Dart in `lib/platform/voice/edge_token.dart` with an LGPLv3 attribution header (LGPLv3 is compatible with the app's AGPL-3.0). It is verified against reference vectors.
+   - A 403 is retried once with the server's `Date` header to correct clock skew.
+   - Text is split into chunks of at most 4096 UTF-8 bytes (64 KiB in total).
+3. **Opt-in cloud providers.** OpenAI-compatible (`/v1/audio/speech`), ElevenLabs and NVIDIA NIM are opt-in.
+   - Their keys live only in the device's secure storage (`cw2.voice.<provider>.apiKey`).
+   - Requests have timeouts, no redirects, and audio and text limits.
+4. **No silent provider fallback.** A failure is reported with a link to Settings and is never retried with another provider. The only fallback is Edge retrying once with its default voice for the language when a chosen voice returns no audio.
+5. **Privacy notice.** Settings state, for every cloud choice, that the message text goes to that service. For Edge, it also states that the service is unofficial.
+6. **Device voice deferred.** The device voice is modeled (`SpeechProvider.system`, `NativeSpeechEngine`) but not offered until a follow-up can ship it safely on every platform.
+7. **Playback.** Audio plays through the app's shared `AudioPlaybackPort`.
+   - One reading plays at a time.
+   - Readings are cached in memory: 16 entries, 32 MiB.
+   - A reading stops when the user sends a prompt in its session or leaves the session.
+
+### Rationale
+
+- A keyless default makes the feature useful at once on every native platform, which ADR-048's native-first resolver could not do while the device voice is not shippable.
+- Porting the token algorithm keeps the app dependency-free for Edge and auditable. Keeping the attribution header satisfies LGPLv3.
+- Never swapping providers on failure means message text only ever goes to the service the user chose.
+- Keeping keys only in secure storage follows the existing v2 secrets boundary.
+
+### Consequences
+
+- ✅ Read aloud works on Android, iOS, macOS, Windows and Linux with no setup. Users who prefer a paid voice can pick one.
+- ✅ No OpenCode contract change. The feature is harness-neutral and client-owned.
+- ⚠️ Edge's protocol is unofficial. Microsoft may change the token, version string or endpoint, or apply rate limits, and the Edge path would then fail until it is updated. Failures are reported, never hidden.
+- ⚠️ With Edge as the default, message text goes to Microsoft unless the user switches provider or turns Read aloud off. The settings page states this.
+- ❌ No offline or device voice for now. The Web offers no read aloud.
+
+### ADR-023 Compatibility
+
+Fully compliant, not an exception. Read aloud is a client-side feature with no endpoint, schema, event, or lifecycle change on the harness server.
+
+### Key Files
+
+- `lib/shared/voice/read_aloud.dart`, `lib/shared/voice/speakable_text.dart` — settings, provider model, failures and spoken text.
+- `lib/platform/voice/edge_token.dart`, `lib/platform/voice/edge_speech_io.dart` — the Edge token and websocket synthesis.
+- `lib/platform/voice/cloud_speech_io.dart`, `lib/platform/voice/speech_key_store_io.dart` — cloud providers and secure keys.
+- `lib/features/voice/read_aloud_controller.dart`, `lib/features/voice/read_aloud_actions.dart`, `lib/features/settings/read_aloud_settings_page.dart` — playback, bar action, pill and settings.
+- `test/v2/voice/` — token vectors, protocol helpers, controller and UI tests.

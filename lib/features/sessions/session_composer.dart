@@ -18,6 +18,7 @@ import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/endpoint_health_view.dart';
+import '../voice/read_aloud_actions.dart';
 import 'composer_attach_button.dart';
 import 'composer_attachment_strip.dart';
 import 'composer_input.dart';
@@ -281,6 +282,8 @@ class _SessionComposerState extends State<SessionComposer> {
     // A dictation in flight ends first, so nothing it hears lands after the
     // text is read.
     _voice.currentState?.cancel();
+    // A new prompt ends the conversation's reading (#541).
+    stopReadingIn(context, widget.controller.live.session);
     final draft = _text;
     final sent = draft.text;
     final attachments = widget.controller.live.attachments;

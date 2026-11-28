@@ -869,6 +869,126 @@ class V2LocalizationsZh extends V2Localizations {
   String get messageImageSaved => '图片已保存';
 
   @override
+  String get readAloudTitle => '朗读';
+
+  @override
+  String get readAloudEnable => '朗读';
+
+  @override
+  String get readAloudEnableDescription => '在消息栏中提供朗读';
+
+  @override
+  String get readAloudProvider => '语音服务';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge（实验性）';
+
+  @override
+  String get readAloudProviderSystem => '设备语音';
+
+  @override
+  String get readAloudProviderOpenAi => '兼容 OpenAI';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      '实验性：使用 Microsoft Edge 的非官方朗读服务。消息文本会发送给 Microsoft。';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return '消息文本会发送给 $service。';
+  }
+
+  @override
+  String get readAloudVoice => '语音';
+
+  @override
+  String get readAloudVoiceDefault => '你的语言的默认语音';
+
+  @override
+  String get readAloudVoicesFailed => '无法加载语音';
+
+  @override
+  String get readAloudModel => '模型';
+
+  @override
+  String get readAloudBaseUrl => '服务器地址';
+
+  @override
+  String get readAloudBaseUrlRequired => 'NVIDIA NIM 必填';
+
+  @override
+  String get readAloudApiKey => 'API 密钥';
+
+  @override
+  String get readAloudApiKeySaved => '此设备上已保存密钥';
+
+  @override
+  String get readAloudSave => '保存';
+
+  @override
+  String get readAloudClear => '清除';
+
+  @override
+  String get readAloudSpeed => '语速';
+
+  @override
+  String get readAloudTestPhrase => '测试短语';
+
+  @override
+  String get readAloudTestPhraseDefault => '你好！消息听起来会是这样。';
+
+  @override
+  String get readAloudTest => '试听语音';
+
+  @override
+  String get readAloudAction => '朗读';
+
+  @override
+  String get readAloudStop => '停止朗读';
+
+  @override
+  String get readAloudPause => '暂停';
+
+  @override
+  String get readAloudResume => '继续';
+
+  @override
+  String get readAloudPreparing => '正在准备音频…';
+
+  @override
+  String get readAloudSettings => '设置';
+
+  @override
+  String get readAloudFailOffline => '无法连接语音服务';
+
+  @override
+  String get readAloudFailUnauthorized => '语音服务拒绝了密钥';
+
+  @override
+  String get readAloudFailRateLimited => '语音服务繁忙，请稍后再试';
+
+  @override
+  String get readAloudFailTooLong => '内容太长，无法朗读';
+
+  @override
+  String get readAloudFailNoAudio => '没有可朗读的内容';
+
+  @override
+  String get readAloudFailRejected => '语音服务拒绝了请求';
+
+  @override
+  String get readAloudFailNotConfigured => '请先设置朗读';
+
+  @override
+  String get readAloudFailUnavailable => '此处无法使用朗读';
+
+  @override
   String get composerSendNow => '立即发送';
 
   @override

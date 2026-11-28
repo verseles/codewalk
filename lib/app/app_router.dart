@@ -55,7 +55,10 @@ GoRouter createAppRouter({
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) => const SettingsShellPage(),
+            builder: (context, state) => SettingsShellPage(
+              initial: SettingsSection.values
+                  .asNameMap()[state.uri.queryParameters['section']],
+            ),
           ),
           GoRoute(
             path: '/pair',

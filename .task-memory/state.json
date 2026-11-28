@@ -1,5 +1,5 @@
 {
-  "artifact_seq": 19,
+  "artifact_seq": 20,
   "artifacts": {
     "A0001": {
       "active": true,
@@ -304,6 +304,22 @@
       "stage": "S6",
       "supersedes": null,
       "title": "u5 #539 review round 4 reports"
+    },
+    "A0020": {
+      "active": true,
+      "bytes": 1187,
+      "created_at": "2026-11-28T03:12:33Z",
+      "evidence": "session_live_source.dart:179,92; prompt_outbox.dart:104; prompt_client.dart:155-162; workspace_first_prompt.dart:55; sessions_controller.dart:21-239; v1 forward_message_dialog.dart",
+      "id": "A0020",
+      "impact": "Shapes #542 plan: same-server targets, open handle per target, per-target outcome, no model override",
+      "origin": "Explore subagent",
+      "path": "artifacts/tm_20261127T213730Z_22ec9025/A0020.md",
+      "purpose": "Plan #542 Forward",
+      "rerun_when": "send/outbox/live directory APIs change",
+      "sha256": "2a3da488afa668270cd3eb0c622e13a1af376c5b1f436c1495f8ae0a41cd8a00",
+      "stage": "S6",
+      "supersedes": null,
+      "title": "#542 v1 forward UX and v2 seams"
     }
   },
   "checklist": [
@@ -763,11 +779,30 @@
     {
       "at": "2026-11-28T03:01:23Z",
       "text": "u5 r4 judgment (A0019): accept F1 hint below pill when no room above in list; F2 keep row alive while overflow menu open (AutomaticKeepAliveClientMixin); F3+F9 post-frame recheck on scroll and ScrollMetricsNotification (Scaffold ScrollNotificationObserver) re-reads clip rect, hides if anchor left; F4 fork skips navigation when root navigator can pop (same rule as composer_voice_button _covered, shared helper); F5 absorb taps on bar half outside bubble while settling (inside TapRegion group); F6 observable pass-through test via hit test; F7 positive control fork test; F8 menu choice after list jump test. Rejected: none. Significant change -> round 5 re-review."
+    },
+    {
+      "at": "2026-11-28T03:09:17Z",
+      "text": "u5 r4 fixes committed bdc25d4b (staged only #539 hunks of session_live_page via hash-object/update-index). Mutation check: 4 new bar tests fail with fixes reverted. #541 WIP: widget tests read_aloud_ui_test (3 pass), BEHAVIOR 'V2 read aloud' section, ADR-063 (Edge keyless default; replaces ADR-048 for v2; AGENTS has no ADR table), AGENTS L108 deps note, cache key uses text not hashCode; analyze 4 pre-existing; l10n check ok."
+    },
+    {
+      "at": "2026-11-28T03:15:56Z",
+      "text": "p542 planning (#542 Forward, owner Q2=b multi-select immediate, per-target outcome, no blind resend): 9 helpers discovered (incl. Grok, retried), key codewalk-542-forward-plan-20261128T031515Z-53a6, payload /tmp/opencode/g8/plan/p542/p1.txt, metrics rvw_20261128T031555Z_6bedaf7c. Runs concurrently with u5 r5 review (op_dfce3612db26)."
+    },
+    {
+      "at": "2026-11-28T03:16:58Z",
+      "text": "p542 handshakes: 8 READY (Claude-haiku, Claude-opus-F, Codex-luna, Codex-sol-F, DeepSeek, Ernie, Gemini, Hungerg); Grok rc=1 out of credits (technical failure, excluded: helpers_r1 = 8)."
     }
   ],
-  "generation": 98,
-  "next_action": "Implement u5 r4 fixes F1-F9 in message_action_bar.dart, session_live_page _forkFrom (stage only #539 hunks; #541 WIP shares the file), tests; gate; commit; round 5.",
-  "pending_operation": null,
+  "generation": 106,
+  "next_action": "Handshake p542 helpers (rev.sh hs), checkpoint READY results, then dispatch p1 after u5 r5 capture (one pending op at a time).",
+  "pending_operation": {
+    "expected_bytes": 40000,
+    "expected_seconds": 600,
+    "id": "op_dfce3612db26",
+    "kind": "subagent",
+    "prepared_at": "2026-11-28T03:14:21Z",
+    "purpose": "u5 #539 re-review round 5 on bdc25d4b (8 helpers, rev.sh u5 run r5 p5.txt helpers_r1)"
+  },
   "queued_followups": [],
   "request": {
     "bytes": 13157,
@@ -789,7 +824,7 @@
   "status": "in_progress",
   "task_id": "tm_20261127T213730Z_22ec9025",
   "title": "#527 group 8: 19 owner UX items (sidebar, timeline actions, composer, tasks, settings, defaults)",
-  "updated_at": "2026-11-28T03:01:23Z",
+  "updated_at": "2026-11-28T03:23:44Z",
   "validations": [
     {
       "at": "2026-11-27T22:28:42Z",
@@ -860,6 +895,20 @@
       "criterion": null,
       "evidence": "analyze 4/4; suite +2641 ~4 -1, the 1 = app_indeterminate_progress_test flagging the uncommitted #541 WIP settings page (not part of the #539 commit). Log /tmp/opencode/g8/gate539d.log",
       "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T03:14:23Z",
+      "check": "Full gate on bdc25d4b (clean worktree)",
+      "criterion": null,
+      "evidence": "analyze 4 pre-existing; flutter test +2646 ~4 all passed (/tmp/opencode/g8/wt_test.log)",
+      "outcome": "pass"
+    },
+    {
+      "at": "2026-11-28T03:23:44Z",
+      "check": "#541 full suite (working tree)",
+      "criterion": null,
+      "evidence": "+2483 ~4 -3: app_snack_bar guard (fixed: read-aloud failure via showAppSnackBar; guard+voice 25 pass) and appearance golden desktop_light/dark (expected: new Read aloud settings destination; regenerate on x86 via goldens.yml after push). Log /tmp/opencode/g8/t541.log",
+      "outcome": "info"
     }
   ]
 }

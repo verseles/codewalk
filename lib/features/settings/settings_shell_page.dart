@@ -14,21 +14,34 @@ import '../../shared/releases/apk_update.dart';
 import '../../shared/shortcuts/shortcut_action.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../hosts/hosts_filter_target.dart';
+import '../voice/read_aloud_controller.dart';
 import 'about_settings_page.dart';
 import 'apk_update_controller.dart';
 import 'appearance_settings_page.dart';
 import 'behavior_settings_page.dart';
 import 'diagnostics_settings_page.dart';
+import 'read_aloud_settings_page.dart';
 import 'release_news_card.dart';
 import 'shortcuts_settings_page.dart';
 import 'update_check_controller.dart';
 import 'update_scheduler.dart';
 import 'updates_settings_page.dart';
 
-enum SettingsSection { appearance, behavior, shortcuts, logs, updates, about }
+enum SettingsSection {
+  appearance,
+  behavior,
+  readAloud,
+  shortcuts,
+  logs,
+  updates,
+  about,
+}
 
 class SettingsShellPage extends StatefulWidget {
-  const SettingsShellPage({super.key});
+  const SettingsShellPage({super.key, this.initial});
+
+  /// The section a link opens, as `/settings?section=readAloud`.
+  final SettingsSection? initial;
 
   @override
   State<SettingsShellPage> createState() => _SettingsShellPageState();
@@ -49,6 +62,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
   bool _history = false;
   bool _wasWide = false;
   bool _opened = false;
+  bool _initialShown = false;
 
   @override
   void didChangeDependencies() {
@@ -60,6 +74,10 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       });
     }
     final wide = context.windowSizeClass.isAtLeastExpanded;
+    if (!_initialShown) {
+      _initialShown = true;
+      _selected ??= widget.initial;
+    }
     if (wide) {
       _selected ??= SettingsSection.appearance;
     }
@@ -140,6 +158,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       key: _detailKey,
       child: switch (section) {
         SettingsSection.behavior => const BehaviorSettingsPage(),
+        SettingsSection.readAloud => const ReadAloudSettingsPage(),
         SettingsSection.shortcuts => const ShortcutsSettingsPage(),
         SettingsSection.logs => const DiagnosticsSettingsPage(),
         SettingsSection.updates => UpdatesSettingsPage(
@@ -232,6 +251,16 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
       '${window ? ' ${l.settingsBehaviorWindowChrome} ${l.settingsBehaviorWindowChromeDescription} ${l.settingsBehaviorWindowClose} ${l.settingsBehaviorWindowCloseDescription}' : ''}',
       l.settingsNavigationGroupExperience,
     );
+    final readAloud =
+        context.read<ReadAloudController?>() != null &&
+        matches(
+          l.readAloudTitle,
+          '${l.readAloudEnableDescription} ${l.readAloudProvider} '
+          '${l.readAloudVoice} ${l.readAloudProviderEdge} '
+          '${l.readAloudProviderOpenAi} ${l.readAloudProviderElevenLabs} '
+          '${l.readAloudProviderNim}',
+          l.settingsNavigationGroupExperience,
+        );
     final shortcuts =
         supportsShortcuts &&
         matches(
@@ -296,6 +325,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
         if (!servers &&
             !appearance &&
             !behavior &&
+            !readAloud &&
             !shortcuts &&
             !logs &&
             !updates &&
@@ -317,7 +347,7 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             ),
           ),
         ],
-        if (appearance || behavior)
+        if (appearance || behavior || readAloud)
           _group(context, l.settingsNavigationGroupExperience),
         if (appearance)
           _destination(
@@ -332,6 +362,13 @@ class _SettingsShellPageState extends State<SettingsShellPage> {
             l.settingsBehaviorTitle,
             l.settingsBehaviorChatRenderModeDescription,
             Symbols.tune,
+          ),
+        if (readAloud)
+          _destination(
+            SettingsSection.readAloud,
+            l.readAloudTitle,
+            l.readAloudEnableDescription,
+            Symbols.record_voice_over,
           ),
         if (shortcuts) ...[
           _group(context, l.settingsNavigationGroupInput),

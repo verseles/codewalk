@@ -925,6 +925,128 @@ class V2LocalizationsUr extends V2Localizations {
   String get messageImageSaved => 'تصویر محفوظ ہو گئی';
 
   @override
+  String get readAloudTitle => 'بلند آواز سے پڑھیں';
+
+  @override
+  String get readAloudEnable => 'بلند آواز سے پڑھیں';
+
+  @override
+  String get readAloudEnableDescription =>
+      'پیغام کی بار میں بلند آواز سے پڑھیں دکھائیں';
+
+  @override
+  String get readAloudProvider => 'آواز کی سروس';
+
+  @override
+  String get readAloudProviderEdge => 'Microsoft Edge (تجرباتی)';
+
+  @override
+  String get readAloudProviderSystem => 'آلے کی آواز';
+
+  @override
+  String get readAloudProviderOpenAi => 'OpenAI کے موافق';
+
+  @override
+  String get readAloudProviderElevenLabs => 'ElevenLabs';
+
+  @override
+  String get readAloudProviderNim => 'NVIDIA NIM';
+
+  @override
+  String get readAloudEdgeNotice =>
+      'تجرباتی: Microsoft Edge کی غیر سرکاری پڑھنے کی سروس استعمال کرتا ہے۔ پیغام کا متن Microsoft کو جاتا ہے۔';
+
+  @override
+  String readAloudCloudNotice(String service) {
+    return 'پیغام کا متن $service کو جاتا ہے۔';
+  }
+
+  @override
+  String get readAloudVoice => 'آواز';
+
+  @override
+  String get readAloudVoiceDefault => 'آپ کی زبان کی ڈیفالٹ';
+
+  @override
+  String get readAloudVoicesFailed => 'آوازیں لوڈ نہیں ہو سکیں';
+
+  @override
+  String get readAloudModel => 'ماڈل';
+
+  @override
+  String get readAloudBaseUrl => 'سرور کا پتہ';
+
+  @override
+  String get readAloudBaseUrlRequired => 'NVIDIA NIM کے لیے لازمی';
+
+  @override
+  String get readAloudApiKey => 'API کلید';
+
+  @override
+  String get readAloudApiKeySaved => 'اس آلے پر ایک کلید محفوظ ہے';
+
+  @override
+  String get readAloudSave => 'محفوظ کریں';
+
+  @override
+  String get readAloudClear => 'صاف کریں';
+
+  @override
+  String get readAloudSpeed => 'رفتار';
+
+  @override
+  String get readAloudTestPhrase => 'آزمائشی جملہ';
+
+  @override
+  String get readAloudTestPhraseDefault => 'ہیلو! پیغامات ایسے سنائی دیں گے۔';
+
+  @override
+  String get readAloudTest => 'آواز آزمائیں';
+
+  @override
+  String get readAloudAction => 'بلند آواز سے پڑھیں';
+
+  @override
+  String get readAloudStop => 'پڑھنا روکیں';
+
+  @override
+  String get readAloudPause => 'روکیں';
+
+  @override
+  String get readAloudResume => 'جاری رکھیں';
+
+  @override
+  String get readAloudPreparing => 'آڈیو تیار ہو رہا ہے…';
+
+  @override
+  String get readAloudSettings => 'ترتیبات';
+
+  @override
+  String get readAloudFailOffline => 'آواز کی سروس تک رسائی نہیں ہو سکی';
+
+  @override
+  String get readAloudFailUnauthorized => 'آواز کی سروس نے کلید مسترد کر دی';
+
+  @override
+  String get readAloudFailRateLimited =>
+      'آواز کی سروس مصروف ہے؛ بعد میں کوشش کریں';
+
+  @override
+  String get readAloudFailTooLong => 'بلند آواز سے پڑھنے کے لیے بہت لمبا';
+
+  @override
+  String get readAloudFailNoAudio => 'بلند آواز سے پڑھنے کو کچھ نہیں';
+
+  @override
+  String get readAloudFailRejected => 'آواز کی سروس نے درخواست مسترد کر دی';
+
+  @override
+  String get readAloudFailNotConfigured => 'پہلے بلند آواز سے پڑھنا ترتیب دیں';
+
+  @override
+  String get readAloudFailUnavailable => 'یہاں بلند آواز سے پڑھنا دستیاب نہیں';
+
+  @override
   String get composerSendNow => 'ابھی بھیجیں';
 
   @override

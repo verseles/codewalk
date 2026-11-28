@@ -20,6 +20,7 @@ import '../features/settings/release_announcements_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../features/settings/update_scheduler.dart';
+import '../features/voice/read_aloud_controller.dart';
 import '../platform/connectivity/network_changes.dart';
 import '../platform/endpoints/connect_options.dart';
 import '../platform/endpoints/pairing_factory.dart';
@@ -53,6 +54,7 @@ import '../platform/storage/credential_factory.dart';
 import '../platform/storage/metadata_store.dart';
 import '../platform/storage/payload_factory.dart';
 import '../platform/storage/preferences_backend.dart';
+import '../platform/voice/speech_factory.dart';
 import '../platform/window/desktop_window_port.dart';
 import '../shared/diagnostics/diagnostics_controller.dart';
 import '../shared/l10n/l10n_bridge.dart';
@@ -337,6 +339,8 @@ AppDependencies createAppDependencies({
       : null;
   final sessionDrafts =
       draftStore ?? SessionDraftStore(payloads: payloads, index: metadata);
+  final playback = audioPlayback ?? createAudioPlaybackPort();
+  final preferences = locator<AppPreferencesController>();
   return AppDependencies(
     preferences: locator<AppPreferencesController>(),
     navigation: navigation,
@@ -384,7 +388,17 @@ AppDependencies createAppDependencies({
     attachmentPicker: attachmentPicker ?? createAttachmentPickerPort(),
     attachmentFileOpener: attachmentFileOpener ?? createAttachmentFileOpener(),
     mapUriLauncher: mapUriLauncher ?? createMapUriLauncher(),
-    audioPlayback: audioPlayback ?? createAudioPlaybackPort(),
+    audioPlayback: playback,
+    readAloud: ReadAloudController(
+      metadata: metadata,
+      keys: createSpeechKeyStore(),
+      synthesizer: createSpeechSynthesizer,
+      player: playback,
+      locale: () =>
+          (preferences.locale ??
+                  WidgetsBinding.instance.platformDispatcher.locale)
+              .toLanguageTag(),
+    ),
     locationFixSource: locationFixSource ?? createLocationFixSource(),
     messageImages: messageImages ?? createMessageImageSink(),
     unrestrictedOwnership: unrestrictedOwnership,
@@ -443,6 +457,7 @@ Future<AppDependencies> loadAppDependencies({
   await dependencies.permissionModes?.initialize();
   await dependencies.unrestrictedOwnership?.initialize();
   await dependencies.modelPreferences?.initialize();
+  await dependencies.readAloud?.load();
   await dependencies.sessionTabs?.initialize();
   await dependencies.workspace?.initialize();
   if (listenNativeLinks) {

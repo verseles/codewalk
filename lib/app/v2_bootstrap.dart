@@ -15,6 +15,7 @@ import '../features/settings/release_announcements_controller.dart';
 import '../features/settings/release_history_controller.dart';
 import '../features/settings/update_check_controller.dart';
 import '../features/settings/update_scheduler.dart';
+import '../features/voice/read_aloud_controller.dart';
 import '../platform/appearance/dynamic_color_adapter.dart';
 import '../platform/sessions/attachment_staging_store.dart';
 import '../platform/sessions/model_preference_store.dart';
@@ -151,6 +152,9 @@ class _CodeWalkV2BootstrapState extends State<CodeWalkV2Bootstrap>
         Provider<MapUriLauncher?>.value(value: dependencies.mapUriLauncher),
         Provider<AudioPlaybackPort?>.value(value: dependencies.audioPlayback),
         Provider<MessageImageSink?>.value(value: dependencies.messageImages),
+        ChangeNotifierProvider<ReadAloudController?>.value(
+          value: dependencies.readAloud,
+        ),
         Provider<LocationFixSource?>.value(
           value: dependencies.locationFixSource,
         ),

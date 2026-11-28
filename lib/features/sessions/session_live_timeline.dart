@@ -88,6 +88,7 @@ class SessionLiveTimeline extends StatefulWidget {
     this.onOpenReportChild,
     this.onTapLink,
     this.bottomEndOverlay,
+    this.bottomStartOverlay,
     this.emptyBuilder,
     this.messageActions,
     this.highlight,
@@ -131,6 +132,10 @@ class SessionLiveTimeline extends StatefulWidget {
 
   /// A floating action above the footer, below the timeline's jump controls.
   final Widget? bottomEndOverlay;
+
+  /// A floating control at the footer's start, such as the read-aloud
+  /// controls (#541); it takes no room while it shows nothing.
+  final Widget? bottomStartOverlay;
 
   /// Opens the sub-conversation of a subagent card; null for none.
   final ValueChanged<ToolCall>? onOpenChild;
@@ -879,6 +884,8 @@ class _SessionLiveTimelineState extends State<SessionLiveTimeline> {
               end: 0,
               child: Center(child: _olderPill(context)),
             ),
+          if (widget.bottomStartOverlay case final overlay?)
+            PositionedDirectional(start: 16, bottom: 4, child: overlay),
           if (_showJumpControl ||
               _showJumpToFirst ||
               widget.bottomEndOverlay != null)

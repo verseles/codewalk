@@ -23,6 +23,8 @@ import '../../shared/theme/chat_appearance.dart';
 import '../../shared/widgets/app_indeterminate_progress.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/route_covered.dart';
+import '../voice/read_aloud_actions.dart';
+import '../voice/read_aloud_controller.dart';
 import 'message_action_bar.dart';
 import 'session_attachment_scope.dart';
 import 'session_composer.dart';
@@ -81,6 +83,7 @@ class _SessionLivePageState extends State<SessionLivePage>
   /// The list told which session this page shows, so the endpoint's unread
   /// mark of that session is cleared while the user sees it.
   SessionsController? _catalog;
+  ReadAloudController? _readAloud;
 
   /// The composer field, which mod+L and a single Escape focus from anywhere
   /// in the workspace while this page is shown.
@@ -192,6 +195,7 @@ class _SessionLivePageState extends State<SessionLivePage>
   void didChangeDependencies() {
     super.didChangeDependencies();
     _softwareKeyboardOpen = (View.maybeOf(context)?.viewInsets.bottom ?? 0) > 0;
+    _readAloud = context.read<ReadAloudController?>();
   }
 
   @override
@@ -214,6 +218,9 @@ class _SessionLivePageState extends State<SessionLivePage>
 
   @override
   void dispose() {
+    // Leaving the conversation ends its reading (#541).
+    final prefix = readAloudSessionPrefix(widget.controller.session);
+    unawaited(_readAloud?.stopWhere((key) => key.startsWith(prefix)));
     WidgetsBinding.instance.removeObserver(this);
     _childLookup?.cancel();
     _shown?.releaseComposer(_focusComposer);
@@ -374,7 +381,8 @@ class _SessionLivePageState extends State<SessionLivePage>
       _ => false,
     };
     final owner = turn.owner;
-    if (!settled || owner == null) return const [];
+    final read = readAloudAction(context, c.session, item);
+    if (!settled || owner == null) return [?read];
     final catalog = context.read<SessionsController?>();
     final row = catalog?.findSession(c.session);
     // Only a session the list shows can fork, as the command checks; and
@@ -385,6 +393,7 @@ class _SessionLivePageState extends State<SessionLivePage>
         catalog.lists(c.session) &&
         c.turn.port?.state.staged != true;
     return [
+      ?read,
       if (c.turn.canUndo)
         turn.latest
             ? MessageAction(
@@ -724,6 +733,9 @@ class _SessionLivePageState extends State<SessionLivePage>
                             models: c.selectionState.models,
                             agents: c.selectionState.agents,
                             child: SessionLiveTimeline(
+                              bottomStartOverlay: ReadAloudPill(
+                                session: c.session,
+                              ),
                               bottomEndOverlay: hasCapsule
                                   ? SessionSubagentCapsule(
                                       live: c,
